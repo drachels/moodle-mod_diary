@@ -14,13 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Search area for mod_diary activities.
+ *
+ * @package    mod_diary
+ * @copyright  2019 AL Rachels (drachels@drachels.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace mod_diary\search;
+
 defined('MOODLE_INTERNAL') || die();
 
-$logs = array(
-    array('module'=>'diary', 'action'=>'view', 'mtable'=>'diary', 'field'=>'name'),
-    array('module'=>'diary', 'action'=>'view all', 'mtable'=>'diary', 'field'=>'name'),
-    array('module'=>'diary', 'action'=>'view responses', 'mtable'=>'diary', 'field'=>'name'),
-    array('module'=>'diary', 'action'=>'add entry', 'mtable'=>'diary', 'field'=>'name'),
-    array('module'=>'diary', 'action'=>'update entry', 'mtable'=>'diary', 'field'=>'name'),
-    array('module'=>'diary', 'action'=>'update feedback', 'mtable'=>'diary', 'field'=>'name')
-);
+/**
+ * Search area for mod_diary activities.
+ *
+ * @package    mod_diary
+ * @copyright  2019 AL Rachels (drachels@drachels.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class activity extends \core_search\base_activity {
+}

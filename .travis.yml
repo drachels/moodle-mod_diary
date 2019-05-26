@@ -2,12 +2,12 @@ sudo: false
 notifications:
   email:
     recipients:
-      - david.monllao@gmail.com
+      - drachels@drachels.com
     on_success: never
     on_failure: always
 language: php
 php:
-  - "5.4"
+  - "7.2"
 env:
  - DB=pgsql
 before_script:

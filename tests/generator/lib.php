@@ -19,7 +19,7 @@
  *
  * @package    mod_diary
  * @category   test
- * @copyright  2014 David Monllao <david.monllao@gmail.com>
+ * @copyright  2019 AL Rachels <drachels@drachels.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @package    mod_diary
  * @category   test
- * @copyright  2014 David Monllao <david.monllao@gmail.com>
+ * @copyright  2019 AL Rachels <drachels@drachels.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_diary_generator extends testing_module_generator {

@@ -25,7 +25,7 @@ Feature: Teacher can view, comment and grade students entries
     And I log in as "student1"
     And I follow "Course 1"
     And I follow "Test diary name"
-    And I press "Start or edit my diary entry"
+    And I press "Start new day or edit current day diary entry"
     And I set the following fields to these values:
       | Entry | Student 1 first reply |
     And I press "Save changes"
@@ -34,7 +34,7 @@ Feature: Teacher can view, comment and grade students entries
     And I follow "Course 1"
     And I follow "Test diary name"
     And I should see "Diary question"
-    And I press "Start or edit my diary entry"
+    And I press "Start new day or edit current day diary entry"
     And I set the following fields to these values:
       | Entry | Student 2 first reply |
     And I press "Save changes"
@@ -80,7 +80,7 @@ Feature: Teacher can view, comment and grade students entries
     And I log in as "student1"
     And I follow "Course 1"
     And I follow "Test diary name"
-    And I press "Start or edit my diary entry"
+    And I press "Start new day or edit current day diary entry"
     And I set the following fields to these values:
       | Entry | Student 1 edited first reply |
     And I press "Save changes"
