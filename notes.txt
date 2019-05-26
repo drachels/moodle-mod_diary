@@ -1,0 +1,21 @@
+Sometime ago, due to a forum inquirey, I started to
+modify a copy of journal and create a diary module.
+Eventually, I removed it from all my Moodle sites,
+but have decided to work on it some more.
+07/26/2018 Verified I don't have diary installed anywhere.
+07/26/2018 Installed diary code to moodle35.
+07/26/2018 report.php modified line 136 that used to
+be a notification entry, so that it is now:
+    echo $OUTPUT->notification(get_string("feedbackupdated", "journal", "$count"), "notifysuccess");
+07/26/2018 Added the missing comment lines from 2 thru 15.
+07/26/2018 Went through all the SQL statemnts and made sure
+that all the "j's" were changed to "d's" for consistency.
+07/26/2018 Converted multiple double blank lines to single ones.
+05/21/2019 Verified diary is still installed in moodle35.
+05/21/2019 Installed a copy into my development site, moodle3dev.
+05/23/2019 Modified view.php to force the edit menu cog to show.
+05/24/2019 Added timecreated field and have it working along with
+the timemodified field, I think.
+05/24/2019 I think part of my problem starting a new entry,
+might be due to calculations being made based on GMT.
+05/26/2019 Set version to 0.8Beta.
