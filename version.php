@@ -16,19 +16,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page opens the current version instance of diary.
+ * Defines the version of hotquestion.
  *
- * @package    mod_diary
- * @copyright  2019 AL Rachels (drachels@drachels.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- **/
+ * This code fragment is called by moodle_needs_upgrading() and
+ * /admin/index.php
+ *
+ * @package   mod_hotquestion
+ * @copyright 2019 onwards AL Rachels drachels@drachels.com
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-// Only when master becomes a stable the version value will be changed for
-// the current date. Otherwise we just increase the last NN by one.
+defined('MOODLE_INTERNAL') || die();
 
+$plugin->version  = 2019052600;      // The current module version (Date: YYYYMMDDXX).
+$plugin->requires = 2015111600;      // Requires Moodle 3.0 version.
+$plugin->cron     = 60;              // Period for cron to check this module (secs).
 $plugin->component = 'mod_diary';
-$plugin->version  = 2019052600;
-$plugin->requires = 2015111600;  // Moodle 3.0
-$plugin->release = '0.8 (Build: 2019052600)';
 $plugin->maturity = MATURITY_BETA;
-$plugin->cron     = 60;
+$plugin->release = '0.8 (Build: 2019052600)'; // User-friendly version number.
+
