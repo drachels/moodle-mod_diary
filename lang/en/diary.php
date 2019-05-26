@@ -65,7 +65,7 @@ $string['diaryquestion'] = 'Diary question';
 $string['mailsubject'] = 'Diary feedback';
 $string['modulename'] = 'Diary';
 $string['modulename_help'] = 'The diary activity enables teachers to obtain students feedback
- about a specific topic';
+ over a period of time.';
 $string['modulenameplural'] = 'Diarys';
 $string['needsregrade'] = 'Entry has changed since last feedback was saved.';
 $string['newdiaryentries'] = 'New diary entries';
