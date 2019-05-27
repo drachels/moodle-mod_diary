@@ -121,11 +121,11 @@ function diary_supports($feature) {
 
 
 function diary_get_view_actions() {
-    return array('view','view all','view responses');
+    return array('view', 'view all', 'view responses');
 }
 
 function diary_get_post_actions() {
-    return array('add entry','update entry','update feedback');
+    return array('add entry', 'update entry', 'update feedback');
 }
 
 function diary_user_outline($course, $user, $mod, $diary) {
@@ -135,6 +135,7 @@ function diary_user_outline($course, $user, $mod, $diary) {
 
         $numwords = count(preg_split("/\w\b/", $entry->text)) - 1;
 
+        $result = new stdClass();
         $result->info = get_string("numwords", "", $numwords);
         $result->time = $entry->timemodified;
         return $result;
@@ -154,7 +155,8 @@ function diary_user_complete($course, $user, $mod, $diary) {
             echo "<p><font size=\"1\">".get_string("lastedited").": ".userdate($entry->timemodified)."</font></p>";
         }
         if ($entry->text) {
-            echo format_text($entry->text, $entry->format);
+            //echo format_text($entry->text, $entry->format);
+            echo diary_format_entry_text($entry, $course, $mod);
         }
         if ($entry->teacher) {
             $grades = make_grades_menu($diary->grade);
@@ -237,7 +239,7 @@ function diary_cron () {
             $entriesmanager = has_capability('mod/diary:manageentries', $context, $user);
 
             if (!$canadd and $entriesmanager) {
-                continue;  // Not an active participant
+                continue;  // Not an active participant.
             }
 
             $diaryinfo = new stdClass();
@@ -245,14 +247,14 @@ function diary_cron () {
             $diaryinfo->diary = format_string($entry->name,true);
             $diaryinfo->url = "$CFG->wwwroot/mod/diary/view.php?id=$mod->id";
             $modnamepl = get_string( 'modulenameplural','diary' );
-            $msubject = get_string( 'mailsubject','diary' );
+            $msubject = get_string( 'mailsubject', 'diary' );
 
-            $postsubject = "$course->shortname: $msubject: ".format_string($entry->name,true);
-            $posttext  = "$course->shortname -> $modnamepl -> ".format_string($entry->name,true)."\n";
+            $postsubject = "$course->shortname: $msubject: ".format_string($entry->name, true);
+            $posttext  = "$course->shortname -> $modnamepl -> ".format_string($entry->name, true)."\n";
             $posttext .= "---------------------------------------------------------------------\n";
             $posttext .= get_string("diarymail", "diary", $diaryinfo)."\n";
             $posttext .= "---------------------------------------------------------------------\n";
-            if ($user->mailformat == 1) {  // HTML
+            if ($user->mailformat == 1) {  // HTML.
                 $posthtml = "<p><font face=\"sans-serif\">".
                 "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
                 "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
@@ -261,11 +263,11 @@ function diary_cron () {
                 $posthtml .= "<p>".get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
                 $posthtml .= "</font><hr />";
             } else {
-              $posthtml = "";
+                $posthtml = "";
             }
 
             if (! email_to_user($user, $teacher, $postsubject, $posttext, $posthtml)) {
-                echo "Error: diary cron: Could not send out mail for id $entry->id to user $user->id ($user->email)\n";
+                echo "Error: Diary cron: Could not send out mail for id $entry->id to user $user->id ($user->email)\n";
             }
             if (!$DB->set_field("diary_entries", "mailed", "1", array("id" => $entry->id))) {
                 echo "Could not update the mailed field for id $entry->id\n";
@@ -288,55 +290,111 @@ function diary_cron () {
  * @param int $timestart
  * @return bool
  */
-function diary_print_recent_activity($course, $isteacher, $timestart) {
-    global $CFG, $DB, $OUTPUT;
+function diary_print_recent_activity($course, $viewfullnames, $timestart) {
+    global $CFG, $USER, $DB, $OUTPUT;
 
     if (!get_config('diary', 'showrecentactivity')) {
         return false;
     }
 
-    $content = false;
-    $diarys = NULL;
+    $dbparams = array($timestart, $course->id, 'diary');
+    $namefields = user_picture::fields('u', null, 'userid');
+    $sql = "SELECT de.id, de.timemodified, cm.id AS cmid, $namefields
+         FROM {diary_entries} de
+              JOIN {diary} d         ON d.id = de.diary
+              JOIN {course_modules} cm ON cm.instance = d.id
+              JOIN {modules} md        ON md.id = cm.module
+              JOIN {user} u            ON u.id = de.userid
+         WHERE de.timemodified > ? AND
+               d.course = ? AND
+               md.name = ?
+         ORDER BY de.timemodified ASC
+    ";
 
-    // log table should not be used here
+    $newentries = $DB->get_records_sql($sql, $dbparams);
 
-    $select = "time > ? AND
-               course = ? AND
-               module = 'diary' AND
-               (action = 'add entry' OR action = 'update entry')";
-    if (!$logs = $DB->get_records_select('log', $select, array($timestart, $course->id), 'time ASC')){
-        return false;
-    }
+    $modinfo = get_fast_modinfo($course);
+                             
+                                   
+                                                                  
+    $show    = array();
+                     
+     
 
-    $modinfo = & get_fast_modinfo($course);
-    foreach ($logs as $log) {
-        ///Get diary info.  I'll need it later
-        $j_log_info = diary_log_info($log);
+                                           
+    foreach ($newentries as $anentry) {
+                                              
+                                           
 
-        $cm = $modinfo->instances['diary'][$j_log_info->id];
+        if (!array_key_exists($anentry->cmid, $modinfo->get_cms())) {
+            continue;
+        }
+        $cm = $modinfo->get_cm($anentry->cmid);
+
         if (!$cm->uservisible) {
             continue;
         }
-
-        if (!isset($diarys[$log->info])) {
-            $diarys[$log->info] = $j_log_info;
-            $diarys[$log->info]->time = $log->time;
-            $diarys[$log->info]->url = str_replace('&', '&amp;', $log->url);
+        if ($anentry->userid == $USER->id) {
+            $show[] = $anentry;
+            continue;
         }
+        $context = context_module::instance($anentry->cmid);
+
+        // Only teachers can see other students entries.
+        if (!has_capability('mod/diary:manageentries', $context)) {
+            continue;
+                                                                            
+        }
+     
+
+        $groupmode = groups_get_activity_groupmode($cm, $course);
+
+        if ($groupmode == SEPARATEGROUPS &&
+                !has_capability('moodle/site:accessallgroups',  $context)) {
+            if (isguestuser()) {
+                // Shortcut - guest user does not belong into any group.
+                continue;
+            }
+
+            // This will be slow - show only users that share group with me in this cm.
+            if (!$modinfo->get_groups($cm->groupingid)) {
+                continue;
+            }
+            $usersgroups = groups_get_all_groups($course->id, $anentry->userid, $cm->groupingid);
+            if (is_array($usersgroups)) {
+                $usersgroups = array_keys($usersgroups);
+                $intersect = array_intersect($usersgroups, $modinfo->get_groups($cm->groupingid));
+                if (empty($intersect)) {
+                    continue;
+                }
+            }
+        }
+        $show[] = $anentry;
     }
 
-    if ($diarys) {
-        $content = true;
-        echo $OUTPUT->heading(get_string('newdiaryentries', 'diary').':', 3);
-        foreach ($diarys as $diary) {
-            print_recent_activity_note($diary->time, $diary, $diary->name,
-                                       $CFG->wwwroot.'/mod/diary/'.$diary->url);
-        }
+    if (empty($show)) {
+        return false;
     }
 
-    return $content;
+    echo $OUTPUT->heading(get_string('newdiaryentries', 'diary').':', 3);
+
+    foreach ($show as $submission) {
+        $cm = $modinfo->get_cm($submission->cmid);
+        $context = context_module::instance($submission->cmid);
+        if (has_capability('mod/diary:manageentries', $context)) {
+            $link = $CFG->wwwroot.'/mod/diary/report.php?id='.$cm->id;
+        } else {
+            $link = $CFG->wwwroot.'/mod/diary/view.php?id='.$cm->id;
+        }
+        print_recent_activity_note($submission->timemodified,
+                                   $submission,
+                                   $cm->name,
+                                   $link,
+                                   false,
+                                   $viewfullnames);
+    }
+    return true;
 }
-
 /**
  * Returns the users with data in one diary
  * (users with records in diary_entries, students and teachers)
@@ -346,7 +404,7 @@ function diary_print_recent_activity($course, $isteacher, $timestart) {
 function diary_get_participants($diaryid) {
     global $DB;
 
-    //Get students
+    // Get students
     $students = $DB->get_records_sql("SELECT DISTINCT u.id
                                       FROM {user} u,
                                       {diary_entries} d
@@ -413,7 +471,7 @@ function diary_scale_used_anywhere($scaleid) {
  */
 function diary_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'diaryheader', get_string('modulenameplural', 'diary'));
-    $mform->addElement('advcheckbox', 'reset_diary', get_string('removemessages','diary'));
+    $mform->addElement('advcheckbox', 'reset_diary', get_string('removemessages', 'diary'));
 }
 
 /**
@@ -423,7 +481,7 @@ function diary_reset_course_form_definition(&$mform) {
  * @return array
  */
 function diary_reset_course_form_defaults($course) {
-    return array('reset_diary'=>1);
+    return array('reset_diary' => 1);
 }
 
 /**
@@ -513,8 +571,10 @@ function diary_get_user_grades($diary, $userid=0) {
 
     global $DB;
 
+    $params = array();
     if ($userid) {
-        $userstr = 'AND userid = '.$userid;
+        $userstr = 'AND userid = :uid';
+        $params['uid'] = $userid;
     } else {
         $userstr = '';
     }
@@ -527,12 +587,13 @@ function diary_get_user_grades($diary, $userid=0) {
         $sql = "SELECT userid, timemodified as datesubmitted, format as feedbackformat,
                 rating as rawgrade, entrycomment as feedback, teacher as usermodifier, timemarked as dategraded
                 FROM {diary_entries}
-                WHERE diary = '$diary->id' ".$userstr;
+                WHERE diary = :did ".$userstr;
+        $params['did'] = $diary->id;
 
-        $grades = $DB->get_records_sql($sql);
+        $grades = $DB->get_records_sql($sql, $params);
 
         if ($grades) {
-            foreach ($grades as $key=>$grade) {
+            foreach ($grades as $key => $grade) {
                 $grades[$key]->id = $grade->userid;
             }
         } else {
@@ -548,7 +609,7 @@ function diary_get_user_grades($diary, $userid=0) {
 /**
  * Update diary grades in 1.9 gradebook
  *
- * @param object   $diary      if is null, all diarys
+ * @param object   $diary        if is null, all diarys
  * @param int      $userid       if is false al users
  * @param boolean  $nullifnone   return null if grade does not exist
  */
@@ -556,7 +617,7 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
 
     global $CFG, $DB;
 
-    if (!function_exists('grade_update')) { //workaround for buggy PHP versions
+    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
     }
 
@@ -564,9 +625,9 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
         if ($grades = diary_get_user_grades($diary, $userid)) {
             diary_grade_item_update($diary, $grades);
         } else if ($userid && $nullifnone) {
-            $grade = new object();
+            $grade = new stdClass();
             $grade->userid   = $userid;
-            $grade->rawgrade = NULL;
+            $grade->rawgrade = null;
             diary_grade_item_update($diary, $grade);
         } else {
             diary_grade_item_update($diary);
@@ -597,16 +658,16 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
  * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function diary_grade_item_update($diary, $grades=NULL) {
+function diary_grade_item_update($diary, $grades=null) {
     global $CFG;
-    if (!function_exists('grade_update')) { //workaround for buggy PHP versions
+    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
     }
 
     if (array_key_exists('cmidnumber', $diary)) {
-        $params = array('itemname'=>$diary->name, 'idnumber'=>$diary->cmidnumber);
+        $params = array('itemname' => $diary->name, 'idnumber' => $diary->cmidnumber);
     } else {
-        $params = array('itemname'=>$diary->name);
+        $params = array('itemname' => $diary->name);
     }
 
     if ($diary->grade > 0) {
@@ -624,9 +685,9 @@ function diary_grade_item_update($diary, $grades=NULL) {
         $params['multfactor'] = 1.0;
     }
 
-    if ($grades  === 'reset') {
+    if ($grades === 'reset') {
         $params['reset'] = true;
-        $grades = NULL;
+        $grades = null;
     }
 
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, $grades, $params);
@@ -644,14 +705,13 @@ function diary_grade_item_delete($diary) {
 
     require_once($CFG->libdir.'/gradelib.php');
 
-    return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, NULL, array('deleted'=>1));
+    return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, null, array('deleted'=>1));
 }
 
 
 function diary_get_users_done($diary, $currentgroup) {
     global $DB;
-//print_object($diary);
-//print_object($currentgroup);
+
     $params = array();
 
     $sql = "SELECT DISTINCT u.* FROM {diary_entries} de
@@ -659,7 +719,7 @@ function diary_get_users_done($diary, $currentgroup) {
 
     // Group users
     if ($currentgroup != 0) {
-        $sql.= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid = ?";
+        $sql .= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid = ?";
         $params[] = $currentgroup;
     }
 
@@ -689,7 +749,7 @@ function diary_get_users_done($diary, $currentgroup) {
 }
 
 /**
- * Counts all the journal entries (optionally in a given group).
+ * Counts all the diary entries (optionally in a given group).
  */
 function diary_count_entries($diary, $groupid = 0) {
     global $DB;
@@ -702,15 +762,15 @@ function diary_count_entries($diary, $groupid = 0) {
         $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
                 JOIN {groups_members} g ON g.userid = d.userid
                 JOIN {user} u ON u.id = g.userid
-                WHERE d.diary = $diary->id AND g.groupid = '$groupid'";
-        $diarys = $DB->get_records_sql($sql);
+                WHERE d.diary = ? AND g.groupid = ?";
+        $diarys = $DB->get_records_sql($sql, array($diary->id, $groupid));
 
-    } else { // Count all the entries from the whole course
+    } else { // Count all the entries from the whole course.
 
         $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
                 JOIN {user} u ON u.id = d.userid
-                WHERE d.diary = '$diary->id'";
-        $diarys = $DB->get_records_sql($sql);
+                WHERE d.diary = ?";
+        $diarys = $DB->get_records_sql($sql, array($diary->id));
     }
 
 
@@ -737,8 +797,8 @@ function diary_get_unmailed_graded($cutofftime) {
 
     $sql = "SELECT de.*, d.course, d.name FROM {diary_entries} de
             JOIN {diary} d ON de.diary = d.id
-            WHERE de.mailed = '0' AND de.timemarked < '$cutofftime' AND de.timemarked > 0";
-    return $DB->get_records_sql($sql);
+            WHERE de.mailed = '0' AND de.timemarked < ? AND de.timemarked > 0";
+    return $DB->get_records_sql($sql, array($cutofftime));
 }
 
 function diary_log_info($log) {
@@ -748,8 +808,8 @@ function diary_log_info($log) {
             FROM {diary} d
             JOIN {diary_entries} de ON de.diary = d.id
             JOIN {user} u ON u.id = de.userid
-            WHERE de.id = '$log->info'";
-    return $DB->get_record_sql($sql);
+            WHERE de.id = ?";
+    return $DB->get_record_sql($sql, array($log->info));
 }
 
 /**
@@ -764,11 +824,10 @@ function diary_get_coursemodule($diaryid) {
 
     return $DB->get_record_sql("SELECT cm.id FROM {course_modules} cm
                                 JOIN {modules} m ON m.id = cm.module
-                                WHERE cm.instance = '$diaryid' AND m.name = 'diary'");
+                                WHERE cm.instance = ? AND m.name = 'diary'", array($diaryid));
 }
 
 
-// OTHER diary FUNCTIONS ///////////////////////////////////////////////////////////////////
 
 function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
 
@@ -776,7 +835,7 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
 
     require_once($CFG->dirroot.'/lib/gradelib.php');
 
-    echo "\n<table class=\"diaryuserentry\">";
+    echo "\n<table class=\"diaryuserentry\" id=\"entry-" . $user->id . "\">";
 
     echo "\n<tr>";
     echo "\n<td class=\"userpix\" rowspan=\"2\">";
@@ -791,7 +850,9 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
 
     echo "\n<tr><td>";
     if ($entry) {
-        echo format_text($entry->text, $entry->format);
+        //echo format_text($entry->text, $entry->format);
+        echo diary_format_entry_text($entry, $course);
+
     } else {
         print_string("noentry", "diary");
     }
@@ -832,9 +893,9 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
             }
         }
 
-        // Grade selector
+        // Grade selector.
         $attrs['id'] = 'r' . $entry->id;
-        echo html_writer::label(fullname($user) . " " . get_string('grade'), 'r' . $entry->id, true, array('class' => 'accesshide'));
+        echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array('class' => 'accesshide'));
         echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
         echo $hiddengradestr;
         // Rewrote next three lines to show entry needs to be regraded due to resubmission.
@@ -846,11 +907,10 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
         echo $gradebookgradestr;
 
         // Feedback text
-        echo html_writer::label(fullname($user) . " " . get_string('feedback'), 'c' . $entry->id, true, array('class' => 'accesshide'));
+        echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array('class' => 'accesshide'));
         echo "<p><textarea id=\"c$entry->id\" name=\"c$entry->id\" rows=\"12\" cols=\"60\" $feedbackdisabledstr>";
         p($feedbacktext);
         echo "</textarea></p>";
-
 
         if ($feedbackdisabledstr != '') {
             echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
@@ -888,12 +948,46 @@ function diary_print_feedback($course, $entry, $grades) {
     echo '<td class="entrycontent">';
 
     echo '<div class="grade">';
+///////////////////////////////////////////////////
 
+// Got it working, but it is showing 5 decimal places! REALLY need to figure out how
+// to make $grading_info come up with the right diary_entries record, instead of always
+// coming up with the last one.
+
+/////////////////////////////////////////////////////
+
+
+
+// Need to remove this Gradebook preference section and use it for the activity overall grade.
+// Will need to make my own individual entry preference.
     // Gradebook preference
     $grading_info = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($entry->userid));
-    if (!empty($grading_info->items[0]->grades[$entry->userid]->str_long_grade)) {
+
+
+
+//echo 'This is grading_info ';
+//print_object($grading_info);
+
+//echo 'This is course ';
+//print_object($course);
+//echo 'This is entry ';
+//print_object($entry);
+//echo 'This is grades ';
+//print_object($grades);
+
+
+
+    //if (!empty($grading_info->items[0]->grades[$entry->userid]->str_long_grade)) {
+    //    echo get_string('grade').': ';
+    //    echo $grading_info->items[0]->grades[$entry->userid]->str_long_grade;
+    //} else {
+    //    print_string('nograde');
+    //}
+//print_object($grading_info);
+    // My preference
+    if (!empty($grades)) {
         echo get_string('grade').': ';
-        echo $grading_info->items[0]->grades[$entry->userid]->str_long_grade;
+        echo $grades.'/'.number_format($grading_info->items[0]->grademax, 2);
     } else {
         print_string('nograde');
     }
@@ -902,5 +996,83 @@ function diary_print_feedback($course, $entry, $grades) {
     // Feedback text
     echo format_text($entry->entrycomment, FORMAT_PLAIN);
     echo '</td></tr></table>';
+}
+
+
+/**
+ * Serves the diary files.
+ *
+ * @package  mod_diary
+ * @category files
+ * @param stdClass $course course object
+ * @param stdClass $cm course module object
+ * @param stdClass $context context object
+ * @param string $filearea file area
+ * @param array $args extra arguments
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool false if file not found, does not return if found - just send the file
+ */
+function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    global $DB, $USER;
+
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return false;
+    }
+
+    require_course_login($course, true, $cm);
+
+    if (!$course->visible && !has_capability('moodle/course:viewhiddencourses', $context)) {
+        return false;
+    }
+
+    // Args[0] should be the entry id.
+    $entryid = intval(array_shift($args));
+    $entry = $DB->get_record('diary_entries', array('id' => $entryid), 'id, userid', MUST_EXIST);
+
+    $canmanage = has_capability('mod/diary:manageentries', $context);
+    if (!$canmanage && !has_capability('mod/diary:addentries', $context)) {
+        // Even if it is your own entry.
+        return false;
+    }
+
+    // Students can only see their own entry.
+    if (!$canmanage && $USER->id !== $entry->userid) {
+        return false;
+    }
+
+    if ($filearea !== 'entry') {
+        return false;
+    }
+
+    $fs = get_file_storage();
+    $relativepath = implode('/', $args);
+    $fullpath = "/$context->id/mod_diary/$filearea/$entryid/$relativepath";
+    $file = $fs->get_file_by_hash(sha1($fullpath));
+
+    // Finally send the file.
+    send_stored_file($file, null, 0, $forcedownload, $options);
+}
+
+function diary_format_entry_text($entry, $course = false, $cm = false) {
+
+    if (!$cm) {
+        if ($course) {
+            $courseid = $course->id;
+        } else {
+            $courseid = 0;
+        }
+        $cm = get_coursemodule_from_instance('diary', $entry->diary, $courseid);
+    }
+
+    $context = context_module::instance($cm->id);
+    $entrytext = file_rewrite_pluginfile_urls($entry->text, 'pluginfile.php', $context->id, 'mod_diary', 'entry', $entry->id);
+
+    $formatoptions = array(
+        'context' => $context,
+        'noclean' => false,
+        'trusted' => false
+    );
+    return format_text($entrytext, $entry->format, $formatoptions);
 }
 

@@ -26,8 +26,8 @@
 require_once("../../config.php");
 require_once("lib.php");
 
-$cmid = required_param('id', PARAM_INT);    // Course Module ID
-$cm = get_coursemodule_from_id('diary', $cmid, 0, false, MUST_EXIST);
+$id = required_param('id', PARAM_INT);    // Course Module ID
+$cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
 if (! $cm) {
@@ -142,12 +142,15 @@ if ($timenow > $timestart) {
                     border:2px solid black;
                     -webkit-border-radius:16px;
                     -moz-border-radius:16px;border-radius:16px;">';
-                echo format_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
-
+                //echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
+                echo diary_format_entry_text($entry, $course, $cm).'</div></p>';
+//print_object($diary);
+//print_object($entry->rating);
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) or !empty($entry->rating)) {
                     //$grades = make_grades_menu($diary->grade);
-                    $grades = make_grades_menu($entry->rating);
+                    //$grades = make_grades_menu($entry->rating);
+                    $grades = $entry->rating;
                     echo $OUTPUT->heading(get_string('feedback'));
                     diary_print_feedback($course, $entry, $grades);
                 }
