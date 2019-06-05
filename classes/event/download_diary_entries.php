@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_diary entry updated event.
+ * The mod_diary download diary entries event.
  *
  * @package     mod_diary
- * @copyright   2014 drachels@drachels.com
+ * @copyright   2016 AL Rachels (drachels@drachels.com)
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,14 +26,13 @@ namespace mod_diary\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_diary entry updated class.
+ * The mod_diary download diary entries class.
  *
  * @package    mod_diary
- * @since      Moodle 2.7
- * @copyright  2014 drachels@drachels.com
+ * @copyright  2019 drachels@drachels.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class entry_updated extends \core\event\base {
+class download_diary_entries extends \core\event\base {
 
     /**
      * Init method.
@@ -50,7 +49,7 @@ class entry_updated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('evententryupdated', 'mod_diary');
+        return get_string('eventdownloadquestions', 'mod_diary');
     }
 
     /**
@@ -59,8 +58,8 @@ class entry_updated extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has updated an entry for the diary activity with the course module id
-            '$this->contextinstanceid'";
+        return "The user with id '$this->userid' has downloaded diary entries for the diary activity with the course module id
+            '$this->contextinstanceid'.";
     }
 
     /**
@@ -68,7 +67,7 @@ class entry_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/diary/edit.php', array('id' => $this->contextinstanceid));
+        return new \moodle_url('/mod/diary/view.php', array('id' => $this->contextinstanceid));
     }
 
     /**
@@ -77,7 +76,7 @@ class entry_updated extends \core\event\base {
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
     protected function get_legacy_logdata() {
-        $url = new \moodle_url('edit.php', array('id' => $this->contextinstanceid));
-        return array($this->courseid, 'diary', 'edit', $url->out(), $this->objectid, $this->contextinstanceid);
+        $url = new \moodle_url('view.php', array('id' => $this->contextinstanceid));
+        return array($this->courseid, 'diary', 'view', $url->out(), $this->objectid, $this->contextinstanceid);
     }
 }
