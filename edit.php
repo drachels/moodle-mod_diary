@@ -25,7 +25,7 @@
 require_once("../../config.php");
 require_once('./edit_form.php');
 
-$id = required_param('id', PARAM_INT);    // Course Module ID
+$id = required_param('id', PARAM_INT);    // Course Module ID.
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     print_error("Course Module ID was incorrect");
@@ -53,32 +53,30 @@ $PAGE->set_heading($course->fullname);
 
 $data = new stdClass();
 
-//$entry = $DB->get_record("diary_entries", array("userid" => $USER->id, "diary" => $diary->id));
 // My mod. Get all records for current user, instead of just one.
 $entrys = $DB->get_records("diary_entries", array("userid" => $USER->id, "diary" => $diary->id));
 
-    if ($entrys) {
-        foreach ($entrys as $entry) {
-            $data->entryid = $entry->id;
-            $data->text = $entry->text;
-            $data->textformat = $entry->format;
-            $data->timecreated = $entry->timecreated;
-        }
-        // I think these calculations might be based on GMT instead of America/Chicago.
-        if ((time() / 86400) - (floor($entry->timecreated) / 86400) > 1) {
+if ($entrys) {
+    foreach ($entrys as $entry) {
+        $data->entryid = $entry->id;
+        $data->text = $entry->text;
+        $data->textformat = $entry->format;
+        $data->timecreated = $entry->timecreated;
+    }
+    // I think these calculations might be based on GMT instead of America/Chicago.
+    if ((time() / 86400) - (floor($entry->timecreated) / 86400) > 1) {
         $entrys = '';
         $data->entryid = null;
         $data->text = '';
         $data->textformat = FORMAT_HTML;
         $data->timecreated = time();
-        }
-    } else {
-        $data->entryid = null;
-        $data->text = '';
-        $data->textformat = FORMAT_HTML;
-        $data->timecreated = time();
     }
-
+} else {
+    $data->entryid = null;
+    $data->text = '';
+    $data->textformat = FORMAT_HTML;
+    $data->timecreated = time();
+}
 
 $data->id = $cm->id;
 

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -27,7 +26,7 @@ require_once(__DIR__ . "/../../config.php");
 require_once("lib.php");
 
 
-$id = required_param('id', PARAM_INT);   // course
+$id = required_param('id', PARAM_INT);   // Course.
 
 if (! $course = $DB->get_record("course", array("id" => $id))) {
     print_error("Course ID is incorrect");
@@ -36,7 +35,7 @@ if (! $course = $DB->get_record("course", array("id" => $id))) {
 require_course_login($course);
 
 
-// Header
+// Header.
 $strdiarys = get_string("modulenameplural", "diary");
 $PAGE->set_pagelayout('incourse');
 $PAGE->set_url('/mod/diary/index.php', array('id' => $id));
@@ -52,17 +51,17 @@ if (! $diarys = get_all_instances_in_course("diary", $course)) {
     die;
 }
 
-// Sections
+// Sections.
 $usesections = course_format_uses_sections($course->format);
 if ($usesections) {
-	$modinfo = get_fast_modinfo($course);
-	$sections = $modinfo->get_section_info_all();
+    $modinfo = get_fast_modinfo($course);
+    $sections = $modinfo->get_section_info_all();
 }
 
 $timenow = time();
 
 
-// Table data
+// Table data.
 $table = new html_table();
 
 $table->head = array();
@@ -84,7 +83,7 @@ foreach ($diarys as $diary) {
     $context = context_module::instance($diary->coursemodule);
     $entriesmanager = has_capability('mod/diary:manageentries', $context);
 
-    // Section
+    // Section.
     $printsection = '';
     if ($diary->section !== $currentsection) {
         if ($diary->section) {
@@ -100,29 +99,29 @@ foreach ($diarys as $diary) {
         $table->data[$i][] = $printsection;
     }
 
-    // Link
-    $diaryname = format_string($diary->name,true, array('context' => $context));
+    // Link.
+    $diaryname = format_string($diary->name, true, array('context' => $context));
     if (!$diary->visible) {
-        //Show dimmed if the mod is hidden
+        // Show dimmed if the mod is hidden.
         $table->data[$i][] = "<a class=\"dimmed\" href=\"view.php?id=$diary->coursemodule\">".$diaryname."</a>";
     } else {
-        //Show normal if the mod is visible
+        // Show normal if the mod is visible.
         $table->data[$i][] = "<a href=\"view.php?id=$diary->coursemodule\">".$diaryname."</a>";
     }
 
-    // Description
+    // Description.
     $table->data[$i][] = format_text($diary->intro,  $diary->introformat);
 
-    // Entries info
+    // Entries info.
     if ($entriesmanager) {
 
-        // Display the report.php col only if is a entries manager in some CONTEXT_MODULE
+        // Display the report.php col only if is a entries manager in some CONTEXT_MODULE.
         if (empty($managersomewhere)) {
             $table->head[] = get_string('viewentries', 'diary');
             $table->align[] = 'left';
             $managersomewhere = true;
 
-            // Fill the previous col cells
+            // Fill the previous col cells.
             $manageentriescell = count($table->head) - 1;
             for ($j = 0; $j < $i; $j++) {
                 if (is_array($table->data[$j])) {
@@ -132,8 +131,8 @@ foreach ($diarys as $diary) {
         }
 
         //$entrycount = diary_count_entries($diary, get_current_group($course->id));
-		$entrycount = diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
-        $table->data[$i][] = "<a href=\"report.php?id=$diary->coursemodule\">".get_string("viewallentries","diary", $entrycount)."</a>";
+        $entrycount = diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
+        $table->data[$i][] = "<a href=\"report.php?id=$diary->coursemodule\">".get_string("viewallentries", "diary", $entrycount)."</a>";
     } else if (!empty($managersomewhere)) {
         $table->data[$i][] = "";
     }

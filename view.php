@@ -70,6 +70,13 @@ $PAGE->force_settings_menu();
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
+///////////////////////////////////////////////////
+// Get local renderer.
+$output = $PAGE->get_renderer('mod_diary');
+//$output->init($de);
+////////////////////////////////////////
+
+
 /// Check to see if groups are being used here
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = groups_get_activity_group($cm, true);
@@ -82,12 +89,15 @@ if ($entriesmanager) {
           get_string('viewallentries','diary', $entrycount).'</a></div>';
 }
 
-$diary->intro = trim($diary->intro);
-if (!empty($diary->intro)) {
-    $intro = format_module_intro('diary', $diary, $cm->id);
-    echo $OUTPUT->box($intro, 'generalbox', 'intro');
-}
+//////////////////////////////////////////////////////////////
+echo $output->introduction($diary, $cm);
 
+//$diary->intro = trim($diary->intro);
+//if (!empty($diary->intro)) {
+//    $intro = format_module_intro('diary', $diary, $cm->id);
+//    echo $OUTPUT->box($intro, 'generalbox', 'intro');
+//}
+//////////////////////////////////////////////////////////////
 echo '<br />';
 
 // Check to see if diary is currently available.
@@ -99,7 +109,7 @@ if ($course->format == 'weeks' and $diary->days) {
     } else {
         $timefinish = $course->enddate;
     }
-} else {  // Have no time limits on the diarys
+} else {  // Have no time limits on the diarys.
 
     $timestart = $timenow - 1;
     $timefinish = $timenow + 1;
@@ -109,13 +119,13 @@ if ($timenow > $timestart) {
 
     echo $OUTPUT->box_start();
 
-    // Edit button
+    // Edit button.
     if ($timenow < $timefinish) {
 
         if ($canadd) {
             // Maybe keep single button with calculation to see if need to start a new day.
             // Add first button for editing current day.
-            echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit','diary'), 'get',
+            echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'diary'), 'get',
                 array("class" => "singlebutton diarystart"));
             // MAYBE, add a second button for starting new entry.
             // echo '<br>'.$OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit','diary'), 'get',
@@ -123,7 +133,7 @@ if ($timenow > $timestart) {
         }
     }
 
-    // Display entry
+    // Display entry.
     if ($entrys = $DB->get_records('diary_entries', array('userid' => $USER->id, 'diary' => $diary->id))) {
         //print_object($entrys);
         foreach ($entrys as $entry) {
@@ -152,17 +162,17 @@ if ($timenow > $timestart) {
                     //$grades = make_grades_menu($entry->rating);
                     $grades = $entry->rating;
                     echo $OUTPUT->heading(get_string('feedback'));
-                    diary_print_feedback($course, $entry, $grades);
+                    echo $output->diary_print_feedback($course, $entry, $grades);
                 }
             }
         }
     } else {
-        echo '<span class="warning">'.get_string('notstarted','diary').'</span>';
+        echo '<span class="warning">'.get_string('notstarted', 'diary').'</span>';
     }
 
     echo $OUTPUT->box_end();
 
-    // Info
+    // Info.
     if ($timenow < $timefinish) {
         if (!empty($entry->timemodified)) {
             echo '<div class="lastedit"><strong>'.get_string('lastedited').': </strong> ';
@@ -170,7 +180,7 @@ if ($timenow > $timestart) {
             echo ' ('.get_string('numwords', '', count_words($entry->text)).')';
             echo "</div>";
         }
-        //Added three lines to mark entry as being dirty and needing regrade.
+        // Added three lines to mark entry as being dirty and needing regrade.
         if (!empty($entry->timemodified) AND !empty($entry->timemarked) AND $entry->timemodified > $entry->timemarked) {
             echo "<div class=\"lastedit\">".get_string("needsregrade", "diary"). "</div>";
         }

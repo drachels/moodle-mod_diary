@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -155,7 +154,7 @@ function diary_user_complete($course, $user, $mod, $diary) {
             echo "<p><font size=\"1\">".get_string("lastedited").": ".userdate($entry->timemodified)."</font></p>";
         }
         if ($entry->text) {
-            //echo format_text($entry->text, $entry->format);
+            // echo format_text($entry->text, $entry->format);
             echo diary_format_entry_text($entry, $course, $mod);
         }
         if ($entry->teacher) {
@@ -183,7 +182,7 @@ function diary_cron () {
         $timenow = time();
 
         $usernamefields = get_all_user_name_fields();
-        $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, ' . implode(', ', $usernamefields);
+        $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, '.implode(', ', $usernamefields);
 
         // To save some db queries.
         $users = array();
@@ -244,9 +243,9 @@ function diary_cron () {
 
             $diaryinfo = new stdClass();
             $diaryinfo->teacher = fullname($teacher);
-            $diaryinfo->diary = format_string($entry->name,true);
+            $diaryinfo->diary = format_string($entry->name, true);
             $diaryinfo->url = "$CFG->wwwroot/mod/diary/view.php?id=$mod->id";
-            $modnamepl = get_string( 'modulenameplural','diary' );
+            $modnamepl = get_string( 'modulenameplural', 'diary' );
             $msubject = get_string( 'mailsubject', 'diary' );
 
             $postsubject = "$course->shortname: $msubject: ".format_string($entry->name, true);
@@ -258,7 +257,7 @@ function diary_cron () {
                 $posthtml = "<p><font face=\"sans-serif\">".
                 "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
                 "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
-                "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">".format_string($entry->name,true)."</a></font></p>";
+                "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">".format_string($entry->name, true)."</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
                 $posthtml .= "<p>".get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
                 $posthtml .= "</font><hr />";
@@ -314,18 +313,10 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
     $newentries = $DB->get_records_sql($sql, $dbparams);
 
     $modinfo = get_fast_modinfo($course);
-                             
-                                   
-                                                                  
+
     $show    = array();
-                     
-     
 
-                                           
     foreach ($newentries as $anentry) {
-                                              
-                                           
-
         if (!array_key_exists($anentry->cmid, $modinfo->get_cms())) {
             continue;
         }
@@ -343,9 +334,7 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
         // Only teachers can see other students entries.
         if (!has_capability('mod/diary:manageentries', $context)) {
             continue;
-                                                                            
         }
-     
 
         $groupmode = groups_get_activity_groupmode($cm, $course);
 
@@ -404,26 +393,26 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
 function diary_get_participants($diaryid) {
     global $DB;
 
-    // Get students
+    // Get students.
     $students = $DB->get_records_sql("SELECT DISTINCT u.id
                                       FROM {user} u,
                                       {diary_entries} d
                                       WHERE d.diary = '$diaryid' and
                                       u.id = d.userid");
-    //Get teachers
+    // Get teachers.
     $teachers = $DB->get_records_sql("SELECT DISTINCT u.id
                                       FROM {user} u,
                                       {diary_entries} d
                                       WHERE d.diary = '$diaryid' and
                                       u.id = d.teacher");
 
-    //Add teachers to students
+    // Add teachers to students.
     if ($teachers) {
         foreach ($teachers as $teacher) {
             $students[$teacher->id] = $teacher;
         }
     }
-    //Return students array (it contains an array of unique users)
+    // Return students array, (it contains an array of unique users).
     return ($students);
 }
 
@@ -433,7 +422,7 @@ function diary_get_participants($diaryid) {
  * @param int $scaleid Scale ID
  * @return boolean True if a scale is being used by one diary
  */
-function diary_scale_used ($diaryid,$scaleid) {
+function diary_scale_used ($diaryid, $scaleid) {
     global $DB;
     $return = false;
 
@@ -554,7 +543,7 @@ function diary_print_overview($courses, &$htmlarray) {
 
         if ($diaryopen) {
             $str = '<div class="diary overview"><div class="name">'.
-                   $strdiary.': <a '.($diary->visible?'':' class="dimmed"').
+                   $strdiary.': <a '.($diary->visible ? '' : ' class="dimmed"').
                    ' href="'.$CFG->wwwroot.'/mod/diary/view.php?id='.$diary->coursemodule.'">'.
                    $diary->name.'</a></div></div>';
 
@@ -617,7 +606,7 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
 
     global $CFG, $DB;
 
-    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions
+    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions.
         require_once($CFG->libdir.'/gradelib.php');
     }
 
@@ -639,7 +628,7 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
                 JOIN {diary} d ON cm.instance = d.id
                 WHERE m.name = 'diary'";
         if ($recordset = $DB->get_records_sql($sql)) {
-           foreach ($recordset as $diary) {
+            foreach ($recordset as $diary) {
                 if ($diary->grade != false) {
                     diary_update_grades($diary);
                 } else {
@@ -660,7 +649,7 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
  */
 function diary_grade_item_update($diary, $grades=null) {
     global $CFG;
-    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions
+    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions.
         require_once($CFG->libdir.'/gradelib.php');
     }
 
@@ -676,7 +665,7 @@ function diary_grade_item_update($diary, $grades=null) {
         $params['grademin']   = 0;
         $params['multfactor'] = 1.0;
 
-    } else if($diary->grade < 0) {
+    } else if ($diary->grade < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
         $params['scaleid']   = -$diary->grade;
 
@@ -705,10 +694,14 @@ function diary_grade_item_delete($diary) {
 
     require_once($CFG->libdir.'/gradelib.php');
 
-    return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, null, array('deleted'=>1));
+    return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, null, array('deleted' => 1));
 }
 
-
+/**
+ * Return users that have entries.
+ *
+ * return null
+ */
 function diary_get_users_done($diary, $currentgroup) {
     global $DB;
 
@@ -717,13 +710,13 @@ function diary_get_users_done($diary, $currentgroup) {
     $sql = "SELECT DISTINCT u.* FROM {diary_entries} de
             JOIN {user} u ON de.userid = u.id ";
 
-    // Group users
+    // Group users.
     if ($currentgroup != 0) {
         $sql .= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid = ?";
         $params[] = $currentgroup;
     }
 
-    $sql.= " WHERE de.diary = ? ORDER BY de.timemodified DESC";
+    $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";
     $params[] = $diary->id;
     $diarys = $DB->get_records_sql($sql, $params);
 
@@ -773,7 +766,6 @@ function diary_count_entries($diary, $groupid = 0) {
         $diarys = $DB->get_records_sql($sql, array($diary->id));
     }
 
-
     if (!$diarys) {
         return 0;
     }
@@ -792,6 +784,11 @@ function diary_count_entries($diary, $groupid = 0) {
     return count($diarys);
 }
 
+/**
+ * Return entries that have not been emailed.
+ *
+ * return
+ */
 function diary_get_unmailed_graded($cutofftime) {
     global $DB;
 
@@ -801,6 +798,11 @@ function diary_get_unmailed_graded($cutofftime) {
     return $DB->get_records_sql($sql, array($cutofftime));
 }
 
+/**
+ * Return diar log info.
+ *
+ * return
+ */
 function diary_log_info($log) {
     global $DB;
 
@@ -827,176 +829,6 @@ function diary_get_coursemodule($diaryid) {
                                 WHERE cm.instance = ? AND m.name = 'diary'", array($diaryid));
 }
 
-
-
-function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
-
-    global $USER, $OUTPUT, $DB, $CFG;
-
-    require_once($CFG->dirroot.'/lib/gradelib.php');
-
-    echo "\n<table class=\"diaryuserentry\" id=\"entry-" . $user->id . "\">";
-
-    echo "\n<tr>";
-    echo "\n<td class=\"userpix\" rowspan=\"2\">";
-    echo $OUTPUT->user_picture($user, array('courseid' => $course->id, 'alttext' => true));
-    echo "</td>";
-    echo "<td class=\"userfullname\">".fullname($user);
-    if ($entry) {
-        echo " <span class=\"lastedit\">".get_string("lastedited").": ".userdate($entry->timemodified)."</span>";
-    }
-    echo "</td>";
-    echo "</tr>";
-
-    echo "\n<tr><td>";
-    if ($entry) {
-        //echo format_text($entry->text, $entry->format);
-        echo diary_format_entry_text($entry, $course);
-
-    } else {
-        print_string("noentry", "diary");
-    }
-    echo "</td></tr>";
-
-    if ($entry) {
-        echo "\n<tr>";
-        echo "<td class=\"userpix\">";
-        if (!$entry->teacher) {
-            $entry->teacher = $USER->id;
-        }
-        if (empty($teachers[$entry->teacher])) {
-            $teachers[$entry->teacher] = $DB->get_record('user', array('id' => $entry->teacher));
-        }
-        echo $OUTPUT->user_picture($teachers[$entry->teacher], array('courseid' => $course->id, 'alttext' => true));
-        echo "</td>";
-        echo "<td>".get_string("feedback").":";
-
-
-        $attrs = array();
-        $hiddengradestr = '';
-        $gradebookgradestr = '';
-        $feedbackdisabledstr = '';
-        $feedbacktext = $entry->entrycomment;
-
-        // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
-        $grading_info = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($user->id));
-        if (!empty($grading_info->items[0]->grades[$entry->userid]->str_long_grade)) {
-            if ($gradingdisabled = $grading_info->items[0]->grades[$user->id]->locked || $grading_info->items[0]->grades[$user->id]->overridden) {
-                $attrs['disabled'] = 'disabled';
-                $hiddengradestr = '<input type="hidden" name="r'.$entry->id.'" value="'.$entry->rating.'"/>';
-                $gradebooklink = '<a href="'.$CFG->wwwroot.'/grade/report/grader/index.php?id='.$course->id.'">';
-                $gradebooklink.= $grading_info->items[0]->grades[$user->id]->str_long_grade.'</a>';
-                $gradebookgradestr = '<br/>'.get_string("gradeingradebook", "diary").':&nbsp;'.$gradebooklink;
-
-                $feedbackdisabledstr = 'disabled="disabled"';
-                $feedbacktext = $grading_info->items[0]->grades[$user->id]->str_feedback;
-            }
-        }
-
-        // Grade selector.
-        $attrs['id'] = 'r' . $entry->id;
-        echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array('class' => 'accesshide'));
-        echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
-        echo $hiddengradestr;
-        // Rewrote next three lines to show entry needs to be regraded due to resubmission.
-        if (!empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
-            echo " <span class=\"lastedit\">".get_string("needsregrade", "diary"). "</span>";
-        } else if ($entry->timemarked) {
-            echo " <span class=\"lastedit\">".userdate($entry->timemarked)."</span>";
-        }
-        echo $gradebookgradestr;
-
-        // Feedback text
-        echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array('class' => 'accesshide'));
-        echo "<p><textarea id=\"c$entry->id\" name=\"c$entry->id\" rows=\"12\" cols=\"60\" $feedbackdisabledstr>";
-        p($feedbacktext);
-        echo "</textarea></p>";
-
-        if ($feedbackdisabledstr != '') {
-            echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
-        }
-        echo "</td></tr>";
-    }
-    echo "</table>\n";
-
-}
-
-function diary_print_feedback($course, $entry, $grades) {
-
-    global $CFG, $DB, $OUTPUT;
-
-    require_once($CFG->dirroot.'/lib/gradelib.php');
-
-    if (! $teacher = $DB->get_record('user', array('id' => $entry->teacher))) {
-        print_error('Weird diary error');
-    }
-
-    echo '<table class="feedbackbox">';
-
-    echo '<tr>';
-    echo '<td class="left picture">';
-    echo $OUTPUT->user_picture($teacher, array('courseid' => $course->id, 'alttext' => true));
-    echo '</td>';
-    echo '<td class="entryheader">';
-    echo '<span class="author">'.fullname($teacher).'</span>';
-    echo '&nbsp;&nbsp;<span class="time">'.userdate($entry->timemarked).'</span>';
-    echo '</td>';
-    echo '</tr>';
-
-    echo '<tr>';
-    echo '<td class="left side">&nbsp;</td>';
-    echo '<td class="entrycontent">';
-
-    echo '<div class="grade">';
-///////////////////////////////////////////////////
-
-// Got it working, but it is showing 5 decimal places! REALLY need to figure out how
-// to make $grading_info come up with the right diary_entries record, instead of always
-// coming up with the last one.
-
-/////////////////////////////////////////////////////
-
-
-
-// Need to remove this Gradebook preference section and use it for the activity overall grade.
-// Will need to make my own individual entry preference.
-    // Gradebook preference
-    $grading_info = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($entry->userid));
-
-
-
-//echo 'This is grading_info ';
-//print_object($grading_info);
-
-//echo 'This is course ';
-//print_object($course);
-//echo 'This is entry ';
-//print_object($entry);
-//echo 'This is grades ';
-//print_object($grades);
-
-
-
-    //if (!empty($grading_info->items[0]->grades[$entry->userid]->str_long_grade)) {
-    //    echo get_string('grade').': ';
-    //    echo $grading_info->items[0]->grades[$entry->userid]->str_long_grade;
-    //} else {
-    //    print_string('nograde');
-    //}
-//print_object($grading_info);
-    // My preference
-    if (!empty($grades)) {
-        echo get_string('grade').': ';
-        echo $grades.'/'.number_format($grading_info->items[0]->grademax, 2);
-    } else {
-        print_string('nograde');
-    }
-    echo '</div>';
-
-    // Feedback text
-    echo format_text($entry->entrycomment, FORMAT_PLAIN);
-    echo '</td></tr></table>';
-}
 
 
 /**
@@ -1054,6 +886,11 @@ function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownlo
     send_stored_file($file, null, 0, $forcedownload, $options);
 }
 
+/**
+ * Return formatted text.
+ *
+ * return
+ */
 function diary_format_entry_text($entry, $course = false, $cm = false) {
 
     if (!$cm) {
@@ -1075,4 +912,148 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
     );
     return format_text($entrytext, $entry->format, $formatoptions);
 }
+/**
+ * Return the toolbar.
+ *
+ * @param bool $shownew whether show "New round" button
+ * return alist of links
+ */
+function toolbar($course, $user, $entry, $shownew = true) {
+    global $USER, $DB, $CFG;
 
+    $output = '';
+    $toolbuttons = array();
+    $datep = new stdClass();
+    $datec = ''; // Date currently looking at.
+    $daten = ''; // Date next after datec.
+    $datep = ''; // Date previous to datec.
+
+    if (! empty($entry->timecreated)) {
+
+        // Print date toolbuttons datep/daten.
+        // When here first there is a datep but not a daten.
+        // When go to datep, then there is a daten.
+
+// datep - Need an sql where the diary_entries id and timecreated are lower than current id and the diary and user are the same as current diary and user.
+// daten - Need an sql where the diary_entries id and timecreated are higher than current id and the diary and user are the same as current diary and user.
+
+        $output = 'The entry id is: '.$entry->id.'. The diary is: '.$entry->diary.'. The userid is: '.$entry->userid.'. The timecreated was: '.$entry->timecreated;
+
+        //$output = 'The course is '.$course->id.' and the user is '.$user->id.' and the entry is '.$entry->id;
+        //$output = 'The toolbar function was called!';
+
+        $datec = $entry->timecreated;
+        //print_object($datec);
+
+    }
+
+    return $output;
+}
+    /**
+     * Prints the currently selected diary entry of student identified as $user.
+     *
+     * @param integer $course
+     * @param integer $user
+     * @param integer $entry
+     * @param integer $teachers
+     * @param integer $grades
+     */
+    function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
+        global $USER, $OUTPUT, $DB, $CFG;
+
+        require_once($CFG->dirroot.'/lib/gradelib.php');
+
+        echo "\n<table class=\"diaryuserentry\" id=\"entry-" . $user->id . "\">";
+
+        echo "\n<tr>";
+        echo "\n<td class=\"userpix\" rowspan=\"2\">";
+        echo $OUTPUT->user_picture($user, array('courseid' => $course->id, 'alttext' => true));
+        echo "</td>";
+        echo "<td class=\"userfullname\">".fullname($user);
+        if ($entry) {
+            echo " <span class=\"lastedit\">".get_string("lastedited").": ".userdate($entry->timemodified)." </span>";
+        }
+
+        // Pass current course, user and entry to the toolbar function.
+        echo toolbar($course, $user, $entry);
+
+        echo "</td>";
+        echo "</tr>";
+
+        echo "\n<tr><td>";
+        if ($entry) {
+            //echo format_text($entry->text, $entry->format);
+            //echo "<p>In lib.php, this is in the print user entry function.</p>";
+
+            // Print toolbar.
+            //echo $output->container_start("toolbar");
+            //echo $output->toolbar(has_capability('mod/diary:manageentries', $context));
+            //echo $output->container_end();
+
+            echo diary_format_entry_text($entry, $course);
+
+        } else {
+            print_string("noentry", "diary");
+        }
+        echo "</td></tr>";
+
+        if ($entry) {
+            echo "\n<tr>";
+            echo "<td class=\"userpix\">";
+            if (!$entry->teacher) {
+                $entry->teacher = $USER->id;
+            }
+            if (empty($teachers[$entry->teacher])) {
+                $teachers[$entry->teacher] = $DB->get_record('user', array('id' => $entry->teacher));
+            }
+            echo $OUTPUT->user_picture($teachers[$entry->teacher], array('courseid' => $course->id, 'alttext' => true));
+            echo "</td>";
+            echo "<td>".get_string("feedback").":";
+
+            $attrs = array();
+            $hiddengradestr = '';
+            $gradebookgradestr = '';
+            $feedbackdisabledstr = '';
+            $feedbacktext = $entry->entrycomment;
+
+            // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
+            $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($user->id));
+            if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
+                if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked || $gradinginfo->items[0]->grades[$user->id]->overridden) {
+                    $attrs['disabled'] = 'disabled';
+                    $hiddengradestr = '<input type="hidden" name="r'.$entry->id.'" value="'.$entry->rating.'"/>';
+                    $gradebooklink = '<a href="'.$CFG->wwwroot.'/grade/report/grader/index.php?id='.$course->id.'">';
+                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade.'</a>';
+                    $gradebookgradestr = '<br/>'.get_string("gradeingradebook", "diary").':&nbsp;'.$gradebooklink;
+
+                    $feedbackdisabledstr = 'disabled="disabled"';
+                    $feedbacktext = $gradinginfo->items[0]->grades[$user->id]->str_feedback;
+                }
+            }
+
+            // Grade selector.
+            $attrs['id'] = 'r' . $entry->id;
+            echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array('class' => 'accesshide'));
+            echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
+            echo $hiddengradestr;
+            // Rewrote next three lines to show entry needs to be regraded due to resubmission.
+            if (!empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
+                echo " <span class=\"lastedit\">".get_string("needsregrade", "diary"). "</span>";
+            } else if ($entry->timemarked) {
+                echo " <span class=\"lastedit\">".userdate($entry->timemarked)."</span>";
+            }
+            echo $gradebookgradestr;
+
+            // Feedback text.
+            echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array('class' => 'accesshide'));
+            echo "<p><textarea id=\"c$entry->id\" name=\"c$entry->id\" rows=\"12\" cols=\"60\" $feedbackdisabledstr>";
+            p($feedbacktext);
+            echo "</textarea></p>";
+
+            if ($feedbackdisabledstr != '') {
+                echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
+            }
+            echo "</td></tr>";
+        }
+        echo "</table>\n";
+    }

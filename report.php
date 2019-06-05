@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -26,7 +25,7 @@
 require_once("../../config.php");
 require_once("lib.php");
 
-$id = required_param('id', PARAM_INT);   // course module
+$id = required_param('id', PARAM_INT);   // Course module.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     print_error("Course Module ID was incorrect");
@@ -48,7 +47,7 @@ if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
 }
 
 // Header.
-$PAGE->set_url('/mod/diary/report.php', array('id'=>$id));
+$PAGE->set_url('/mod/diary/report.php', array('id' => $id));
 
 $PAGE->navbar->add(get_string("entries", "diary"));
 $PAGE->set_title(get_string("modulenameplural", "diary"));
@@ -57,19 +56,32 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string("entries", "diary"));
 
+///////////////////////////////////////////////////
+// Get local renderer.
+$output = $PAGE->get_renderer('mod_diary');
+//$output->init($de);
+////////////////////////////////////////
+
 // Make some easy ways to access the entries.
 if ( $eee = $DB->get_records("diary_entries", array("diary" => $diary->id))) {
+
+//print_object($eee);
+
     foreach ($eee as $ee) {
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id]  = $ee;
+//print_object('this is in foreach eee entrybyuser');
+//print_object($entrybyuser);
+//print_object('this is in foreach eee entrybyentry');
+//print_object($entrybyentry);
     }
-print_object('this is ee');
-print_object($ee);
+//print_object('this is ee');
+//print_object($ee);
 } else {
     $entrybyuser  = array () ;
     $entrybyentry = array () ;
 }
-
+//print_object($entrybyuser);
 // Group mode
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = groups_get_activity_group($cm, true);
@@ -171,7 +183,63 @@ if (!$users) {
 
     groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id");
 
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// Add download button for all entries in this diary.
+    if (has_capability('mod/diary:manageentries', $context)) {
+            $options = array();
+            $options['id'] = $id;
+            $options['diary'] = $diary->id;
+            $options['action'] = 'download';
+            $url = new moodle_url('/mod/diary/report.php', $options);
+
+
+
+            $tools[] = html_writer::link($url, $OUTPUT->pix_icon('a/download_all'
+                , get_string('csvexport', 'diary'))
+                , array('class' => 'toolbutton'));
+
+            // Print refresh toolbutton.
+            //$url = new moodle_url('/mod/diary/report.php', $options));
+            $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/reload'
+                , get_string('reload'))
+                , array('class' => 'toolbutton'));
+
+//echo '<br>The following is options:';
+//print_object($options);
+$output = html_writer::alist($tools, array('id' => 'toolbar'));
+
+
+echo 'Download or refresh page toolbar: ';
+echo $output;
+//print_object($toolbuttons);
+
+        $d = $cm->instance; // Course module to download questions from.
+
+//echo 'The following is d:';
+//print_object($d);
+
+        // Call download question function in locallib.
+
+//echo 'The following is download diary entries:';
+//print_object($d);
+
+
+//    $d = download_diary_entries($d);
+
+}
+
+
+//echo "<p>In report.php, this is right above the first entry listing showing the current course module.  $cm->id</p>";
+//echo 'This might be where I want to put a toolbar:';
+//////////////////////////////////////////////////////////////
+
     $grades = make_grades_menu($diary->grade);
+
+
+//echo "<p>In report.php, this is right above the first entry listing showing the current maxgrade.  $diary->grade</p>";
+
+
     if (!$teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
         print_error('noentriesmanagers', 'diary');
     }
@@ -180,7 +248,12 @@ if (!$users) {
 
     if ($usersdone = diary_get_users_done($diary, $currentgroup)) {
         foreach ($usersdone as $user) {
-            diary_print_user_entry($course, $user, $entrybyuser[$user->id], $teachers, $grades);
+//echo "<p>In report.php, this is above each individual users entry. $user->id</p>";
+
+            echo diary_print_user_entry($course, $user, $entrybyuser[$user->id], $teachers, $grades);
+
+//echo "<p>In report.php, this is above unset users line. $user->id</p>";
+
             unset($users[$user->id]);
         }
     }
@@ -194,7 +267,7 @@ if (!$users) {
 
     // List remaining users with no entries.
     foreach ($users as $user) {
-        diary_print_user_entry($course, $user, NULL, $teachers, $grades);
+        echo diary_print_user_entry($course, $user, NULL, $teachers, $grades);
     }
 
     echo "<p class=\"feedbacksave\">";
