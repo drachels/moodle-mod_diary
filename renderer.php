@@ -344,4 +344,18 @@ class mod_diary_renderer extends plugin_renderer_base {
         echo format_text($entry->entrycomment, FORMAT_PLAIN);
         echo '</td></tr></table>';
     }
+//}
+
+    /**
+     * Print some text.
+     *
+     */
+ //   public function diary_print_user_xxentry($diary, $cm) {
+    public function diary_print_user_xxentry() {
+        $output = '';
+
+        $output .= 'Some sample text for testing.';
+
+        return $output;
+    }
 }
