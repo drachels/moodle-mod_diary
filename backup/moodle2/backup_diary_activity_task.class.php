@@ -30,7 +30,7 @@ class backup_diary_activity_task extends backup_activity_task {
     static public function encode_content_links($content) {
         global $CFG;
 
-        $base = preg_quote($CFG->wwwroot.'/mod/diary','#');
+        $base = preg_quote($CFG->wwwroot.'/mod/diary', '#');
 
         $pattern = "#(".$base."\/index.php\?id\=)([0-9]+)#";
         $content = preg_replace($pattern, '$@diaryINDEX*$2@$', $content);

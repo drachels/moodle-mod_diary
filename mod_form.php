@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -22,19 +21,20 @@
  * @copyright  2019 AL Rachels (drachels@drachels.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
+defined('MOODLE_INTERNAL') || die();
 
-require_once ($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
 class mod_diary_mod_form extends moodleform_mod {
 
-    function definition() {
-
+    public function definition() {
         global $COURSE;
+
         $mform    =& $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        $mform->addElement('text', 'name', get_string('diaryname', 'diary'), array('size'=>'64'));
+        $mform->addElement('text', 'name', get_string('diaryname', 'diary'), array('size' => '64'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
@@ -42,10 +42,10 @@ class mod_diary_mod_form extends moodleform_mod {
 
         $options = array();
         $options[0] = get_string('alwaysopen', 'diary');
-        for ($i=1;$i<=13;$i++) {
+        for ($i = 1; $i <= 13; $i++) {
             $options[$i] = get_string('numdays', '', $i);
         }
-        for ($i=2;$i<=16;$i++) {
+        for ($i = 2; $i <= 16; $i++) {
             $days = $i * 7;
             $options[$days] = get_string('numweeks', '', $i);
         }

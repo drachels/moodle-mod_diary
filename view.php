@@ -59,6 +59,12 @@ if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
 
 $diaryname = format_string($diary->name, true, array('context' => $context));
 
+///////////////////////////////////////////////////
+// Get local renderer.
+$output = $PAGE->get_renderer('mod_diary');
+//$output->init($de);
+////////////////////////////////////////
+
 // Header
 $PAGE->set_url('/mod/diary/view.php', array('id'=>$cm->id));
 $PAGE->navbar->add($diaryname);
@@ -70,6 +76,9 @@ $PAGE->force_settings_menu();
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
+
+
+
 /// Check to see if groups are being used here
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = groups_get_activity_group($cm, true);
@@ -78,16 +87,24 @@ groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/view.php?id=$cm->id"
 // If viewer is a manager, create a link to diary entries made by users.
 if ($entriesmanager) {
     $entrycount = diary_count_entries($diary, $currentgroup);
+
     echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'">'.
           get_string('viewallentries','diary', $entrycount).'</a></div>';
+////////////////////////////////////////////////////////////////////////////////////////
+//    echo '<div class="xreportlink"><a href="xreport.php?id='.$cm->id.'">'.
+//          get_string('viewallentries','diary', $entrycount).'...xreport</a></div>';
+////////////////////////////////////////////////////////////////////////////////////////
 }
 
-$diary->intro = trim($diary->intro);
-if (!empty($diary->intro)) {
-    $intro = format_module_intro('diary', $diary, $cm->id);
-    echo $OUTPUT->box($intro, 'generalbox', 'intro');
-}
+//////////////////////////////////////////////////////////////
+echo $output->introduction($diary, $cm);
 
+//$diary->intro = trim($diary->intro);
+//if (!empty($diary->intro)) {
+//    $intro = format_module_intro('diary', $diary, $cm->id);
+//    echo $OUTPUT->box($intro, 'generalbox', 'intro');
+//}
+//////////////////////////////////////////////////////////////
 echo '<br />';
 
 // Check to see if diary is currently available.
@@ -99,7 +116,7 @@ if ($course->format == 'weeks' and $diary->days) {
     } else {
         $timefinish = $course->enddate;
     }
-} else {  // Have no time limits on the diarys
+} else {  // Have no time limits on the diarys.
 
     $timestart = $timenow - 1;
     $timefinish = $timenow + 1;
@@ -109,13 +126,13 @@ if ($timenow > $timestart) {
 
     echo $OUTPUT->box_start();
 
-    // Edit button
+    // Edit button.
     if ($timenow < $timefinish) {
 
         if ($canadd) {
             // Maybe keep single button with calculation to see if need to start a new day.
             // Add first button for editing current day.
-            echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit','diary'), 'get',
+            echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'diary'), 'get',
                 array("class" => "singlebutton diarystart"));
             // MAYBE, add a second button for starting new entry.
             // echo '<br>'.$OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit','diary'), 'get',
@@ -123,46 +140,67 @@ if ($timenow > $timestart) {
         }
     }
 
-    // Display entry
-    if ($entrys = $DB->get_records('diary_entries', array('userid' => $USER->id, 'diary' => $diary->id))) {
+    // Display entry.
+    if ($entrys = $DB->get_records('diary_entries', array('userid' => $USER->id, 'diary' => $diary->id), $sort = 'timecreated DESC')) {
         //print_object($entrys);
         foreach ($entrys as $entry) {
             if (empty($entry->text)) {
                 echo '<p align="center"><b>'.get_string('blankentry','diary').'</b></p>';
             } else {
-                //$color3 = $moocfg->keyboardbgc;
-                //$color3 = '#00ff00';
                 $color3 = get_config('mod_diary', 'entrybgc');
-                // Both of these methods work. Second is better.
-                echo '<p><b>Created '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' Modified '.date(get_config('mod_diary', 'dateformat'), $entry->timemodified).'</b>';
-                //echo '<p><b>'.userdate($entry->timemodified).'</b>';
 
                 echo '<div align="left" style="font-size:1em; padding: 5px;
                     font-weight:bold;background: '.$color3.';
                     border:2px solid black;
                     -webkit-border-radius:16px;
                     -moz-border-radius:16px;border-radius:16px;">';
+
+                $date1 = new DateTime(date('Y-m-d G:i:s', time()));
+                //print_object($date1);
+                $date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
+                //print_object($date2);
+                $diff = date_diff($date1, $date2);
+                //print_object($diff);
+                //print_object($diff->h);
+                // Add a heading for each entry on the page.
+                echo $OUTPUT->heading(get_string('entry', 'diary'));
+
+                // Both of these methods work. Second is better.
+                echo '<p><b>Created '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' Modified '.date(get_config('mod_diary', 'dateformat'), $entry->timemodified).' This entry was made '.$diff->d.' days and '.$diff->h.' hours ago.</b>';
+                //echo '<p><b>'.userdate($entry->timemodified).'</b>';
+
+                echo '<div align="left" style="font-size:1em; padding: 5px;
+                    font-weight:bold;background: '.$color3.';
+                    border:1px solid black;
+                    -webkit-border-radius:16px;
+                    -moz-border-radius:16px;border-radius:16px;">';
                 //echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
                 echo diary_format_entry_text($entry, $course, $cm).'</div></p>';
+
 //print_object($diary);
 //print_object($entry->rating);
+
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) or !empty($entry->rating)) {
                     //$grades = make_grades_menu($diary->grade);
                     //$grades = make_grades_menu($entry->rating);
                     $grades = $entry->rating;
+
+                   // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
-                    diary_print_feedback($course, $entry, $grades);
+                    echo $output->diary_print_feedback($course, $entry, $grades);
                 }
+                echo '</div></p>';
+
             }
         }
     } else {
-        echo '<span class="warning">'.get_string('notstarted','diary').'</span>';
+        echo '<span class="warning">'.get_string('notstarted', 'diary').'</span>';
     }
 
     echo $OUTPUT->box_end();
 
-    // Info
+    // Info.
     if ($timenow < $timefinish) {
         if (!empty($entry->timemodified)) {
             echo '<div class="lastedit"><strong>'.get_string('lastedited').': </strong> ';
@@ -170,7 +208,7 @@ if ($timenow > $timestart) {
             echo ' ('.get_string('numwords', '', count_words($entry->text)).')';
             echo "</div>";
         }
-        //Added three lines to mark entry as being dirty and needing regrade.
+        // Added three lines to mark entry as being dirty and needing regrade.
         if (!empty($entry->timemodified) AND !empty($entry->timemarked) AND $entry->timemodified > $entry->timemarked) {
             echo "<div class=\"lastedit\">".get_string("needsregrade", "diary"). "</div>";
         }

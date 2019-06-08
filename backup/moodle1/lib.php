@@ -47,13 +47,13 @@ class moodle1_mod_diary_handler extends moodle1_mod_handler {
 
     public function process_diary($data) {
 
-        // get the course module id and context id
+        // Get the course module id and context id.
         $instanceid = $data['id'];
         $cminfo     = $this->get_cminfo($instanceid);
         $moduleid   = $cminfo['id'];
         $contextid  = $this->converter->get_contextid(CONTEXT_MODULE, $moduleid);
 
-        // we now have all information needed to start writing into the file
+        // We now have all information needed to start writing into the file.
         $this->open_xml_writer("activities/diary_{$moduleid}/diary.xml");
         $this->xmlwriter->begin_tag('activity', array('id' => $instanceid, 'moduleid' => $moduleid,
             'modulename' => 'diary', 'contextid' => $contextid));
