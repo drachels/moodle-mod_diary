@@ -36,6 +36,7 @@ $string['accessdenied'] = 'Access denied';
 $string['alwaysopen'] = 'Always open';
 $string['blankentry'] = 'Blank entry';
 $string['configdateformat'] = 'This defines how dates are shown in grade reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
+$string['csvexport'] = 'Export to .csv';
 $string['daysavailable'] = 'Days available';
 $string['deadline'] = 'Days Open';
 $string['dateformat'] = 'Default date format';
@@ -51,8 +52,7 @@ $string['gradeingradebook'] = 'Current grade in gradebook';
 $string['diary:addentries'] = 'Add diary entries';
 $string['diary:addinstance'] = 'Add diary instances';
 $string['diary:manageentries'] = 'Manage diary entries';
-$string['diarymail'] = '{$a->teacher} has posted some feedback on your
-diary entry for \'{$a->diary}\'
+$string['diarymail'] = '{$a->teacher} has posted some feedback on your diary entry for \'{$a->diary}\'
 
 You can see it appended to your diary entry:
 
@@ -69,6 +69,7 @@ $string['modulename_help'] = 'The diary activity enables teachers to obtain stud
 $string['modulenameplural'] = 'Diarys';
 $string['needsregrade'] = 'Entry has changed since last feedback was saved.';
 $string['newdiaryentries'] = 'New diary entries';
+$string['nextentry'] = 'Next entry';
 $string['nodeadline'] = 'Always open';
 $string['noentriesmanagers'] = 'There are no teachers';
 $string['noentry'] = 'No entry';
@@ -78,6 +79,7 @@ $string['notstarted'] = 'You have not started this diary yet';
 $string['overallrating'] = 'Overall rating';
 $string['pluginadministration'] = 'Diary module administration';
 $string['pluginname'] = 'Diary';
+$string['previousentry'] = 'Previous entry';
 $string['rate'] = 'Rate';
 $string['removeentries'] = 'Remove all entries';
 $string['removemessages'] = 'Remove all Diary entries';

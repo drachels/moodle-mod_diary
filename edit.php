@@ -25,7 +25,7 @@
 require_once("../../config.php");
 require_once('./edit_form.php');
 
-$id = required_param('id', PARAM_INT);    // Course Module ID
+$id = required_param('id', PARAM_INT);    // Course Module ID.
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     print_error("Course Module ID was incorrect");
@@ -53,32 +53,46 @@ $PAGE->set_heading($course->fullname);
 
 $data = new stdClass();
 
-//$entry = $DB->get_record("diary_entries", array("userid" => $USER->id, "diary" => $diary->id));
 // My mod. Get all records for current user, instead of just one.
 $entrys = $DB->get_records("diary_entries", array("userid" => $USER->id, "diary" => $diary->id));
 
-    if ($entrys) {
-        foreach ($entrys as $entry) {
-            $data->entryid = $entry->id;
-            $data->text = $entry->text;
-            $data->textformat = $entry->format;
-            $data->timecreated = $entry->timecreated;
-        }
-        // I think these calculations might be based on GMT instead of America/Chicago.
-        if ((time() / 86400) - (floor($entry->timecreated) / 86400) > 1) {
+if ($entrys) {
+// Get the latest user entry.
+    foreach ($entrys as $entry) {
+        $data->entryid = $entry->id;
+        $data->text = $entry->text;
+        $data->textformat = $entry->format;
+        $data->timecreated = $entry->timecreated;
+    }
+
+// Get the difference between now and when the latest entry was created.
+$date1 = new DateTime(date('Y-m-d G:i:s', time()));
+//print_object($date1);
+$date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
+//print_object($date2);
+$diff = date_diff($date1, $date2);
+//print_object($diff->d);
+//print_object(floor((time() / 86400) - ($entry->timecreated) / 86400));
+
+// If now is on a new calendar day, then start a new entry.
+    // I think these calculations might be based on GMT instead of America/Chicago.
+    //if ((time() / 86400) - (floor($entry->timecreated) / 86400) > 1) {
+    if (floor((time() / 86400) - (($entry->timecreated) / 86400)) > 0) {
+    //if (($diff->d + $diff->h) > 0) {
+    //if ($diff->d > 0) {
         $entrys = '';
         $data->entryid = null;
         $data->text = '';
         $data->textformat = FORMAT_HTML;
         $data->timecreated = time();
-        }
-    } else {
-        $data->entryid = null;
-        $data->text = '';
-        $data->textformat = FORMAT_HTML;
-        $data->timecreated = time();
     }
-
+// If there are no entries for this user, start the first one.
+} else {
+    $data->entryid = null;
+    $data->text = '';
+    $data->textformat = FORMAT_HTML;
+    $data->timecreated = time();
+}
 
 $data->id = $cm->id;
 
