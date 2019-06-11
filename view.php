@@ -116,8 +116,8 @@ if ($course->format == 'weeks' and $diary->days) {
     } else {
         $timefinish = $course->enddate;
     }
-} else {  // Have no time limits on the diarys.
-
+} else {  
+    // Have no time limits on the diarys.
     $timestart = $timenow - 1;
     $timefinish = $timenow + 1;
     $diary->days = 0;

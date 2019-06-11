@@ -61,3 +61,9 @@ Also make it so there is a Save all my feedback at the tope of the list,
 below each entry, and at the bottome of the page.
 Also played with the sort order of the report page, but never could get
 the results I wanted. Reverted to old sort.
+
+06/09/2019 Finally fixed edit.php so that when it is a new calendar
+date, it will start a new entry, no matter how many hours have elapsed.
+06/06/2019 Finally fixed the double button problem for the user entry
+toolbar. Each button used $output and the function was also returning
+a $output, which gave two sets of tools.

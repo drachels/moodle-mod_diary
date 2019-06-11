@@ -1050,19 +1050,25 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
 /**
  * Return the toolbar.
  *
- * @param bool $shownew whether show "New round" button
  * return alist of links
  */
 function toolbar($course, $user, $entry) {
-    global $USER, $OUTPUT, $DB, $THEME, $CFG;
+    global $USER, $OUTPUT, $DB, $CFG;
 
     $output = '';
-    $toolbuttons = array();
+   // $toolbuttons = array();
     $entryp = new stdClass();
-    $entryc = '5'; // Date currently looking at.
+    $entryc = ''; // Entry currently looking at.
     $entryn = ''; // Date next after entryc.
     $entryp = ''; // Date previous to entryc.
 
+    $entryc = $entry->id;
+
+
+
+
+//print_object(get_entries_by_this_user($entry));
+get_entries_by_this_user($entry);
     //if ($entry->get_preventry() != null) {
 
   //      if (! empty($entry->timecreated)) {
@@ -1072,29 +1078,115 @@ function toolbar($course, $user, $entry) {
 //            $entryp = $entry->get_preventry()->id;
 //            $roundn = '';
 
-            $url = new moodle_url('/mod/diary/xreport.php', array('id' => $entry->id, 'datec' => $entryp));
+            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryp));
             $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed_rtl'
-                , get_string('previousentry', 'diary')), array('class' => 'toolbutton'));
+                                 , get_string('previousentry', 'diary'))
+                                 , array('class' => 'toolbutton'));
         } else {
             $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty_rtl', ''), array('class' => 'dis_toolbutton'));
         }
-  //      if ($entry->get_nextentry() != null) {
-        if (! empty($entryn)) {
+//        if ($entry->get_nextentry() != null) {
+//        if (! empty($entryn)) {
 //            $roundn = $entry->get_nextentry()->id;
 //            $entryp = '';
 
-            $url = new moodle_url('/mod/diary/xreport.php', array('id' => $entry->id, 'datec' => $entryn));
-            $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
-                , get_string('nextentry', 'diary')), array('class' => 'toolbutton'));
-        } else {
-            $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty', ''), array('class' => 'dis_toolbutton'));
-        }
+            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryn));
+ //           $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
+ //                                , get_string('nextentry', 'diary'))
+ //                                , array('class' => 'toolbutton'));
+//        } else {
+//            $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty'
+//                                 , '')
+//                                 , array('class' => 'dis_toolbutton'));
+//        }
 
         echo $output = html_writer::alist($toolbuttons, array('id' => 'toolbar'));
 
  //   }
 
-    return $output;
+    return;
+}
+
+/**
+ * Get current entries by user id.
+ * @param int $diary
+ */
+function get_entries_by_this_user($diary) {
+    global $DB;
+    //print_object($diary);
+    //print_object($diary->id);
+    if ($eee = $DB->get_records("diary_entries", array("userid" => $diary->userid))) {
+    //if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = "timecreated ASC, timemodified ASC")) {
+
+    //print_object('This is $eee');
+    //print_object($eee);
+
+    $counter = 0;
+
+    // Now, filter down to get the latest entry by any user who has made at least one entry.
+    foreach ($eee as $ee) {
+        $counter = $counter+1;
+        $entrybyuser[$ee->userid] = $ee;
+        $entrybyentry[$ee->id]  = $ee;
+    }
+
+    Print_object('This is the counter result.');
+    print_object($counter);
+
+    print_object('This is from the get entries by this user function.');
+    print_object($entrybyuser);
+
+    } else {
+        $entrybyuser  = array () ;
+        $entrybyentry = array () ;
+    }
+    return $eee;
+}
+
+
+
+/**
+ * Set current entry to show.
+ * @param int $entryid
+ */
+function set_currententry($entryid = -1) {
+    global $DB;
+
+    $entries = $DB->get_records('diary_entries', array('diary' => $this->instance->id), 'id ASC');
+    if (empty($entries)) {
+        // Create the first round.
+        $round = new StdClass();
+        $round->starttime = time();
+        $round->endtime = 0;
+        $round->diary = $this->instance->id;
+        //$round->id = $DB->insert_record('diary_entries', $round);
+        $entries[] = $round;
+    }
+
+    if ($entryid != -1 && array_key_exists($entryid, $entries)) {
+        $this->currententry = $entries[$entryid];
+
+        $ids = array_keys($entries);
+        // Search previous round.
+        $currentkey = array_search($entryid, $ids);
+        if (array_key_exists($currentkey - 1, $ids)) {
+            $this->preventry = $entries[$ids[$currentkey - 1]];
+        } else {
+            $this->preventry = null;
+        }
+        // Search next round.
+        if (array_key_exists($currentkey + 1, $ids)) {
+            $this->nextentry = $entries[$ids[$currentkey + 1]];
+        } else {
+            $this->nextentry = null;
+        }
+    } else {
+        // Use the last round.
+        $this->currententry = array_pop($entries);
+        $this->preventry = array_pop($entries);
+        $this->nextentry = null;
+    }
+    return $entryid;
 }
 
     /**
