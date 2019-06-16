@@ -728,19 +728,16 @@ function diary_get_users_done($diary, $currentgroup) {
         $sql .= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid = ?";
         $params[] = $currentgroup;
     }
-// The old version of this line puts users with new entries at the bottom of report.
-// However, with DESC, newest entries are at the top, except for admin?
-    $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";
+    // The old version of this line puts users with new entries at the bottom of report.
+    // However, with DESC, newest entries are at the top, except for admin?
+    // $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";
 
-
-//    $sql .= " WHERE de.diary = ? ORDER BY de.rating ASC, de.timemarked ASC, de.timemodified ASC, de.timecreated DESC";
-
+    // Modified 06/15/2019 to give alphabetical listing on report.php page.
+    $sql .= " WHERE de.diary = ? ORDER BY u.lastname";
 
     $params[] = $diary->id;
     $diarys = $DB->get_records_sql($sql, $params);
 
-//print_object($sql);
-//print_object($diary);
     $cm = diary_get_coursemodule($diary->id);
     if (!$diarys || !$cm) {
         return null;
@@ -949,8 +946,10 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
     global $USER, $OUTPUT, $DB, $CFG;
 
     require_once($CFG->dirroot.'/lib/gradelib.php');
+    $dcolor3 = get_config('mod_diary', 'entrybgc');
+    $dcolor4 = get_config('mod_diary', 'entrytextbgc');
 
-    echo "\n<table class=\"diaryuserentry\" id=\"entry-" . $user->id . "\">";
+    echo "\n<table class=\"diaryuserentry\" id=\"entry-" . $user->id . "\" bgcolor=\"$dcolor4\">";
 
     echo "\n<tr>";
     echo "\n<td class=\"userpix\" rowspan=\"2\">";
@@ -1062,8 +1061,9 @@ function toolbar($course, $user, $entry) {
     $entryn = ''; // Date next after entryc.
     $entryp = ''; // Date previous to entryc.
 
-    $entryc = $entry->id;
-
+    //if (! $entryc = $entry->id) {
+    //    $entryc = $entry->id;
+    //}
 
 
 
@@ -1090,7 +1090,9 @@ get_entries_by_this_user($entry);
 //            $roundn = $entry->get_nextentry()->id;
 //            $entryp = '';
 
-            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryn));
+//            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryn));
+
+
  //           $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
  //                                , get_string('nextentry', 'diary'))
  //                                , array('class' => 'toolbutton'));
@@ -1115,32 +1117,40 @@ function get_entries_by_this_user($diary) {
     global $DB;
     //print_object($diary);
     //print_object($diary->id);
-    if ($eee = $DB->get_records("diary_entries", array("userid" => $diary->userid))) {
+
+    //if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->diary, "userid" => $diary->userid))) {
+
+
+//    if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->diary))) {
+
+
+
     //if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = "timecreated ASC, timemodified ASC")) {
 
     //print_object('This is $eee');
     //print_object($eee);
 
-    $counter = 0;
+//    $counter = 0;
 
     // Now, filter down to get the latest entry by any user who has made at least one entry.
-    foreach ($eee as $ee) {
-        $counter = $counter+1;
-        $entrybyuser[$ee->userid] = $ee;
-        $entrybyentry[$ee->id]  = $ee;
-    }
+//    foreach ($eee as $ee) {
+//        $counter = $counter+1;
+//        $entrybyuser[$ee->userid] = $ee;
+//        $entrybyentry[$ee->id]  = $ee;
+//    }
 
-    Print_object('This is the counter result.');
-    print_object($counter);
+    //Print_object('This is the counter result.');
+    //print_object($counter);
 
-    print_object('This is from the get entries by this user function.');
-    print_object($entrybyuser);
+    //print_object('This is from the get entries by this user function.');
+    //print_object($entrybyuser);
 
-    } else {
-        $entrybyuser  = array () ;
-        $entrybyentry = array () ;
-    }
-    return $eee;
+//    } else {
+//        $entrybyuser  = array () ;
+//        $entrybyentry = array () ;
+//    }
+//    return $eee;
+    return null;
 }
 
 
@@ -1189,11 +1199,125 @@ function set_currententry($entryid = -1) {
     return $entryid;
 }
 
-    /**
-     * Return previous round.
-     *
-     * @return object
-     */
-    function get_preventry() {
-        return $this->preventry;
+/**
+ * Download entries in this diary activity.
+ *
+ * @param array $array
+ * @param string $filename - The filename to use.
+ * @param string $delimiter - The character to use as a delimiter.
+ * @return nothing
+ */
+//function download_entries($array, $filename = "export.csv", $delimiter=";") {
+function download_entries($context, $course, $id, $diary) {
+$filename = "export.csv";
+$delimiter=";";
+//print_object('I am in the download entries function.');
+
+//print_object($id);
+//print_object($diary);
+    global $CFG, $DB, $USER;
+    require_once($CFG->libdir.'/csvlib.class.php');
+
+       // This is a copy of what hotquestion uses at the start of locallib
+       // $this->cm        = get_coursemodule_from_id('diary', $cmid, 0, false, MUST_EXIST);
+       // $this->course    = $DB->get_record('course', array('id' => $this->cm->course), '*', MUST_EXIST);
+       // $this->instance  = $DB->get_record('diary', array('id' => $this->cm->instance), '*', MUST_EXIST);
+       // $this->set_currentround($roundid);
+
+    $data = new StdClass();
+    $data->diary = $diary->id;
+    //$context = context_module::instance($diary->id);
+    // Trigger download_diary_entries event.
+    $event = \mod_diary\event\download_diary_entries::create(array(
+        'objectid' => $data->diary,
+        'context' => $context
+    ));
+    $event->trigger();
+
+    // Construct sql query and filename based on admin or teacher.
+    // Add filename details based on course and Diary activity name.
+    $csv = new csv_export_writer();
+    $strdiary = get_string('pluginname', 'diary');
+    if (is_siteadmin($USER->id)) {
+        $whichdiary = ('AND d.diary > 0');
+        $csv->filename = clean_filename(get_string('exportfilenamep1', 'diary'));
+    } else {
+        $whichdiary = ('AND d.diary = ');
+        $whichdiary .= ($diary->id);
+        $csv->filename = clean_filename(($course->shortname).'_');
+        $csv->filename .= clean_filename(($diary->name));
     }
+    $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary').gmdate("Ymd_Hi").'GMT.csv');
+
+    $fields = array();
+
+    $fields = array(get_string('firstname'),
+                    get_string('lastname'),
+                    get_string('pluginname', 'diary'),
+                   // get_string('userid', 'diary'),
+                    get_string('userid', 'diary'),
+                    get_string('timecreated', 'diary'),
+                    get_string('timemodified', 'diary'),
+                    get_string('format', 'diary'),
+                    get_string('rating', 'diary'),
+                    get_string('entrycomment', 'diary'),
+                    get_string('teacher', 'diary'),
+                    get_string('timemarked', 'diary'),
+                    get_string('mailed', 'diary'),
+                    get_string('text', 'diary'));
+    // Add the headings to our data array.
+    $csv->add_data($fields);
+    if ($CFG->dbtype == 'pgsql') {
+        $sql = "SELECT d.id AS entry,
+                       u.firstname AS firstname,
+                       u.lastname AS lastname,
+                       d.diary AS diary,
+                       d.userid AS userid,
+                       to_char(to_timestamp(d.timecreated), 'YYYY-MM-DD HH24:MI:SS') AS timecreated,
+                       to_char(to_timestamp(d.timemodified), 'YYYY-MM-DD HH24:MI:SS') AS timemodified,
+                       d.text AS text,
+                       d.format AS format,
+                       d.rating AS rating,
+                       d.entrycomment AS entrycomment,
+                       d.teacher AS teacher,
+                       to_char(to_timestamp(d.timemarked), 'YYYY-MM-DD HH24:MI:SS') AS timemarked,
+                       d.mailed AS mailed
+                FROM {diary_entries} d
+                JOIN {user} u ON u.id = d.userid
+                WHERE d.userid > 0 ";
+    } else {
+        $sql = "SELECT d.id AS entry,
+                       u.firstname AS 'firstname',
+                        u.lastname AS 'lastname',
+                        d.diary AS diary,
+                        d.userid AS userid,
+                        FROM_UNIXTIME(d.timecreated) AS TIMECREATED,
+                        FROM_UNIXTIME(d.timemodified) AS TIMEMODIFIED,
+                        d.text AS text,
+                        d.format AS format,
+                        d.rating AS rating,
+                        d.entrycomment AS entrycomment,
+                        d.teacher AS teacher,
+                        FROM_UNIXTIME(d.timemarked) AS TIMEMARKED,
+                        d.mailed AS mailed
+                    FROM {diary_entries} d
+                    JOIN {user} u ON u.id = d.userid
+                    WHERE d.userid > 0 ";
+    }
+
+    $sql .= ($whichdiary);
+    $sql .= "     GROUP BY u.lastname, u.firstname, d.diary, d.id
+                  ORDER BY u.lastname ASC, u.firstname ASC, d.diary ASC, d.id ASC";
+
+    // Add the list of users and diarys to our data array.
+    if ($ds = $DB->get_records_sql($sql, $fields)) {
+        foreach ($ds as $d) {
+            $output = array($d->firstname, $d->lastname, $d->diary, $d->userid, $d->timecreated, $d->timemodified, $d->format,
+            $d->rating, $d->entrycomment, $d->teacher, $d->timemarked, $d->mailed, $d->text);
+            $csv->add_data($output);
+        }
+    }
+    // Download the completed array.
+    $csv->download_file();
+    exit;
+}
