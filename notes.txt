@@ -67,3 +67,15 @@ date, it will start a new entry, no matter how many hours have elapsed.
 06/06/2019 Finally fixed the double button problem for the user entry
 toolbar. Each button used $output and the function was also returning
 a $output, which gave two sets of tools.
+06/13/2019 Added another color setting so that the view.php has a color
+for the whole background as well as another color for the text background.
+I also added code in the report.php so that each entry uses one of the
+two colors. Still deciding which one to use. For report, the code is
+actually in lib.php, in the, function diary_print_user_entry, about line 948.
+
+06/15/2019 Finally figured out a really simple way to get the entries list
+on the report.php page to be in alphabetical order.
+06/15/2019 Double whammy! GOt the list order to work and just now, I also
+have gotten the download_entries to work. Still have a few bugs to work
+out due to $this-> not working. Later 1800 - I have the bugs fixed. Just
+need to verify things tomorrow and do some code cleanup.
