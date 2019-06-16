@@ -36,7 +36,10 @@ if (! $cm = get_coursemodule_from_id('diary', $id)) {
 if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
     print_error("Course module is misconfigured");
 }
-
+//print_object($id);
+//print_object($id);
+//print_object($id);
+//print_object($id);
 require_login($course, false, $cm);
 
 $context = context_module::instance($cm->id);
@@ -47,15 +50,16 @@ require_capability('mod/diary:manageentries', $context);
 if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     print_error("Course module is incorrect");
 }
-
+//print_object('Here is the data for $diary');
+//print_object($diary);
 // Handle download entries, previous day, and next day toolbuttons.
 if (!empty($action)) {
     switch ($action) {
         case 'download':
             if (has_capability('mod/diary:manageentries', $context)) {
-                $d = $cm->instance; // Course module to download entries from.
+                //$d = $cm->instance; // Course module to download entries from.
                 // Call download entries function in lib.
-                $de->download_entries($d);
+                download_entries($context, $course, $id, $diary);
             }
             break;
     }
@@ -74,17 +78,11 @@ echo $OUTPUT->heading(get_string("entries", "diary"));
 // Make some easy ways to access the latest entries.
 // First, get all the entries from this diary activity.
 if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id))) {
-//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = "timecreated ASC, timemodified ASC")) {
-//print_object($eee);
 // Now, filter down to get the latest entry by any user who has made at least one entry.
     foreach ($eee as $ee) {
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id]  = $ee;
     }
-// At this point, the entries need to be sorted so ones needing grading are at the top
-// of the list on the report page. Currently, they are shown in diary_entries id order.
-
-//print_object($entrybyuser);
 
 } else {
     $entrybyuser  = array () ;
@@ -161,6 +159,7 @@ if ($data = data_submitted()) {
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
 
+    // Report how many entries were updated when the, Save all my feedback button was pressed.
     echo $OUTPUT->notification(get_string("feedbackupdated", "journal", "$count"), "notifysuccess");
 
 } else {
@@ -250,6 +249,7 @@ if (!$users) {
 
     // Get a list of user who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup)) {
+//print_object($usersdone);
         foreach ($usersdone as $user) {
             // Based on list of users with at least one entry, print the latest entry onscreen.
             echo diary_print_user_entry($course, $user, $entrybyuser[$user->id], $teachers, $grades);
