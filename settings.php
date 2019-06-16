@@ -49,11 +49,20 @@ if ($ADMIN->fulltree) {
         'M d, Y G:i', PARAM_TEXT, 15)
     );
 
-    // Diary entry text background colour setting.
+    // Diary entry/feedback background colour setting.
     $name = 'mod_diary/entrybgc';
     $title = get_string('entrybgc_title', 'diary');
     $description = get_string('entrybgc_descr', 'diary');
     $default = get_string('entrybgc_colour', 'diary');
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+
+    // Diary entry text background colour setting.
+    $name = 'mod_diary/entrytextbgc';
+    $title = get_string('entrytextbgc_title', 'diary');
+    $description = get_string('entrytextbgc_descr', 'diary');
+    $default = get_string('entrytextbgc_colour', 'diary');
     $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
