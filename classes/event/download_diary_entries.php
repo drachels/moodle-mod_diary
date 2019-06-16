@@ -49,7 +49,7 @@ class download_diary_entries extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventdownloadquestions', 'mod_diary');
+        return get_string('eventdownloadentriess', 'mod_diary');
     }
 
     /**
