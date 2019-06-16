@@ -130,13 +130,9 @@ if ($timenow > $timestart) {
     if ($timenow < $timefinish) {
 
         if ($canadd) {
-            // Maybe keep single button with calculation to see if need to start a new day.
-            // Add first button for editing current day.
+            // Add button for editing current entry or starting a new entry.
             echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'diary'), 'get',
                 array("class" => "singlebutton diarystart"));
-            // MAYBE, add a second button for starting new entry.
-            // echo '<br>'.$OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit','diary'), 'get',
-            //    array("class" => "singlebutton diarystart"));
         }
     }
 
@@ -148,6 +144,7 @@ if ($timenow > $timestart) {
                 echo '<p align="center"><b>'.get_string('blankentry','diary').'</b></p>';
             } else {
                 $color3 = get_config('mod_diary', 'entrybgc');
+                $color4 = get_config('mod_diary', 'entrytextbgc');
 
                 echo '<div align="left" style="font-size:1em; padding: 5px;
                     font-weight:bold;background: '.$color3.';
@@ -162,15 +159,16 @@ if ($timenow > $timestart) {
                 $diff = date_diff($date1, $date2);
                 //print_object($diff);
                 //print_object($diff->h);
+
                 // Add a heading for each entry on the page.
-                echo $OUTPUT->heading(get_string('entry', 'diary'));
+                echo $OUTPUT->heading(get_string('entry', 'diary').' Can add more here if needed.');
 
                 // Both of these methods work. Second is better.
                 echo '<p><b>Created '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' Modified '.date(get_config('mod_diary', 'dateformat'), $entry->timemodified).' This entry was made '.$diff->d.' days and '.$diff->h.' hours ago.</b>';
                 //echo '<p><b>'.userdate($entry->timemodified).'</b>';
-
+// simulating two background colors for each entry.
                 echo '<div align="left" style="font-size:1em; padding: 5px;
-                    font-weight:bold;background: '.$color3.';
+                    font-weight:bold;background: '.$color4.';
                     border:1px solid black;
                     -webkit-border-radius:16px;
                     -moz-border-radius:16px;border-radius:16px;">';
