@@ -65,48 +65,7 @@ if ($entrys) {
         $data->timecreated = $entry->timecreated;
     }
 
-//print_object(date('Y-m-d G:i:s', $timestamp = strtotime('today midnight')));
-//print_object($timestamp = strtotime('today midnight'));
-//print_object($timestamp);
-//print_object($today = (new DateTime())->setTime(0,0));
-//print_object($today);
-//print_object($today->format('Y-m-d G:i:s'));
-//print_object(new DateTime('today midnight'));
-//print_object($stamp = mktime(0, 0, 0));
-
-//print_object(date('Y-m-d G:i:s', $timestamp));
-//print_object($timestamp+60);
-//print_object(date('Y-m-d G:i:s', ($timestamp+60)));
-
-//echo 'This is using date1 and date2.';
-    // Get the difference between now and when the latest entry was created.
-//    $date1 = new DateTime(date('Y-m-d G:i:s', time()));
-//    print_object($date1);
-//    $date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
-//    print_object($date2);
- //   $diff1 = date_diff($date1, $date2);
-//    print_object($diff1->d);
-    //print_object(floor((time() / 86400) - ($entry->timecreated) / 86400));
-
-//echo 'This is using floor on date3 and date4.';
-    // Get the difference between now and when the latest entry was created.
-    //$date3 = new DateTime(date('Y-m-d G:i:s', (1559970537)));
-//    $date3 = (1559970537 / 86400);
-//    print_object($date3);
-    //$date4 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
-//    $date4 = floor(1559969940 / 86400);
-//    print_object($date4);
-//    $diff2 = ($date3 - $date4);
-//    print_object($diff2);
-    //print_object(floor((time() / 86400) - ($entry->timecreated) / 86400));
-
-
-    // If time now is on a new calendar day, then start a new entry.
-    // I think these calculations might be based on GMT instead of America/Chicago.
-    //if ((time() / 86400) - (floor($entry->timecreated) / 86400) > 1) {
-//    if (floor((time() / 86400) - (($entry->timecreated) / 86400)) > 0) {
-    //if (($diff->d + $diff->h) > 0) {
-    //if ($diff->d > 0) {
+// If new calendar day, start a new entry.
 if (strtotime('today midnight') > $entry->timecreated) {
         $entrys = '';
         $data->entryid = null;
