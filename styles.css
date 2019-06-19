@@ -47,6 +47,13 @@
   margin: 5px;
   text-align: center;
 }
+#page-mod-diary-view .needsedit,
+#page-mod-diary-view .editend {
+   font-size: 0.9em;
+  color: red;
+  text-decoration: underline;
+  text-align: center;
+}
 #page-mod-diary-view .author {
   font-size: 1em;
   font-weight: bold;
@@ -99,6 +106,11 @@
   white-space: nowrap;
 }
 #page-mod-diary-report .diaryuserentry td .lastedit {
-  font-size: 0.76em;
+  font-size: 0.7em;
+  margin-left: 10px;
+}#page-mod-diary-report .diaryuserentry td .needsedit {
+  font-size: 0.9em;
+  color: red;
+  text-decoration: underline;
   margin-left: 10px;
 }
