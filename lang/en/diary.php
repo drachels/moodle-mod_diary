@@ -38,6 +38,7 @@ $string['alwaysopen'] = 'Always open';
 $string['blankentry'] = 'Blank entry';
 $string['configdateformat'] = 'This defines how dates are shown in grade reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
 $string['csvexport'] = 'Export to .csv';
+$string['currententry'] = 'Current entry';
 $string['daysavailable'] = 'Days available';
 $string['deadline'] = 'Days Open';
 $string['dateformat'] = 'Default date format';
@@ -77,7 +78,8 @@ $string['modulename'] = 'Diary';
 $string['modulename_help'] = 'The diary activity enables teachers to obtain students feedback
  over a period of time.';
 $string['modulenameplural'] = 'Diarys';
-$string['needsregrade'] = 'Entry has changed since last feedback was saved.';
+$string['needsgrading'] = ' This entry has not been graded yet.';
+$string['needsregrade'] = 'This entry has changed since it was graded.';
 $string['newdiaryentries'] = 'New diary entries';
 $string['nextentry'] = 'Next entry';
 $string['nodeadline'] = 'Always open';
