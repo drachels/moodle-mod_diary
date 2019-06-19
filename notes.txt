@@ -79,3 +79,17 @@ on the report.php page to be in alphabetical order.
 have gotten the download_entries to work. Still have a few bugs to work
 out due to $this-> not working. Later 1800 - I have the bugs fixed. Just
 need to verify things tomorrow and do some code cleanup.
+
+06/16/2019 Made a slight change to the ORDER BY in SQL for entries list
+in report.php file. Added both u.lastname ASC and u.firstname ASC. Also
+had to add $sort 'lastname ASC, firstname ASC' in report.php, at about
+line 185, so that the list of users with no entry, is alphabetized, too. 
+Started adding icons for previous and next toolbuttons. Also added css
+style for the notice that an entry has changed since the last feedback
+was made. It now shows slightly larger, red, and underlined so it stands out.
+
+06/17/2019 Fixed css style for the notice that an entry has changed since the
+lst feedback was made for the view.php page. Also made it so the info is
+post below each entry on the page.
+06/17/2019 Fixed backup and restore so they now work, correctly.
+06/18/2018 Added red warnings for needs regrade and needs grading.
