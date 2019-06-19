@@ -182,7 +182,8 @@ if ($currentgroup) {
     $groups = '';
 }
 
-$users = get_users_by_capability($context, 'mod/diary:addentries', '', '', '', '', $groups);
+// Get a sorted list of users to use for the part of the list where users have no entries.
+$users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort='lastname ASC, firstname ASC', '', '', $groups);
 
 if (!$users) {
     echo $OUTPUT->heading(get_string("nousersyet"));
@@ -208,11 +209,23 @@ if (!$users) {
                        , get_string('reload'))
                        , array('class' => 'toolbutton'));
 
-        $options{'action'} = 'previousentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed_rtl'
-                       , get_string('previousentry', 'diary'))
-                       , array('class' => 'toolbutton'));
+//        $options{'action'} = 'previousentry';
+//        $url = new moodle_url('/mod/diary/report.php', $options);
+//        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed_rtl'
+//                       , get_string('previousentry', 'diary'))
+//                       , array('class' => 'toolbutton'));
+
+//        $options{'action'} = 'currententry';
+//        $url = new moodle_url('/mod/diary/report.php', $options);
+//        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
+//                       , get_string('currententry', 'diary'))
+//                       , array('class' => 'toolbutton'));
+
+//        $options{'action'} = 'currententry';
+//        $url = new moodle_url('/mod/diary/report.php', $options);
+//        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('a/r_next'
+//                       , get_string('currententry', 'diary'))
+//                       , array('class' => 'toolbutton'));
 
 
         // This needs to become a string.
