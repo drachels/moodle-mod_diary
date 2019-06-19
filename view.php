@@ -161,12 +161,12 @@ if ($timenow > $timestart) {
                 //print_object($diff->h);
 
                 // Add a heading for each entry on the page.
-                echo $OUTPUT->heading(get_string('entry', 'diary').' Can add more here if needed.');
+                //echo $OUTPUT->heading(get_string('entry', 'diary').' Can add more here if needed.');
+                echo $OUTPUT->heading(get_string('entry', 'diary'));
 
                 // Both of these methods work. Second is better.
                 echo '<p><b>Created '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' Modified '.date(get_config('mod_diary', 'dateformat'), $entry->timemodified).' This entry was made '.$diff->d.' days and '.$diff->h.' hours ago.</b>';
                 //echo '<p><b>'.userdate($entry->timemodified).'</b>';
-// simulating two background colors for each entry.
                 echo '<div align="left" style="font-size:1em; padding: 5px;
                     font-weight:bold;background: '.$color4.';
                     border:1px solid black;
@@ -175,8 +175,35 @@ if ($timenow > $timestart) {
                 //echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
                 echo diary_format_entry_text($entry, $course, $cm).'</div></p>';
 
-//print_object($diary);
-//print_object($entry->rating);
+                // Info regarding last edit and word count.
+                if ($timenow < $timefinish) {
+                    if (!empty($entry->timemodified)) {
+
+
+                    echo '<p><b>Created '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' Modified '.date(get_config('mod_diary', 'dateformat'), $entry->timemodified).' This entry was made '.$diff->d.' days and '.$diff->h.' hours ago.</b>';
+                    //echo '<p><b>'.userdate($entry->timemodified).'</b>';
+
+
+                        echo '<div class="lastedit"><strong>'.get_string('lastedited').': </strong> ';
+                        echo userdate($entry->timemodified);
+                        echo ' ('.get_string('numwords', '', count_words($entry->text)).')';
+                        echo "</div>";
+                    }
+                    if (!empty($entry->timecreated) AND !empty($entry->timemodified) AND empty($entry->timemarked)) {
+                        echo "<div class=\"needsedit\">".get_string("needsgrading", "diary"). "</div>";
+                    } else if (!empty($entry->timemodified) AND !empty($entry->timemarked) AND $entry->timemodified > $entry->timemarked) {
+                        echo "<div class=\"needsedit\">".get_string("needsregrade", "diary"). "</div>";
+                    }
+
+                    if (!empty($diary->days)) {
+                        echo '<div class="editend"><strong>'.get_string('editingends', 'diary').': </strong> ';
+                        echo userdate($timefinish).'</div>';
+                    }
+
+                } else {
+                    echo '<div class="editend"><strong>'.get_string('editingended', 'diary').': </strong> ';
+                    echo userdate($timefinish).'</div>';
+                }
 
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) or !empty($entry->rating)) {
@@ -189,50 +216,18 @@ if ($timenow > $timestart) {
                     echo $output->diary_print_feedback($course, $entry, $grades);
                 }
                 echo '</div></p>';
-
             }
         }
     } else {
         echo '<span class="warning">'.get_string('notstarted', 'diary').'</span>';
     }
-
     echo $OUTPUT->box_end();
 
-    // Info.
-    if ($timenow < $timefinish) {
-        if (!empty($entry->timemodified)) {
-            echo '<div class="lastedit"><strong>'.get_string('lastedited').': </strong> ';
-            echo userdate($entry->timemodified);
-            echo ' ('.get_string('numwords', '', count_words($entry->text)).')';
-            echo "</div>";
-        }
-        // Added three lines to mark entry as being dirty and needing regrade.
-        if (!empty($entry->timemodified) AND !empty($entry->timemarked) AND $entry->timemodified > $entry->timemarked) {
-            echo "<div class=\"lastedit\">".get_string("needsregrade", "diary"). "</div>";
-        }
-
-        if (!empty($diary->days)) {
-            echo '<div class="editend"><strong>'.get_string('editingends', 'diary').': </strong> ';
-            echo userdate($timefinish).'</div>';
-        }
-
-    } else {
-        echo '<div class="editend"><strong>'.get_string('editingended', 'diary').': </strong> ';
-        echo userdate($timefinish).'</div>';
-    }
-
-    // Feedback
-    //if (!empty($entry->entrycomment) or !empty($entry->rating)) {
-    //    $grades = make_grades_menu($diary->grade);
-    //    echo $OUTPUT->heading(get_string('feedback'));
-    //    diary_print_feedback($course, $entry, $grades);
-    //}
 
 } else {
     echo '<div class="warning">'.get_string('notopenuntil', 'diary').': ';
     echo userdate($timestart).'</div>';
 }
-
 
 // Trigger module viewed event.
 $event = \mod_diary\event\course_module_viewed::create(array(
