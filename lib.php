@@ -586,7 +586,7 @@ function diary_get_user_grades($diary, $userid=0) {
 
     } else {
 
-        $sql = "SELECT userid, timemodified as datesubmitted, format as feedbackformat,
+        $sql = "SELECT DISTINCT userid, timemodified as datesubmitted, format as feedbackformat,
                 rating as rawgrade, entrycomment as feedback, teacher as usermodifier, timemarked as dategraded
                 FROM {diary_entries}
                 WHERE diary = :did ".$userstr;
@@ -733,7 +733,7 @@ function diary_get_users_done($diary, $currentgroup) {
     // $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";
 
     // Modified 06/15/2019 to give alphabetical listing on report.php page.
-    $sql .= " WHERE de.diary = ? ORDER BY u.lastname";
+    $sql .= " WHERE de.diary = ? ORDER BY u.lastname ASC, u.firstname ASC";
 
     $params[] = $diary->id;
     $diarys = $DB->get_records_sql($sql, $params);
@@ -1026,9 +1026,9 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
         echo $hiddengradestr;
         // Rewrote next three lines to show entry needs to be regraded due to resubmission.
         if (!empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
-            echo " <span class=\"lastedit\">".get_string("needsregrade", "diary"). "</span>";
+            echo " <span class=\"needsedit\">".get_string("needsregrade", "diary"). " </span>";
         } else if ($entry->timemarked) {
-            echo " <span class=\"lastedit\">".userdate($entry->timemarked)."</span>";
+            echo " <span class=\"lastedit\">".userdate($entry->timemarked)." </span>";
         }
         echo $gradebookgradestr;
 
@@ -1057,9 +1057,9 @@ function toolbar($course, $user, $entry) {
     $output = '';
    // $toolbuttons = array();
     $entryp = new stdClass();
-    $entryc = ''; // Entry currently looking at.
-    $entryn = ''; // Date next after entryc.
-    $entryp = ''; // Date previous to entryc.
+    $entryc = '4'; // Entry currently looking at.
+    $entryn = '6'; // Date next after entryc.
+    $entryp = '5'; // Date previous to entryc.
 
     //if (! $entryc = $entry->id) {
     //    $entryc = $entry->id;
@@ -1086,21 +1086,21 @@ get_entries_by_this_user($entry);
             $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty_rtl', ''), array('class' => 'dis_toolbutton'));
         }
 //        if ($entry->get_nextentry() != null) {
-//        if (! empty($entryn)) {
+        if (! empty($entryn)) {
 //            $roundn = $entry->get_nextentry()->id;
 //            $entryp = '';
 
-//            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryn));
+            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryn));
 
 
- //           $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
- //                                , get_string('nextentry', 'diary'))
- //                                , array('class' => 'toolbutton'));
-//        } else {
-//            $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty'
-//                                 , '')
-//                                 , array('class' => 'dis_toolbutton'));
-//        }
+            $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
+                                 , get_string('nextentry', 'diary'))
+                                 , array('class' => 'toolbutton'));
+        } else {
+            $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty'
+                                 , '')
+                                 , array('class' => 'dis_toolbutton'));
+        }
 
         echo $output = html_writer::alist($toolbuttons, array('id' => 'toolbar'));
 
