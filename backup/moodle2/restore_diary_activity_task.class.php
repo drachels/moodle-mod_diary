@@ -38,10 +38,10 @@ class restore_diary_activity_task extends restore_activity_task {
     static public function define_decode_rules() {
 
         $rules = array();
-        $rules[] = new restore_decode_rule('diaryINDEX', '/mod/diary/index.php?id=$1', 'course');
-        $rules[] = new restore_decode_rule('diaryVIEWBYID', '/mod/diary/view.php?id=$1', 'course_module');
-        $rules[] = new restore_decode_rule('diaryREPORT', '/mod/diary/report.php?id=$1', 'course_module');
-        $rules[] = new restore_decode_rule('diaryEDIT', '/mod/diary/edit.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('DIARYINDEX', '/mod/diary/index.php?id=$1', 'course');
+        $rules[] = new restore_decode_rule('DIARYVIEWBYID', '/mod/diary/view.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('DIARYREPORT', '/mod/diary/report.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('DIARYEDIT', '/mod/diary/edit.php?id=$1', 'course_module');
 
         return $rules;
 

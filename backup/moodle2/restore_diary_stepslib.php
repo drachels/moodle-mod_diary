@@ -56,7 +56,8 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         unset($data->id);
 
         $data->diary = $this->get_new_parentid('diary');
-        $data->modified = $this->apply_date_offset($data->modified);
+        $data->timemcreated = $this->apply_date_offset($data->timecreated);
+        $data->timemodified = $this->apply_date_offset($data->timemodified);
         $data->timemarked = $this->apply_date_offset($data->timemarked);
         $data->userid = $this->get_mappingid('user', $data->userid);
         $data->teacher = $this->get_mappingid('user', $data->teacher);

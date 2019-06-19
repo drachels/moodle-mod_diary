@@ -25,7 +25,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $entries = new backup_nested_element('entries');
 
         $entry = new backup_nested_element('entry', array('id'), array(
-            'userid', 'modified', 'text', 'format', 'rating',
+            'userid', 'timecreated', 'timemodified', 'text', 'format', 'rating',
             'entrycomment', 'teacher', 'timemarked', 'mailed'));
 
         $diary->add_child($entries);
