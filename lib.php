@@ -307,9 +307,9 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
          WHERE de.timemodified > ? AND
                d.course = ? AND
                md.name = ?
-         ORDER BY de.timemodified ASC
+         ORDER BY u.lastname ASC, u.firstname ASC
     ";
-
+// Changed on 06/22/2019 original line 310: ORDER BY de.timemodified ASC
     $newentries = $DB->get_records_sql($sql, $dbparams);
 
     $modinfo = get_fast_modinfo($course);
@@ -942,8 +942,12 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
  * @param integer $teachers
  * @param integer $grades
  */
+ // Course module, course, system user, current diary entry, current teacher, grades, ALL entries in durrent diary.
 function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
+//function diary_print_user_entry($cm, $course, $user, $entry, $teachers, $grades, $eee) {
     global $USER, $OUTPUT, $DB, $CFG;
+
+
 
     require_once($CFG->dirroot.'/lib/gradelib.php');
     $dcolor3 = get_config('mod_diary', 'entrybgc');
@@ -961,7 +965,7 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
     }
 
     // Pass current course, user and entry to the toolbar function.
-    echo toolbar($course, $user, $entry);
+    //echo toolbar($cm, $course, $user, $entry);
 
     echo "</td>";
     echo "</tr>";
@@ -1051,23 +1055,36 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
  *
  * return alist of links
  */
-function toolbar($course, $user, $entry) {
+function toolbar($cm, $course, $user, $entry) {
     global $USER, $OUTPUT, $DB, $CFG;
+
+// Make some easy ways to access the latest entries for the current user.
+if ($eee = $DB->get_records("diary_entries", array("diary" => $entry->diary, "userid" => $entry->userid))) {
+// Now, filter down to get the latest entry by any user who has made at least one entry.
+    foreach ($eee as $ee) {
+        $entrybyuser[$ee->userid] = $ee;
+        $entrybyentry[$ee->id]  = $ee;
+    }
+
+} else {
+    $entrybyuser  = array () ;
+    $entrybyentry = array () ;
+}
+
 
     $output = '';
    // $toolbuttons = array();
     $entryp = new stdClass();
     $entryc = '4'; // Entry currently looking at.
-    $entryn = '6'; // Date next after entryc.
+    $entryn = ''; // Date next after entryc.
     $entryp = '5'; // Date previous to entryc.
 
     //if (! $entryc = $entry->id) {
     //    $entryc = $entry->id;
     //}
 
+//print_object($eee);
 
-
-//print_object(get_entries_by_this_user($entry));
 get_entries_by_this_user($entry);
     //if ($entry->get_preventry() != null) {
 
@@ -1078,7 +1095,7 @@ get_entries_by_this_user($entry);
 //            $entryp = $entry->get_preventry()->id;
 //            $roundn = '';
 
-            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryp));
+            $url = new moodle_url('/mod/diary/report.php', array('id' => $cm->id, 'user' => $user->id, 'entryc' => $entryp));
             $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed_rtl'
                                  , get_string('previousentry', 'diary'))
                                  , array('class' => 'toolbutton'));
@@ -1090,7 +1107,7 @@ get_entries_by_this_user($entry);
 //            $roundn = $entry->get_nextentry()->id;
 //            $entryp = '';
 
-            $url = new moodle_url('/mod/diary/report.php', array('id' => $entry->id, 'datec' => $entryn));
+            $url = new moodle_url('/mod/diary/report.php', array('id' => $cm->id, 'datec' => $entryn));
 
 
             $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
@@ -1107,6 +1124,7 @@ get_entries_by_this_user($entry);
  //   }
 
     return;
+    //return $entry;
 }
 
 /**
