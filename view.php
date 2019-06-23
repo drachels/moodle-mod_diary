@@ -88,7 +88,7 @@ groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/view.php?id=$cm->id"
 if ($entriesmanager) {
     $entrycount = diary_count_entries($diary, $currentgroup);
 
-    echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'">'.
+    echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">'.
           get_string('viewallentries','diary', $entrycount).'</a></div>';
 ////////////////////////////////////////////////////////////////////////////////////////
 //    echo '<div class="xreportlink"><a href="xreport.php?id='.$cm->id.'">'.
