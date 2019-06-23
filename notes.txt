@@ -93,3 +93,10 @@ lst feedback was made for the view.php page. Also made it so the info is
 post below each entry on the page.
 06/17/2019 Fixed backup and restore so they now work, correctly.
 06/18/2018 Added red warnings for needs regrade and needs grading.
+06/21/2019 Discover was still using one Journal string in report.php
+where the code for the, Save all my feedback, button was being assigned
+to a variable. Fixed to use Diary string.
+06/21/2019 Discovered the Recent Activity function was ORDER BY timemodified,
+and since I had changed the report.php to use lastname, firstname in ASC
+order, I changed the Recent Activity to also us alphabetical order.
+06/23/2019 FINALLY! Got a toolbar working in report.php.
