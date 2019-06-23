@@ -27,7 +27,7 @@ require_once("lib.php");
 //require_once("locallib.php");
 
 $id = required_param('id', PARAM_INT);   // Course module.
-$action  = optional_param('action', '', PARAM_ACTION);  // Action(download, refresh page).
+$action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(download, refresh page).
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     print_error("Course Module ID was incorrect");
@@ -36,10 +36,7 @@ if (! $cm = get_coursemodule_from_id('diary', $id)) {
 if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
     print_error("Course module is misconfigured");
 }
-//print_object($id);
-//print_object($id);
-//print_object($id);
-//print_object($id);
+
 require_login($course, false, $cm);
 
 $context = context_module::instance($cm->id);
@@ -50,18 +47,51 @@ require_capability('mod/diary:manageentries', $context);
 if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     print_error("Course module is incorrect");
 }
-//print_object('Here is the data for $diary');
-//print_object($diary);
-// Handle download entries, previous day, and next day toolbuttons.
+
+// Handle toolbar capabilities.
 if (!empty($action)) {
     switch ($action) {
         case 'download':
             if (has_capability('mod/diary:manageentries', $context)) {
                 //$d = $cm->instance; // Course module to download entries from.
-                // Call download entries function in lib.
+                // Call download entries function in lib.php.
                 download_entries($context, $course, $id, $diary);
             }
             break;
+        case 'currententry':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                 $stringlable = 'currententry';
+                 $eee = $DB->get_records("diary_entries", array("diary" => $diary->id));
+            }
+            break;
+        case 'firstentry':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                 $stringlable = 'firstentry';
+                 $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timecreated DESC');
+            }
+            break;
+        case 'lowestgradeentry':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                 $stringlable = 'lowestgradeentry';
+                 $eee = $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating DESC, timemodified DESC');
+            }
+            break;
+        case 'highestgradeentry':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                 $stringlable = 'highestgradeentry';
+                 $eee = $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating ASC');
+            }
+            break;
+        case 'latestmodifiedentry':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                 $stringlable = 'latestmodifiedentry';
+                 $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timemodified ASC');
+            }
+            break;
+        default:
+            if (has_capability('mod/diary:manageentries', $context)) {
+                 $stringlable = 'currententry';
+            }
     }
 }
 
@@ -73,25 +103,65 @@ $PAGE->set_title(get_string("modulenameplural", "diary"));
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string("entries", "diary"));
+//echo $OUTPUT->heading(get_string("entries", "diary"));
+echo $OUTPUT->heading(get_string($stringlable, "diary"));
 
-// Make some easy ways to access the latest entries.
-// First, get all the entries from this diary activity.
-if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id))) {
-// Now, filter down to get the latest entry by any user who has made at least one entry.
+// Get a list of groups for this course.
+$currentgroup = groups_get_activity_group($cm, true);
+if ($currentgroup) {
+    $groups = $currentgroup;
+} else {
+    $groups = '';
+}
+
+// Get a sorted list of users in the current group to use for processing the report.
+$users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort='lastname ASC, firstname ASC', '', '', $groups);
+
+// Process the list of users so we have current, previous, and next entry, for each user.
+//foreach ($users as $cur) {
+//print_object($cur->firstname.' '.$cur->lastname);
+//print_object($cur);
+//}
+
+// Make some easy ways to access entries.
+// Sort on different fields will give different results.
+
+// Works - This gets the entries in timemodified order from newest to oldest and therefore, shows the oldest timemodified.
+// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timemodified DESC')) {
+
+// Works - This gets the entries in timecreated order from newest to oldest and therefore, shows the oldest timecreated.
+//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timecreated DESC')) {
+
+// Works - This gets LOWEST graded entries.
+// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating DESC')) {
+// This gets HIGHEST graded entries.
+//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating ASC')) {
+
+//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timemodified ASC, rating ASC')) {
+//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating ASC')) {
+// NO - if ($eee = $DB->get_records_select("diary_entries", $select = "(timecreated > 0 AND rating = null) OR (timemodified > timemarked) OR (timecreated > 0)", array("diary" => $diary->id), $sort = 'rating DESC')) {
+
+// Works -  By default, this gets the most recent entry.
+// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id))) {
+
+// This is dev one trying to use pre and next...
+// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id, "userid" => $cur->id))) {
+
+    //$deids = array_keys($eee);  // Get the table id's of all entries in $eee for current users of this diary.
+    //print_object($deids);
+
+//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id))) {
+if ($eee) {
+    // Now, filter down to get entry by any user who has made at least one entry.
     foreach ($eee as $ee) {
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id]  = $ee;
+        $entrybyuserentry[$ee->userid][$ee->id] = $ee;
     }
-
 } else {
     $entrybyuser  = array () ;
     $entrybyentry = array () ;
 }
-
-// Group mode
-$groupmode = groups_get_activity_groupmode($cm);
-$currentgroup = groups_get_activity_group($cm, true);
 
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
@@ -160,7 +230,7 @@ if ($data = data_submitted()) {
     $event->trigger();
 
     // Report how many entries were updated when the, Save all my feedback button was pressed.
-    echo $OUTPUT->notification(get_string("feedbackupdated", "journal", "$count"), "notifysuccess");
+    echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
 
 } else {
 
@@ -175,15 +245,9 @@ if ($data = data_submitted()) {
     $event->trigger();
 }
 
-// Print out the diary entries.
-if ($currentgroup) {
-    $groups = $currentgroup;
-} else {
-    $groups = '';
-}
 
-// Get a sorted list of users to use for the part of the list where users have no entries.
-$users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort='lastname ASC, firstname ASC', '', '', $groups);
+
+
 
 if (!$users) {
     echo $OUTPUT->heading(get_string("nousersyet"));
@@ -197,35 +261,50 @@ if (!$users) {
         $options['diary'] = $diary->id;
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/report.php', $options);
+        
         // Add download button.
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('a/download_all'
+        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('i/export'
                        , get_string('csvexport', 'diary'))
                        , array('class' => 'toolbutton'));
 
         // Add refresh toolbutton.
-        $options{'action'} = 'refresh';
+        //$options{'action'} = 'refresh'; 
+        $options{'action'} = $stringlable;
         $url = new moodle_url('/mod/diary/report.php', $options);
         $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/reload'
                        , get_string('reload'))
                        , array('class' => 'toolbutton'));
 
-//        $options{'action'} = 'previousentry';
-//        $url = new moodle_url('/mod/diary/report.php', $options);
-//        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed_rtl'
-//                       , get_string('previousentry', 'diary'))
-//                       , array('class' => 'toolbutton'));
+        $options{'action'} = 'currententry';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('i/edit'
+                       , get_string('currententry', 'diary'))
+                       , array('class' => 'toolbutton'));
 
-//        $options{'action'} = 'currententry';
-//        $url = new moodle_url('/mod/diary/report.php', $options);
-//        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
-//                       , get_string('currententry', 'diary'))
-//                       , array('class' => 'toolbutton'));
+        $options{'action'} = 'firstentry';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/left'
+                       , get_string('firstentry', 'diary'))
+                       , array('class' => 'toolbutton'));
 
-//        $options{'action'} = 'currententry';
-//        $url = new moodle_url('/mod/diary/report.php', $options);
-//        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('a/r_next'
-//                       , get_string('currententry', 'diary'))
-//                       , array('class' => 'toolbutton'));
+        $options{'action'} = 'lowestgradeentry';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/down'
+                       , get_string('lowestgradeentry', 'diary'))
+                       , array('class' => 'toolbutton'));
+
+        $options{'action'} = 'highestgradeentry';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/up'
+                       , get_string('highestgradeentry', 'diary'))
+                       , array('class' => 'toolbutton'));
+
+        $options{'action'} = 'latestmodifiedentry';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/right'
+                       , get_string('latestmodifiedentry', 'diary'))
+                       , array('class' => 'toolbutton'));
+
 
 
         // This needs to become a string.
@@ -235,10 +314,6 @@ if (!$users) {
 
         $d = $cm->instance; // Course module to download questions from.
 
-        // Call download question function in lib.
-        //echo 'The following is download diary entries:';
-        //print_object($d);
-        // $d = km,($d);
     }
 
     $grades = make_grades_menu($diary->grade);
@@ -253,23 +328,32 @@ if (!$users) {
     $saveallbutton =  "<p class=\"feedbacksave\">";
     $saveallbutton .=  "<input type=\"hidden\" name=\"id\" value=\"$cm->id\" />";
     $saveallbutton .=  "<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-    $saveallbutton .=  "<input type=\"submit\" value=\"".get_string("saveallfeedback", "journal")."\" />";
+    $saveallbutton .=  "<input type=\"submit\" value=\"".get_string("saveallfeedback", "diary")."\" />";
     $saveallbutton .=  "</p>";
     //echo "</form>";
 
 	// Add save button at the top of the list of users with entries.
     echo $saveallbutton;
 
-    // Get a list of user who have completed at least one entry.
+    // Print a list of users who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup)) {
-//print_object($usersdone);
         foreach ($usersdone as $user) {
             // Based on list of users with at least one entry, print the latest entry onscreen.
+            // I added $cm and $eee due to experiments in lib.php function being called.
+            // Will need to feed toolbar results into here so the correct $entry is printed.
+
+
             echo diary_print_user_entry($course, $user, $entrybyuser[$user->id], $teachers, $grades);
+            //echo diary_print_user_entry($cm, $course, $user, $entrybyuser[$user->id], $teachers, $grades, $eee);
+            //echo diary_print_user_entry($cm, $course, $user, $entrybyentry[$user->id], $teachers, $grades, $eee);
+            //echo diary_print_user_entry($cm, $course, $user, $entrybyuserentry_shift[$user->id], $teachers, $grades, $eee);
+//$entrybyuser[$ee->userid]
+//$entrybyuserentry[$ee->userid][$ee->id]
+
+
             // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
             echo $saveallbutton;
-//    echo toolbar($course, $user, $entrybyuser[$user->id]);
-//print_object($entrybyuser[$user->id]);
+            // Remove users who are done from our list of everyone so we finish with a list of users with no entries.
             unset($users[$user->id]);
         }
     }
@@ -277,6 +361,7 @@ if (!$users) {
     // List remaining users with no entries.
     foreach ($users as $user) {
         echo diary_print_user_entry($course, $user, NULL, $teachers, $grades);
+        //echo diary_print_user_entry($cm, $course, $user, NULL, $teachers, $grades, $eee);
     }
     // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
     echo $saveallbutton;
