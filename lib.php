@@ -68,7 +68,7 @@ function diary_update_instance($diary) {
 /**
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
- * nd any data that depends on it.
+ * and any data that depends on it.
  * @param int $id diary ID
  * @return boolean True if successful
  */
@@ -92,7 +92,10 @@ function diary_delete_instance($id) {
     return $result;
 }
 
-
+/**
+ * @param string $feature FEATURE_xx constant for requested feature
+ * @return mixed True if module supports feature, null if doesn't know
+ */
 function diary_supports($feature) {
     switch($feature) {
         case FEATURE_MOD_INTRO:
@@ -118,15 +121,44 @@ function diary_supports($feature) {
     }
 }
 
-
+/**
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
+ * @return array
+ */
 function diary_get_view_actions() {
     return array('view', 'view all', 'view responses');
 }
 
+/**
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
+ * @return array
+ */
 function diary_get_post_actions() {
     return array('add entry', 'update entry', 'update feedback');
 }
 
+/**
+ * Returns a summary of data activity of this user.
+ *
+ * @global object
+ * @param object $course
+ * @param object $user
+ * @param object $mod
+ * @param object $data
+ * @return object|null
+ */
 function diary_user_outline($course, $user, $mod, $diary) {
     global $DB;
 
@@ -142,7 +174,15 @@ function diary_user_outline($course, $user, $mod, $diary) {
     return null;
 }
 
-
+/**
+ * Prints all the records uploaded by this user
+ *
+ * @global object
+ * @param object $course
+ * @param object $user
+ * @param object $mod
+ * @param object $data
+ */
 function diary_user_complete($course, $user, $mod, $diary) {
     global $DB, $OUTPUT;
 
@@ -173,7 +213,7 @@ function diary_user_complete($course, $user, $mod, $diary) {
  * Function to be run periodically according to the moodle cron.
  * Finds all diary notifications that have yet to be mailed out, and mails them.
  */
-function diary_cron () {
+function diary_cron() {
     global $CFG, $USER, $DB;
 
     $cutofftime = time() - $CFG->maxeditingtime;
@@ -309,7 +349,7 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
                md.name = ?
          ORDER BY u.lastname ASC, u.firstname ASC
     ";
-// Changed on 06/22/2019 original line 310: ORDER BY de.timemodified ASC
+    // Changed on 06/22/2019 original line 310: ORDER BY de.timemodified ASC
     $newentries = $DB->get_records_sql($sql, $dbparams);
 
     $modinfo = get_fast_modinfo($course);
@@ -607,7 +647,6 @@ function diary_get_user_grades($diary, $userid=0) {
 
 }
 
-
 /**
  * Update diary grades in 1.9 gradebook
  *
@@ -695,7 +734,6 @@ function diary_grade_item_update($diary, $grades=null) {
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, $grades, $params);
 }
 
-
 /**
  * Delete grade item for given diary
  *
@@ -755,13 +793,13 @@ function diary_get_users_done($diary, $currentgroup) {
             unset($diarys[$key]);
         }
     }
-//print_object($diarys);
-
     return $diarys;
 }
 
 /**
  * Counts all the diary entries (optionally in a given group).
+ *
+ *
  */
 function diary_count_entries($diary, $groupid = 0) {
     global $DB;
@@ -818,7 +856,7 @@ function diary_get_unmailed_graded($cutofftime) {
 }
 
 /**
- * Return diar log info.
+ * Return diary log info.
  *
  * return
  */
@@ -847,8 +885,6 @@ function diary_get_coursemodule($diaryid) {
                                 JOIN {modules} m ON m.id = cm.module
                                 WHERE cm.instance = ? AND m.name = 'diary'", array($diaryid));
 }
-
-
 
 /**
  * Serves the diary files.
@@ -932,7 +968,6 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
     return format_text($entrytext, $entry->format, $formatoptions);
 }
 
-
 /**
  * Prints the currently selected diary entry of student identified as $user.
  *
@@ -942,12 +977,9 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
  * @param integer $teachers
  * @param integer $grades
  */
- // Course module, course, system user, current diary entry, current teacher, grades, ALL entries in durrent diary.
 function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
-//function diary_print_user_entry($cm, $course, $user, $entry, $teachers, $grades, $eee) {
+
     global $USER, $OUTPUT, $DB, $CFG;
-
-
 
     require_once($CFG->dirroot.'/lib/gradelib.php');
     $dcolor3 = get_config('mod_diary', 'entrybgc');
@@ -964,31 +996,20 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
         echo " <span class=\"lastedit\">".get_string("lastedited").": ".userdate($entry->timemodified)." </span>";
     }
 
-    // Pass current course, user and entry to the toolbar function.
-    //echo toolbar($cm, $course, $user, $entry);
-
     echo "</td>";
     echo "</tr>";
 
     echo "\n<tr><td>";
+
+    // If there is a user entry, format it and show it.
     if ($entry) {
-        //echo format_text($entry->text, $entry->format);
-        //echo "<p>In lib.php, this is in the print user entry function.</p>";
-
-        // Print toolbar.
-        //echo $output->container_start("toolbar");
-        //echo $output->toolbar(has_capability('mod/diary:manageentries', $context));
-        //echo $output->container_end();
-
-
-
         echo diary_format_entry_text($entry, $course);
-
     } else {
         print_string("noentry", "diary");
     }
     echo "</td></tr>";
 
+    // If there is a user entry, add a teacher feedback area for grade and comments. Add previous grades and comments, if available.
     if ($entry) {
         echo "\n<tr>";
         echo "<td class=\"userpix\">";
@@ -1051,129 +1072,6 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
 }
 
 /**
- * Return the toolbar.
- *
- * return alist of links
- */
-function toolbar($cm, $course, $user, $entry) {
-    global $USER, $OUTPUT, $DB, $CFG;
-
-// Make some easy ways to access the latest entries for the current user.
-if ($eee = $DB->get_records("diary_entries", array("diary" => $entry->diary, "userid" => $entry->userid))) {
-// Now, filter down to get the latest entry by any user who has made at least one entry.
-    foreach ($eee as $ee) {
-        $entrybyuser[$ee->userid] = $ee;
-        $entrybyentry[$ee->id]  = $ee;
-    }
-
-} else {
-    $entrybyuser  = array () ;
-    $entrybyentry = array () ;
-}
-
-
-    $output = '';
-   // $toolbuttons = array();
-    $entryp = new stdClass();
-    $entryc = '4'; // Entry currently looking at.
-    $entryn = ''; // Date next after entryc.
-    $entryp = '5'; // Date previous to entryc.
-
-    //if (! $entryc = $entry->id) {
-    //    $entryc = $entry->id;
-    //}
-
-//print_object($eee);
-
-get_entries_by_this_user($entry);
-    //if ($entry->get_preventry() != null) {
-
-  //      if (! empty($entry->timecreated)) {
-        if (! empty($entryp)) {
-        // Print prev/next datec toolbuttons.
-//        if ($entry->get_preventry() != null) {
-//            $entryp = $entry->get_preventry()->id;
-//            $roundn = '';
-
-            $url = new moodle_url('/mod/diary/report.php', array('id' => $cm->id, 'user' => $user->id, 'entryc' => $entryp));
-            $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed_rtl'
-                                 , get_string('previousentry', 'diary'))
-                                 , array('class' => 'toolbutton'));
-        } else {
-            $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty_rtl', ''), array('class' => 'dis_toolbutton'));
-        }
-//        if ($entry->get_nextentry() != null) {
-        if (! empty($entryn)) {
-//            $roundn = $entry->get_nextentry()->id;
-//            $entryp = '';
-
-            $url = new moodle_url('/mod/diary/report.php', array('id' => $cm->id, 'datec' => $entryn));
-
-
-            $toolbuttons[] = html_writer::link($url, $OUTPUT->pix_icon('t/collapsed'
-                                 , get_string('nextentry', 'diary'))
-                                 , array('class' => 'toolbutton'));
-        } else {
-            $toolbuttons[] = html_writer::tag('span', $OUTPUT->pix_icon('t/collapsed_empty'
-                                 , '')
-                                 , array('class' => 'dis_toolbutton'));
-        }
-
-        echo $output = html_writer::alist($toolbuttons, array('id' => 'toolbar'));
-
- //   }
-
-    return;
-    //return $entry;
-}
-
-/**
- * Get current entries by user id.
- * @param int $diary
- */
-function get_entries_by_this_user($diary) {
-    global $DB;
-    //print_object($diary);
-    //print_object($diary->id);
-
-    //if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->diary, "userid" => $diary->userid))) {
-
-
-//    if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->diary))) {
-
-
-
-    //if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = "timecreated ASC, timemodified ASC")) {
-
-    //print_object('This is $eee');
-    //print_object($eee);
-
-//    $counter = 0;
-
-    // Now, filter down to get the latest entry by any user who has made at least one entry.
-//    foreach ($eee as $ee) {
-//        $counter = $counter+1;
-//        $entrybyuser[$ee->userid] = $ee;
-//        $entrybyentry[$ee->id]  = $ee;
-//    }
-
-    //Print_object('This is the counter result.');
-    //print_object($counter);
-
-    //print_object('This is from the get entries by this user function.');
-    //print_object($entrybyuser);
-
-//    } else {
-//        $entrybyuser  = array () ;
-//        $entrybyentry = array () ;
-//    }
-//    return $eee;
-    return null;
-}
-
-
-
-/**
  * Set current entry to show.
  * @param int $entryid
  */
@@ -1227,20 +1125,11 @@ function set_currententry($entryid = -1) {
  */
 //function download_entries($array, $filename = "export.csv", $delimiter=";") {
 function download_entries($context, $course, $id, $diary) {
-$filename = "export.csv";
-$delimiter=";";
-//print_object('I am in the download entries function.');
+    $filename = "export.csv";
+    $delimiter=";";
 
-//print_object($id);
-//print_object($diary);
     global $CFG, $DB, $USER;
     require_once($CFG->libdir.'/csvlib.class.php');
-
-       // This is a copy of what hotquestion uses at the start of locallib
-       // $this->cm        = get_coursemodule_from_id('diary', $cmid, 0, false, MUST_EXIST);
-       // $this->course    = $DB->get_record('course', array('id' => $this->cm->course), '*', MUST_EXIST);
-       // $this->instance  = $DB->get_record('diary', array('id' => $this->cm->instance), '*', MUST_EXIST);
-       // $this->set_currentround($roundid);
 
     $data = new StdClass();
     $data->diary = $diary->id;
