@@ -3,7 +3,7 @@ notifications:
   email:
     recipients:
       - drachels@drachels.com
-    on_success: never
+    on_success: always
     on_failure: always
 language: php
 php:
