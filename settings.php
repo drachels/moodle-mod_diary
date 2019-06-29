@@ -31,7 +31,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('mod_diary/availibility', get_string('availability'), ''));
 
     $settings->add(new admin_setting_configselect('diary/showrecentactivity', get_string('showrecentactivity', 'diary'),
-                                              get_string('showrecentactivity', 'diary'), 0,
+                                              get_string('showrecentactivity', 'diary'), 1,
                                               array('0' => get_string('no'), '1' => get_string('yes'))));
 
     $settings->add(new admin_setting_configselect('diary/overview', get_string('showoverview', 'diary'),
