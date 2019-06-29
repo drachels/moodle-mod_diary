@@ -108,9 +108,15 @@
 #page-mod-diary-report .diaryuserentry td .lastedit {
   font-size: 0.7em;
   margin-left: 10px;
-}#page-mod-diary-report .diaryuserentry td .needsedit {
+}
+#page-mod-diary-report .diaryuserentry td .needsedit {
   font-size: 0.9em;
   color: red;
   text-decoration: underline;
   margin-left: 10px;
 }
+#page-mod-diary-report .mediaplugin {
+  width: 100% !important;
+}
+
+
