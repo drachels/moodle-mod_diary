@@ -1130,7 +1130,6 @@ function download_entries($context, $course, $id, $diary) {
 
     global $CFG, $DB, $USER;
     require_once($CFG->libdir.'/csvlib.class.php');
-
     $data = new StdClass();
     $data->diary = $diary->id;
     //$context = context_module::instance($diary->id);
@@ -1141,16 +1140,23 @@ function download_entries($context, $course, $id, $diary) {
     ));
     $event->trigger();
 
-    // Construct sql query and filename based on admin or teacher.
+    // Construct sql query and filename based on admin, teacher, or student.
     // Add filename details based on course and Diary activity name.
     $csv = new csv_export_writer();
     $strdiary = get_string('pluginname', 'diary');
+    $whichuser = ''; // Leave blank for an admin or teacher.
     if (is_siteadmin($USER->id)) {
         $whichdiary = ('AND d.diary > 0');
         $csv->filename = clean_filename(get_string('exportfilenamep1', 'diary'));
-    } else {
+    } elseif (has_capability('mod/diary:manageentries', $context)) {
         $whichdiary = ('AND d.diary = ');
         $whichdiary .= ($diary->id);
+        $csv->filename = clean_filename(($course->shortname).'_');
+        $csv->filename .= clean_filename(($diary->name));
+    } elseif (has_capability('mod/diary:addentries', $context)) {
+        $whichdiary = ('AND d.diary = ');
+        $whichdiary .= ($diary->id);
+        $whichuser = (' AND d.userid = '.$USER->id);  // Not an admin or teacher so can only get their OWN entries. 
         $csv->filename = clean_filename(($course->shortname).'_');
         $csv->filename .= clean_filename(($diary->name));
     }
@@ -1213,6 +1219,7 @@ function download_entries($context, $course, $id, $diary) {
     }
 
     $sql .= ($whichdiary);
+    $sql .= ($whichuser);
     $sql .= "     GROUP BY u.lastname, u.firstname, d.diary, d.id
                   ORDER BY u.lastname ASC, u.firstname ASC, d.diary ASC, d.id ASC";
 
