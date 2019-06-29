@@ -43,8 +43,12 @@ class mod_diary_renderer extends plugin_renderer_base {
      *
      * @param object $diary
      */
-    public function init($diary) {
-        $this->diary = $diary;
+    public function init($cm) {
+        $this->cm = $cm;
+//print_object('I am in the init function of renderer 1.');
+//print_object($this->diary);
+//print_object($diary);
+//print_object('I am in the init function of renderer 2.');
     }
 
     /**
@@ -67,72 +71,69 @@ class mod_diary_renderer extends plugin_renderer_base {
      * @param bool $shownew whether show "New round" button
      * return alist of links
      */
-    public function toolbar($shownew = true) {
+    public function toolbar() {
+
+        global $DB, $CFG, $USER;
         $output = '';
         $toolbuttons = array();
-        $roundp = new stdClass();
-        $round = '';
-        $roundn = '';
-        $roundp = '';
+
+            //echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'diary'), 'get',
+            //    array("class" => "singlebutton diarystart"));
+
 
         // Print export to .csv file toolbutton.
-        if ($shownew) {
+        //if ($shownew) {
             $options = array();
-            $options['id'] = $this->diary->cm->id;
+            $options['id'] = $this->cm->id;
+            //$options['diary'] = $this->diary->id;
+                                 
             $options['action'] = 'download';
             $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('a/download_all'
-                , get_string('csvexport', 'diary'))
-                , array('class' => 'toolbutton'));
-        }
+            $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/export'
+                                 , get_string('csvexport', 'diary'))
+                                 , array('class' => 'toolbutton'));
 
-        // Print prev/next round toolbuttons.
-        if ($this->diary->get_prevround() != null) {
-            $roundp = $this->diary->get_prevround()->id;
-            $roundn = '';
+            $options['action'] = 'editentry';
+            //$options['action'] = $stringlable;
 
-            $url = new moodle_url('/mod/diary/view.php', array('id' => $this->diary->cm->id, 'round' => $roundp));
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/collapsed_rtl'
-                , get_string('previousround', 'diary')), array('class' => 'toolbutton'));
-        } else {
-            $toolbuttons[] = html_writer::tag('span', $this->pix_icon('t/collapsed_empty_rtl', '')
-                , array('class' => 'dis_toolbutton'));
-        }
-        if ($this->diary->get_nextround() != null) {
-            $roundn = $this->diary->get_nextround()->id;
-            $roundp = '';
+            $url = new moodle_url('/mod/diary/edit.php', $options);
+            $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/edit'
+                                 , get_string('startoredit', 'diary'))
+                                 , array('class' => 'toolbutton'));
 
-            $url = new moodle_url('/mod/diary/view.php', array('id' => $this->diary->cm->id, 'round' => $roundn));
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/collapsed'
-                , get_string('nextround', 'diary')), array('class' => 'toolbutton'));
-        } else {
-            $toolbuttons[] = html_writer::tag('span', $this->pix_icon('t/collapsed_empty', ''), array('class' => 'dis_toolbutton'));
-        }
-
-        // Print new round toolbutton.
-        if ($shownew) {
-            $options = array();
-            $options['id'] = $this->diary->cm->id;
-            $options['action'] = 'newround';
+            $options{'action'} = 'firstentry';
             $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/add'
-                , get_string('newround', 'diary')), array('class' => 'toolbutton'));
-        }
+            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/left'
+                                 , get_string('sortfirstentry', 'diary'))
+                                 , array('class' => 'toolbutton'));
 
-        // Print remove round toolbutton.
-        if ($shownew) {
-            $options = array();
-            $options['id'] = $this->diary->cm->id;
-            $options['action'] = 'removeround';
-            $options['round'] = $this->diary->get_currentround()->id;
+
+            $options{'action'} = 'lowestgradeentry';
             $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/less'
-            , get_string('removeround', 'diary')), array('class' => 'toolbutton'));
-        }
+            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/down'
+                           , get_string('lowestgradeentry', 'diary'))
+                           , array('class' => 'toolbutton'));
+
+            $options{'action'} = 'highestgradeentry';
+            $url = new moodle_url('/mod/diary/view.php', $options);
+            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/up'
+                           , get_string('highestgradeentry', 'diary'))
+                           , array('class' => 'toolbutton'));
+
+            $options{'action'} = 'latestmodifiedentry';
+            $url = new moodle_url('/mod/diary/view.php', $options);
+            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/right'
+                           , get_string('latestmodifiedentry', 'diary'))
+                           , array('class' => 'toolbutton'));
+          //  }
 
         // Print refresh toolbutton.
-        $url = new moodle_url('/mod/diary/view.php', array('id' => $this->diary->cm->id));
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/reload', get_string('reload')), array('class' => 'toolbutton'));
+        $options{'action'} = 'refresh';
+        //$options{'action'} = $stringlable;
+        $url = new moodle_url('/mod/diary/view.php', array('id' => $this->cm->id));
+        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/reload'
+                             , get_string('reload'))
+                             , array('class' => 'toolbutton'));
 
         // Return all available toolbuttons.
         $output .= html_writer::alist($toolbuttons, array('id' => 'toolbar'));
