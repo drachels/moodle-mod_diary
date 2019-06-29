@@ -26,7 +26,7 @@ require_once("../../config.php");
 require_once("lib.php");
 
 $id = required_param('id', PARAM_INT);   // Course module.
-$action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(download, refresh page).
+$action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(default to current entry).
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     print_error("Course Module ID was incorrect");
@@ -57,8 +57,8 @@ if (!empty($action)) {
             break;
         case 'currententry':
             if (has_capability('mod/diary:manageentries', $context)) {
-                 $stringlable = 'currententry';
-                 // Get ALL diary entries in an order that will result in showing the users most current entry.
+                $stringlable = 'currententry';
+                // Get ALL diary entries in an order that will result in showing the users most current entry.
                  $eee = $DB->get_records("diary_entries", array("diary" => $diary->id));
             }
             break;
@@ -72,11 +72,11 @@ if (!empty($action)) {
         case 'lowestgradeentry':
             if (has_capability('mod/diary:manageentries', $context)) {
                  $stringlable = 'lowestgradeentry';
-                 // Get ALL diary entries in an order that will result in showing the users
-                 // oldest, ungraded entry. Once all ungraded entries have a grade, the entry
-                 // with the lowest grade is shown. For duplicate low grades, the entry that
-                 // is oldest, is shown.
-                 $eee = $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating DESC, timemodified DESC');
+                // Get ALL diary entries in an order that will result in showing the users
+                // oldest, ungraded entry. Once all ungraded entries have a grade, the entry
+                // with the lowest grade is shown. For duplicate low grades, the entry that
+                // is oldest, is shown.
+                 $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating DESC, timemodified DESC');
             }
             break;
         case 'highestgradeentry':
@@ -84,7 +84,7 @@ if (!empty($action)) {
                  $stringlable = 'highestgradeentry';
                  // Get ALL diary entries in an order that will result in showing the users highest
                  // graded entry. Duplicates high grades result in showing the most recent entry.
-                 $eee = $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating ASC');
+                 $eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating ASC');
             }
             break;
         case 'latestmodifiedentry':
@@ -254,7 +254,7 @@ if (!$users) {
 } else {
     groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id");
 
-    // Add download and refresh button for all entries in this diary.
+    // Create download, refresh, current, oldest, lowest, highest, and most recent edit button for all entries in this diary.
     if (has_capability('mod/diary:manageentries', $context)) {
         $options = array();
         $options['id'] = $id;
@@ -306,8 +306,8 @@ if (!$users) {
                        , array('class' => 'toolbutton'));
 
         // This needs to become a string.
-        echo 'Download or refresh page toolbar: ';
-                                        
+        echo ' Toolbar: ';
+        // Add the toolbar to the top of the report page.
         echo $output = html_writer::alist($tools, array('id' => 'toolbar'));
 
         //$d = $cm->instance; // Course module to download questions from.
