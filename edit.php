@@ -26,6 +26,7 @@ require_once("../../config.php");
 require_once('./edit_form.php');
 
 $id = required_param('id', PARAM_INT);    // Course Module ID.
+$action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(default to current entry).
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     print_error("Course Module ID was incorrect");
