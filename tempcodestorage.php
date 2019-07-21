@@ -1,4 +1,106 @@
 <?php
+///////////////////////////travis.yml from
+// https://github.com/learnweb/moodle-tool_lifecycle/blob/master/.travis.yml
+language: php
+
+sudo: false
+dist: trusty
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.npm
+
+addons:
+  postgresql: "9.4"
+
+php:
+  - 7.0
+  - 7.1
+
+env:
+  matrix:
+   - DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
+   - DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
+   - DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
+   - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
+   - DB=pgsql MOODLE_BRANCH=master
+   - DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
+   - DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
+   - DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
+   - DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+   - DB=mysqli MOODLE_BRANCH=master
+
+matrix:
+ allow_failures:
+  - env: DB=pgsql MOODLE_BRANCH=master
+  - env: DB=mysqli MOODLE_BRANCH=master
+ exclude:
+  - php: 7.0
+    env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
+  - php: 7.0
+    env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+  - php: 7.0
+    env: DB=pgsql MOODLE_BRANCH=master
+  - php: 7.0
+    env: DB=mysqli MOODLE_BRANCH=master
+ fast_finish: true
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - nvm install 8.9.4
+  - cd ../..
+  - composer selfupdate
+  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
+  - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
+jobs:
+  include:
+    # Prechecks against latest Moodle stable only.
+    - stage: static
+      php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+      install:
+      - moodle-plugin-ci install --no-init
+      script:
+      - moodle-plugin-ci phplint
+      - moodle-plugin-ci phpcpd
+      - moodle-plugin-ci phpmd
+      - moodle-plugin-ci codechecker
+      - moodle-plugin-ci savepoints
+      - moodle-plugin-ci mustache
+      - moodle-plugin-ci grunt
+      - moodle-plugin-ci validate
+    # Smaller build matrix for development builds
+    - stage: develop
+      php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+      install:
+      - moodle-plugin-ci install
+      script:
+      - moodle-plugin-ci phpunit --coverage-clover
+      - moodle-plugin-ci behat
+
+# Unit tests and behat tests against full matrix.
+install:
+  - moodle-plugin-ci install
+  -
+script:
+  - moodle-plugin-ci phpunit --coverage-clover
+  - moodle-plugin-ci behat
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+stages:
+  - static
+  - name: develop
+    if: branch != master AND (type != pull_request OR head_branch != master) AND (tag IS blank)
+  - name: test
+if: branch = master OR (type = pull_request AND head_branch = master) OR (tag IS present)
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // took these out of the function diary_print_user_entry and will try moving
