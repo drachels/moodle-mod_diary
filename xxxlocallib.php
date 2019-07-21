@@ -71,40 +71,6 @@ class mod_diary {
 
 
     /**
-     * Open a new round and close the old one.
-     */
-    public function add_new_round() {
-        global $USER, $CFG, $DB;
-
-        // Close the latest round.
-        $entries = $DB->get_records('diary_entries', array('diary' => $this->instance->id), 'id DESC', '*', 0, 1);
-        $old = array_pop($entries);
-        $old->endtime = time();
-        $DB->update_record('diary_entries', $old);
-
-        // Open a new round.
-        $new = new StdClass();
-        $new->diary = $this->instance->id;
-        $new->starttime = time();
-        $new->endtime = 0;
-        $context = context_module::instance($this->cm->id);
-        $rid = $DB->insert_record('diary_entries', $new);
-
-        if ($CFG->version > 2014051200) { // Moodle 2.7+.
-            $params = array(
-                'objectid' => $this->cm->id,
-                'context' => $context,
-            );
-
-            $event = \mod_diary\event\add_round::create($params);
-            $event->trigger();
-        } else {
-            add_to_log($this->course->id, 'diary', 'add round',
-                "view.php?id={$this->cm->id}&round=$rid", $rid, $this->cm->id);
-        }
-    }
-
-    /**
      * Set current entry to show.
      * @param int $entryid
      */
@@ -227,78 +193,6 @@ class mod_diary {
         return $this->currententry;
     }
 
-    /**
-     * If the currently being viewed round is empty, delete it.
-     * Otherwise, remove any entries in the round currently being viewed,
-     * remove any votes for each question being removed,
-     * then remove the currently being viewed round.
-     * @return nothing
-     */
-    public function remove_round() {
-        global $DB;
-
-        $data = new StdClass();
-        $data->diary = $this->instance->id;
-        $context = context_module::instance($this->cm->id);
-        // Trigger remove_round event.
-        $event = \mod_diary\event\remove_round::create(array(
-            'objectid' => $data->diary,
-            'context' => $context
-        ));
-        $event->trigger();
-
-        $entryid = $_GET['round'];
-        if ($this->currententry->endtime == 0) {
-            $this->currententry->endtime = 0xFFFFFFFF;  // Hack.
-        }
-        $params = array($this->instance->id, $this->currententry->starttime, $this->currententry->endtime);
-        $entries = $DB->get_records_sql('SELECT q.*, count(v.voter) as votecount
-                                     FROM {diary_entries} q
-                                         LEFT JOIN {diary_votes} v
-                                         ON v.question = q.id
-                                     WHERE q.diary = ?
-                                         AND q.time >= ?
-                                         AND q.time <= ?
-                                     GROUP BY q.id
-                                     ORDER BY votecount DESC, q.time DESC', $params);
-
-        if ($entries) {
-            foreach ($entries as $q) {
-                $questionid = $q->id; // Get id of first question on the page to delete.
-                $dbquestion = $DB->get_record('diary_entries', array('id' => $questionid));
-                $DB->delete_records('diary_entries', array('id' => $dbquestion->id));
-                // Get an array of all votes on the question that was just deleted, then delete them.
-                $dbvote = $DB->get_records('diary_votes', array('question' => $questionid));
-                $DB->delete_records('diary_votes', array('question' => $dbquestion->id));
-            }
-            // Now that all entries and votes are gone, remove the round.
-            $dbround = $DB->get_record('diary_entries', array('id' => $entryid));
-            $DB->delete_records('diary_entries', array('id' => $dbround->id));
-        } else {
-            // This round is empty so delete without having to remove entries and votes.
-            $dbround = $DB->get_record('diary_entries', array('id' => $entryid));
-            $DB->delete_records('diary_entries', array('id' => $dbround->id));
-        }
-        // Now we need to see if we need a new round or have one we can still use.
-        $entries = $DB->get_records('diary_entries', array('diary' => $this->instance->id), 'id DESC');
-
-        foreach ($entries as $rnd) {
-            if ($rnd->endtime == 0) {
-                // Deleted a closed round so just return.
-                return;
-            } else {
-                // Deleted our open round so create a new round.
-                $round = new StdClass();
-                $round->starttime = time();
-                $round->endtime = 0;
-                $round->diary = $this->instance->id;
-                $round->id = $DB->insert_record('diary_entries', $round);
-                $entries[] = $round;
-                return;
-            }
-        }
-        return $this->currententry;
-    }
 
     /**
      * Download entries.
@@ -374,52 +268,6 @@ class mod_diary {
         // Download the completed array.
         $csv->download_file();
         exit;
-    }
-
-    /**
-     * Toggle approval go/stop of current question in current round.
-     *
-     * @param var $question
-     * @return nothing
-     */
-    public function approve_question($question) {
-        global $CFG, $DB, $USER;
-        $context = context_module::instance($this->cm->id);
-        $question = $DB->get_record('diary_entries', array('id' => $question));
-
-        if ($question->approved) {
-            // If currently approved, toggle to disapproved.
-            $question->approved = '0';
-            $DB->update_record('diary_entries', $question);
-        } else {
-            // If currently disapproved, toggle to approved.
-            $question->approved = '1';
-            $DB->update_record('diary_entries', $question);
-        }
-        return;
-    }
-
-    /**
-     * Set teacher priority of current question in current round.
-     *
-     * @param int $u the priority up or down flag.
-     * @param int $question the question id
-     */
-    public function tpriority_change($u, $question) {
-        global $CFG, $DB, $USER;
-
-        $context = context_module::instance($this->cm->id);
-        $question = $DB->get_record('diary_entries', array('id' => $question));
-
-        if ($u) {
-            // If priority flag is 1, increase priority by 1.
-            $question->tpriority = ++$question->tpriority;
-            $DB->update_record('diary_entries', $question);
-        } else {
-            // If priority flag is 0, decrease priority by 1.
-            $question->tpriority = --$question->tpriority;
-            $DB->update_record('diary_entries', $question);
-        }
     }
 
 }
