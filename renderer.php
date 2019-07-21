@@ -77,63 +77,60 @@ class mod_diary_renderer extends plugin_renderer_base {
         $output = '';
         $toolbuttons = array();
 
-            //echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'diary'), 'get',
-            //    array("class" => "singlebutton diarystart"));
+        //echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'diary'), 'get',
+        //    array("class" => "singlebutton diarystart"));
 
 
         // Print export to .csv file toolbutton.
-        //if ($shownew) {
-            $options = array();
-            $options['id'] = $this->cm->id;
-            //$options['diary'] = $this->diary->id;
+        $options = array();
+        $options['id'] = $this->cm->id;
+        //$options['diary'] = $this->diary->id;
                                  
-            $options['action'] = 'download';
-            $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/export'
-                                 , get_string('csvexport', 'diary'))
-                                 , array('class' => 'toolbutton'));
-
-            $options['action'] = 'editentry';
-            //$options['action'] = $stringlable;
-
-            $url = new moodle_url('/mod/diary/edit.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/edit'
-                                 , get_string('startoredit', 'diary'))
-                                 , array('class' => 'toolbutton'));
-
-            $options{'action'} = 'firstentry';
-            $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/left'
-                                 , get_string('sortfirstentry', 'diary'))
-                                 , array('class' => 'toolbutton'));
-
-
-            $options{'action'} = 'lowestgradeentry';
-            $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/down'
-                           , get_string('lowestgradeentry', 'diary'))
-                           , array('class' => 'toolbutton'));
-
-            $options{'action'} = 'highestgradeentry';
-            $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/up'
-                           , get_string('highestgradeentry', 'diary'))
-                           , array('class' => 'toolbutton'));
-
-            $options{'action'} = 'latestmodifiedentry';
-            $url = new moodle_url('/mod/diary/view.php', $options);
-            $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/right'
-                           , get_string('latestmodifiedentry', 'diary'))
-                           , array('class' => 'toolbutton'));
-          //  }
+        $options['action'] = 'download';
+        $url = new moodle_url('/mod/diary/view.php', $options);
+        $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/export'
+            , get_string('csvexport', 'diary'))
+            , array('class' => 'toolbutton'));
 
         // Print refresh toolbutton.
         $options{'action'} = 'refresh';
         //$options{'action'} = $stringlable;
         $url = new moodle_url('/mod/diary/view.php', array('id' => $this->cm->id));
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/reload'
-                             , get_string('reload'))
-                             , array('class' => 'toolbutton'));
+            , get_string('reload'))
+            , array('class' => 'toolbutton'));
+
+        $options['action'] = 'editentry';
+        //$options['action'] = $stringlable;
+
+        $url = new moodle_url('/mod/diary/edit.php', $options);
+        $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/edit'
+            , get_string('startoredit', 'diary'))
+            , array('class' => 'toolbutton'));
+
+        $options{'action'} = 'firstentry';
+        $url = new moodle_url('/mod/diary/view.php', $options);
+        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/left'
+            , get_string('sortfirstentry', 'diary'))
+            , array('class' => 'toolbutton'));
+
+        $options{'action'} = 'lowestgradeentry';
+        $url = new moodle_url('/mod/diary/view.php', $options);
+        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/down'
+            , get_string('lowestgradeentry', 'diary'))
+            , array('class' => 'toolbutton'));
+
+        $options{'action'} = 'highestgradeentry';
+        $url = new moodle_url('/mod/diary/view.php', $options);
+        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/up'
+            , get_string('highestgradeentry', 'diary'))
+            , array('class' => 'toolbutton'));
+
+        $options{'action'} = 'latestmodifiedentry';
+        $url = new moodle_url('/mod/diary/view.php', $options);
+        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/right'
+            , get_string('latestmodifiedentry', 'diary'))
+            , array('class' => 'toolbutton'));
 
         // Return all available toolbuttons.
         $output .= html_writer::alist($toolbuttons, array('id' => 'toolbar'));
@@ -194,16 +191,7 @@ class mod_diary_renderer extends plugin_renderer_base {
 
         echo "\n<tr><td>";
         if ($entry) {
-            //echo format_text($entry->text, $entry->format);
-            //echo "<p>In lib.php, this is in the print user entry function.</p>";
-
-            // Print toolbar.
-            //echo $output->container_start("toolbar");
-            //echo $output->toolbar(has_capability('mod/diary:manageentries', $context));
-            //echo $output->container_end();
-
             echo diary_format_entry_text($entry, $course);
-
         } else {
             print_string("noentry", "diary");
         }
@@ -301,13 +289,6 @@ class mod_diary_renderer extends plugin_renderer_base {
         echo '<td class="entrycontent">';
 
         echo '<div class="grade">';
-        ///////////////////////////////////////////////////
-
-        // Got it working, but it is showing 5 decimal places! REALLY need to figure out how
-        // to make $gradinginfo come up with the right diary_entries record, instead of always
-        // coming up with the last one.
-
-        /////////////////////////////////////////////////////
         // Need to remove this Gradebook preference section and use it for the activity overall grade.
         // Will need to make my own individual entry preference.
 
