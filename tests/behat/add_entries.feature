@@ -19,7 +19,7 @@ Feature: Users can add entries to diary activities
       | student1 | C1 | student |
     And the following "activities" exist:
       | activity | name               | intro | course | idnumber |
-      | data     | Test diary name | n     | C1     | data1    |
+      | diary     | Test diary name | n     | C1     | diary1    |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I add a "Text input" field to "Test diary name" diary and I fill the form with:

@@ -114,8 +114,3 @@ the heading to tell which data is being displayed.
 
 06/25/2019 Removed a LOT of leftover development code that is no longer
 needed.
-
-07/21/2019 The past month has been very slow. Everything I have tried to
-use to get things so you can edit and save whichever entry is at the top
-of the view.php page, has failed. I can edit, but the save always seems
-to fail.

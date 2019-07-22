@@ -1235,3 +1235,35 @@ function download_entries($context, $course, $id, $diary) {
     $csv->download_file();
     exit;
 }
+
+/**
+ * Return the editor and attachment options when editing a diary entry
+ *
+ * @param  stdClass $course  course object
+ * @param  stdClass $context context object
+ * @param  stdClass $entry   entry object
+ * @return array array containing the editor and attachment options
+ * @since  Moodle 3.2
+ */
+function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey) {
+    $maxfiles = 99;                // TODO: add some setting.
+    $maxbytes = $course->maxbytes; // TODO: add some setting.
+
+    $editoroptions = array(
+        'entryid' => $entry->id,
+        'action'   => $action,
+        'firstkey' => $firstkey,
+        'trusttext' => true,
+        'maxfiles' => $maxfiles,
+        'maxbytes' => $maxbytes,
+        'context' => $context,
+        'subdirs' => file_area_contains_subdirs($context, 'mod_diary', 'entry', $entry->id)
+    );
+    $attachmentoptions = array(
+        'subdirs' => false,
+        'maxfiles' => $maxfiles,
+        'maxbytes' => $maxbytes
+    );
+
+    return array($editoroptions, $attachmentoptions);
+}

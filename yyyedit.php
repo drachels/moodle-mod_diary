@@ -31,11 +31,13 @@ $id = required_param('id', PARAM_INT);    // Course Module ID.
 $action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(default to current entry).
 $firstkey  = optional_param('firstkey', '', PARAM_INT);  // Which entry to edit.
 
-//print_object('xxx spacer1');
-//print_object('xxx spacer2');
-//print_object('xxx spacer3');
-//print_object('This is first key as soon as we are on the edit.php page.');
-//print_object($firstkey);
+print_object('xxx spacer1');
+print_object('xxx spacer2');
+print_object('xxx spacer3');
+print_object('This is id, action, and first key as soon as we are on the edit.php page.');
+print_object($id);
+print_object($action);
+print_object($firstkey);
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     print_error('invalidcoursemodule');
@@ -55,79 +57,53 @@ if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     print_error('invalidcourse');
 }
 
+
+print_object('This is cm, course, context, and diary key as soon as we are on the edit.php page.');
+print_object($cm);
+print_object($course);
+print_object($context);
+print_object($diary);
+
+
 // Header.
-$PAGE->set_url('/mod/diary/edit.php', array('id' => $id));
+$PAGE->set_url('/mod/diary/edit.php', array('id' => $id, 'action'=>$action, 'firstkey'=>$firstkey));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
 
-$data = new stdClass();
-
-$parameters = array(
-    'userid' => $USER->id,
-    'diary' => $diary->id,
-    'action' => $action,
-    'firstkey' => $firstkey
-);
-
 // Get the single record specified by firstkey.
 $entry = $DB->get_record("diary_entries", array("userid" => $USER->id, 'id' => $firstkey));
 
-//print_object('And this is the $entry we are going to edit.');
-//print_object($entry);
+print_object('And this is the $entry we are going to edit.');
+print_object($entry);
 
 if ($action == 'currententry' && $entry) {
 //print_object('Action was currententry and there is an entry so we passed the first if action test.');
-    $data->entryid = $entry->id;
-    $data->timecreated = $entry->timecreated;
-    $data->text = $entry->text;
-    $data->textformat = $entry->format;
-
+// Since we are editing currententry, do nothing to the entry yet.
     // Check the timecreated of the current entry to see if now is a new calendar day .
-    if (strtotime('today midnight') > $entry->timecreated) {
+    if ((strtotime('today midnight') > $entry->timecreated) || ($action == 'currententry' && ! $entry) ) {
 //print_object('Action was currententry and there is an entry so we passed the first if action test and it is past midnight on a new calenday so starting a new entry.');
-
-        $entry = '';
-        $data->entryid = null;
-        $data->timecreated = time();
-        $data->text = '';
-        $data->textformat = FORMAT_HTML;
+//Simce we need to start a new entry or there is no entry yet, set up a new entry with only timecreated entered.
+        $entry = new stdClass();
+        $entry->entryid = null;
+        $entry->timecreated = time();
+        $entry->text = '';
+        $entry->textformat = FORMAT_HTML;
     }
 } else if ($action == 'editentry' && $entry) {
 //print_object('Action was editentry and there is an entry so we passed into the else if action test.');
 
-    $data->entryid = $entry->id;
-    $data->timecreated = $entry->timecreated;
-    $data->text = $entry->text;
-    $data->textformat = $entry->format;
+// Since we are editing editing, do nothing yet.
 // Think I might need to add a check for currententry && !entry to justify starting a new entry, else error.
-} else if ($action == 'currententry' && ! $entry) {
-//print_object('Action was currententry BUT there was NO entry so we passed into the second else if action test and starting a new blank entry.');
 
-    // There are no entries for this user, so start the first one.
-    $data->entryid = null;
-    $data->timecreated = time();
-    $data->text = '';
-    $data->textformat = FORMAT_HTML;
 } else {
         print_error('There has been an error.');
 }
 
-$data->id = $cm->id;
+//$entry->id = $cm->id;
 
-// Need options for action and entryid, so they can be used after, Save changes, is clicked.
-/**
-$editoroptions = array(
-    'action'   => $action,
-    'firstkey' => $data->entryid,
-    'maxfiles' => EDITOR_UNLIMITED_FILES,
-    'context' => $context,
-    'subdirs' => false,
-    'enable_filemanagement' => true
-);
-**/
 
-list($editoroptions, $attachmentoptions) = diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey);
+
 
 // This is original journal version and I think it is BROKEN! I don't think the $data->entryid works.
 // It appears to work in journal because there is only ONE entry in the journal_entries table for each user
@@ -135,43 +111,28 @@ list($editoroptions, $attachmentoptions) = diary_get_editor_and_attachment_optio
 // entries for each user. When the page reloads after the, Save changes, button is clicked, the 
 // $data->entryid is empty which tells edit.php to start a new DB entry.
 
-//$data = file_prepare_standard_editor($data, 'text', $editoroptions, $context, 'mod_diary', 'entry', $data->entryid);
-////this one $data = file_prepare_standard_editor($data, 'text', $editoroptions, $context, 'mod_diary', 'entry', $data->id);
+list($editoroptions, $attachmentoptions) = diary_get_editor_and_attachment_options($course, $context, $entry);
 
-$data = file_prepare_standard_editor($data, 'text', $editoroptions, $context, 'mod_diary', 'entry', $data->id);
-$data = file_prepare_standard_filemanager($data, 'attachment', $attachmentoptions, $context, 'mod_diary', 'attachment', $data->id);
+$entry = file_prepare_standard_editor($entry, 'text', $editoroptions, $context, 'mod_diary', 'entry', $entry->id);
+//$data = file_prepare_standard_editor($data, 'text', $editoroptions, $context, 'mod_diary', 'entry', $data->id);
 
+//print_object('Getting set to add $entry to the form and this is current $entry:');
+//print_object($entry);
 
-
+$mform = new mod_diary_entry_form(null, array('current'=>$entry, 'entryid' => $entry->id, 'editoroptions' => $editoroptions));
 //$form = new mod_diary_entry_form(null, array('entryid' => $data->id, 'editoroptions' => $editoroptions));
-$form = new mod_diary_entry_form(null, array('current'=>$data, 'cm'=>$cm, 'diary'=>$diary,
-                                                 'editoroptions'=>$editoroptions, 'attachmentoptions'=>$attachmentoptions));
 
-/**
-print_object('This is various items from $form: $data, $cm, $diary, $editoroptions, and $attachmentoptions-------------------------------------');
-print_object($form);
-print_object('-------------------------------------$data');
-print_object($data);
-print_object('-------------------------------------$cm');
-print_object($cm);
-print_object('-------------------------------------$diary');
-print_object($diary);
-print_object('-------------------------------------$editoroptions');
-print_object($editoroptions);
-print_object('------------------------------------- $attachmentoptions');
-print_object($attachmentoptions);
-**/
 
 // Set existing data loaded from the database for this entry.
-$form->set_data($data);
-//print_object('This is $form after set_data-------------------------------------');
-//print_object($form);
+$mform->set_data($entry);
+//print_object('This is just after $mform->set_data($data) and we are printing $data.');
+//print_object($data);
 
-if ($form->is_cancelled()) {
+if ($mform->is_cancelled()) {
     redirect($CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id);
-} else if ($fromform = $form->get_data()) {
+} else if ($fromform = $mform->get_data()) {
 
-//print_object('This is $fromform after set_data======================================');
+//print_object('This should be after return from edit_form, and printing $fromform.');
 //print_object($fromform);
 
     // If data submitted, then process and store, contains text, format, and itemid.
@@ -182,24 +143,28 @@ if ($form->is_cancelled()) {
 
     // This will be overwriten after we have the entryid.
     $newentry = new stdClass();
-    $newentry->timecreated = $fromform->timecreated;
+    $newentry->id = $data->id;
+    $newentry->timecreated = $data->timecreated;
     $newentry->timemodified = $timenow;
     $newentry->text = $fromform->text_editor['text'];
     $newentry->format = $fromform->text_editor['format'];
 
-//print_object('This is $fromform->timecreated just before we test it for the if on the edit.php page.');
-//print_object($fromform->timecreated);
-//print_object('And this is $fromform->entryid.');
-//print_object($fromform->entryid);
-//print_object('And this is $newentry after setting itemsjust be for the if.');
+//print_object('This is first key just before we test it for the if on the edit.php page.');
+//print_object($firstkey);
+//print_object('And this is $diary->id.');
+//print_object($diary->id);
+//print_object('And this is $data after edit and just before the if.');
+//print_object($data);
+//print_object('And this is $newentry after edit and just before the if.');
 //print_object($newentry);
+
 
     //if ($entry) { // I think the problem is here as next line is not being printed when saving.
     //if ($newentry->id = $firstkey;) { // I think the problem is here as next line is not being printed when saving.
-    if ($fromform->entryid) { // I think the problem is here as next line is not being printed when saving.
+    if ($data) { // I think the problem is here as next line is not being printed when saving.
 //print_object('In the first part of the if.');
-        //$newentry->id = $entry->id;
-        $newentry->id = $fromform->entryid;
+        $newentry->id = $data->id;
+        //$newentry->id = $firstkey;
         if (!$DB->update_record("diary_entries", $newentry)) {
             print_error("Could not update your diary");
         }
@@ -219,8 +184,8 @@ if ($form->is_cancelled()) {
         $editoroptions['context'], 'mod_diary', 'entry', $newentry->id);
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
-    $newentry->timecreated = $fromform->timecreated;
-    //$newentry->modified = $timenow;
+    $newentry->timecreated = $data->timecreated;
+    //$newentry->timemodified = $timenow;
 
     $DB->update_record('diary_entries', $newentry);
 
@@ -255,6 +220,6 @@ $intro = format_module_intro('diary', $diary, $cm->id);
 echo $OUTPUT->box($intro);
 
 // Otherwise fill and print the form.
-$form->display();
+$mform->display();
 
 echo $OUTPUT->footer();

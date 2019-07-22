@@ -30,43 +30,31 @@ class mod_diary_entry_form extends moodleform {
 
     public function definition() {
         global $CFG, $DB;
-/**
-print_object('xxx spacer edit_form 1');
-print_object('xxx spacer edit_form 2');
-print_object('xxx spacer edit_form 3 ==============================');
-print_object($this->_customdata);
-**/
-        $data = $this->_customdata['current'];
-
-//echo 'This is $data after executing this: $data = $this->_customdata["current"]';
-//print_object($data);
-
-//echo 'printing $this->_customdata["editoroptions"]["action"]';
-//print_object($this->_customdata['editoroptions']['action']);
-
-//echo 'printing $this->_customdata["editoroptions"]["firstkey"]';
-//print_object($this->_customdata['editoroptions']['firstkey']);
-
-$action = $this->_customdata['editoroptions']['action'];
-
-//echo 'printing $action after setting it equal to this $this->_customdata["editoroptions"]["action"]';
-//print_object($action);
-
-$firstkey = $this->_customdata['editoroptions']['firstkey'];
-
-//echo 'printing $firstkey after setting it equal to this $this->_customdata["editoroptions"]["firstkey"]';
-//print_object($firstkey);
-
-$temp = $this->_customdata['editoroptions'];
-
-//echo 'printing $temp which contains editoroptions';
-//print_object($temp);
-
-//print_object($temp['firstkey']);
 
         $mform = $this->_form;
 
-        //$currententry      = $this->_customdata['current'];
+        $currententry = $this->_customdata['entryid'];
+
+print_object('xxx spacer edit_form');
+print_object('xxx spacer edit_form');
+print_object('xxx spacer edit_form');
+
+//echo 'This is $this->_customdata when entering edit_form page.';
+//print_object($this->_customdata);
+
+
+        $currententry      = $this->_customdata['current'];
+        $cm                = $this->_customdata['cm'];
+        $editoroptions = $this->_customdata['editoroptions'];
+        $attachmentoptions = $this->_customdata['attachmentoptions'];
+
+        $context  = context_module::instance($cm->id);
+        // Prepare format_string/text options
+        $fmtoptions = array(
+            'context' => $context);
+
+echo 'This is $currententry';
+print_object($currententry);
         //$diary             = $this->_customdata['diary'];
         //$cm                = $this->_customdata['cm'];
         //$definitionoptions = $this->_customdata['definitionoptions'];
@@ -78,44 +66,32 @@ $temp = $this->_customdata['editoroptions'];
         //    'context' => $context);
 
 //-------------------------------------------------------------------------------
-        //$mform->addElement('header', 'general', get_string('general', 'form'));
+        $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        //$mform->addElement('text', $action);
-        //$mform->setType($action, PARAM_RAW);
-
-
-        $mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'),
-                null, $this->_customdata['editoroptions']);
+        $mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'), null, $editoroptions);
+        //$mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'), null, $this->_customdata['current']);
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 
+        $mform->addElement('filemanager', 'attachment_filemanager', get_string('attachment', 'diary'), null, $attachmentoptions);
+        $mform->addHelpButton('attachment_filemanager', 'attachment', 'diary');
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
+        //$mform->addElement('hidden', 'cmid');
+        //$mform->setType('cmid', PARAM_INT);
 
-// The following hidden item, action, makes edit.php break and print error from line 113.
 
-//        $mform->addElement('hidden', 'action');
-//        $mform->setType('action', PARAM_ACTION);
-        //$mform->setConstant('action', 'templates');
-
-        $mform->addElement('hidden', 'firstkey');
-        $mform->setType('firstkey', PARAM_INT);
-
-        $mform->addElement('hidden', 'entryid');
-        $mform->setType('entryid', PARAM_INT);
-
-        $mform->addElement('hidden', 'timecreated');
-        $mform->setType('timecreated', PARAM_INT);
-
-        //$mform->addElement('hidden', 'firstkey');
-        //$mform->setType('firstkey', PARAM_INT);
-        
         // Maybe use this later. It adds file attachment stuff.
         // $mform->addElement('file', 'attachment', get_string('attachment', 'forum'));
         // Maybe use this later. It adds a tags list.
         // $mform->addElement('tags', 'interests', get_string('interestslist'), array('itemtype' => 'user', 'component' => 'core'));
 
         $this->add_action_buttons();
+
+        $this->set_data($currententry);
+echo 'This is $currententry after set data';
+print_object($currententry);
     }
 }
 

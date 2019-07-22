@@ -29,11 +29,11 @@ $id = required_param('id', PARAM_INT);   // Course module.
 $action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(default to current entry).
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
-    print_error("Course Module ID was incorrect");
+    print_error('invalidcoursemodule');
 }
 
 if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
-    print_error("Course module is misconfigured");
+    print_error('coursemisconf');
 }
 
 require_login($course, false, $cm);
@@ -43,7 +43,7 @@ $context = context_module::instance($cm->id);
 require_capability('mod/diary:manageentries', $context);
 
 if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
-    print_error("Course module is incorrect");
+    print_error('invalidid', 'diary');
 }
 
 // Handle toolbar capabilities.
@@ -254,7 +254,7 @@ if (!$users) {
 } else {
     groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id");
 
-    // Create download, refresh, current, oldest, lowest, highest, and most recent edit button for all entries in this diary.
+    // Create download, reload, current, oldest, lowest, highest, and most recent edit button for all entries in this diary.
     if (has_capability('mod/diary:manageentries', $context)) {
         $options = array();
         $options['id'] = $id;
@@ -267,12 +267,12 @@ if (!$users) {
                        , get_string('csvexport', 'diary'))
                        , array('class' => 'toolbutton'));
 
-        // Add refresh toolbutton.
-        //$options{'action'} = 'refresh'; 
+        // Add reload toolbutton.
+        //$options{'action'} = 'reload'; 
         $options{'action'} = $stringlable;
         $url = new moodle_url('/mod/diary/report.php', $options);
         $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/reload'
-                       , get_string('reload'))
+                       , get_string('reload', 'diary'))
                        , array('class' => 'toolbutton'));
 
         $options{'action'} = 'currententry';

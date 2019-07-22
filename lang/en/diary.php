@@ -35,6 +35,13 @@ $string['eventfeedbackupdated'] = 'Diary feedback updated';
 
 $string['accessdenied'] = 'Access denied';
 $string['alwaysopen'] = 'Always open';
+$string['alias'] = 'Keyword';
+$string['aliases'] = 'Keyword(s)';
+$string['aliases_help'] = 'Each diary entry can have an associated list of keywords (or aliases).
+
+Enter each keyword on a new line (not separated by commas).';
+$string['attachment'] = 'Attachment';
+$string['attachment_help'] = 'You can optionally attach one or more files to a diary entry.';
 $string['blankentry'] = 'Blank entry';
 $string['configdateformat'] = 'This defines how dates are shown in grade reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
 $string['csvexport'] = 'Export to .csv';
@@ -82,8 +89,8 @@ $string['modulename'] = 'Diary';
 $string['modulename_help'] = 'The diary activity enables teachers to obtain students feedback
  over a period of time.';
 $string['modulenameplural'] = 'Diarys';
-$string['needsgrading'] = ' This entry has not been graded yet.';
-$string['needsregrade'] = 'This entry has changed since it was graded.';
+$string['needsgrading'] = ' This entry has not been given feedback or graded yet.';
+$string['needsregrade'] = 'This entry has changed since feedback or a grade was given.';
 $string['newdiaryentries'] = 'New diary entries';
 $string['nextentry'] = 'Next entry';
 $string['nodeadline'] = 'Always open';
@@ -98,6 +105,7 @@ $string['pluginname'] = 'Diary';
 $string['previousentry'] = 'Previous entry';
 $string['rate'] = 'Rate';
 $string['rating'] = 'Rating';
+$string['reload'] = 'Reload and show from current to oldest diary entry';
 $string['removeentries'] = 'Remove all entries';
 $string['removemessages'] = 'Remove all Diary entries';
 $string['saveallfeedback'] = 'Save all my feedback';
@@ -108,7 +116,7 @@ $string['sortcurrententry'] = 'From current diary entry to the first entry.';
 $string['sortfirstentry'] = 'From first diary entry to the latest entry.';
 $string['sortlowestentry'] = 'From lowest grade diary entry to the highest entry.';
 $string['sorthighestentry'] = 'From highest grade diary entry to the lowest grade entry.';
-$string['sortlastentry'] = 'From latest diary entry to the first entry.';
+$string['sortlastentry'] = 'From latest modified diary entry to the oldest modified entry.';
 $string['startoredit'] = 'Start new day or edit current day diary entry';
 $string['teacher'] = 'Teacher';
 $string['text'] = 'Text';

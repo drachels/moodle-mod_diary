@@ -1,4 +1,70 @@
 <?php
+// Check to see how long it takes for a section of code to execute.
+                for($i=0, $start = microtime(true); $i < 1000000; $i++) {
+                    foreach ($entrys as $firstkey => $firstValue) {
+                        break;
+                    }
+                }
+                echo "foreach to get first key and value: " . (microtime(true) - $start) . " seconds <br />";
+
+
+
+///////////////////////////////////////////
+// THis section of code was in edit.php from 0.9.3 on server 10.0.6.241.
+// This fir if section will need more else if's to take care of other sorts.
+// Developed another method that lets me edit any record, but only save to currentrecord.
+
+// My mod. Get all records for current user, instead of just one.
+//$entrys = $DB->get_records("diary_entries", array("userid" => $USER->id, "diary" => $diary->id));
+if ($action == 'firstentry') {
+    echo 'Checking for Action and it is: ';
+    print_object($action);    $entrys = $DB->get_records("diary_entries", $parameters, $sort='timecreated DESC');
+} else if ($action == 'currententry') {
+    echo 'Checking for Action and it is: ';
+    print_object($action);
+    $entrys = $DB->get_records("diary_entries", $parameters, $sort='timecreated ASC');
+}
+
+// If there are no entries for this user, start the first one.
+if (! $entrys) {
+    $data->entryid = null;
+    $data->text = '';
+    $data->textformat = FORMAT_HTML;
+    $data->timecreated = time();
+} else if ($entrys) {
+    // Get the latest user entry.
+    foreach ($entrys as $entry) {
+        $data->entryid = $entry->id;
+        $data->tempid = $entry->id;
+        $data->text = $entry->text;
+        $data->textformat = $entry->format;
+        $data->timecreated = $entry->timecreated;
+    }
+
+    // If new calendar day, start a new entry.
+    if ((strtotime('today midnight') > $entry->timecreated) && ($action == 'currententry')) {
+        $entrys = '';
+        $data->entryid = null;
+        $data->tempid = null;
+        $data->text = '';
+        $data->textformat = FORMAT_HTML;
+        $data->timecreated = time();
+    }
+}
+
+
+///////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
 ///////////////////////////travis.yml from
 // https://github.com/learnweb/moodle-tool_lifecycle/blob/master/.travis.yml
 language: php
