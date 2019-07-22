@@ -114,3 +114,5 @@ the heading to tell which data is being displayed.
 
 06/25/2019 Removed a LOT of leftover development code that is no longer
 needed.
+
+07/22/2019 Finally have "correct" edit capability. Pushed ver. 0.9.5.
