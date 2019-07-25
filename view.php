@@ -89,7 +89,7 @@ if (!empty($action)) {
             }
             break;
 
-        // Show the edit button for editing the first entry in the current list of entries.
+        // Show the reload button for sorting from current entry to oldest entry.
         case 'reload':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
@@ -259,6 +259,7 @@ if ($timenow > $timestart) {
                 $color3 = get_config('mod_diary', 'entrybgc');
                 $color4 = get_config('mod_diary', 'entrytextbgc');
 
+                // Start a division to contain the overall entry.
                 echo '<div align="left" style="font-size:1em; padding: 5px;
                     font-weight:bold;background: '.$color3.';
                     border:2px solid black;
@@ -270,20 +271,17 @@ if ($timenow > $timestart) {
                 $diff = date_diff($date1, $date2);
 
                 // Add a heading for each entry on the page.
-                //echo $OUTPUT->heading(get_string('entry', 'diary').' Can add more here if needed.');
+                //echo $OUTPUT->heading(get_string('entry', 'diary').' Might want to add mm/dd/yyyy.');
                 echo $OUTPUT->heading(get_string('entry', 'diary'));
 
-                // Both of these methods work for the date format. Second is simpler but format cannot be changed.
-                echo '<p><b>Created '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' Modified '.date(get_config('mod_diary', 'dateformat'), $entry->timemodified).' This entry was made '.$diff->days.' days and '.$diff->h.' hours ago.</b>';
-                //echo '<p><b>'.userdate($entry->timemodified).'</b>';
-
+                // Start an inner division for the user's text entry container.
                 echo '<div align="left" style="font-size:1em; padding: 5px;
                     font-weight:bold;background: '.$color4.';
                     border:1px solid black;
                     -webkit-border-radius:16px;
                     -moz-border-radius:16px;border-radius:16px;">';
 
-                // Need to keep track of the details for the first entry printed so the diary_entries->id can be passed to edit.php.
+                // This adds the actual entry text division close tag for each entry listed on the page.
                 //echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
                 echo diary_format_entry_text($entry, $course, $cm).'</div></p>';
 
@@ -291,12 +289,16 @@ if ($timenow > $timestart) {
                 if ($timenow < $timefinish) {
                     if (!empty($entry->timemodified)) {
 
-                        echo '<p><b>Created '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' Modified '.date(get_config('mod_diary', 'dateformat'), $entry->timemodified).' This entry was made '.$diff->days.' days and '.$diff->h.' hours ago.</b>';
-                        //echo '<p><b>'.userdate($entry->timemodified).'</b>';
+                        echo '<div class="lastedit"><strong>Details: </strong> ('.get_string('numwords', '', count_words($entry->text)).') '.get_string('created', 'diary', ['one' => $diff->days, 'two' => $diff->h]).'<br>';
 
-                        echo '<div class="lastedit"><strong>'.get_string('lastedited').': </strong> ';
-                        echo userdate($entry->timemodified);
-                        echo ' ('.get_string('numwords', '', count_words($entry->text)).')';
+                        echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
+                        //echo userdate($entry->timecreated).'<br>';
+                        echo date(get_config('mod_diary', 'dateformat'), $entry->timecreated).'<br>';
+
+                        echo '<strong> '.get_string('lastedited').': </strong> ';
+                        //echo userdate($entry->timemodified).'<br>';
+                        echo date(get_config('mod_diary', 'dateformat'), $entry->timemodified).'<br>';
+
                         echo "</div>";
                     }
 

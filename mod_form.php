@@ -40,6 +40,9 @@ class mod_diary_mod_form extends moodleform_mod {
 
         $this->standard_intro_elements(get_string('diaryquestion', 'diary'));
 
+        // ----------------------------------------------------------------------
+        $mform->addElement('header', 'availibilityhdr', get_string('availability'));
+
         $options = array();
         $options[0] = get_string('alwaysopen', 'diary');
         for ($i = 1; $i <= 13; $i++) {
@@ -56,6 +59,8 @@ class mod_diary_mod_form extends moodleform_mod {
         } else {
             $mform->setDefault('days', '0');
         }
+
+        // ----------------------------------------------------------------------
 
         $this->standard_grading_coursemodule_elements();
 

@@ -38,6 +38,8 @@ function diary_add_instance($diary) {
     $diary->timemodified = time();
     $diary->id = $DB->insert_record("diary", $diary);
 
+    // Will need this later when I implement calendar dates, maybe.
+    //diary_update_calendar($diary, $diary->coursemodule);
     diary_grade_item_update($diary);
 
     return $diary->id;
@@ -93,6 +95,20 @@ function diary_delete_instance($id) {
 }
 
 /**
+ * Indicates API features that the diary supports.
+ *
+ * @uses FEATURE_MOD_INTRO
+ * @uses FEATURE_GRADE_HAS_GRADE
+ * @uses FEATURE_GRADE_OUTCOMES
+ * @uses FEATURE_RATE
+ * @uses FEATURE_GROUPS
+ * @uses FEATURE_GROUPINGS
+ * @uses FEATURE_GROUPMEMBERSONLY
+ * @uses FEATURE_COMPLETION_TRACKS_VIEWS
+
+ * @uses FEATURE_COMPLETION_HAS_RULES
+
+
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed True if module supports feature, null if doesn't know
  */
@@ -105,7 +121,7 @@ function diary_supports($feature) {
         case FEATURE_GRADE_OUTCOMES:
             return false;
         case FEATURE_RATE:
-            return false;
+            return true;
         case FEATURE_GROUPS:
             return true;
         case FEATURE_GROUPINGS:
@@ -183,6 +199,9 @@ function diary_user_outline($course, $user, $mod, $diary) {
  * @param object $mod
  * @param object $data
  */
+//////////////////////////////////////////
+// Can't find where this is being used! //
+//////////////////////////////////////////
 function diary_user_complete($course, $user, $mod, $diary) {
     global $DB, $OUTPUT;
 
@@ -693,7 +712,7 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
 
 
 /**
- * Create grade item for given diary
+ * Update/create grade item for given diary.
  *
  * @param object $diary object with extra cmidnumber
  * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
@@ -701,29 +720,21 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
  */
 function diary_grade_item_update($diary, $grades=null) {
     global $CFG;
-    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions.
-        require_once($CFG->libdir.'/gradelib.php');
-    }
 
-    if (array_key_exists('cmidnumber', $diary)) {
-        $params = array('itemname' => $diary->name, 'idnumber' => $diary->cmidnumber);
-    } else {
-        $params = array('itemname' => $diary->name);
-    }
+    $params = array('itemname'=>$diary->name, 'idnumber'=>$diary->cmidnumber);
 
-    if ($diary->grade > 0) {
-        $params['gradetype']  = GRADE_TYPE_VALUE;
-        $params['grademax']   = $diary->grade;
-        $params['grademin']   = 0;
-        $params['multfactor'] = 1.0;
+    // if (!$diary->assessed or $diary->scale == 0) {
+    if ($diary->scale == 0) {
+        $params['gradetype'] = GRADE_TYPE_NONE;
 
-    } else if ($diary->grade < 0) {
+    } else if ($diary->scale > 0) {
+        $params['gradetype'] = GRADE_TYPE_VALUE;
+        $params['grademax']  = $diary->scale;
+        $params['grademin']  = 0;
+
+    } else if ($diary->scale < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
-        $params['scaleid']   = -$diary->grade;
-
-    } else {
-        $params['gradetype']  = GRADE_TYPE_NONE;
-        $params['multfactor'] = 1.0;
+        $params['scaleid']   = -$diary->scale;
     }
 
     if ($grades === 'reset') {
@@ -750,8 +761,11 @@ function diary_grade_item_delete($diary) {
 
 /**
  * Return only the users that have entries in the specified diary activity.
+ * Used by report.php.
  *
- * return object $diarys
+ * @param   object   $diary
+ * @return  object   currentgroup
+ * return   object   $diarys
  */
 function diary_get_users_done($diary, $currentgroup) {
     global $DB;
@@ -969,7 +983,7 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
 }
 
 /**
- * Prints the currently selected diary entry of student identified as $user.
+ * Prints the currently selected diary entry of student identified as $user, on the report page.
  *
  * @param integer $course
  * @param integer $user
@@ -993,7 +1007,7 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
     echo "</td>";
     echo "<td class=\"userfullname\">".fullname($user);
     if ($entry) {
-        echo " <span class=\"lastedit\">".get_string("lastedited").": ".userdate($entry->timemodified)." </span>";
+        echo " <span class=\"lastedit\">".get_string("timecreated", 'diary').':  '.userdate($entry->timecreated).' '.get_string("lastedited").": ".userdate($entry->timemodified)." </span>";
     }
 
     echo "</td>";
@@ -1072,7 +1086,7 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
 }
 
 /**
- * Set current entry to show.
+ * Set current entry to show. VERIFY AND DELETE IF NOT USING THIS FUNCTION AFTER ALL.
  * @param int $entryid
  */
 function set_currententry($entryid = -1) {
@@ -1250,14 +1264,15 @@ function diary_get_editor_and_attachment_options($course, $context, $entry, $act
     $maxbytes = $course->maxbytes; // TODO: add some setting.
 
     $editoroptions = array(
-        'entryid' => $entry->id,
+        //'entryid' => $entry->id,
         'action'   => $action,
         'firstkey' => $firstkey,
         'trusttext' => true,
         'maxfiles' => $maxfiles,
         'maxbytes' => $maxbytes,
         'context' => $context,
-        'subdirs' => file_area_contains_subdirs($context, 'mod_diary', 'entry', $entry->id)
+        //'subdirs' => file_area_contains_subdirs($context, 'mod_diary', 'entry', $entry->id)
+        'subdirs' => false,
     );
     $attachmentoptions = array(
         'subdirs' => false,

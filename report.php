@@ -336,7 +336,7 @@ if (!$users) {
     if ($usersdone = diary_get_users_done($diary, $currentgroup)) {
         foreach ($usersdone as $user) {
 
-            // Based pn toolbutton and on list of users with at least one entry, print the entries onscreen.
+            // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
             echo diary_print_user_entry($course, $user, $entrybyuser[$user->id], $teachers, $grades);
 
             // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
