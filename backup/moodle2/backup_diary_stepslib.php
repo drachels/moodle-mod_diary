@@ -20,7 +20,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
     protected function define_structure() {
 
         $diary = new backup_nested_element('diary', array('id'), array(
-            'name', 'intro', 'introformat', 'days', 'grade', 'timemodified'));
+            'name', 'intro', 'introformat', 'days', 'scale', 'timemodified', 'assessed', 'assesstimestart', 'assesstimefinish'));
 
         $entries = new backup_nested_element('entries');
 

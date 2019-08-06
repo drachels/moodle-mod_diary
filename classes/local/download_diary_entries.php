@@ -35,13 +35,12 @@ class download_diary_entries {
      * @param string $delimiter - The character to use as a delimiter.
      * @return nothing
      */
-    //public function download_diary_entries($array, $filename = "export.csv", $delimiter=";") {
+    // public function download_diary_entries($array, $filename = "export.csv", $delimiter=";") {
     public function __construct($array, $filename = "export.csv", $delimiter=";") {
         global $CFG, $DB, $USER;
         require_once($CFG->libdir.'/csvlib.class.php');
         $data = new StdClass();
         $data->diary = $this->instance->id;
-echo 'In the local/download_diary_entries.php file';
         exit;
     }
 }
