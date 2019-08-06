@@ -116,3 +116,6 @@ the heading to tell which data is being displayed.
 needed.
 
 07/22/2019 Finally have "correct" edit capability. Pushed ver. 0.9.5.
+07/25/2019 Pushed ver. 0.9.6 Have things to the point of REALLY needing to
+start development for ratings.
+08/03/2019 Have started adding code for ratingoptions as ver. 0.9.7
