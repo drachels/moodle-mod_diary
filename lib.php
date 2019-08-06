@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * CHECKED! - MAY NEED MORE WORK.
  * Given an object containing all the necessary data,
  * (defined by the form in mod.html) this function
  * will create a new instance and return the id number
@@ -35,20 +36,39 @@ defined('MOODLE_INTERNAL') || die();
 function diary_add_instance($diary) {
     global $DB;
 
+    if (empty($diary->assessed)) {
+        $diary->assessed = 0;
+    }
+
+    if (empty($diary->ratingtime) || empty($diary->assessed)) {
+        $diary->assesstimestart  = 0;
+        $diary->assesstimefinish = 0;
+    }
     $diary->timemodified = time();
     $diary->id = $DB->insert_record("diary", $diary);
 
     // Will need this later when I implement calendar dates, maybe.
-    //diary_update_calendar($diary, $diary->coursemodule);
+    // diary_update_calendar($diary, $diary->coursemodule);
+    // Add calendar events if necessary.
+    diary_set_events($diary);
+    if (!empty($diary->completionexpected)) {
+        \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $diary->completionexpected);
+    }
+
+
+
+
     diary_grade_item_update($diary);
 
     return $diary->id;
 }
 
 /**
- * Given an object containing all the necessary data,
- * (defined by the form in mod.html) this function
- * will update an existing instance with new data.
+ * CHECKED! - MAY NEED MORE WORK.
+ * 8/4/19 Changed all $data to $diary.
+ *
+ * Given an object containing all the necessary diary data,
+ * will update an existing instance with new diary data.
  * @param object $diary Object containing required diary properties
  * @return boolean True if successful
  */
@@ -58,7 +78,22 @@ function diary_update_instance($diary) {
     $diary->timemodified = time();
     $diary->id = $diary->instance;
 
+    if (empty($diary->assessed)) {
+        $diary->assessed = 0;
+    }
+
+    if (empty($diary->ratingtime) or empty($diary->assessed)) {
+        $diary->assesstimestart  = 0;
+        $diary->assesstimefinish = 0;
+    }
+
+    if (empty($diary->notification)) {
+        $diary->notification = 0;
+    }
+
     $result = $DB->update_record("diary", $diary);
+
+    // Add calendar events if necessary.
 
     diary_grade_item_update($diary);
 
@@ -68,6 +103,8 @@ function diary_update_instance($diary) {
 }
 
 /**
+ * NEEDS WORK, I THINK, for grade items!
+ *
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
  * and any data that depends on it.
@@ -533,15 +570,22 @@ function diary_reset_course_form_defaults($course) {
 }
 
 /**
- * Removes all entries
+ * Actual implementation of the reset course functionality, delete all the
+ * data responses for course $data->courseid.
  *
- * @param object $data
+ * @global object
+ * @global object
+ * @param object $data the data submitted from the reset course.
+ * @return array status array
  */
 function diary_reset_userdata($data) {
-
     global $CFG, $DB;
+    require_once($CFG->libdir.'/filelib.php');
+    require_once($CFG->dirroot.'/rating/lib.php');
 
+    $componentstr = get_string('modulenameplural', 'diary');
     $status = array();
+// THIS FUNCTION NEEDS REWRITE!
     if (!empty($data->reset_diary)) {
 
         $sql = "SELECT d.id
@@ -623,95 +667,66 @@ function diary_print_overview($courses, &$htmlarray) {
 
 /**
  * Get diary grades for a user.
- *
+ * CHECKED!
  * @param object   $diary        if is null, all diarys
  * @param int      $userid       if is false al users
  * @param boolean  $nullifnone   return null if grade does not exist
  */
 function diary_get_user_grades($diary, $userid=0) {
+    global $CFG;
 
-    global $DB;
+    require_once($CFG->dirroot.'/rating/lib.php');
 
-    $params = array();
-    if ($userid) {
-        $userstr = 'AND userid = :uid';
-        $params['uid'] = $userid;
-    } else {
-        $userstr = '';
-    }
+    $ratingoptions = new stdClass;
+    $ratingoptions->component = 'mod_diary';
+    $ratingoptions->ratingarea = 'entry';
+    $ratingoptions->modulename = 'diary';
+    $ratingoptions->moduleid   = $diary->id;
 
-    if (!$diary) {
-        return false;
+    $ratingoptions->userid = $userid;
+    $ratingoptions->aggregationmethod = $diary->assessed;
+    $ratingoptions->scaleid = $diary->scale;
+    $ratingoptions->itemtable = 'diary_entries';
+    $ratingoptions->itemtableusercolumn = 'userid';
 
-    } else {
-
-        $sql = "SELECT DISTINCT userid, timemodified as datesubmitted, format as feedbackformat,
-                rating as rawgrade, entrycomment as feedback, teacher as usermodifier, timemarked as dategraded
-                FROM {diary_entries}
-                WHERE diary = :did ".$userstr;
-        $params['did'] = $diary->id;
-
-        $grades = $DB->get_records_sql($sql, $params);
-
-        if ($grades) {
-            foreach ($grades as $key => $grade) {
-                $grades[$key]->id = $grade->userid;
-            }
-        } else {
-            return false;
-        }
-
-        return $grades;
-    }
-
+    $rm = new rating_manager();
+    return $rm->get_user_grades($ratingoptions);
 }
 
 /**
- * Update diary grades in 1.9 gradebook
+ * CHECKED! 8/4/19
+ * Update diary activity grades.
  *
- * @param object   $diary        if is null, all diarys
- * @param int      $userid       if is false al users
- * @param boolean  $nullifnone   return null if grade does not exist
+ * @category grade
+ * @param object   $diary        If is null, then all diaries.
+ * @param int      $userid       If is false, then all users.
+ * @param boolean  $nullifnone   Return null if grade does not exist.
  */
-function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
-
+function diary_update_grades($diary, $userid=0, $nullifnone=true) {
     global $CFG, $DB;
+    require_once($CFG->libdir.'/gradelib.php');
 
-    if (!function_exists('grade_update')) { // Workaround for buggy PHP versions.
-        require_once($CFG->libdir.'/gradelib.php');
-    }
+    if (!$diary->assessed) {
+        diary_grade_item_update($diary);
 
-    if ($diary != null) {
-        if ($grades = diary_get_user_grades($diary, $userid)) {
-            diary_grade_item_update($diary, $grades);
-        } else if ($userid && $nullifnone) {
-            $grade = new stdClass();
-            $grade->userid   = $userid;
-            $grade->rawgrade = null;
-            diary_grade_item_update($diary, $grade);
-        } else {
-            diary_grade_item_update($diary);
-        }
+    } else if ($grades = diary_get_user_grades($diary, $userid)) {
+        diary_grade_item_update($diary, $grades);
+
+    } else if ($userid and $nullifnone) {
+        $grade = new stdClass();
+        $grade->userid   = $userid;
+        $grade->rawgrade = null;
+        diary_grade_item_update($diary, $grade);
+
     } else {
-        $sql = "SELECT d.*, cm.idnumber as cmidnumber
-                FROM {course_modules} cm
-                JOIN {modules} m ON m.id = cm.module
-                JOIN {diary} d ON cm.instance = d.id
-                WHERE m.name = 'diary'";
-        if ($recordset = $DB->get_records_sql($sql)) {
-            foreach ($recordset as $diary) {
-                if ($diary->grade != false) {
-                    diary_update_grades($diary);
-                } else {
-                    diary_grade_item_update($diary);
-                }
-            }
-        }
+        diary_grade_item_update($diary);
     }
 }
 
 
 /**
+ * CHECKED! 8/4/19
+ *
  * Update/create grade item for given diary.
  *
  * @param object $diary object with extra cmidnumber
@@ -720,11 +735,11 @@ function diary_update_grades($diary=null, $userid=0, $nullifnone=true) {
  */
 function diary_grade_item_update($diary, $grades=null) {
     global $CFG;
+    require_once($CFG->libdir.'/gradelib.php');
 
     $params = array('itemname'=>$diary->name, 'idnumber'=>$diary->cmidnumber);
 
-    // if (!$diary->assessed or $diary->scale == 0) {
-    if ($diary->scale == 0) {
+    if (!$diary->assessed or $diary->scale == 0) {
         $params['gradetype'] = GRADE_TYPE_NONE;
 
     } else if ($diary->scale > 0) {
@@ -746,6 +761,8 @@ function diary_grade_item_update($diary, $grades=null) {
 }
 
 /**
+ * CHECKED! 8/4/19
+ *
  * Delete grade item for given diary
  *
  * @param   object   $diary

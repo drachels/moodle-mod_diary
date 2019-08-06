@@ -216,6 +216,34 @@ if ($data = data_submitted()) {
             $entrybyuser[$entry->userid]->teacher    = $USER->id;
             $entrybyuser[$entry->userid]->timemarked = $timenow;
 
+                require_once($CFG->dirroot.'/rating/lib.php');
+                if ($diary->assessed != RATING_AGGREGATE_NONE) {
+
+print_object('In the if assessed and printing $diary->assessed');
+print_object($diary->assessed);
+
+                    $ratingoptions = new stdClass;
+                    $ratingoptions->context = $context;
+                    $ratingoptions->component = 'mod_diary';
+                    $ratingoptions->ratingarea = 'entry';
+                    //$ratingoptions->items = $records;
+                    //$ratingoptions->items = $entrybyuser[$entry->userid]; ////////////////////////////
+                    $ratingoptions->items = $entry; ////////////////////////////
+                    $ratingoptions->aggregate = $diary->assessed;//the aggregation method
+                    $ratingoptions->scaleid = $diary->scale;
+                    $ratingoptions->userid = $USER->id;
+                    //$ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/'.$url;
+                    $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/report.php?id'.$id;
+//$PAGE->set_url('/mod/diary/report.php', array('id' => $id));
+
+                    $ratingoptions->assesstimestart = $diary->assesstimestart;
+                    $ratingoptions->assesstimefinish = $diary->assesstimefinish;
+print_object($ratingoptions);
+
+                    $rm = new rating_manager();
+                    $records = $rm->get_ratings($ratingoptions);
+                }
+
             $diary = $DB->get_record("diary", array("id" => $entrybyuser[$entry->userid]->diary));
             $diary->cmidnumber = $cm->idnumber;
 
@@ -313,7 +341,7 @@ if (!$users) {
         //$d = $cm->instance; // Course module to download questions from.
     }
 
-    $grades = make_grades_menu($diary->grade);
+    $grades = make_grades_menu($diary->scale);
 
     if (!$teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
         print_error('noentriesmanagers', 'diary');
