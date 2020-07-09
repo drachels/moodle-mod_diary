@@ -119,3 +119,11 @@ needed.
 07/25/2019 Pushed ver. 0.9.6 Have things to the point of REALLY needing to
 start development for ratings.
 08/03/2019 Have started adding code for ratingoptions as ver. 0.9.7
+10/04/2019 Commented out line 53 of lib.php that is calling a function I
+not implemented yet.
+
+05/31/2020 Started transferring tickets from User Support Tracker into
+Diary Support Tracker.
+
+20200709 Diary_499, Need Entries per page selector for view.php page, is
+    now Being test. 

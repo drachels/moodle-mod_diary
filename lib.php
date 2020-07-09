@@ -39,24 +39,21 @@ function diary_add_instance($diary) {
     if (empty($diary->assessed)) {
         $diary->assessed = 0;
     }
-
+    // 9/17/2019 First one always true as ratingtime does not exist.
     if (empty($diary->ratingtime) || empty($diary->assessed)) {
         $diary->assesstimestart  = 0;
         $diary->assesstimefinish = 0;
     }
     $diary->timemodified = time();
-    $diary->id = $DB->insert_record("diary", $diary);
+    $diary->id = $DB->insert_record('diary', $diary);
 
     // Will need this later when I implement calendar dates, maybe.
     // diary_update_calendar($diary, $diary->coursemodule);
     // Add calendar events if necessary.
-    diary_set_events($diary);
+    //diary_set_events($diary);
     if (!empty($diary->completionexpected)) {
         \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $diary->completionexpected);
     }
-
-
-
 
     diary_grade_item_update($diary);
 
@@ -541,11 +538,11 @@ function diary_scale_used ($diaryid, $scaleid) {
 function diary_scale_used_anywhere($scaleid) {
     global $DB;
 
-    if ($scaleid and $DB->get_records('diary', array('grade' => -$scaleid))) {
-        return true;
-    } else {
+    //if ($scaleid and $DB->get_records('diary', array('grade' => -$scaleid))) {
+    //    return true;
+   // } else {
         return false;
-    }
+    //}
 }
 
 /**
@@ -674,7 +671,9 @@ function diary_print_overview($courses, &$htmlarray) {
  */
 function diary_get_user_grades($diary, $userid=0) {
     global $CFG;
-
+//print_object('in the diary_get_user_grades function 1 and printing $userid and $diary');
+//print_object($userid);
+//print_object($diary);
     require_once($CFG->dirroot.'/rating/lib.php');
 
     $ratingoptions = new stdClass;
@@ -690,6 +689,12 @@ function diary_get_user_grades($diary, $userid=0) {
     $ratingoptions->itemtableusercolumn = 'userid';
 
     $rm = new rating_manager();
+//print_object('now printing $ratingoptions');
+//print_object($ratingoptions);
+// the following is an empty array.
+//print_object('now printing $rm->get_user_grades');
+//print_object($rm->get_user_grades($ratingoptions));
+
     return $rm->get_user_grades($ratingoptions);
 }
 
@@ -705,21 +710,28 @@ function diary_get_user_grades($diary, $userid=0) {
 function diary_update_grades($diary, $userid=0, $nullifnone=true) {
     global $CFG, $DB;
     require_once($CFG->libdir.'/gradelib.php');
+//print_object('made it to diary_update_grades 1');
 
     if (!$diary->assessed) {
         diary_grade_item_update($diary);
+//print_object('made it to diary_update_grades 2');
 
     } else if ($grades = diary_get_user_grades($diary, $userid)) {
         diary_grade_item_update($diary, $grades);
+//print_object('made it to diary_update_grades 3');
 
     } else if ($userid and $nullifnone) {
         $grade = new stdClass();
         $grade->userid   = $userid;
         $grade->rawgrade = null;
         diary_grade_item_update($diary, $grade);
+//print_object('made it to diary_update_grades 4 and printing grade');
+//print_object($grade);
 
     } else {
         diary_grade_item_update($diary);
+//print_object('made it to diary_update_grades 5');
+
     }
 }
 
@@ -736,26 +748,36 @@ function diary_update_grades($diary, $userid=0, $nullifnone=true) {
 function diary_grade_item_update($diary, $grades=null) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
+//print_object('made it to diary_grade_item_update 1');
 
     $params = array('itemname'=>$diary->name, 'idnumber'=>$diary->cmidnumber);
 
     if (!$diary->assessed or $diary->scale == 0) {
         $params['gradetype'] = GRADE_TYPE_NONE;
+//print_object('made it to diary_grade_item_update 2');
 
     } else if ($diary->scale > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
         $params['grademax']  = $diary->scale;
         $params['grademin']  = 0;
+//print_object('made it to diary_grade_item_update 3');
 
     } else if ($diary->scale < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
         $params['scaleid']   = -$diary->scale;
+//print_object('made it to diary_grade_item_update 4');
+
     }
 
     if ($grades === 'reset') {
         $params['reset'] = true;
         $grades = null;
     }
+print_object('here are the params for diary_grade_item_update');
+print_object($params);
+print_object('and here are $grades');
+print_object($grades);
+
 
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, $grades, $params);
 }
@@ -918,7 +940,7 @@ function diary_get_coursemodule($diaryid) {
 }
 
 /**
- * Serves the diary files.
+ * Serves the diary files. THIS FUNCTION MAY BE ORPHANED. APPEARS TO BE SO IN JOURNAL.
  *
  * @package  mod_diary
  * @category files
@@ -1008,7 +1030,7 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
  * @param integer $teachers
  * @param integer $grades
  */
-function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
+function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
 
     global $USER, $OUTPUT, $DB, $CFG;
 
@@ -1078,7 +1100,10 @@ function diary_print_user_entry($course, $user, $entry, $teachers, $grades) {
         // Grade selector.
         $attrs['id'] = 'r' . $entry->id;
         echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array('class' => 'accesshide'));
+//print_object($diary->assessed);
+if ($diary->assessed > 0){
         echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
+}
         echo $hiddengradestr;
         // Rewrote next three lines to show entry needs to be regraded due to resubmission.
         if (!empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {

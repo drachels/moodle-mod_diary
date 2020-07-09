@@ -225,8 +225,11 @@ if ($course->format == 'weeks' and $diary->days) {
     $diary->days = 0;
 }
 if ($timenow > $timestart) {
+    //echo '<form method="post">';
 
     echo $OUTPUT->box_start();
+    // Toolbar form within the box.
+    //echo '<form method="post">';
 
     // Add Current entry Edit button and user toolbar.
     if ($timenow < $timefinish) {
@@ -234,6 +237,7 @@ if ($timenow > $timestart) {
         if ($canadd) {
             echo get_string('sortorder', 'diary');
             echo $sortorderinfo;
+
             echo $output->box_start();
 
             // Add button for editing current entry or starting a new entry.
@@ -244,18 +248,50 @@ if ($timenow > $timestart) {
                , get_string('startoredit', 'diary'), 'get',
                array("class" => "singlebutton diarystart"));
             // Print user toolbar icons.
-            echo get_string('usertoolbar', 'diary');
+            //echo get_string('usertoolbar', 'diary');
             echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey);
+
+////////////////////////////////////////////////////////
+            // 20200709 Added selector for prefered number of entries per page. Default is 7.
+            echo '<form method="post">';
+
+            $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
+            $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
+
+            if ($perpage < 2) {
+            $perpage = 2;
+            }
+            if ($perpage != $oldperpage) {
+                set_user_preference('diary_perpage_'.$diary->id, $perpage);
+            }
+
+            $pagesizes = array(2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,15=>15,
+                       20=>20,30=>30,40=>40,50=>50,100=>100,200=>200,300=>300,400=>400,500=>500,1000=>1000);
+            // This creates the dropdown list for how many entries to show on the page.
+            $selection = html_writer::select($pagesizes, 'perpage', $perpage, false, array('id' => 'pref_perpage', 'class' => 'custom-select'));
+
+            echo get_string('pagesize', 'diary').': <select onchange="this.form.submit()" name="perpage">';
+            echo '<option selected="true" value="'.$selection.'</option>';
+            echo '</select>';
+            echo '</form>';
+
+///////////////////////////////////////////////////////////////////////////
             echo $output->box_end();
         }
     }
 
     // Display entry with the $DB portion supplied/set by the toolbar.
     if ($entrys) {
+////////////////////////////////
+        $thispage = 1;
+//echo $thispage.' and perpage '.$perpage;
+/////////////////////////////////////////
         foreach ($entrys as $entry) {
             if (empty($entry->text)) {
                 echo '<p align="center"><b>'.get_string('blankentry','diary').'</b></p>';
-            } else {
+
+            } elseif ($thispage <= $perpage) {
+                $thispage++;
                 $color3 = get_config('mod_diary', 'entrybgc');
                 $color4 = get_config('mod_diary', 'entrytextbgc');
 
@@ -272,14 +308,16 @@ if ($timenow > $timestart) {
 
                 // Add a heading for each entry on the page.
                 //echo $OUTPUT->heading(get_string('entry', 'diary').' Might want to add mm/dd/yyyy.');
-                echo $OUTPUT->heading(get_string('entry', 'diary'));
+                echo $OUTPUT->heading(get_string('entry', 'diary').' - '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated));
+                //echo $OUTPUT->heading(get_string('entry', 'diary'));
 
                 // Start an inner division for the user's text entry container.
                 echo '<div align="left" style="font-size:1em; padding: 5px;
                     font-weight:bold;background: '.$color4.';
                     border:1px solid black;
                     -webkit-border-radius:16px;
-                    -moz-border-radius:16px;border-radius:16px;">';
+                    -moz-border-radius:16px;
+                    border-radius:16px;">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
                 //echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
@@ -322,15 +360,19 @@ if ($timenow > $timestart) {
                 if (!empty($entry->entrycomment) or !empty($entry->rating)) {
                     //$grades = make_grades_menu($diary->grade);
                     //$grades = make_grades_menu($entry->rating);
+                    // Get the rating for the current entry.
                     $grades = $entry->rating;
-
                    // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
+                    // Format output using renderer.php.
                     echo $output->diary_print_feedback($course, $entry, $grades);
                 }
                 echo '</div></p>';
+
             }
+
         }
+
     } else {
         echo '<span class="warning">'.get_string('notstarted', 'diary').'</span>';
     }

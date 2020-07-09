@@ -51,7 +51,7 @@
 #page-mod-diary-view .editend {
    font-size: 0.9em;
   color: red;
-  text-decoration: underline;
+//  text-decoration: underline;
   text-align: center;
 }
 #page-mod-diary-view .author {
@@ -112,7 +112,7 @@
 #page-mod-diary-report .diaryuserentry td .needsedit {
   font-size: 0.9em;
   color: red;
-  text-decoration: underline;
+//  text-decoration: underline;
   margin-left: 10px;
 }
 #page-mod-diary-report .mediaplugin {
