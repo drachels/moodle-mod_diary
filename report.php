@@ -198,8 +198,11 @@ if ($data = data_submitted()) {
         $entry = $entrybyentry[$num];
         // Only update entries where feedback has actually changed.
         $rating_changed = false;
-// r is undefined when Ratings is set to No ratings.
-        $studentrating = clean_param($vals['r'], PARAM_INT);
+        if ($diary->assessed != RATING_AGGREGATE_NONE) {
+            $studentrating = clean_param($vals['r'], PARAM_INT);
+        } else {
+            $studentrating = '';
+        }
         $studentcomment = clean_text($vals['c'], FORMAT_PLAIN);
 
         if ($studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
@@ -225,16 +228,16 @@ if ($data = data_submitted()) {
             $entrybyuser[$entry->userid]->timemarked = $timenow;
 
 
-$records[$entry->id] = $entrybyuser[$entry->userid];
-print_object('1 In the if $rating_changed and printing $newentry and $entrybyuser[$entry->userid]');
-print_object($newentry);
-print_object($records);
+            $records[$entry->id] = $entrybyuser[$entry->userid];
+//print_object('1 In the if $rating_changed and printing $newentry and $entrybyuser[$entry->userid]');
+//print_object($newentry);
+//print_object($records);
 
 
                 if ($diary->assessed != RATING_AGGREGATE_NONE) {
 
-print_object('2 In the if assessed and printing $diary->assessed');
-print_object($diary->assessed);
+//print_object('2 In the if assessed and printing $diary->assessed');
+//print_object($diary->assessed);
 
                     $ratingoptions = new stdClass;
                     $ratingoptions->context = $context;
@@ -253,9 +256,9 @@ print_object($diary->assessed);
 
                     $ratingoptions->assesstimestart = $diary->assesstimestart;
                     $ratingoptions->assesstimefinish = $diary->assesstimefinish;
-print_object('3 In the if assessed and printing $ratingoptions');
+//print_object('3 In the if assessed and printing $ratingoptions');
 
-print_object($ratingoptions);
+//print_object($ratingoptions);
 
                     $rm = new rating_manager();
                     //$records = $rm->get_ratings($ratingoptions);
@@ -399,7 +402,8 @@ if (!$users) {
 
             // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
             echo diary_print_user_entry($course, $diary, $user, $entrybyuser[$user->id], $teachers, $grades);
-
+//print_object('print $grades');
+//print_object($grades);
             // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
             echo $saveallbutton;
 

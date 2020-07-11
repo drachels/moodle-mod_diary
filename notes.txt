@@ -126,4 +126,5 @@ not implemented yet.
 Diary Support Tracker.
 
 20200709 Diary_499, Need Entries per page selector for view.php page, is
-    now Being test. 
+    now Being tested. 
+20200710 Diary_573, Need edit icon for every entry, is now being tested.

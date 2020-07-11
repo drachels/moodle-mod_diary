@@ -306,9 +306,18 @@ if ($timenow > $timestart) {
                 $date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
                 $diff = date_diff($date1, $date2);
 
+                // Create edit entry toolbutton link to use for each individual entry.
+                $options['id'] = $cm->id;
+                $options['action'] = 'editentry';
+                $options['firstkey'] = $entry->id;
+                $url = new moodle_url('/mod/diary/edit.php', $options);
+                $editthisentry = html_writer::link($url, $output->pix_icon('i/edit'
+                    , get_string('startoredit', 'diary'))
+                    , array('class' => 'toolbutton'));
+
                 // Add a heading for each entry on the page.
                 //echo $OUTPUT->heading(get_string('entry', 'diary').' Might want to add mm/dd/yyyy.');
-                echo $OUTPUT->heading(get_string('entry', 'diary').' - '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated));
+                echo $OUTPUT->heading(get_string('entry', 'diary').' - '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' testing '.$editthisentry);
                 //echo $OUTPUT->heading(get_string('entry', 'diary'));
 
                 // Start an inner division for the user's text entry container.

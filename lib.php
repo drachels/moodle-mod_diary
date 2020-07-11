@@ -710,23 +710,27 @@ function diary_get_user_grades($diary, $userid=0) {
 function diary_update_grades($diary, $userid=0, $nullifnone=true) {
     global $CFG, $DB;
     require_once($CFG->libdir.'/gradelib.php');
-//print_object('made it to diary_update_grades 1');
+print_object('made it to diary_update_grades 1 and printing $diary');
+print_object($diary);
 
     if (!$diary->assessed) {
         diary_grade_item_update($diary);
-//print_object('made it to diary_update_grades 2');
+print_object('made it to diary_update_grades 2 and printing $diary');
+print_object($diary);
 
     } else if ($grades = diary_get_user_grades($diary, $userid)) {
         diary_grade_item_update($diary, $grades);
-//print_object('made it to diary_update_grades 3');
+print_object('made it to diary_update_grades 3 and printing $diary and $grades');
+print_object($diary);
+print_object($grades);
 
     } else if ($userid and $nullifnone) {
         $grade = new stdClass();
         $grade->userid   = $userid;
         $grade->rawgrade = null;
         diary_grade_item_update($diary, $grade);
-//print_object('made it to diary_update_grades 4 and printing grade');
-//print_object($grade);
+print_object('made it to diary_update_grades 4 and printing grade');
+print_object($grade);
 
     } else {
         diary_grade_item_update($diary);
@@ -745,27 +749,37 @@ function diary_update_grades($diary, $userid=0, $nullifnone=true) {
  * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function diary_grade_item_update($diary, $grades=null) {
+//function diary_grade_item_update($diary, $grades=null) {
+function diary_grade_item_update($diary, $grades) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
-//print_object('made it to diary_grade_item_update 1');
 
     $params = array('itemname'=>$diary->name, 'idnumber'=>$diary->cmidnumber);
+print_object('made it to diary_grade_item_update 00 and printing $grades');
+print_object($grades);
+//print_object('made it to diary_grade_item_update 0 and printing $diary');
+//print_object($diary);
+//print_object('made it to diary_grade_item_update 1 and printing $params');
+//print_object($params);
+
 
     if (!$diary->assessed or $diary->scale == 0) {
         $params['gradetype'] = GRADE_TYPE_NONE;
-//print_object('made it to diary_grade_item_update 2');
+//print_object('made it to diary_grade_item_update 2 and printing $params');
+//print_object($params);
 
     } else if ($diary->scale > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
         $params['grademax']  = $diary->scale;
         $params['grademin']  = 0;
-//print_object('made it to diary_grade_item_update 3');
+//print_object('made it to diary_grade_item_update 3 and printing $params');
+//print_object($params);
 
     } else if ($diary->scale < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
         $params['scaleid']   = -$diary->scale;
-//print_object('made it to diary_grade_item_update 4');
+//print_object('made it to diary_grade_item_update 4 and printing $params');
+//print_object($params);
 
     }
 
@@ -773,10 +787,10 @@ function diary_grade_item_update($diary, $grades=null) {
         $params['reset'] = true;
         $grades = null;
     }
-print_object('here are the params for diary_grade_item_update');
-print_object($params);
-print_object('and here are $grades');
-print_object($grades);
+//print_object('here are the $params for diary_grade_item_update 5');
+//print_object($params);
+//print_object('and here are $grades 6');
+//print_object($grades);
 
 
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, $grades, $params);
@@ -1031,7 +1045,14 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
  * @param integer $grades
  */
 function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
-
+print_object('1 in function diary_print_user_entry and printing $course, $diary, $user, $entry, $teachers, $grades');
+//print_object($course);
+//print_object($diary);
+//print_object($user);
+//print_object($entry); // This has the goodies I need in it.
+print_object($entry->rating); // This has the goodies I need in it.
+//print_object($teachers);
+//print_object($grades);
     global $USER, $OUTPUT, $DB, $CFG;
 
     require_once($CFG->dirroot.'/lib/gradelib.php');
@@ -1053,6 +1074,8 @@ function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grad
     echo "</tr>";
 
     echo "\n<tr><td>";
+//print_object('1 in function diary_print_user_entry and printing $entry');
+//print_object($entry);
 
     // If there is a user entry, format it and show it.
     if ($entry) {
@@ -1084,6 +1107,8 @@ function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grad
 
         // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
         $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($user->id));
+print_object('2 in function diary_print_user_entry and printing $gradinginfo');
+print_object($gradinginfo);
         if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
             if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked || $gradinginfo->items[0]->grades[$user->id]->overridden) {
                 $attrs['disabled'] = 'disabled';
@@ -1099,12 +1124,17 @@ function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grad
 
         // Grade selector.
         $attrs['id'] = 'r' . $entry->id;
+//print_object('3 in function diary_print_user_entry and printing $attrs and $entry');
+//print_object($attrs);
+//print_object($entry);
         echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array('class' => 'accesshide'));
 //print_object($diary->assessed);
-if ($diary->assessed > 0){
-        echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
-}
+        if ($diary->assessed > 0){
+            echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
+        }
         echo $hiddengradestr;
+//print_object('4 in function diary_print_user_entry and printing $hiddengradestr');
+//print_object($hiddengradestr);
         // Rewrote next three lines to show entry needs to be regraded due to resubmission.
         if (!empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
             echo " <span class=\"needsedit\">".get_string("needsregrade", "diary"). " </span>";
@@ -1112,6 +1142,8 @@ if ($diary->assessed > 0){
             echo " <span class=\"lastedit\">".userdate($entry->timemarked)." </span>";
         }
         echo $gradebookgradestr;
+//print_object('5 in function diary_print_user_entry and printing $gradebookgradestr');
+//print_object($gradebookgradestr);
 
         // Feedback text.
         echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array('class' => 'accesshide'));
