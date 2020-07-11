@@ -1,5 +1,3 @@
-sudo: false
-
 notifications:
   email:
     recipients:
@@ -9,72 +7,40 @@ on_failure: always
 
 language: php
 
-os: linux
-dist: xenial
-
-services:
-  - mysql
-  - postgresql
+sudo: true
 
 addons:
   firefox: "47.0.1"
+  postgresql: "9.4"
   apt:
     packages:
       - openjdk-8-jre-headless
-      - chromium-chromedriver
 
 cache:
   directories:
     - $HOME/.composer/cache
     - $HOME/.npm
 
-jobs:
-  include:
-    - php: 7.4
-      env:
-        - MOODLE_BRANCH=master
-        - DB=mysqli
-        - DIFFERENT_GRUNT=yes
+php:
+ - 7.0
+ - 7.1
 
-    - php: 7.3
-      env:
-        - MOODLE_BRANCH=MOODLE_38_STABLE
-        - DB=pgsql
-
-    - php: 7.2
-      env:
-        - MOODLE_BRANCH=MOODLE_37_STABLE
-        - DB=mysqli
-        - DIFFERENT_GRUNT=yes
-
-    - php: 7.1
-      env:
-        - MOODLE_BRANCH=MOODLE_36_STABLE
-        - DB=pgsql
-        - NODE=8.9
-        - DIFFERENT_GRUNT=yes
-
-    - php: 7.1
-      env:
-        - MOODLE_BRANCH=MOODLE_35_STABLE
-        - DB=mysqli
-        - DIFFERENT_GRUNT=yes
+env:
+ global:
+  - MOODLE_BRANCH=MOODLE_34_STABLE
+  - MOODLE_BRANCH=MOODLE_35_STABLE
+  - MOODLE_BRANCH=MOODLE_36_STABLE
+  - IGNORE_NAMES=mobile_view_page.mustache
+ matrix:
+  - DB=pgsql
+  - DB=mysqli
 
 before_install:
   - phpenv config-rm xdebug.ini
-
-  - if [ -z $DIFFERENT_GRUNT ]; then
-      export DIFFERENT_GRUNT=no;
-    fi
-
-  - if [ -z $NODE ]; then
-      export NODE=14;
-    fi
-  - nvm install $NODE
-  - nvm use $NODE
-
+  - nvm install 8.9
+  - nvm use 8.9
   - cd ../..
-  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^2
+  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
@@ -88,6 +54,6 @@ script:
   - moodle-plugin-ci validate
   - moodle-plugin-ci savepoints
   - moodle-plugin-ci mustache
-  - moodle-plugin-ci grunt || [ "$DIFFERENT_GRUNT" = 'yes' ]
+  - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat
