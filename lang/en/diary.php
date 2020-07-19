@@ -113,6 +113,7 @@ $string['removemessages'] = 'Remove all Diary entries';
 $string['returnto'] = 'Return to {$a}';
 $string['saveallfeedback'] = 'Save all my feedback';
 $string['savesettings'] = 'Save settings';
+$string['selectentry'] = 'Select entry for marking';
 $string['showrecentactivity'] = 'Show recent activity';
 $string['showoverview'] = 'Show diarys overview on my moodle';
 $string['sortorder'] = '<h4>Sort order is: </h4>';
