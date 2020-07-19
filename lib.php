@@ -62,10 +62,11 @@ function diary_add_instance($diary) {
 
 /**
  * CHECKED! - MAY NEED MORE WORK.
- * 8/4/19 Changed all $data to $diary.
+ * 20190804 Changed all $data to $diary.
  *
  * Given an object containing all the necessary diary data,
  * will update an existing instance with new diary data.
+ *
  * @param object $diary Object containing required diary properties
  * @return boolean True if successful
  */
@@ -201,6 +202,8 @@ function diary_get_post_actions() {
 
 /**
  * Returns a summary of data activity of this user.
+ *
+ * Not used yet, as of 20200718.
  *
  * @global object
  * @param object $course
@@ -741,7 +744,7 @@ print_object($grade);
 
 
 /**
- * CHECKED! 8/4/19
+ * CHECKED! 20190804
  *
  * Update/create grade item for given diary.
  *
@@ -749,8 +752,9 @@ print_object($grade);
  * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-//function diary_grade_item_update($diary, $grades=null) {
-function diary_grade_item_update($diary, $grades) {
+// 20200718 Had to switch back to first one as I need the null.
+function diary_grade_item_update($diary, $grades=null) {
+//function diary_grade_item_update($diary, $grades) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
@@ -1036,131 +1040,9 @@ function diary_format_entry_text($entry, $course = false, $cm = false) {
 }
 
 /**
- * Prints the currently selected diary entry of student identified as $user, on the report page.
+ * Set current diary entry to show for current user.
  *
- * @param integer $course
- * @param integer $user
- * @param integer $entry
- * @param integer $teachers
- * @param integer $grades
- */
-function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
-print_object('1 in function diary_print_user_entry and printing $course, $diary, $user, $entry, $teachers, $grades');
-//print_object($course);
-//print_object($diary);
-//print_object($user);
-//print_object($entry); // This has the goodies I need in it.
-print_object($entry->rating); // This has the goodies I need in it.
-//print_object($teachers);
-//print_object($grades);
-    global $USER, $OUTPUT, $DB, $CFG;
-
-    require_once($CFG->dirroot.'/lib/gradelib.php');
-    $dcolor3 = get_config('mod_diary', 'entrybgc');
-    $dcolor4 = get_config('mod_diary', 'entrytextbgc');
-
-    echo "\n<table class=\"diaryuserentry\" id=\"entry-" . $user->id . "\" bgcolor=\"$dcolor4\">";
-
-    echo "\n<tr>";
-    echo "\n<td class=\"userpix\" rowspan=\"2\">";
-    echo $OUTPUT->user_picture($user, array('courseid' => $course->id, 'alttext' => true));
-    echo "</td>";
-    echo "<td class=\"userfullname\">".fullname($user);
-    if ($entry) {
-        echo " <span class=\"lastedit\">".get_string("timecreated", 'diary').':  '.userdate($entry->timecreated).' '.get_string("lastedited").": ".userdate($entry->timemodified)." </span>";
-    }
-
-    echo "</td>";
-    echo "</tr>";
-
-    echo "\n<tr><td>";
-//print_object('1 in function diary_print_user_entry and printing $entry');
-//print_object($entry);
-
-    // If there is a user entry, format it and show it.
-    if ($entry) {
-        echo diary_format_entry_text($entry, $course);
-    } else {
-        print_string("noentry", "diary");
-    }
-    echo "</td></tr>";
-
-    // If there is a user entry, add a teacher feedback area for grade and comments. Add previous grades and comments, if available.
-    if ($entry) {
-        echo "\n<tr>";
-        echo "<td class=\"userpix\">";
-        if (!$entry->teacher) {
-            $entry->teacher = $USER->id;
-        }
-        if (empty($teachers[$entry->teacher])) {
-            $teachers[$entry->teacher] = $DB->get_record('user', array('id' => $entry->teacher));
-        }
-        echo $OUTPUT->user_picture($teachers[$entry->teacher], array('courseid' => $course->id, 'alttext' => true));
-        echo "</td>";
-        echo "<td>".get_string("feedback").":";
-
-        $attrs = array();
-        $hiddengradestr = '';
-        $gradebookgradestr = '';
-        $feedbackdisabledstr = '';
-        $feedbacktext = $entry->entrycomment;
-
-        // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
-        $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($user->id));
-print_object('2 in function diary_print_user_entry and printing $gradinginfo');
-print_object($gradinginfo);
-        if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
-            if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked || $gradinginfo->items[0]->grades[$user->id]->overridden) {
-                $attrs['disabled'] = 'disabled';
-                $hiddengradestr = '<input type="hidden" name="r'.$entry->id.'" value="'.$entry->rating.'"/>';
-                $gradebooklink = '<a href="'.$CFG->wwwroot.'/grade/report/grader/index.php?id='.$course->id.'">';
-                $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade.'</a>';
-                $gradebookgradestr = '<br/>'.get_string("gradeingradebook", "diary").':&nbsp;'.$gradebooklink;
-
-                $feedbackdisabledstr = 'disabled="disabled"';
-                $feedbacktext = $gradinginfo->items[0]->grades[$user->id]->str_feedback;
-            }
-        }
-
-        // Grade selector.
-        $attrs['id'] = 'r' . $entry->id;
-//print_object('3 in function diary_print_user_entry and printing $attrs and $entry');
-//print_object($attrs);
-//print_object($entry);
-        echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array('class' => 'accesshide'));
-//print_object($diary->assessed);
-        if ($diary->assessed > 0){
-            echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
-        }
-        echo $hiddengradestr;
-//print_object('4 in function diary_print_user_entry and printing $hiddengradestr');
-//print_object($hiddengradestr);
-        // Rewrote next three lines to show entry needs to be regraded due to resubmission.
-        if (!empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
-            echo " <span class=\"needsedit\">".get_string("needsregrade", "diary"). " </span>";
-        } else if ($entry->timemarked) {
-            echo " <span class=\"lastedit\">".userdate($entry->timemarked)." </span>";
-        }
-        echo $gradebookgradestr;
-//print_object('5 in function diary_print_user_entry and printing $gradebookgradestr');
-//print_object($gradebookgradestr);
-
-        // Feedback text.
-        echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array('class' => 'accesshide'));
-        echo "<p><textarea id=\"c$entry->id\" name=\"c$entry->id\" rows=\"12\" cols=\"60\" $feedbackdisabledstr>";
-        p($feedbacktext);
-        echo "</textarea></p>";
-
-        if ($feedbackdisabledstr != '') {
-            echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
-        }
-        echo "</td></tr>";
-    }
-    echo "</table>\n";
-}
-
-/**
- * Set current entry to show. VERIFY AND DELETE IF NOT USING THIS FUNCTION AFTER ALL.
+ * VERIFY AND DELETE IF NOT USING THIS FUNCTION AFTER ALL.
  * @param int $entryid
  */
 function set_currententry($entryid = -1) {
@@ -1201,127 +1083,6 @@ function set_currententry($entryid = -1) {
         $this->nextentry = null;
     }
     return $entryid;
-}
-
-/**
- * Download entries in this diary activity.
- *
- * @param array $array
- * @param string $filename - The filename to use.
- * @param string $delimiter - The character to use as a delimiter.
- * @return nothing
- */
-//function download_entries($array, $filename = "export.csv", $delimiter=";") {
-function download_entries($context, $course, $id, $diary) {
-    $filename = "export.csv";
-    $delimiter=";";
-
-    global $CFG, $DB, $USER;
-    require_once($CFG->libdir.'/csvlib.class.php');
-    $data = new StdClass();
-    $data->diary = $diary->id;
-    //$context = context_module::instance($diary->id);
-    // Trigger download_diary_entries event.
-    $event = \mod_diary\event\download_diary_entries::create(array(
-        'objectid' => $data->diary,
-        'context' => $context
-    ));
-    $event->trigger();
-
-    // Construct sql query and filename based on admin, teacher, or student.
-    // Add filename details based on course and Diary activity name.
-    $csv = new csv_export_writer();
-    $strdiary = get_string('pluginname', 'diary');
-    $whichuser = ''; // Leave blank for an admin or teacher.
-    if (is_siteadmin($USER->id)) {
-        $whichdiary = ('AND d.diary > 0');
-        $csv->filename = clean_filename(get_string('exportfilenamep1', 'diary'));
-    } elseif (has_capability('mod/diary:manageentries', $context)) {
-        $whichdiary = ('AND d.diary = ');
-        $whichdiary .= ($diary->id);
-        $csv->filename = clean_filename(($course->shortname).'_');
-        $csv->filename .= clean_filename(($diary->name));
-    } elseif (has_capability('mod/diary:addentries', $context)) {
-        $whichdiary = ('AND d.diary = ');
-        $whichdiary .= ($diary->id);
-        $whichuser = (' AND d.userid = '.$USER->id);  // Not an admin or teacher so can only get their OWN entries. 
-        $csv->filename = clean_filename(($course->shortname).'_');
-        $csv->filename .= clean_filename(($diary->name));
-    }
-    $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary').gmdate("Ymd_Hi").'GMT.csv');
-
-    $fields = array();
-
-    $fields = array(get_string('firstname'),
-                    get_string('lastname'),
-                    get_string('pluginname', 'diary'),
-                   // get_string('userid', 'diary'),
-                    get_string('userid', 'diary'),
-                    get_string('timecreated', 'diary'),
-                    get_string('timemodified', 'diary'),
-                    get_string('format', 'diary'),
-                    get_string('rating', 'diary'),
-                    get_string('entrycomment', 'diary'),
-                    get_string('teacher', 'diary'),
-                    get_string('timemarked', 'diary'),
-                    get_string('mailed', 'diary'),
-                    get_string('text', 'diary'));
-    // Add the headings to our data array.
-    $csv->add_data($fields);
-    if ($CFG->dbtype == 'pgsql') {
-        $sql = "SELECT d.id AS entry,
-                       u.firstname AS firstname,
-                       u.lastname AS lastname,
-                       d.diary AS diary,
-                       d.userid AS userid,
-                       to_char(to_timestamp(d.timecreated), 'YYYY-MM-DD HH24:MI:SS') AS timecreated,
-                       to_char(to_timestamp(d.timemodified), 'YYYY-MM-DD HH24:MI:SS') AS timemodified,
-                       d.text AS text,
-                       d.format AS format,
-                       d.rating AS rating,
-                       d.entrycomment AS entrycomment,
-                       d.teacher AS teacher,
-                       to_char(to_timestamp(d.timemarked), 'YYYY-MM-DD HH24:MI:SS') AS timemarked,
-                       d.mailed AS mailed
-                FROM {diary_entries} d
-                JOIN {user} u ON u.id = d.userid
-                WHERE d.userid > 0 ";
-    } else {
-        $sql = "SELECT d.id AS entry,
-                       u.firstname AS 'firstname',
-                        u.lastname AS 'lastname',
-                        d.diary AS diary,
-                        d.userid AS userid,
-                        FROM_UNIXTIME(d.timecreated) AS TIMECREATED,
-                        FROM_UNIXTIME(d.timemodified) AS TIMEMODIFIED,
-                        d.text AS text,
-                        d.format AS format,
-                        d.rating AS rating,
-                        d.entrycomment AS entrycomment,
-                        d.teacher AS teacher,
-                        FROM_UNIXTIME(d.timemarked) AS TIMEMARKED,
-                        d.mailed AS mailed
-                    FROM {diary_entries} d
-                    JOIN {user} u ON u.id = d.userid
-                    WHERE d.userid > 0 ";
-    }
-
-    $sql .= ($whichdiary);
-    $sql .= ($whichuser);
-    $sql .= "     GROUP BY u.lastname, u.firstname, d.diary, d.id
-                  ORDER BY u.lastname ASC, u.firstname ASC, d.diary ASC, d.id ASC";
-
-    // Add the list of users and diarys to our data array.
-    if ($ds = $DB->get_records_sql($sql, $fields)) {
-        foreach ($ds as $d) {
-            $output = array($d->firstname, $d->lastname, $d->diary, $d->userid, $d->timecreated, $d->timemodified, $d->format,
-            $d->rating, $d->entrycomment, $d->teacher, $d->timemarked, $d->mailed, $d->text);
-            $csv->add_data($output);
-        }
-    }
-    // Download the completed array.
-    $csv->download_file();
-    exit;
 }
 
 /**
