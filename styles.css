@@ -23,21 +23,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 
-#page-mod-diary-view .feedbackbox {
-  width: 75%;
+#page-mod-diary-view .feedbackbox { /* Used in renderer.php. */
+  width: 85%;
   border-collapse: separate;
 }
-#page-mod-diary-view .entrycontent {
+#page-mod-diary-view .entrycontent { /* Used in renderer.php. */
   padding: 3px;
 }
-#page-mod-diary-view .picture {
+#page-mod-diary-view .picture { /* Used in renderer.php with left. */
   width: 35px;
 }
-#page-mod-diary-view .info {
+#page-mod-diary-view .info { /* Cannot find this in use, anywhere. */
   margin-bottom: 5px;
   text-align: right;
 }
-#page-mod-diary-view .diarystart,
+#page-mod-diary-view .diarystart, /* Used in view.php. */
 #page-mod-diary-report .feedbacksave {
   text-align: center;
 }
@@ -90,7 +90,7 @@
 }
 
 #page-mod-diary-report .diaryuserentry {
-  border: 1px solid #000000;
+  /*border: 1px solid #000000;*/
   border-collapse: collapse;
   border-spacing: 0;
 }
@@ -119,4 +119,9 @@
   width: 100% !important;
 }
 
+#lastedit {
+  font-size: 0.7em;
+  margin: 5px;
+  text-align: center;
+}
 
