@@ -22,6 +22,7 @@
  * @copyright  2019 AL Rachels (drachels@drachels.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
+use \mod_diary\local\results;
 
 require_once("../../config.php");
 require_once("lib.php");
@@ -85,7 +86,7 @@ if (!empty($action)) {
         case 'download':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Call download entries function in lib.php.
-                download_entries($context, $course, $id, $diary);
+                results::download_entries($context, $course, $id, $diary);
             }
             break;
 
@@ -248,7 +249,7 @@ if ($timenow > $timestart) {
                , get_string('startoredit', 'diary'), 'get',
                array("class" => "singlebutton diarystart"));
             // Print user toolbar icons.
-            //echo get_string('usertoolbar', 'diary');
+            echo ' '.get_string('usertoolbar', 'diary');
             echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey);
 
 ////////////////////////////////////////////////////////
@@ -316,9 +317,14 @@ if ($timenow > $timestart) {
                     , array('class' => 'toolbutton'));
 
                 // Add a heading for each entry on the page.
-                //echo $OUTPUT->heading(get_string('entry', 'diary').' Might want to add mm/dd/yyyy.');
-                echo $OUTPUT->heading(get_string('entry', 'diary').' - '.date(get_config('mod_diary', 'dateformat'), $entry->timecreated).' testing '.$editthisentry);
-                //echo $OUTPUT->heading(get_string('entry', 'diary'));
+                // echo $OUTPUT->heading(get_string('entry', 'diary').' Might want to add mm/dd/yyyy.');
+                echo $OUTPUT->heading(get_string('entry', 'diary').' - '
+                    // .date(get_config('mod_diary', 'dateformat'), $entry->timecreated)
+                    .date('M d, Y', $entry->timecreated)
+                    .'  '.$editthisentry);
+
+
+                // echo $OUTPUT->heading(get_string('entry', 'diary'));
 
                 // Start an inner division for the user's text entry container.
                 echo '<div align="left" style="font-size:1em; padding: 5px;
@@ -329,21 +335,24 @@ if ($timenow > $timestart) {
                     border-radius:16px;">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
-                //echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
+                // echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
                 echo diary_format_entry_text($entry, $course, $cm).'</div></p>';
 
                 // Info regarding last edit and word count.
                 if ($timenow < $timefinish) {
                     if (!empty($entry->timemodified)) {
 
-                        echo '<div class="lastedit"><strong>Details: </strong> ('.get_string('numwords', '', count_words($entry->text)).') '.get_string('created', 'diary', ['one' => $diff->days, 'two' => $diff->h]).'<br>';
+                        echo '<div class="lastedit"><strong>Details: </strong> ('
+                           .get_string('numwords', '', count_words($entry->text))
+                           .') '.get_string('created', 'diary', ['one' => $diff->days
+                           , 'two' => $diff->h]).'<br>';
 
                         echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
-                        //echo userdate($entry->timecreated).'<br>';
+                        // echo userdate($entry->timecreated).'<br>';
                         echo date(get_config('mod_diary', 'dateformat'), $entry->timecreated).'<br>';
 
                         echo '<strong> '.get_string('lastedited').': </strong> ';
-                        //echo userdate($entry->timemodified).'<br>';
+                        // echo userdate($entry->timemodified).'<br>';
                         echo date(get_config('mod_diary', 'dateformat'), $entry->timemodified).'<br>';
 
                         echo "</div>";
@@ -351,7 +360,9 @@ if ($timenow > $timestart) {
 
                     if (!empty($entry->timecreated) AND !empty($entry->timemodified) AND empty($entry->timemarked)) {
                         echo "<div class=\"needsedit\">".get_string("needsgrading", "diary"). "</div>";
-                    } else if (!empty($entry->timemodified) AND !empty($entry->timemarked) AND $entry->timemodified > $entry->timemarked) {
+                    } else if (!empty($entry->timemodified)
+                        AND !empty($entry->timemarked)
+                        AND $entry->timemodified > $entry->timemarked) {
                         echo "<div class=\"needsedit\">".get_string("needsregrade", "diary"). "</div>";
                     }
 
@@ -367,11 +378,11 @@ if ($timenow > $timestart) {
 
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) or !empty($entry->rating)) {
-                    //$grades = make_grades_menu($diary->grade);
-                    //$grades = make_grades_menu($entry->rating);
+                    // $grades = make_grades_menu($diary->grade);
+                    // $grades = make_grades_menu($entry->rating);
                     // Get the rating for the current entry.
                     $grades = $entry->rating;
-                   // Add a heading for each feedback on the page.
+                    // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
                     // Format output using renderer.php.
                     echo $output->diary_print_feedback($course, $entry, $grades);
