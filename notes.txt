@@ -130,3 +130,5 @@ Diary Support Tracker.
 20200710 Diary_573, Need edit icon for every entry, is now being tested.
 20200812 Diary_510, Need to implement Ratings. Finally seem to have the
     rating system working.
+20200813 Additional changes to Diary Ratings, code cleanup, and
+    bumped the version.
