@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 use stdClass;
 use csv_export_writer;
 use html_writer;
+use context_module;
 
 /**
  * Utility class for Diary results.
@@ -175,19 +176,16 @@ class results  {
         $dcolor3 = get_config('mod_diary', 'entrybgc');
         $dcolor4 = get_config('mod_diary', 'entrytextbgc');
 
-//print_object('1 in function diary_print_user_entry and printing $entry');
-//print_object($entry);
-
         // Create a table for the current users entry with area for teacher feedback.
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
-
-        // Add an entry label followed by the date of the entry.
-        echo '<tr>';
-        echo '<td style="width:35px;">'.get_string('entry', 'diary').'</td><td>';
-        echo date('M d, Y', $entry->timecreated);
-        echo '</td><td></td>';
-        echo '</tr>';
-
+        if ($entry) {
+            // Add an entry label followed by the date of the entry.
+            echo '<tr>';
+            echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
+            echo date(get_config('mod_diary', 'dateformat'), $entry->timecreated);
+            echo '</td><td></td>';
+            echo '</tr>';
+        }
         // Add first of two rows, this one containing details showing the user, timecreated, and time last edited.
         echo '<tr>';
         echo '<td class="userpix" rowspan="2">';
@@ -213,7 +211,7 @@ class results  {
             -moz-border-radius:16px;border-radius:16px;">';
         // If there is a user entry, format it and show it.
         if ($entry) {
-            echo diary_format_entry_text($entry, $course);
+            echo self::diary_format_entry_text($entry, $course);
         } else {
             print_string("noentry", "diary");
         }
@@ -242,8 +240,7 @@ class results  {
 
             // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
             $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($user->id));
-//print_object('2 in function diary_print_user_entry and printing $gradinginfo');
-//print_object($gradinginfo);
+
             if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
                 if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
                     || $gradinginfo->items[0]->grades[$user->id]->overridden) {
@@ -260,17 +257,14 @@ class results  {
 
             // Grade selector.
             $attrs['id'] = 'r' . $entry->id;
-//print_object('3 in function diary_print_user_entry and printing $attrs and $entry');
-//print_object($attrs);
-//print_object($entry);
+
             echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array('class' => 'accesshide'));
-//print_object($diary->assessed);
+
             if ($diary->assessed > 0) {
                 echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
             }
             echo $hiddengradestr;
-//print_object('4 in function diary_print_user_entry and printing $hiddengradestr');
-//print_object($hiddengradestr);
+
             // Rewrote next three lines to show entry needs to be regraded due to resubmission.
             if (!empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
                 echo ' <span class="needsedit">'.get_string("needsregrade", "diary"). ' </span>';
@@ -278,8 +272,6 @@ class results  {
                 echo ' <span class="lastedit">'.userdate($entry->timemarked).' </span>';
             }
             echo $gradebookgradestr;
-//print_object('5 in function diary_print_user_entry and printing $gradebookgradestr');
-//print_object($gradebookgradestr);
 
             // Feedback text.
             echo html_writer::label(fullname($user)." "
@@ -301,14 +293,134 @@ class results  {
     }
 
     /**
+     * Return formatted text.
+     *
+     * @param array $entry
+     * @param array $course
+     * @param array $cm
+     * return format_text
+     */
+    public static function diary_format_entry_text($entry, $course = false, $cm = false) {
+
+        if (!$cm) {
+            if ($course) {
+                $courseid = $course->id;
+            } else {
+                $courseid = 0;
+            }
+            $cm = get_coursemodule_from_instance('diary', $entry->diary, $courseid);
+        }
+
+        $context = context_module::instance($cm->id);
+        $entrytext = file_rewrite_pluginfile_urls($entry->text, 'pluginfile.php', $context->id, 'mod_diary', 'entry', $entry->id);
+
+        $formatoptions = array(
+            'context' => $context,
+            'noclean' => false,
+            'trusted' => false
+        );
+        return format_text($entrytext, $entry->format, $formatoptions);
+    }
+
+    /**
+     * Return the editor and attachment options when editing a diary entry
+     *
+     * @param  stdClass $course  course object
+     * @param  stdClass $context context object
+     * @param  stdClass $entry   entry object
+     * @return array array containing the editor and attachment options
+     * @since  Moodle 3.2
+     */
+    public static function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey) {
+        $maxfiles = 99;                // TODO: add some setting.
+        $maxbytes = $course->maxbytes; // TODO: add some setting.
+
+        $editoroptions = array(
+            'action'   => $action,
+            'firstkey' => $firstkey,
+            'trusttext' => true,
+            'maxfiles' => $maxfiles,
+            'maxbytes' => $maxbytes,
+            'context' => $context,
+            'subdirs' => false,
+        );
+        $attachmentoptions = array(
+            'subdirs' => false,
+            'maxfiles' => $maxfiles,
+            'maxbytes' => $maxbytes
+        );
+
+        return array($editoroptions, $attachmentoptions);
+    }
+
+    /**
      * Check to see if this Diary is available for use.
      *
      * Used in view.php. 20200718 Not found in view.php now.
-     * @param int $diary
+     * @param array $diary
      */
     public static function is_available($diary) {
         $timeopen = $diary->timeopen;
         $timeclose = $diary->timeclose;
         return (($timeopen == 0 || time() >= $timeopen) && ($timeclose == 0 || time    () < $timeclose));
+    }
+
+    /**
+     * Get the latest entry in mdl_diary_entries for the current user.
+     *
+     * Used in lib.php.
+     * @param int $diary        ID of the current Diary activity.
+     * @param int $user         ID of the current user.
+     * @param int $timecreated  Unix time when Diary entry was created.
+     * @param int $timemodified Unix time when Diary entry was last changed.
+     */
+    public static function get_grade_entry($diary, $user, $timecreated, $timemodified) {
+        global $USER, $DB, $CFG;
+        $sql = "SELECT * FROM ".$CFG->prefix."diary_entries".
+               " WHERE diary = ".$diary
+                        ." AND userid = ".$user
+                        ." AND timecreated = ".$timecreated
+                        ." AND timemodified = ".$timemodified.
+               " ORDER BY timecreated";
+
+        if ($rec = $DB->get_record_sql($sql, array())) {
+            return $rec;
+        } else {
+            return null;
+        }
+
+    }
+
+    /**
+     * Check for existing rating entry in mdl_rating for the current user.
+     *
+     * Used in report.php.
+     * @param array $ratingoptions An array of current entry data.
+     * @return array $rec          An entry was found, so return it for update.
+     */
+    public static function check_rating_entry($ratingoptions) {
+        global $USER, $DB, $CFG;
+        $params = array();
+        $params['contextid'] = $ratingoptions->contextid;
+        $params['component'] = $ratingoptions->component;
+        $params['ratingarea'] = $ratingoptions->ratingarea;
+        $params['itemid'] = $ratingoptions->itemid;
+        $params['userid'] = $ratingoptions->userid;
+        $params['timecreated'] = $ratingoptions->timecreated;
+
+        $sql = 'SELECT * FROM '.$CFG->prefix.'rating'.
+               ' WHERE contextid =  ?'
+                .' AND component =  ?'
+                .' AND ratingarea =  ?'
+                .' AND itemid =  ?'
+                .' AND userid =  ?'
+                .' AND timecreated = ?';
+
+        if ($rec = $DB->record_exists_sql($sql, $params)) {
+            $rec = $DB->get_record_sql($sql, $params);
+            return ($rec);
+        } else {
+            return null;
+        }
     }
 }

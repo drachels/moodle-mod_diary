@@ -90,25 +90,24 @@ class mod_diary_renderer extends plugin_renderer_base {
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/export'
             , get_string('csvexport', 'diary'))
             , array('class' => 'toolbutton'));
-                                 
+
         // Print reload toolbutton.
-        $options{'action'} = 'reload';
+        $options['action'] = 'reload';
         $url = new moodle_url('/mod/diary/view.php', $options);
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/reload'
             , get_string('reload', 'diary'))
             , array('class' => 'toolbutton'));
 
         // Print edit entry toolbutton.
-        //$options['id'] = 'editentry';
         $options['action'] = 'editentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/edit.php', $options);
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/edit'
-            , get_string('startoredit', 'diary'))
+            , get_string('edittopoflist', 'diary'))
             , array('class' => 'toolbutton'));
 
         // Print sort to first entry toolbutton.
-        $options{'action'} = 'sortfirstentry';
+        $options['action'] = 'sortfirstentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/left'
@@ -116,7 +115,7 @@ class mod_diary_renderer extends plugin_renderer_base {
             , array('class' => 'toolbutton'));
 
         // Print lowest grade entry toolbutton.
-        $options{'action'} = 'lowestgradeentry';
+        $options['action'] = 'lowestgradeentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/down'
@@ -124,7 +123,7 @@ class mod_diary_renderer extends plugin_renderer_base {
             , array('class' => 'toolbutton'));
 
         // Print highest grade entry toolbutton.
-        $options{'action'} = 'highestgradeentry';
+        $options['action'] = 'highestgradeentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/up'
@@ -132,7 +131,7 @@ class mod_diary_renderer extends plugin_renderer_base {
             , array('class' => 'toolbutton'));
 
         // Print latest modified entry toolbutton.
-        $options{'action'} = 'latestmodifiedentry';
+        $options['action'] = 'latestmodifiedentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
         $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/right'
@@ -147,7 +146,7 @@ class mod_diary_renderer extends plugin_renderer_base {
 
     /**
      * Returns HTML for a diary inaccessible message.
-     * Added 10/2/16
+     * Added 20161002
      * @param string $message
      * @return <type>
      */
@@ -174,8 +173,7 @@ class mod_diary_renderer extends plugin_renderer_base {
      *
      */
     public function diary_print_feedback($course, $entry, $grades) {
-
-        global $CFG, $DB, $OUTPUT;
+        global $CFG, $DB;
 
         require_once($CFG->dirroot.'/lib/gradelib.php');
 
@@ -187,7 +185,7 @@ class mod_diary_renderer extends plugin_renderer_base {
 
         echo '<tr>';
         echo '<td class="left picture">';
-        echo $OUTPUT->user_picture($teacher, array('courseid' => $course->id, 'alttext' => true));
+        echo $this->output->user_picture($teacher, array('courseid' => $course->id, 'alttext' => true));
         echo '</td>';
         echo '<td class="entryheader">';
         echo '<span class="author">'.fullname($teacher).'</span>';
@@ -201,24 +199,8 @@ class mod_diary_renderer extends plugin_renderer_base {
 
         echo '<div class="grade">';
 
-        // Got it working, but it is showing 5 decimal places! REALLY need to figure out how
-        // to make $gradinginfo come up with the right diary_entries record, instead of always
-        // coming up with the last one.
-
-        /////////////////////////////////////////////////////
-        // Need to remove this Gradebook preference section and use it for the activity overall grade.
-        // Will need to make my own individual entry preference.
-
-        // Gradebook preference
+        // Gradebook preference.
         $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array($entry->userid));
-
-        //if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
-        //    echo get_string('grade').': ';
-        //    echo $gradinginfo->items[0]->grades[$entry->userid]->str_long_grade;
-        //} else {
-        //    print_string('nograde');
-        //}
-        //print_object($gradinginfo);
 
         // My preference.
         if (!empty($grades)) {
@@ -233,7 +215,4 @@ class mod_diary_renderer extends plugin_renderer_base {
         echo format_text($entry->entrycomment, FORMAT_PLAIN);
         echo '</td></tr></table>';
     }
-//}
-
-
 }

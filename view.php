@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -63,19 +62,6 @@ if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
 // Ge the name for this diary activity.
 $diaryname = format_string($diary->name, true, array('context' => $context));
 
-/**
-print_object('xxx spacer view 1');
-print_object('xxx spacer view 2');
-print_object('xxx spacer view 3');
-print_object('This is $id, $cm, $course, $action and $diaryname while on view.php page.');
-print_object($id);
-print_object($cm);
-print_object($course);
-print_object($action);
-print_object($diaryname);
- **/
-
-
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
 $output->init($cm);
@@ -94,13 +80,15 @@ if (!empty($action)) {
         case 'reload':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                //$stringlable = 'currententry';
+                // $stringlable = 'currententry';
                 $sortorderinfo = ('<h4>'.get_string('sortcurrententry', 'diary').'</h4>');
-                $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id, 'diary' => $diary->id), $sort = 'timecreated DESC');
+                $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id,
+                                                                  'diary' => $diary->id),
+                                                            $sort = 'timecreated DESC');
                 // This works in php 7.3 only.
-                //$firstkey = array_key_first($entrys);
+                // $firstkey = array_key_first($entrys);
                 $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstValue) {
+                foreach ($entrys as $firstkey => $firstvalue) {
                     break;
                 }
             }
@@ -110,13 +98,15 @@ if (!empty($action)) {
         case 'currententry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                //$stringlable = 'currententry';
+                // $stringlable = 'currententry';
                 $sortorderinfo = ('<h4>'.get_string('sortcurrententry', 'diary').'</h4>');
-                $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id, 'diary' => $diary->id), $sort = 'timecreated DESC');
+                $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id,
+                                                                  'diary' => $diary->id),
+                                                            $sort = 'timecreated DESC');
                 // This works in php 7.3 only.
-                //$firstkey = array_key_first($entrys);
+                // $firstkey = array_key_first($entrys);
                 $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstValue) {
+                foreach ($entrys as $firstkey => $firstvalue) {
                     break;
                 }
             }
@@ -125,11 +115,13 @@ if (!empty($action)) {
         // Sort the list of entries from oldest to newest based on timecreated.
         case 'sortfirstentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                //$stringlable = 'firstentry';
+                // $stringlable = 'firstentry';
                 $sortorderinfo = ('<h4>'.get_string('sortfirstentry', 'diary').'</h4>');
-                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id, 'diary' => $diary->id), $sort = 'timecreated ASC');
+                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
+                                                                  'diary' => $diary->id),
+                                                            $sort = 'timecreated ASC');
                 $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstValue) {
+                foreach ($entrys as $firstkey => $firstvalue) {
                     break;
                 }
             }
@@ -138,11 +130,13 @@ if (!empty($action)) {
         // Sort the list from lowest grade to highest grade. Show ungraded first, from oldest to newest.
         case 'lowestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                //$stringlable = 'lowestgradeentry';
+                // $stringlable = 'lowestgradeentry';
                 $sortorderinfo = ('<h4>'.get_string('sortlowestentry', 'diary').'</h4>');
-                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id, 'diary' => $diary->id), $sort = 'rating ASC, timemodified ASC');
+                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
+                                                                  'diary' => $diary->id),
+                                                            $sort = 'rating ASC, timemodified ASC');
                 $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstValue) {
+                foreach ($entrys as $firstkey => $firstvalue) {
                     break;
                 }
             }
@@ -151,25 +145,29 @@ if (!empty($action)) {
         // Sort list from highest grade to lowest grade. If tie grade, further sort from newest to oldest.
         case 'highestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                //$stringlable = 'highestgradeentry';
+                // $stringlable = 'highestgradeentry';
                 $sortorderinfo = ('<h4>'.get_string('sorthighestentry', 'diary').'</h4>');
-                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id, 'diary' => $diary->id), $sort = 'rating DESC, timecreated DESC');
+                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
+                                                                  'diary' => $diary->id),
+                                                            $sort = 'rating DESC, timecreated DESC');
                 $firstkey = ''; // Fixes error if user has no entries at all.
-                    foreach ($entrys as $firstkey => $firstValue) {
-                        break;
-                    }
+                foreach ($entrys as $firstkey => $firstvalue) {
+                    break;
+                }
             }
             break;
 
         // Sort list from most recently modified to the one modified the longest time ago.
         case 'latestmodifiedentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                //$stringlable = 'latestmodifiedentry';
+                // $stringlable = 'latestmodifiedentry';
                 $sortorderinfo = ('<h4>'.get_string('sortlastentry', 'diary').'</h4>');
                 // May be needed for future version if editing old entries is allowed.
-                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id, 'diary' => $diary->id), $sort = 'timemodified DESC');
+                $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
+                                                                  'diary' => $diary->id),
+                                                            $sort = 'timemodified DESC');
                 $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstValue) {
+                foreach ($entrys as $firstkey => $firstvalue) {
                     break;
                 }
             }
@@ -177,13 +175,13 @@ if (!empty($action)) {
 
         default:
             if (has_capability('mod/diary:addentries', $context)) {
-                 //$stringlable = 'currententry';
+                 // $stringlable = 'currententry';
             }
     }
 }
 
-// Header
-$PAGE->set_url('/mod/diary/view.php', array('id'=>$cm->id));
+// Header.
+$PAGE->set_url('/mod/diary/view.php', array('id' => $cm->id));
 $PAGE->navbar->add($diaryname);
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
@@ -193,17 +191,17 @@ $PAGE->force_settings_menu();
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
-// Check to see if groups are being used here
-$groupmode = groups_get_activity_groupmode($cm);
-$currentgroup = groups_get_activity_group($cm, true);
-groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/view.php?id=$cm->id");
-
 // If viewer is a manager, create a link to report.php showing diary entries made by users.
 if ($entriesmanager) {
+    // Check to see if groups are being used here.
+    $groupmode = groups_get_activity_groupmode($cm);
+    $currentgroup = groups_get_activity_group($cm, true);
+    groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/view.php?id=$cm->id");
+
     $entrycount = diary_count_entries($diary, $currentgroup);
 
     echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">'.
-          get_string('viewallentries','diary', $entrycount).'</a></div>';
+        get_string('viewallentries', 'diary', $entrycount).'</a></div>';
 }
 
 echo $output->introduction($diary, $cm); // Ouput introduction in renderer.php.
@@ -219,19 +217,15 @@ if ($course->format == 'weeks' and $diary->days) {
     } else {
         $timefinish = $course->enddate;
     }
-} else {  
+} else {
     // Have no time limits on the diarys.
     $timestart = $timenow - 1;
     $timefinish = $timenow + 1;
     $diary->days = 0;
 }
 if ($timenow > $timestart) {
-    //echo '<form method="post">';
 
     echo $OUTPUT->box_start();
-    // Toolbar form within the box.
-    //echo '<form method="post">';
-
     // Add Current entry Edit button and user toolbar.
     if ($timenow < $timefinish) {
 
@@ -252,7 +246,6 @@ if ($timenow > $timestart) {
             echo ' '.get_string('usertoolbar', 'diary');
             echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey);
 
-////////////////////////////////////////////////////////
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
 
@@ -260,38 +253,57 @@ if ($timenow > $timestart) {
             $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
 
             if ($perpage < 2) {
-            $perpage = 2;
+                $perpage = 2;
             }
             if ($perpage != $oldperpage) {
                 set_user_preference('diary_perpage_'.$diary->id, $perpage);
             }
 
-            $pagesizes = array(2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,15=>15,
-                       20=>20,30=>30,40=>40,50=>50,100=>100,200=>200,300=>300,400=>400,500=>500,1000=>1000);
+            $pagesizes = array(2 => 2,
+                               3 => 3,
+                               4 => 4,
+                               5 => 5,
+                               6 => 6,
+                               7 => 7,
+                               8 => 8,
+                               9 => 9,
+                               10 => 10,
+                               15 => 15,
+                               20 => 20,
+                               30 => 30,
+                               40 => 40,
+                               50 => 50,
+                               100 => 100,
+                               200 => 200,
+                               300 => 300,
+                               400 => 400,
+                               500 => 500,
+                               1000 => 1000);
             // This creates the dropdown list for how many entries to show on the page.
-            $selection = html_writer::select($pagesizes, 'perpage', $perpage, false, array('id' => 'pref_perpage', 'class' => 'custom-select'));
+            $selection = html_writer::select($pagesizes,
+                                             'perpage',
+                                             $perpage,
+                                             false,
+                                             array('id' => 'pref_perpage',
+                                                   'class' => 'custom-select'));
 
             echo get_string('pagesize', 'diary').': <select onchange="this.form.submit()" name="perpage">';
             echo '<option selected="true" value="'.$selection.'</option>';
             echo '</select>';
             echo '</form>';
 
-///////////////////////////////////////////////////////////////////////////
             echo $output->box_end();
         }
     }
 
     // Display entry with the $DB portion supplied/set by the toolbar.
     if ($entrys) {
-////////////////////////////////
         $thispage = 1;
-//echo $thispage.' and perpage '.$perpage;
-/////////////////////////////////////////
         foreach ($entrys as $entry) {
             if (empty($entry->text)) {
-                echo '<p align="center"><b>'.get_string('blankentry','diary').'</b></p>';
+                echo '<p align="center"><b>'.get_string('blankentry', 'diary').'</b></p>';
 
-            } elseif ($thispage <= $perpage) {
+            } else if ($thispage <= $perpage) {
                 $thispage++;
                 $color3 = get_config('mod_diary', 'entrybgc');
                 $color4 = get_config('mod_diary', 'entrytextbgc');
@@ -312,19 +324,15 @@ if ($timenow > $timestart) {
                 $options['action'] = 'editentry';
                 $options['firstkey'] = $entry->id;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
-                $editthisentry = html_writer::link($url, $output->pix_icon('i/edit'
-                    , get_string('startoredit', 'diary'))
-                    , array('class' => 'toolbutton'));
+                $editthisentry = html_writer::link($url,
+                    $output->pix_icon('i/edit',
+                    get_string('editthisentry', 'diary')),
+                    array('class' => 'toolbutton'));
 
                 // Add a heading for each entry on the page.
-                // echo $OUTPUT->heading(get_string('entry', 'diary').' Might want to add mm/dd/yyyy.');
-                echo $OUTPUT->heading(get_string('entry', 'diary').' - '
-                    // .date(get_config('mod_diary', 'dateformat'), $entry->timecreated)
-                    .date('M d, Y', $entry->timecreated)
+                echo $OUTPUT->heading(get_string('entry', 'diary').': '
+                    .date(get_config('mod_diary', 'dateformat'), $entry->timecreated)
                     .'  '.$editthisentry);
-
-
-                // echo $OUTPUT->heading(get_string('entry', 'diary'));
 
                 // Start an inner division for the user's text entry container.
                 echo '<div align="left" style="font-size:1em; padding: 5px;
@@ -335,8 +343,7 @@ if ($timenow > $timestart) {
                     border-radius:16px;">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
-                // echo diary_format_entry_text($entry->text, $entry->format, array('context' => $context)).'</div></p>';
-                echo diary_format_entry_text($entry, $course, $cm).'</div></p>';
+                echo results::diary_format_entry_text($entry, $course, $cm).'</div></p>';
 
                 // Info regarding last edit and word count.
                 if ($timenow < $timefinish) {
@@ -348,11 +355,9 @@ if ($timenow > $timestart) {
                            , 'two' => $diff->h]).'<br>';
 
                         echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
-                        // echo userdate($entry->timecreated).'<br>';
                         echo date(get_config('mod_diary', 'dateformat'), $entry->timecreated).'<br>';
 
                         echo '<strong> '.get_string('lastedited').': </strong> ';
-                        // echo userdate($entry->timemodified).'<br>';
                         echo date(get_config('mod_diary', 'dateformat'), $entry->timemodified).'<br>';
 
                         echo "</div>";
@@ -378,8 +383,6 @@ if ($timenow > $timestart) {
 
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) or !empty($entry->rating)) {
-                    // $grades = make_grades_menu($diary->grade);
-                    // $grades = make_grades_menu($entry->rating);
                     // Get the rating for the current entry.
                     $grades = $entry->rating;
                     // Add a heading for each feedback on the page.

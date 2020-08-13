@@ -130,9 +130,9 @@ foreach ($diarys as $diary) {
             }
         }
 
-        //$entrycount = diary_count_entries($diary, get_current_group($course->id));
         $entrycount = diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
-        $table->data[$i][] = "<a href=\"report.php?id=$diary->coursemodule\">".get_string("viewallentries", "diary", $entrycount)."</a>";
+        $table->data[$i][] = "<a href=\"report.php?id=$diary->coursemodule\">"
+            .get_string("viewallentries", "diary", $entrycount)."</a>";
     } else if (!empty($managersomewhere)) {
         $table->data[$i][] = "";
     }

@@ -22,6 +22,7 @@
  * @copyright  2019 AL Rachels (drachels@drachels.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
+use \mod_diary\local\results;
 
 require_once("../../config.php");
 require_once('lib.php'); // May not need this.
@@ -99,19 +100,11 @@ if ($action == 'currententry' && $entry) {
 
 $data->id = $cm->id;
 
-// Need options for action and entryid, so they can be used after, Save changes, is clicked.
-/**
-$editoroptions = array(
-    'action'   => $action,
-    'firstkey' => $data->entryid,
-    'maxfiles' => EDITOR_UNLIMITED_FILES,
-    'context' => $context,
-    'subdirs' => false,
-    'enable_filemanagement' => true
-);
-**/
-
-list($editoroptions, $attachmentoptions) = diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey);
+list($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
+                                                                                            $context,
+                                                                                            $entry,
+                                                                                            $action,
+                                                                                            $firstkey);
 
 $data = file_prepare_standard_editor($data,
                                      'text',

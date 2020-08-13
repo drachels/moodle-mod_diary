@@ -41,11 +41,6 @@ class mod_diary_entry_form extends moodleform {
 
         $mform = $this->_form;
 
-        // $mform->addElement('header', 'general', get_string('general', 'form'));
-
-        // $mform->addElement('text', $action);
-        // $mform->setType($action, PARAM_RAW);
-
         $mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'),
                 null, $this->_customdata['editoroptions']);
         $mform->setType('text_editor', PARAM_RAW);
@@ -62,11 +57,6 @@ class mod_diary_entry_form extends moodleform {
 
         $mform->addElement('hidden', 'timecreated');
         $mform->setType('timecreated', PARAM_INT);
-
-        // Maybe use this later. It adds file attachment stuff.
-        // $mform->addElement('file', 'attachment', get_string('attachment', 'forum'));
-        // Maybe use this later. It adds a tags list.
-        // $mform->addElement('tags', 'interests', get_string('interestslist'), array('itemtype' => 'user', 'component' => 'core'));
 
         $this->add_action_buttons();
     }

@@ -23,6 +23,7 @@
  **/
 
 defined('MOODLE_INTERNAL') || die();
+use \mod_diary\local\results;
 
 /**
  * CHECKED! - MAY NEED MORE WORK.
@@ -39,7 +40,7 @@ function diary_add_instance($diary) {
     if (empty($diary->assessed)) {
         $diary->assessed = 0;
     }
-    // 9/17/2019 First one always true as ratingtime does not exist.
+    // 20190917 First one always true as ratingtime does not exist.
     if (empty($diary->ratingtime) || empty($diary->assessed)) {
         $diary->assesstimestart  = 0;
         $diary->assesstimefinish = 0;
@@ -50,7 +51,7 @@ function diary_add_instance($diary) {
     // Will need this later when I implement calendar dates, maybe.
     // diary_update_calendar($diary, $diary->coursemodule);
     // Add calendar events if necessary.
-    //diary_set_events($diary);
+    // diary_set_events($diary);
     if (!empty($diary->completionexpected)) {
         \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $diary->completionexpected);
     }
@@ -89,15 +90,17 @@ function diary_update_instance($diary) {
         $diary->notification = 0;
     }
 
-    $result = $DB->update_record("diary", $diary);
+    //$result = $DB->update_record('diary', $diary);
+    $DB->update_record('diary', $diary);
 
     // Add calendar events if necessary.
-
+    // Check data lib.php line 1106 for what to add here.
     diary_grade_item_update($diary);
 
-    diary_update_grades($diary, 0, false);
+    //diary_update_grades($diary, 0, false);
 
-    return $result;
+    //return $result;
+    return true;
 }
 
 /**
@@ -152,7 +155,7 @@ function diary_supports($feature) {
         case FEATURE_MOD_INTRO:
             return true;
         case FEATURE_GRADE_HAS_GRADE:
-            return true;
+            return false;
         case FEATURE_GRADE_OUTCOMES:
             return false;
         case FEATURE_RATE:
@@ -236,9 +239,6 @@ function diary_user_outline($course, $user, $mod, $diary) {
  * @param object $mod
  * @param object $data
  */
-//////////////////////////////////////////
-// Can't find where this is being used! //
-//////////////////////////////////////////
 function diary_user_complete($course, $user, $mod, $diary) {
     global $DB, $OUTPUT;
 
@@ -250,7 +250,6 @@ function diary_user_complete($course, $user, $mod, $diary) {
             echo "<p><font size=\"1\">".get_string("lastedited").": ".userdate($entry->timemodified)."</font></p>";
         }
         if ($entry->text) {
-            // echo format_text($entry->text, $entry->format);
             echo diary_format_entry_text($entry, $course, $mod);
         }
         if ($entry->teacher) {
@@ -278,7 +277,8 @@ function diary_cron() {
         $timenow = time();
 
         $usernamefields = get_all_user_name_fields();
-        $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, '.implode(', ', $usernamefields);
+        $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, '
+            .implode(', ', $usernamefields);
 
         // To save some db queries.
         $users = array();
@@ -405,7 +405,7 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
                md.name = ?
          ORDER BY u.lastname ASC, u.firstname ASC
     ";
-    // Changed on 06/22/2019 original line 310: ORDER BY de.timemodified ASC
+    // Changed on 20190622 original line 310: ORDER BY de.timemodified ASC.
     $newentries = $DB->get_records_sql($sql, $dbparams);
 
     $modinfo = get_fast_modinfo($course);
@@ -541,11 +541,11 @@ function diary_scale_used ($diaryid, $scaleid) {
 function diary_scale_used_anywhere($scaleid) {
     global $DB;
 
-    //if ($scaleid and $DB->get_records('diary', array('grade' => -$scaleid))) {
-    //    return true;
-   // } else {
+    if (empty($scaleid)) {
         return false;
-    //}
+    }
+
+    return $DB->record_exists('diary', ['scale' => $scaleid * -1]);
 }
 
 /**
@@ -585,7 +585,7 @@ function diary_reset_userdata($data) {
 
     $componentstr = get_string('modulenameplural', 'diary');
     $status = array();
-// THIS FUNCTION NEEDS REWRITE!
+    // THIS FUNCTION NEEDS REWRITE!
     if (!empty($data->reset_diary)) {
 
         $sql = "SELECT d.id
@@ -667,24 +667,21 @@ function diary_print_overview($courses, &$htmlarray) {
 
 /**
  * Get diary grades for a user.
- * CHECKED!
+ *
  * @param object   $diary        if is null, all diarys
  * @param int      $userid       if is false al users
  * @param boolean  $nullifnone   return null if grade does not exist
  */
 function diary_get_user_grades($diary, $userid=0) {
     global $CFG;
-//print_object('in the diary_get_user_grades function 1 and printing $userid and $diary');
-//print_object($userid);
-//print_object($diary);
-    require_once($CFG->dirroot.'/rating/lib.php');
 
+    require_once($CFG->dirroot.'/rating/lib.php');
+    // 20200812 Fixed ratings.
     $ratingoptions = new stdClass;
     $ratingoptions->component = 'mod_diary';
     $ratingoptions->ratingarea = 'entry';
     $ratingoptions->modulename = 'diary';
     $ratingoptions->moduleid   = $diary->id;
-
     $ratingoptions->userid = $userid;
     $ratingoptions->aggregationmethod = $diary->assessed;
     $ratingoptions->scaleid = $diary->scale;
@@ -692,17 +689,12 @@ function diary_get_user_grades($diary, $userid=0) {
     $ratingoptions->itemtableusercolumn = 'userid';
 
     $rm = new rating_manager();
-//print_object('now printing $ratingoptions');
-//print_object($ratingoptions);
-// the following is an empty array.
-//print_object('now printing $rm->get_user_grades');
-//print_object($rm->get_user_grades($ratingoptions));
 
     return $rm->get_user_grades($ratingoptions);
 }
 
 /**
- * CHECKED! 8/4/19
+ * CHECKED! 190804
  * Update diary activity grades.
  *
  * @category grade
@@ -713,32 +705,23 @@ function diary_get_user_grades($diary, $userid=0) {
 function diary_update_grades($diary, $userid=0, $nullifnone=true) {
     global $CFG, $DB;
     require_once($CFG->libdir.'/gradelib.php');
-print_object('made it to diary_update_grades 1 and printing $diary');
-print_object($diary);
-
+    // From forum lib.php line 811, 812.
+    $cm = get_coursemodule_from_instance('diary', $diary->id);
+    $diary->cmidnumber = $cm->idnumber;
     if (!$diary->assessed) {
         diary_grade_item_update($diary);
-print_object('made it to diary_update_grades 2 and printing $diary');
-print_object($diary);
 
     } else if ($grades = diary_get_user_grades($diary, $userid)) {
         diary_grade_item_update($diary, $grades);
-print_object('made it to diary_update_grades 3 and printing $diary and $grades');
-print_object($diary);
-print_object($grades);
 
     } else if ($userid and $nullifnone) {
         $grade = new stdClass();
         $grade->userid   = $userid;
         $grade->rawgrade = null;
         diary_grade_item_update($diary, $grade);
-print_object('made it to diary_update_grades 4 and printing grade');
-print_object($grade);
 
     } else {
         diary_grade_item_update($diary);
-//print_object('made it to diary_update_grades 5');
-
     }
 }
 
@@ -754,48 +737,26 @@ print_object($grade);
  */
 // 20200718 Had to switch back to first one as I need the null.
 function diary_grade_item_update($diary, $grades=null) {
-//function diary_grade_item_update($diary, $grades) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
-    $params = array('itemname'=>$diary->name, 'idnumber'=>$diary->cmidnumber);
-print_object('made it to diary_grade_item_update 00 and printing $grades');
-print_object($grades);
-//print_object('made it to diary_grade_item_update 0 and printing $diary');
-//print_object($diary);
-//print_object('made it to diary_grade_item_update 1 and printing $params');
-//print_object($params);
-
+    $params = array('itemname' => $diary->name, 'idnumber' => $diary->cmidnumber);
 
     if (!$diary->assessed or $diary->scale == 0) {
         $params['gradetype'] = GRADE_TYPE_NONE;
-//print_object('made it to diary_grade_item_update 2 and printing $params');
-//print_object($params);
-
     } else if ($diary->scale > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
         $params['grademax']  = $diary->scale;
         $params['grademin']  = 0;
-//print_object('made it to diary_grade_item_update 3 and printing $params');
-//print_object($params);
-
     } else if ($diary->scale < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
         $params['scaleid']   = -$diary->scale;
-//print_object('made it to diary_grade_item_update 4 and printing $params');
-//print_object($params);
-
     }
 
     if ($grades === 'reset') {
         $params['reset'] = true;
         $grades = null;
     }
-//print_object('here are the $params for diary_grade_item_update 5');
-//print_object($params);
-//print_object('and here are $grades 6');
-//print_object($grades);
-
 
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, $grades, $params);
 }
@@ -841,7 +802,7 @@ function diary_get_users_done($diary, $currentgroup) {
     // However, with DESC, newest entries are at the top, except for admin?
     // $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";
 
-    // Modified 06/15/2019 to give alphabetical listing on report.php page.
+    // Modified 20190615 to give alphabetical listing on report.php page.
     $sql .= " WHERE de.diary = ? ORDER BY u.lastname ASC, u.firstname ASC";
 
     $params[] = $diary->id;
@@ -1013,33 +974,6 @@ function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownlo
 }
 
 /**
- * Return formatted text.
- *
- * return
- */
-function diary_format_entry_text($entry, $course = false, $cm = false) {
-
-    if (!$cm) {
-        if ($course) {
-            $courseid = $course->id;
-        } else {
-            $courseid = 0;
-        }
-        $cm = get_coursemodule_from_instance('diary', $entry->diary, $courseid);
-    }
-
-    $context = context_module::instance($cm->id);
-    $entrytext = file_rewrite_pluginfile_urls($entry->text, 'pluginfile.php', $context->id, 'mod_diary', 'entry', $entry->id);
-
-    $formatoptions = array(
-        'context' => $context,
-        'noclean' => false,
-        'trusted' => false
-    );
-    return format_text($entrytext, $entry->format, $formatoptions);
-}
-
-/**
  * Set current diary entry to show for current user.
  *
  * VERIFY AND DELETE IF NOT USING THIS FUNCTION AFTER ALL.
@@ -1083,37 +1017,4 @@ function set_currententry($entryid = -1) {
         $this->nextentry = null;
     }
     return $entryid;
-}
-
-/**
- * Return the editor and attachment options when editing a diary entry
- *
- * @param  stdClass $course  course object
- * @param  stdClass $context context object
- * @param  stdClass $entry   entry object
- * @return array array containing the editor and attachment options
- * @since  Moodle 3.2
- */
-function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey) {
-    $maxfiles = 99;                // TODO: add some setting.
-    $maxbytes = $course->maxbytes; // TODO: add some setting.
-
-    $editoroptions = array(
-        //'entryid' => $entry->id,
-        'action'   => $action,
-        'firstkey' => $firstkey,
-        'trusttext' => true,
-        'maxfiles' => $maxfiles,
-        'maxbytes' => $maxbytes,
-        'context' => $context,
-        //'subdirs' => file_area_contains_subdirs($context, 'mod_diary', 'entry', $entry->id)
-        'subdirs' => false,
-    );
-    $attachmentoptions = array(
-        'subdirs' => false,
-        'maxfiles' => $maxfiles,
-        'maxbytes' => $maxbytes
-    );
-
-    return array($editoroptions, $attachmentoptions);
 }

@@ -112,7 +112,6 @@ $PAGE->set_title(get_string("modulenameplural", "diary"));
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
-//echo $OUTPUT->heading(get_string("entries", "diary"));
 echo $OUTPUT->heading(get_string($stringlable, "diary"));
 
 // Get a list of groups for this course.
@@ -124,42 +123,8 @@ if ($currentgroup) {
 }
 
 // Get a sorted list of users in the current group to use for processing the report.
-$users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort='lastname ASC, firstname ASC', '', '', $groups);
+$users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort = 'lastname ASC, firstname ASC', '', '', $groups);
 
-// Process the list of users so we have current, previous, and next entry, for each user.
-//foreach ($users as $cur) {
-//print_object($cur->firstname.' '.$cur->lastname);
-//print_object($cur);
-//}
-
-// Make some easy ways to access entries.
-// Sort on different fields will give different results.
-
-// Works - This gets the entries in timemodified order from newest to oldest and therefore, shows the oldest timemodified.
-// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timemodified DESC')) {
-
-// Works - This gets the entries in timecreated order from newest to oldest and therefore, shows the oldest timecreated.
-//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timecreated DESC')) {
-
-// Works - This gets LOWEST graded entries.
-// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating DESC')) {
-// This gets HIGHEST graded entries.
-//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating ASC')) {
-
-//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'timemodified ASC, rating ASC')) {
-//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id), $sort = 'rating ASC')) {
-// NO - if ($eee = $DB->get_records_select("diary_entries", $select = "(timecreated > 0 AND rating = null) OR (timemodified > timemarked) OR (timecreated > 0)", array("diary" => $diary->id), $sort = 'rating DESC')) {
-
-// Works -  By default, this gets the most recent entry.
-// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id))) {
-
-// This is dev one trying to use pre and next...
-// if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id, "userid" => $cur->id))) {
-
-    //$deids = array_keys($eee);  // Get the table id's of all entries in $eee for current users of this diary.
-    //print_object($deids);
-
-//if ($eee = $DB->get_records("diary_entries", array("diary" => $diary->id))) {
 if ($eee) {
     // Now, filter down to get entry by any user who has made at least one entry.
     foreach ($eee as $ee) {
@@ -168,8 +133,8 @@ if ($eee) {
         $entrybyuserentry[$ee->userid][$ee->id] = $ee;
     }
 } else {
-    $entrybyuser  = array () ;
-    $entrybyentry = array () ;
+    $entrybyuser  = array ();
+    $entrybyentry = array ();
 }
 
 // Process incoming data if there is any.
@@ -177,15 +142,10 @@ if ($data = data_submitted()) {
     confirm_sesskey();
     $feedback = array();
     $data = (array)$data;
-// My single data entry contains id, sesskey, and three other items,entry, feedback, and ???
-// print_object('00 before the foreach loop checking $data');
-// print_object($data);
+    // My single data entry contains id, sesskey, and three other items,entry, feedback, and ???
+
     // Peel out all the data from variable names.
     foreach ($data as $key => $val) {
-// print_object('0 in the foreach loop checking $val');
-// print_object($val);
-// print_object('0 in the foreach loop checking $key');
-// print_object($key);
         if (strpos($key, 'r') === 0 || strpos($key, 'c') === 0) {
             $type = substr($key, 0, 1);
             $num  = substr($key, 1);
@@ -216,48 +176,47 @@ if ($data = data_submitted()) {
             $newentry->entrycomment = $studentcomment;
             $newentry->teacher      = $USER->id;
             $newentry->timemarked   = $timenow;
-            $newentry->mailed       = 0; // Make sure mail goes out (again, even)
+            $newentry->mailed       = 0; // Make sure mail goes out (again, even).
             $newentry->id           = $num;
             if (!$DB->update_record("diary_entries", $newentry)) {
                 notify("Failed to update the diary feedback for user $entry->userid");
             } else {
                 $count++;
             }
-            $entrybyuser[$entry->userid]->rating     = $studentrating;
-            $entrybyuser[$entry->userid]->entrycomment    = $studentcomment;
-            $entrybyuser[$entry->userid]->teacher    = $USER->id;
+            $entrybyuser[$entry->userid]->rating = $studentrating;
+            $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
+            $entrybyuser[$entry->userid]->teacher = $USER->id;
             $entrybyuser[$entry->userid]->timemarked = $timenow;
 
             $records[$entry->id] = $entrybyuser[$entry->userid];
-            // print_object('1 In the if $ratingchanged and printing $newentry and $entrybyuser[$entry->userid]');
-            // print_object($newentry);
-            // print_object($records);
 
+            // Compare to database view.php line 465.
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
-
-                // print_object('2 In the if assessed and printing $diary->assessed');
-                // print_object($diary->assessed);
-
+                // 20200812 Added rating code and got it working.
                 $ratingoptions = new stdClass;
-                $ratingoptions->context = $context;
+                $ratingoptions->contextid = $context->id;
                 $ratingoptions->component = 'mod_diary';
                 $ratingoptions->ratingarea = 'entry';
-                // Need to do something similar to the database activity where a $records array is generated by a locallib function.
-                $ratingoptions->items = $records;
-                // $ratingoptions->items = $entrybyuser[$entry->userid];
-                // $ratingoptions->items = $entry;
-                $ratingoptions->aggregate = $diary->assessed;//the aggregation method
+                $ratingoptions->itemid = $entry->id;
+                $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
                 $ratingoptions->scaleid = $diary->scale;
-                $ratingoptions->userid = $USER->id;
+                $ratingoptions->rating = $entry->rating;
+                $ratingoptions->userid = $entry->userid;
+                $ratingoptions->timecreated = $entry->timecreated;
+                $ratingoptions->timemodified = $entry->timemodified;
                 // $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/'.$url;
                 $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/report.php?id'.$id;
                 // $PAGE->set_url('/mod/diary/report.php', array('id' => $id));
 
                 $ratingoptions->assesstimestart = $diary->assesstimestart;
                 $ratingoptions->assesstimefinish = $diary->assesstimefinish;
-
-                //print_object('3 In the if assessed and printing $ratingoptions');
-                //print_object($ratingoptions);
+                // 20200813 Check if there is already a rating, and if so, just update it.
+                if ($rec = results::check_rating_entry($ratingoptions)) {
+                    $ratingoptions->id = $rec->id;
+                    $DB->update_record('rating', $ratingoptions, false);
+                } else {
+                    $DB->insert_record('rating', $ratingoptions, false);
+                }
 
                 $rm = new rating_manager();
                 //$records = $rm->get_ratings($ratingoptions);
@@ -315,7 +274,6 @@ if (!$users) {
                        , array('class' => 'toolbutton'));
 
         // Add reload toolbutton.
-        //$options{'action'} = 'reload'; 
         $options['action'] = $stringlable;
         $url = new moodle_url('/mod/diary/report.php', $options);
         $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/reload'
@@ -398,9 +356,6 @@ if (!$users) {
             // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
             echo results::diary_print_user_entry($course, $diary, $user, $entrybyuser[$user->id], $teachers, $grades);
             echo '</div>';
-
-//print_object('print $grades');
-//print_object($grades);
 
             // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
             echo $saveallbutton;
