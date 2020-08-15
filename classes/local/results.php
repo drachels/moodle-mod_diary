@@ -423,4 +423,40 @@ class results  {
             return null;
         }
     }
+
+    /**
+     * Check for existing rating entry in mdl_rating for the current user.
+     *
+     * Used in view.php.
+     * @param int $aggregate The Diary rating method.
+     * @return string $aggregatestr   Return the language string for the rating method.
+     */
+    public static function get_diary_aggregation($aggregate) {
+        $aggregatestr = null;
+        switch($aggregate) {
+            case 0:
+                $aggregatestr = get_string('aggregatenone', 'rating');
+                break;
+            case 1:
+                $aggregatestr = get_string('aggregateavg', 'rating');
+                break;
+            case 2:
+                $aggregatestr = get_string('aggregatecount', 'rating');
+                break;
+            case 3:
+                $aggregatestr = get_string('aggregatemax', 'rating');
+                break;
+            case 4:
+                $aggregatestr = get_string('aggregatemin', 'rating');
+                break;
+            case 5:
+                $aggregatestr = get_string('aggregatesum', 'rating');
+                break;
+            default:
+                $aggregatestr = 'AVG'; // Default to this to avoid real breakage - MDL-22270.
+                    debugging('Incorrect call to get_aggregation_method(), incorrect aggregate method '
+                    . $aggregate, DEBUG_DEVELOPER);
+        }
+        return $aggregatestr;
+    }
 }

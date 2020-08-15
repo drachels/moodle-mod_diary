@@ -204,9 +204,7 @@ if ($data = data_submitted()) {
                 $ratingoptions->userid = $entry->userid;
                 $ratingoptions->timecreated = $entry->timecreated;
                 $ratingoptions->timemodified = $entry->timemodified;
-                // $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/'.$url;
                 $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/report.php?id'.$id;
-                // $PAGE->set_url('/mod/diary/report.php', array('id' => $id));
 
                 $ratingoptions->assesstimestart = $diary->assesstimestart;
                 $ratingoptions->assesstimefinish = $diary->assesstimefinish;
@@ -218,8 +216,8 @@ if ($data = data_submitted()) {
                     $DB->insert_record('rating', $ratingoptions, false);
                 }
 
-                $rm = new rating_manager();
-                //$records = $rm->get_ratings($ratingoptions);
+                // $rm = new rating_manager();.
+                // $records = $rm->get_ratings($ratingoptions);.
             }
 
             $diary = $DB->get_record("diary", array("id" => $entrybyuser[$entry->userid]->diary));

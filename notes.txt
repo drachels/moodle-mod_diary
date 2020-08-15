@@ -132,3 +132,5 @@ Diary Support Tracker.
     rating system working.
 20200813 Additional changes to Diary Ratings, code cleanup, and
     bumped the version.
+20200815 Diary_510,  Diary - Need to implement Ratings. Added Rating
+    type and rating to view.php page.

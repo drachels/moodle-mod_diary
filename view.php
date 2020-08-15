@@ -81,7 +81,7 @@ if (!empty($action)) {
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
                 // $stringlable = 'currententry';
-                $sortorderinfo = ('<h4>'.get_string('sortcurrententry', 'diary').'</h4>');
+                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
                 $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
                                                             $sort = 'timecreated DESC');
@@ -99,7 +99,7 @@ if (!empty($action)) {
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
                 // $stringlable = 'currententry';
-                $sortorderinfo = ('<h4>'.get_string('sortcurrententry', 'diary').'</h4>');
+                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
                 $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
                                                             $sort = 'timecreated DESC');
@@ -116,7 +116,7 @@ if (!empty($action)) {
         case 'sortfirstentry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // $stringlable = 'firstentry';
-                $sortorderinfo = ('<h4>'.get_string('sortfirstentry', 'diary').'</h4>');
+                $sortorderinfo = ('<h5>'.get_string('sortfirstentry', 'diary').'</h5>');
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
                                                             $sort = 'timecreated ASC');
@@ -131,7 +131,7 @@ if (!empty($action)) {
         case 'lowestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // $stringlable = 'lowestgradeentry';
-                $sortorderinfo = ('<h4>'.get_string('sortlowestentry', 'diary').'</h4>');
+                $sortorderinfo = ('<h5>'.get_string('sortlowestentry', 'diary').'</h5>');
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
                                                             $sort = 'rating ASC, timemodified ASC');
@@ -146,7 +146,7 @@ if (!empty($action)) {
         case 'highestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // $stringlable = 'highestgradeentry';
-                $sortorderinfo = ('<h4>'.get_string('sorthighestentry', 'diary').'</h4>');
+                $sortorderinfo = ('<h5>'.get_string('sorthighestentry', 'diary').'</h5>');
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
                                                             $sort = 'rating DESC, timecreated DESC');
@@ -161,7 +161,7 @@ if (!empty($action)) {
         case 'latestmodifiedentry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // $stringlable = 'latestmodifiedentry';
-                $sortorderinfo = ('<h4>'.get_string('sortlastentry', 'diary').'</h4>');
+                $sortorderinfo = ('<h5>'.get_string('sortlastentry', 'diary').'</h5>');
                 // May be needed for future version if editing old entries is allowed.
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
@@ -223,6 +223,19 @@ if ($course->format == 'weeks' and $diary->days) {
     $timefinish = $timenow + 1;
     $diary->days = 0;
 }
+
+// 20200815 Get the current rating for this user!
+if ($diary->assessed != RATING_AGGREGATE_NONE) {
+    $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
+    $gradeitemgrademax = $gradinginfo->items[0]->grademax;
+    $userfinalgrade = $gradinginfo->items[0]->grades[$USER->id];
+    $currentuserrating = $userfinalgrade->str_long_grade;
+} else {
+    $currentuserrating = '';
+}
+
+$aggregatestr = results::get_diary_aggregation($diary->assessed);
+
 if ($timenow > $timestart) {
 
     echo $OUTPUT->box_start();
@@ -230,8 +243,10 @@ if ($timenow > $timestart) {
     if ($timenow < $timefinish) {
 
         if ($canadd) {
-            echo get_string('sortorder', 'diary');
-            echo $sortorderinfo;
+            // 20200815 Added type of rating and current rating.
+            echo '<table style="width:100%"><tr><td>'.get_string('sortorder', 'diary').'</td>'
+                .'<td> </td><td><h5>'.$aggregatestr.'</h5></td></tr>';
+            echo '<tr><td>'.$sortorderinfo.'</td><td> </td><td><h5>'.$currentuserrating.' </h5></td></table>';
 
             echo $output->box_start();
 

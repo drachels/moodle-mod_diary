@@ -49,9 +49,9 @@ function diary_add_instance($diary) {
     $diary->id = $DB->insert_record('diary', $diary);
 
     // Will need this later when I implement calendar dates, maybe.
-    // diary_update_calendar($diary, $diary->coursemodule);
+    // diary_update_calendar($diary, $diary->coursemodule);.
     // Add calendar events if necessary.
-    // diary_set_events($diary);
+    // diary_set_events($diary);.
     if (!empty($diary->completionexpected)) {
         \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $diary->completionexpected);
     }
@@ -62,8 +62,6 @@ function diary_add_instance($diary) {
 }
 
 /**
- * CHECKED! - MAY NEED MORE WORK.
- * 20190804 Changed all $data to $diary.
  *
  * Given an object containing all the necessary diary data,
  * will update an existing instance with new diary data.
@@ -90,25 +88,21 @@ function diary_update_instance($diary) {
         $diary->notification = 0;
     }
 
-    //$result = $DB->update_record('diary', $diary);
     $DB->update_record('diary', $diary);
 
     // Add calendar events if necessary.
     // Check data lib.php line 1106 for what to add here.
     diary_grade_item_update($diary);
 
-    //diary_update_grades($diary, 0, false);
-
-    //return $result;
     return true;
 }
 
 /**
- * NEEDS WORK, I THINK, for grade items!
  *
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
  * and any data that depends on it.
+ *
  * @param int $id diary ID
  * @return boolean True if successful
  */
@@ -800,7 +794,7 @@ function diary_get_users_done($diary, $currentgroup) {
     }
     // The old version of this line puts users with new entries at the bottom of report.
     // However, with DESC, newest entries are at the top, except for admin?
-    // $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";
+    // $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";.
 
     // Modified 20190615 to give alphabetical listing on report.php page.
     $sql .= " WHERE de.diary = ? ORDER BY u.lastname ASC, u.firstname ASC";
@@ -971,50 +965,4 @@ function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownlo
 
     // Finally send the file.
     send_stored_file($file, null, 0, $forcedownload, $options);
-}
-
-/**
- * Set current diary entry to show for current user.
- *
- * VERIFY AND DELETE IF NOT USING THIS FUNCTION AFTER ALL.
- * @param int $entryid
- */
-function set_currententry($entryid = -1) {
-    global $DB;
-
-    $entries = $DB->get_records('diary_entries', array('diary' => $this->instance->id), 'id ASC');
-    if (empty($entries)) {
-        // Create the first round.
-        $round = new StdClass();
-        $round->starttime = time();
-        $round->endtime = 0;
-        $round->diary = $this->instance->id;
-        //$round->id = $DB->insert_record('diary_entries', $round);
-        $entries[] = $round;
-    }
-
-    if ($entryid != -1 && array_key_exists($entryid, $entries)) {
-        $this->currententry = $entries[$entryid];
-
-        $ids = array_keys($entries);
-        // Search previous round.
-        $currentkey = array_search($entryid, $ids);
-        if (array_key_exists($currentkey - 1, $ids)) {
-            $this->preventry = $entries[$ids[$currentkey - 1]];
-        } else {
-            $this->preventry = null;
-        }
-        // Search next round.
-        if (array_key_exists($currentkey + 1, $ids)) {
-            $this->nextentry = $entries[$ids[$currentkey + 1]];
-        } else {
-            $this->nextentry = null;
-        }
-    } else {
-        // Use the last round.
-        $this->currententry = array_pop($entries);
-        $this->preventry = array_pop($entries);
-        $this->nextentry = null;
-    }
-    return $entryid;
 }
