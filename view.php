@@ -25,6 +25,7 @@ use \mod_diary\local\results;
 
 require_once("../../config.php");
 require_once("lib.php");
+require_once($CFG->dirroot.'/lib/gradelib.php');
 
 $id = required_param('id', PARAM_INT);    // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
@@ -185,8 +186,11 @@ $PAGE->set_url('/mod/diary/view.php', array('id' => $cm->id));
 $PAGE->navbar->add($diaryname);
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
-// 20190523 Added this to force editing cog to show.
-$PAGE->force_settings_menu();
+
+// 20190523 Added this to force editing cog to show for Boost based themes.
+if ($CFG->branch > 31) {
+    $PAGE->force_settings_menu();
+}
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
@@ -225,7 +229,7 @@ if ($course->format == 'weeks' and $diary->days) {
 }
 
 // 20200815 Get the current rating for this user!
-if ($diary->assessed != RATING_AGGREGATE_NONE) {
+if ($diary->assessed != 'RATING_AGGREGATE_NONE') {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
     $gradeitemgrademax = $gradinginfo->items[0]->grademax;
     $userfinalgrade = $gradinginfo->items[0]->grades[$USER->id];

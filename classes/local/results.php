@@ -202,7 +202,7 @@ class results  {
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
 
-        // Add the secon of two rows, this one containing the users text for this entry.
+        // Add the second of two rows, this one containing the users text for this entry.
         echo '<tr><td>';
         echo '<div align="left" style="font-size:1em; padding: 5px;
             font-weight:bold;background: '.$dcolor4.';
@@ -228,9 +228,22 @@ class results  {
             if (empty($teachers[$entry->teacher])) {
                 $teachers[$entry->teacher] = $DB->get_record('user', array('id' => $entry->teacher));
             }
+
+            // 20200816 Get the current rating for this user!
+            if ($diary->assessed != RATING_AGGREGATE_NONE) {
+                $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
+                $gradeitemgrademax = $gradinginfo->items[0]->grademax;
+                $userfinalgrade = $gradinginfo->items[0]->grades[$user->id];
+                $currentuserrating = $userfinalgrade->str_long_grade;
+            } else {
+                $currentuserrating = '';
+            }
+            $aggregatestr = self::get_diary_aggregation($diary->assessed);
+
             echo $OUTPUT->user_picture($teachers[$entry->teacher], array('courseid' => $course->id, 'alttext' => true));
             echo '</td>';
-            echo '<td>'.get_string("feedback").':  ';
+            //echo '<td>'.get_string("feedback").':  ';
+            echo '<td>'.get_string('rating', 'diary').':  ';
 
             $attrs = array();
             $hiddengradestr = '';
@@ -273,6 +286,9 @@ class results  {
             }
             echo $gradebookgradestr;
 
+            // 20200816 Added overall rating type and rating.
+            echo '<br>'.$aggregatestr.' '.$currentuserrating;
+
             // Feedback text.
             echo html_writer::label(fullname($user)." "
                 .get_string('feedback'), 'c'
@@ -280,7 +296,8 @@ class results  {
             echo '<p><textarea id="c'
                 .$entry->id
                 .'" name="c'.$entry->id
-                .'" rows="12" cols="60" $feedbackdisabledstr>';
+                .'" rows="6" cols="60" $feedbackdisabledstr>';
+                //.'" rows="12" cols="60" $feedbackdisabledstr>';
             echo p($feedbacktext);
             echo '</textarea></p>';
 

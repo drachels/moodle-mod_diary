@@ -38,9 +38,9 @@ function xmldb_diary_upgrade($oldversion=0) {
 
     $result = true;
 
-    if ($result && $oldversion < 2015031200) {
+    if ($result && $oldversion < 2020081600) {
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2015031200, 'diary');
+        upgrade_mod_savepoint(true, 2020081600, 'diary');
     }
 
     return $result;
