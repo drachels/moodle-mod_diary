@@ -228,8 +228,9 @@ if ($course->format == 'weeks' and $diary->days) {
     $diary->days = 0;
 }
 
-// 20200815 Get the current rating for this user!
-if ($diary->assessed != 'RATING_AGGREGATE_NONE') {
+// 20200815 Get the current rating for this user, if this diary is assessed.
+//if ($diary->assessed != 'RATING_AGGREGATE_NONE') {
+if ($diary->assessed != 0) {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
     $gradeitemgrademax = $gradinginfo->items[0]->grademax;
     $userfinalgrade = $gradinginfo->items[0]->grades[$USER->id];

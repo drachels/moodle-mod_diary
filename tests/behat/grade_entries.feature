@@ -23,7 +23,7 @@ Feature: Teacher can view, comment and grade students entries
       | activity | name               | intro            | course | idnumber |
       | diary  | Test diary name  | Diary question | C1     | diary1 |
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course1" course homepage
     And I follow "Test diary name"
     And I press "Start new day or edit current day diary entry"
     And I set the following fields to these values:
@@ -31,7 +31,7 @@ Feature: Teacher can view, comment and grade students entries
     And I press "Save changes"
     And I log out
     And I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course1" course homepage
     And I follow "Test diary name"
     And I should see "Diary question"
     And I press "Start new day or edit current day diary entry"
@@ -40,7 +40,7 @@ Feature: Teacher can view, comment and grade students entries
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course1" course homepage
 
   Scenario: Teacher can access students entries from the diarys list page
     When I follow "Course 1"
@@ -78,7 +78,7 @@ Feature: Teacher can view, comment and grade students entries
     # Check that users see the regraded message
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course1" course homepage
     And I follow "Test diary name"
     And I press "Start new day or edit current day diary entry"
     And I set the following fields to these values:
@@ -87,7 +87,7 @@ Feature: Teacher can view, comment and grade students entries
     And I should see "Entry has changed since last feedback was saved"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course1" course homepage
     And I follow "Test diary name"
     And I follow "View 2 diary entries"
     And I should see "Entry has changed since last feedback was saved" in the "//table[@class='diaryuserentry'][contains(., 'Student 1')]" "xpath_element"

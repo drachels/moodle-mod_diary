@@ -36,7 +36,6 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $data = (Object)$data;
 
-        $oldid = $data->id;
         unset($data->id);
 
         $data->course = $this->get_courseid();

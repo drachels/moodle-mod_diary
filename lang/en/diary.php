@@ -130,7 +130,6 @@ $string['text'] = 'Text';
 $string['timecreated'] = 'Time created';
 $string['timemarked'] = 'Time marked';
 $string['timemodified'] = 'Time modified';
-
 $string['userid'] = 'User id';
 $string['usertoolbar'] = 'User toolbar:';
 $string['viewallentries'] = 'View {$a} diary entries';

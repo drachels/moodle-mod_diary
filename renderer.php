@@ -24,7 +24,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * A custmom renderer class that extends the plugin_renderer_base and is used by the diary module.
+ * A custom renderer class that extends the plugin_renderer_base and is used by the diary module.
  *
  * @package   mod_diary
  * @copyright 2019 onwards AL Rachels drachels@drachels.com
@@ -39,7 +39,7 @@ class mod_diary_renderer extends plugin_renderer_base {
     private $diary;
 
     /**
-     * Initialise internal objects.
+     * Initialize internal objects.
      *
      * @param object $diary
      */
