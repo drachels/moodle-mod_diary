@@ -31,6 +31,7 @@ $id = required_param('id', PARAM_INT);    // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
 $action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(default to current entry).
+$search = optional_param('search', '', PARAM_CLEAN);
 
 if (! $cm) {
     print_error('invalidcoursemodule');
@@ -186,6 +187,8 @@ $PAGE->set_url('/mod/diary/view.php', array('id' => $cm->id));
 $PAGE->navbar->add($diaryname);
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
+//$PAGE->set_button(forum_search_form($course, $search));
+$PAGE->set_button(diary_search_form($course, $search));
 
 // 20190523 Added this to force editing cog to show for Boost based themes.
 if ($CFG->branch > 31) {
