@@ -27,7 +27,7 @@ namespace mod_diary\search;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Diary activities search area.
+ * Search area for mod_diary activities.
  *
  * @package    mod_diary
  * @copyright  2019 AL Rachels (drachels@drachels.com)
@@ -41,6 +41,21 @@ class activity extends \core_search\base_activity {
      * @return bool
      */
     public function uses_file_indexing() {
+print_object('in activity.php at cp 1');
+
         return true;
+    }
+
+    /**
+     * Return the context info required to index files for
+     * this search area.
+     *
+     * @return array
+     */
+    public function get_search_fileareas() {
+print_object('in activity.php at cp 2');
+
+        $fileareas = array('intro', DIARY_INTROATTACHMENT_FILEAREA); // Fileareas.
+        return $fileareas;
     }
 }

@@ -27,6 +27,7 @@ namespace mod_diary\search;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/diary/lib.php');
+require_once($CFG->dirroot . '/lib/grouplib.php');
 
 /**
  * Diary entries search.
@@ -38,18 +39,38 @@ require_once($CFG->dirroot . '/mod/diary/lib.php');
 class entry extends \core_search\base_mod {
 
     /**
+     * @var array Internal quick static cache.
+     */
+    protected $entriesdata = array();
+
+    /**
      * Returns recordset containing required data for indexing diary entries.
      *
      * @param int $modifiedfrom timestamp
-     * @return moodle_recordset
+     * @param \context|null $context Optional context to restrict scope of returned results
+     * @return moodle_recordset|null Recordset (or null if no results)
      */
-    public function get_recordset_by_timestamp($modifiedfrom = 0) {
+    public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
         global $DB;
+//print_object('in entry.php at cp 1');
+//print_object('in entry.php at cp 1');
+//print_object('in entry.php at cp 1');
 
-        $sql = "SELECT de.*, j.course FROM {diary_entries} de
+        list ($contextjoin, $contextparams) = $this->get_context_restriction_sql(
+                $context, 'diary', 'd', SQL_PARAMS_NAMED);
+        if ($contextjoin === null) {
+            return null;
+        }
+
+        $sql = "SELECT de.*, d.course
+                  FROM {diary_entries} de
                   JOIN {diary} d ON d.id = de.diary
-                WHERE de.modified >= ? ORDER BY de.modified ASC";
-        return $DB->get_recordset_sql($sql, array($modifiedfrom));
+          $contextjoin
+                 WHERE de.timemodified >= :timemodified
+              ORDER BY de.timemodified ASC";
+        return $DB->get_recordset_sql($sql,
+                array_merge($contextparams, ['timemodified' => $modifiedfrom]));
+
     }
 
     /**
@@ -78,25 +99,24 @@ class entry extends \core_search\base_mod {
 
         // Prepare associative array with data from DB.
         $doc = \core_search\document_factory::instance($entry->id, $this->componentname, $this->areaname);
-
-        // Not a nice solution to copy a subset of the content but I don't want
-        // to use a kind of "Firstname Lastname diary entry"
-        // because of i18n (the entry can be searched by both the student and
-        // any course teacher (they all have different languages).
-        $doc->set('title', shorten_text(content_to_text($entry->text, $entry->format), 50));
-        $doc->set('content', content_to_text($entry->text, $entry->format));
+        // I am using the entry date (timecreated) for the title.
+        $doc->set('title', content_to_text((date(get_config('mod_diary', 'dateformat'),$entry->timecreated)),$entry->format));
+        $doc->set('content', content_to_text('Entry: '.$entry->text, $entry->format));
         $doc->set('contextid', $context->id);
         $doc->set('courseid', $entry->course);
         $doc->set('userid', $entry->userid);
         $doc->set('owneruserid', \core_search\manager::NO_OWNER_ID);
-        $doc->set('modified', $entry->modified);
+        $doc->set('modified', $entry->timemodified);
+        $doc->set('description1', content_to_text('Feedback: '.$entry->entrycomment, $entry->format));
+
+        // The get_fields_for_entries is not implemented, and BREAKS diary search.
+        //$indexfields = $this->get_fields_for_entries($entry);
 
         // Check if this document should be considered new.
-        if (isset($options['lastindexedtime']) && ($options['lastindexedtime'] < $entry->modified)) {
+        if (isset($options['lastindexedtime']) && ($options['lastindexedtime'] < $entry->timemodified)) {
             // If the document was created after the last index time, it must be new.
             $doc->set_is_new(true);
         }
-
         return $doc;
     }
 
@@ -110,6 +130,7 @@ class entry extends \core_search\base_mod {
      */
     public function check_access($id) {
         global $USER;
+//print_object('in entry.php at cp 3');
 
         try {
             $entry = $this->get_entry($id);
@@ -139,6 +160,7 @@ class entry extends \core_search\base_mod {
      */
     public function get_doc_url(\core_search\document $doc) {
         global $USER;
+//print_object('in entry.php at cp 4');
 
         $entry = $this->get_entry($doc->get('itemid'));
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
@@ -160,6 +182,8 @@ class entry extends \core_search\base_mod {
      * @return \moodle_url
      */
     public function get_context_url(\core_search\document $doc) {
+//print_object('in entry.php at cp 5');
+
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
         return new \moodle_url('/mod/diary/view.php', array('id' => $contextmodule->instanceid));
     }
@@ -175,9 +199,10 @@ class entry extends \core_search\base_mod {
      */
     protected function get_entry($entryid) {
         global $DB;
+//print_object('in entry.php at cp 6');
 
-        return $DB->get_record_sql("SELECT de.*, j.course FROM {diary_entries} de
-                                      JOIN {diary} j ON d.id = de.diary
+        return $DB->get_record_sql("SELECT de.*, d.course FROM {diary_entries} de
+                                      JOIN {diary} d ON d.id = de.diary
                                     WHERE de.id = ?", array('id' => $entryid), MUST_EXIST);
     }
 }

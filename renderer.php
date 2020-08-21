@@ -165,6 +165,8 @@ class mod_diary_renderer extends plugin_renderer_base {
         return $output;
     }
 
+
+
     /**
      * Print the teacher feedback.
      * This renders the teacher feedback on the view.php page.
@@ -213,25 +215,4 @@ class mod_diary_renderer extends plugin_renderer_base {
         echo format_text($entry->entrycomment, FORMAT_PLAIN);
         echo '</td></tr></table>';
     }
-
-    /**
-     * Render quick search form.
-     *
-     * @param \mod_diary\output\quick_search_form $form The renderable.
-     * @return string
-     */
-    public function render_quick_search_form(\mod_diary\output\quick_search_form $form) {
-        return $this->render_from_template('mod_diary/quick_search_form', $form->export_for_template($this));
-    }
-
-    /**
-     * Render big search form.
-     *
-     * @param \mod_diary\output\big_search_form $form The renderable.
-     * @return string
-     */
-    public function render_big_search_form(\mod_diary\output\big_search_form $form) {
-        return $this->render_from_template('mod_diary/big_search_form', $form->export_for_template($this));
-    }
-
 }

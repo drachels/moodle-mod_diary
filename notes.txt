@@ -134,3 +134,7 @@ Diary Support Tracker.
     bumped the version.
 20200815 Diary_510,  Diary - Need to implement Ratings. Added Rating
     type and rating to view.php page.
+20200821 Finally got gloabal search mostly working. Need to account
+    for included files. Currently getting:  Before calling format_text(),
+    the content must be processed with file_rewrite_pluginfile_urls().
+    Pushed ver '0.13.0 (Build: 2020082000)' to github.
