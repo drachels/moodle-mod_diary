@@ -81,13 +81,10 @@ if (!empty($action)) {
         case 'reload':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                // $stringlable = 'currententry';
                 $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
                 $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
                                                             $sort = 'timecreated DESC');
-                // This works in php 7.3 only.
-                // $firstkey = array_key_first($entrys);
                 $firstkey = ''; // Fixes error if user has no entries at all.
                 foreach ($entrys as $firstkey => $firstvalue) {
                     break;
@@ -99,13 +96,10 @@ if (!empty($action)) {
         case 'currententry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                // $stringlable = 'currententry';
                 $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
                 $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
                                                             $sort = 'timecreated DESC');
-                // This works in php 7.3 only.
-                // $firstkey = array_key_first($entrys);
                 $firstkey = ''; // Fixes error if user has no entries at all.
                 foreach ($entrys as $firstkey => $firstvalue) {
                     break;
@@ -116,7 +110,6 @@ if (!empty($action)) {
         // Sort the list of entries from oldest to newest based on timecreated.
         case 'sortfirstentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                // $stringlable = 'firstentry';
                 $sortorderinfo = ('<h5>'.get_string('sortfirstentry', 'diary').'</h5>');
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
@@ -131,7 +124,6 @@ if (!empty($action)) {
         // Sort the list from lowest grade to highest grade. Show ungraded first, from oldest to newest.
         case 'lowestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                // $stringlable = 'lowestgradeentry';
                 $sortorderinfo = ('<h5>'.get_string('sortlowestentry', 'diary').'</h5>');
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
@@ -146,7 +138,6 @@ if (!empty($action)) {
         // Sort list from highest grade to lowest grade. If tie grade, further sort from newest to oldest.
         case 'highestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                // $stringlable = 'highestgradeentry';
                 $sortorderinfo = ('<h5>'.get_string('sorthighestentry', 'diary').'</h5>');
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
                                                                   'diary' => $diary->id),
@@ -161,7 +152,6 @@ if (!empty($action)) {
         // Sort list from most recently modified to the one modified the longest time ago.
         case 'latestmodifiedentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                // $stringlable = 'latestmodifiedentry';
                 $sortorderinfo = ('<h5>'.get_string('sortlastentry', 'diary').'</h5>');
                 // May be needed for future version if editing old entries is allowed.
                 $entrys = $DB->get_records("diary_entries", array('userid' => $USER->id,
@@ -176,7 +166,15 @@ if (!empty($action)) {
 
         default:
             if (has_capability('mod/diary:addentries', $context)) {
-                 // $stringlable = 'currententry';
+                // Reload the current page.
+                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
+                $entrys = $DB->get_records('diary_entries', array('userid' => $USER->id,
+                                                                  'diary' => $diary->id),
+                                                            $sort = 'timecreated DESC');
+                $firstkey = ''; // Fixes error if user has no entries at all.
+                foreach ($entrys as $firstkey => $firstvalue) {
+                    break;
+                }
             }
     }
 }
@@ -229,7 +227,6 @@ if ($course->format == 'weeks' and $diary->days) {
 }
 
 // 20200815 Get the current rating for this user, if this diary is assessed.
-//if ($diary->assessed != 'RATING_AGGREGATE_NONE') {
 if ($diary->assessed != 0) {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
     $gradeitemgrademax = $gradinginfo->items[0]->grademax;
