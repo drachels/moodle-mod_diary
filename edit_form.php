@@ -31,14 +31,6 @@ class mod_diary_entry_form extends moodleform {
     public function definition() {
         global $CFG, $DB;
 
-        //$data = $this->_customdata['current'];
-
-        //$action = $this->_customdata['editoroptions']['action'];
-
-        //$firstkey = $this->_customdata['editoroptions']['firstkey'];
-
-        //$temp = $this->_customdata['editoroptions'];
-
         $mform = $this->_form;
 
         $mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'),

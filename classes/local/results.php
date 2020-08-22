@@ -83,7 +83,6 @@ class results  {
         $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary').gmdate("Ymd_Hi").'GMT.csv');
 
         $fields = array();
-
         $fields = array(get_string('firstname'),
                         get_string('lastname'),
                         get_string('pluginname', 'diary'),
@@ -114,35 +113,35 @@ class results  {
                            d.teacher AS teacher,
                            to_char(to_timestamp(d.timemarked), 'YYYY-MM-DD HH24:MI:SS') AS timemarked,
                            d.mailed AS mailed
-                    FROM {diary_entries} d
-                    JOIN {user} u ON u.id = d.userid
-                    WHERE d.userid > 0 ";
+                      FROM {diary_entries} d
+                      JOIN {user} u ON u.id = d.userid
+                     WHERE d.userid > 0 ";
         } else {
             $sql = "SELECT d.id AS entry,
                            u.firstname AS 'firstname',
-                            u.lastname AS 'lastname',
-                            d.diary AS diary,
-                            d.userid AS userid,
-                            FROM_UNIXTIME(d.timecreated) AS TIMECREATED,
-                            FROM_UNIXTIME(d.timemodified) AS TIMEMODIFIED,
-                            d.text AS text,
-                            d.format AS format,
-                            d.rating AS rating,
-                            d.entrycomment AS entrycomment,
-                            d.teacher AS teacher,
-                            FROM_UNIXTIME(d.timemarked) AS TIMEMARKED,
-                            d.mailed AS mailed
-                        FROM {diary_entries} d
-                        JOIN {user} u ON u.id = d.userid
-                        WHERE d.userid > 0 ";
+                           u.lastname AS 'lastname',
+                           d.diary AS diary,
+                           d.userid AS userid,
+                           FROM_UNIXTIME(d.timecreated) AS TIMECREATED,
+                           FROM_UNIXTIME(d.timemodified) AS TIMEMODIFIED,
+                           d.text AS text,
+                           d.format AS format,
+                           d.rating AS rating,
+                           d.entrycomment AS entrycomment,
+                           d.teacher AS teacher,
+                           FROM_UNIXTIME(d.timemarked) AS TIMEMARKED,
+                           d.mailed AS mailed
+                      FROM {diary_entries} d
+                      JOIN {user} u ON u.id = d.userid
+                     WHERE d.userid > 0 ";
         }
 
         $sql .= ($whichdiary);
         $sql .= ($whichuser);
-        $sql .= "     GROUP BY u.lastname, u.firstname, d.diary, d.id
+        $sql .= "       GROUP BY u.lastname, u.firstname, d.diary, d.id
                   ORDER BY u.lastname ASC, u.firstname ASC, d.diary ASC, d.id ASC";
 
-        // Add the list of users and diarys to our data array.
+        // Add the list of users and diaries to our data array.
         if ($ds = $DB->get_records_sql($sql, $fields)) {
             foreach ($ds as $d) {
                 $output = array($d->firstname, $d->lastname, $d->diary, $d->userid, $d->timecreated, $d->timemodified, $d->format,
@@ -152,7 +151,7 @@ class results  {
         }
         // Download the completed array.
         $csv->download_file();
-        exit;
+        //exit;
     }
 
     /**
