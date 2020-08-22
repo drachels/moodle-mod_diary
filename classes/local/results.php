@@ -238,7 +238,6 @@ class results  {
 
             echo $OUTPUT->user_picture($teachers[$entry->teacher], array('courseid' => $course->id, 'alttext' => true));
             echo '</td>';
-            //echo '<td>'.get_string("feedback").':  ';
             echo '<td>'.get_string('rating', 'diary').':  ';
 
             $attrs = array();
@@ -293,7 +292,6 @@ class results  {
                 .$entry->id
                 .'" name="c'.$entry->id
                 .'" rows="6" cols="60" $feedbackdisabledstr>';
-                //.'" rows="12" cols="60" $feedbackdisabledstr>';
             echo p($feedbacktext);
             echo '</textarea></p>';
 

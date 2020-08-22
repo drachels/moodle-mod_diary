@@ -49,9 +49,9 @@ function diary_add_instance($diary) {
     $diary->id = $DB->insert_record('diary', $diary);
 
     // Will need this later when I implement calendar dates, maybe.
-    // diary_update_calendar($diary, $diary->coursemodule);.
+    // TODO: diary_update_calendar($diary, $diary->coursemodule);.
     // Add calendar events if necessary.
-    // diary_set_events($diary);.
+    // TODO: diary_set_events($diary);.
     if (!empty($diary->completionexpected)) {
         \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $diary->completionexpected);
     }
@@ -577,7 +577,6 @@ function diary_reset_userdata($data) {
     require_once($CFG->libdir.'/filelib.php');
     require_once($CFG->dirroot.'/rating/lib.php');
 
-    $componentstr = get_string('modulenameplural', 'diary');
     $status = array();
     // THIS FUNCTION NEEDS REWRITE!
     if (!empty($data->reset_diary)) {

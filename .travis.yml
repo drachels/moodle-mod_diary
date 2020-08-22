@@ -11,7 +11,7 @@ sudo: true
 
 addons:
   firefox: "47.0.1"
-  postgresql: "9.4"
+  postgresql: "9.5"
   apt:
     packages:
       - openjdk-8-jre-headless
@@ -21,29 +21,50 @@ cache:
     - $HOME/.composer/cache
     - $HOME/.npm
 
-php:
- - 7.0
- - 7.1
-
-env:
- global:
-  - MOODLE_BRANCH=MOODLE_34_STABLE
-  - MOODLE_BRANCH=MOODLE_35_STABLE
-  - MOODLE_BRANCH=MOODLE_36_STABLE
-  - IGNORE_NAMES=mobile_view_page.mustache
- matrix:
-  - DB=pgsql
-  - DB=mysqli
+matrix:
+  include:
+    - php: 7.1
+      env: 
+        DB=pgsql
+        MOODLE_BRANCH=MOODLE_38_STABLE
+        MOODLE_CI_VERSION=2
+    - php: 7.1
+      env: 
+        DB=mysqli
+        MOODLE_BRANCH=MOODLE_38_STABLE
+        MOODLE_CI_VERSION=2
+    - php: 7.1
+      env: 
+        DB=pgsql
+        MOODLE_BRANCH=MOODLE_39_STABLE
+        MOODLE_CI_VERSION=2
+    - php: 7.1
+      env: 
+        DB=mysqli
+        MOODLE_BRANCH=MOODLE_39_STABLE
+        MOODLE_CI_VERSION=2
 
 before_install:
   - phpenv config-rm xdebug.ini
   - nvm install 8.9
   - nvm use 8.9
   - cd ../..
-  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
+  - if [[ $MOODLE_CI_VERSION == 1 ]];
+    then composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^1;
+    else composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2;
+    fi
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
+  - if [[ $MOODLE_CI_VERSION == 1 ]];
+    then
+      if [ -n $GITHUB_APITOKEN ]; then
+        cd ci;
+        composer config -g github-oauth.github.com $GITHUB_APITOKEN;
+        cd ..;
+      fi
+    fi
+
   - moodle-plugin-ci install
 
 script:
@@ -52,8 +73,11 @@ script:
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
   - moodle-plugin-ci validate
-  - moodle-plugin-ci savepoints
-  - moodle-plugin-ci mustache
-  - moodle-plugin-ci grunt
+  - if [[ $MOODLE_CI_VERSION == 2 ]];
+    then
+      moodle-plugin-ci savepoints;
+      moodle-plugin-ci mustache;
+      moodle-plugin-ci grunt;
+    fi
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat

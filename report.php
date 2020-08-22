@@ -54,7 +54,6 @@ if (!empty($action)) {
         case 'download':
             if (has_capability('mod/diary:manageentries', $context)) {
                 // Call download entries function in lib.php.
-                //results::download_entries($context, $course, $id, $diary);
                 results::download_entries($context, $course, $diary);
             }
             break;
@@ -201,7 +200,6 @@ if ($data = data_submitted()) {
                 $ratingoptions->itemid = $entry->id;
                 $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
                 $ratingoptions->scaleid = $diary->scale;
-                //$ratingoptions->rating = $entry->rating;
                 $ratingoptions->rating = $studentrating;
                 $ratingoptions->userid = $entry->userid;
                 $ratingoptions->timecreated = $entry->timecreated;
@@ -217,9 +215,6 @@ if ($data = data_submitted()) {
                 } else {
                     $DB->insert_record('rating', $ratingoptions, false);
                 }
-
-                // $rm = new rating_manager();.
-                // $records = $rm->get_ratings($ratingoptions);.
             }
 
             $diary = $DB->get_record("diary", array("id" => $entrybyuser[$entry->userid]->diary));

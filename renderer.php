@@ -76,8 +76,7 @@ class mod_diary_renderer extends plugin_renderer_base {
      * Return the toolbar     Return all the buttons that are part of the toolbar.
      */
     public function toolbar($context, $course, $id, $diary, $firstkey) {
-
-        global $DB, $CFG, $USER;
+        // TODO: global $DB, $CFG, $USER; Travis says unused.
         $output = '';
         $toolbuttons = array();
 

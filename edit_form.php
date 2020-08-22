@@ -31,13 +31,13 @@ class mod_diary_entry_form extends moodleform {
     public function definition() {
         global $CFG, $DB;
 
-        $data = $this->_customdata['current'];
+        //$data = $this->_customdata['current'];
 
-        $action = $this->_customdata['editoroptions']['action'];
+        //$action = $this->_customdata['editoroptions']['action'];
 
-        $firstkey = $this->_customdata['editoroptions']['firstkey'];
+        //$firstkey = $this->_customdata['editoroptions']['firstkey'];
 
-        $temp = $this->_customdata['editoroptions'];
+        //$temp = $this->_customdata['editoroptions'];
 
         $mform = $this->_form;
 

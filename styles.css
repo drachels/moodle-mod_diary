@@ -68,24 +68,24 @@
 }
 
 #page-mod-diary-index .cell {
-    font-size:0.8em;
+    font-size: 0.8em;
 }
 #page-mod-diary-view .feedbackbox .left,
 #page-mod-diary-view .feedbackbox .entryheader {
-    background-color: #dddddd;
+    background-color: #ddd;
 }
 
 #page-mod-diary-view .feedbackbox {
-    -moz-border-radius-bottomleft:15px;
-    -moz-border-radius-bottomright:15px;
+    -moz-border-radius-bottomleft: 15px;
+    -moz-border-radius-bottomright: 15px;
     border-spacing: 0;
     margin: 0 auto;
 }
 #page-mod-diary-view .feedbackbox .side {
-    -moz-border-radius-bottomleft:15px;
+    -moz-border-radius-bottomleft: 15px;
 }
 #page-mod-diary-view .feedbackbox .entrycontent {
-    -moz-border-radius-bottomright:15px;
+    -moz-border-radius-bottomright: 15px;
 }
 
 #page-mod-diary-report .diaryuserentry {

@@ -95,7 +95,7 @@ class entry extends \core_search\base_mod {
         // Prepare associative array with data from DB.
         $doc = \core_search\document_factory::instance($entry->id, $this->componentname, $this->areaname);
         // I am using the entry date (timecreated) for the title.
-        $doc->set('title', content_to_text((date(get_config('mod_diary', 'dateformat'),$entry->timecreated)),$entry->format));
+        $doc->set('title', content_to_text((date(get_config('mod_diary', 'dateformat'), $entry->timecreated)), $entry->format));
         $doc->set('content', content_to_text('Entry: '.$entry->text, $entry->format));
         $doc->set('contextid', $context->id);
         $doc->set('courseid', $entry->course);
@@ -103,9 +103,6 @@ class entry extends \core_search\base_mod {
         $doc->set('owneruserid', \core_search\manager::NO_OWNER_ID);
         $doc->set('modified', $entry->timemodified);
         $doc->set('description1', content_to_text('Feedback: '.$entry->entrycomment, $entry->format));
-
-        // The get_fields_for_entries is not implemented, and BREAKS diary search.
-        //$indexfields = $this->get_fields_for_entries($entry);
 
         // Check if this document should be considered new.
         if (isset($options['lastindexedtime']) && ($options['lastindexedtime'] < $entry->timemodified)) {
