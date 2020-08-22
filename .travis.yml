@@ -7,13 +7,14 @@ on_failure: always
 
 language: php
 
-addons:
-  postgresql: "9.5"
+sudo: true
 
-services:
-  - mysql
-  - postgresql
-  - docker
+addons:
+  firefox: "47.0.1"
+  postgresql: "9.4"
+  apt:
+    packages:
+      - openjdk-8-jre-headless
 
 cache:
   directories:
@@ -21,21 +22,28 @@ cache:
     - $HOME/.npm
 
 php:
- - 7.2
- - 7.3
- - 7.4
+# - 7.0
+ - 7.1
 
 env:
  global:
-  - MOODLE_BRANCH=MOODLE_39_STABLE
-
+#  - MOODLE_BRANCH=MOODLE_34_STABLE
+#  - MOODLE_BRANCH=MOODLE_35_STABLE
+  - MOODLE_BRANCH=MOODLE_36_STABLE
+  - IGNORE_NAMES=mobile_view_page.mustache
  matrix:
-  - DB=pgsql
+#  - DB=pgsql
   - DB=mysqli
+
+before_install:
   - phpenv config-rm xdebug.ini
+  - nvm install 8.9
+  - nvm use 8.9
   - cd ../..
-  - composer create-project -n --no-dev --prefer-dist moodlehq/plugin-ci ci ^3
+  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
+install:
   - moodle-plugin-ci install
 
 script:
@@ -43,10 +51,9 @@ script:
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
-  - moodle-plugin-ci phpdoc
-  - moodle-plugin-ci validate
-  - moodle-plugin-ci savepoints
-  - moodle-plugin-ci mustache
-  - moodle-plugin-ci grunt
-  - moodle-plugin-ci phpunit
-  - moodle-plugin-ci behat
+#  - moodle-plugin-ci validate
+#  - moodle-plugin-ci savepoints
+#  - moodle-plugin-ci mustache
+#  - moodle-plugin-ci grunt
+#  - moodle-plugin-ci phpunit
+#  - moodle-plugin-ci behat
