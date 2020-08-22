@@ -27,44 +27,28 @@ matrix:
       env: 
         DB=pgsql
         MOODLE_BRANCH=MOODLE_38_STABLE
-        MOODLE_CI_VERSION=2
     - php: 7.1
       env: 
         DB=mysqli
         MOODLE_BRANCH=MOODLE_38_STABLE
-        MOODLE_CI_VERSION=2
     - php: 7.1
       env: 
         DB=pgsql
         MOODLE_BRANCH=MOODLE_39_STABLE
-        MOODLE_CI_VERSION=2
     - php: 7.1
       env: 
         DB=mysqli
         MOODLE_BRANCH=MOODLE_39_STABLE
-        MOODLE_CI_VERSION=2
 
 before_install:
   - phpenv config-rm xdebug.ini
   - nvm install 8.9
   - nvm use 8.9
   - cd ../..
-  - if [[ $MOODLE_CI_VERSION == 1 ]];
-    then composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^1;
-    else composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2;
-    fi
+  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
-  - if [[ $MOODLE_CI_VERSION == 1 ]];
-    then
-      if [ -n $GITHUB_APITOKEN ]; then
-        cd ci;
-        composer config -g github-oauth.github.com $GITHUB_APITOKEN;
-        cd ..;
-      fi
-    fi
-
   - moodle-plugin-ci install
 
 script:
@@ -73,11 +57,8 @@ script:
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
   - moodle-plugin-ci validate
-  - if [[ $MOODLE_CI_VERSION == 2 ]];
-    then
-      moodle-plugin-ci savepoints;
-      moodle-plugin-ci mustache;
-      moodle-plugin-ci grunt;
-    fi
+  - moodle-plugin-ci savepoints
+  - moodle-plugin-ci mustache
+  - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat
