@@ -22,17 +22,17 @@ cache:
     - $HOME/.npm
 
 php:
-# - 7.0
+ - 7.0
  - 7.1
 
 env:
  global:
-#  - MOODLE_BRANCH=MOODLE_34_STABLE
-#  - MOODLE_BRANCH=MOODLE_35_STABLE
+  - MOODLE_BRANCH=MOODLE_34_STABLE
+  - MOODLE_BRANCH=MOODLE_35_STABLE
   - MOODLE_BRANCH=MOODLE_36_STABLE
   - IGNORE_NAMES=mobile_view_page.mustache
  matrix:
-#  - DB=pgsql
+  - DB=pgsql
   - DB=mysqli
 
 before_install:
@@ -51,9 +51,9 @@ script:
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
-#  - moodle-plugin-ci validate
-#  - moodle-plugin-ci savepoints
-#  - moodle-plugin-ci mustache
-#  - moodle-plugin-ci grunt
-#  - moodle-plugin-ci phpunit
-#  - moodle-plugin-ci behat
+  - moodle-plugin-ci validate
+  - moodle-plugin-ci savepoints
+  - moodle-plugin-ci mustache
+  - moodle-plugin-ci grunt
+  - moodle-plugin-ci phpunit
+  - moodle-plugin-ci behat
