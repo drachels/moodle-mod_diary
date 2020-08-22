@@ -48,10 +48,7 @@ class results  {
      * @param string $delimiter - The character to use as a delimiter.
      * @return nothing
      */
-    public static function download_entries($context, $course, $id, $diary) {
-        $filename = "export.csv";
-        $delimiter = ";";
-
+    public static function download_entries($context, $course, $diary) {
         global $CFG, $DB, $USER;
         require_once($CFG->libdir.'/csvlib.class.php');
         $data = new stdClass();
@@ -67,7 +64,6 @@ class results  {
         // Construct sql query and filename based on admin, teacher, or student.
         // Add filename details based on course and Diary activity name.
         $csv = new csv_export_writer();
-        $strdiary = get_string('pluginname', 'diary');
         $whichuser = ''; // Leave blank for an admin or teacher.
         if (is_siteadmin($USER->id)) {
             $whichdiary = ('AND d.diary > 0');

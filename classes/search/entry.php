@@ -52,9 +52,6 @@ class entry extends \core_search\base_mod {
      */
     public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
         global $DB;
-//print_object('in entry.php at cp 1');
-//print_object('in entry.php at cp 1');
-//print_object('in entry.php at cp 1');
 
         list ($contextjoin, $contextparams) = $this->get_context_restriction_sql(
                 $context, 'diary', 'd', SQL_PARAMS_NAMED);
@@ -81,8 +78,6 @@ class entry extends \core_search\base_mod {
      * @return \core_search\document
      */
     public function get_document($entry, $options = array()) {
-        global $DB;
-
         try {
             $cm = $this->get_cm('diary', $entry->diary, $entry->course);
             $context = \context_module::instance($cm->id);
@@ -130,7 +125,6 @@ class entry extends \core_search\base_mod {
      */
     public function check_access($id) {
         global $USER;
-//print_object('in entry.php at cp 3');
 
         try {
             $entry = $this->get_entry($id);
@@ -160,9 +154,7 @@ class entry extends \core_search\base_mod {
      */
     public function get_doc_url(\core_search\document $doc) {
         global $USER;
-//print_object('in entry.php at cp 4');
 
-        $entry = $this->get_entry($doc->get('itemid'));
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
 
         $entryuserid = $doc->get('userid');
@@ -182,8 +174,6 @@ class entry extends \core_search\base_mod {
      * @return \moodle_url
      */
     public function get_context_url(\core_search\document $doc) {
-//print_object('in entry.php at cp 5');
-
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
         return new \moodle_url('/mod/diary/view.php', array('id' => $contextmodule->instanceid));
     }
@@ -199,8 +189,6 @@ class entry extends \core_search\base_mod {
      */
     protected function get_entry($entryid) {
         global $DB;
-//print_object('in entry.php at cp 6');
-
         return $DB->get_record_sql("SELECT de.*, d.course FROM {diary_entries} de
                                       JOIN {diary} d ON d.id = de.diary
                                     WHERE de.id = ?", array('id' => $entryid), MUST_EXIST);

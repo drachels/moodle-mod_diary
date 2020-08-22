@@ -73,7 +73,8 @@ if (!empty($action)) {
         case 'download':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Call download entries function in lib.php.
-                results::download_entries($context, $course, $id, $diary);
+                //results::download_entries($context, $course, $id, $diary);
+                results::download_entries($context, $course, $diary);
             }
             break;
 

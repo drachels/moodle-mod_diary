@@ -688,7 +688,6 @@ function diary_get_user_grades($diary, $userid=0) {
 }
 
 /**
- * CHECKED! 190804
  * Update diary activity grades.
  *
  * @category grade
@@ -697,9 +696,8 @@ function diary_get_user_grades($diary, $userid=0) {
  * @param boolean  $nullifnone   Return null if grade does not exist.
  */
 function diary_update_grades($diary, $userid=0, $nullifnone=true) {
-    global $CFG, $DB;
+    global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
-    // From forum lib.php line 811, 812.
     $cm = get_coursemodule_from_instance('diary', $diary->id);
     $diary->cmidnumber = $cm->idnumber;
     if (!$diary->assessed) {

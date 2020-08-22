@@ -32,16 +32,14 @@ require_once($CFG->dirroot.'/mod/diary/lib.php');
  * @return bool
  */
 function xmldb_diary_upgrade($oldversion=0) {
-
     global $CFG, $DB;
     $dbman = $DB->get_manager();
 
     $result = true;
 
-    if ($result && $oldversion < 2020081600) {
+    if ($result && $oldversion < 2020082200) {
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2020081600, 'diary');
+        upgrade_mod_savepoint(true, 2020082200, 'diary');
     }
-
     return $result;
 }
