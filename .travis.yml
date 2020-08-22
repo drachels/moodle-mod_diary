@@ -7,40 +7,35 @@ on_failure: always
 
 language: php
 
-sudo: true
-
 addons:
-  firefox: "47.0.1"
   postgresql: "9.5"
-  apt:
-    packages:
-      - openjdk-8-jre-headless
+
+services:
+  - mysql
+  - postgresql
+  - docker
 
 cache:
   directories:
     - $HOME/.composer/cache
     - $HOME/.npm
 
+php:
+ - 7.2
+ - 7.3
+ - 7.4
+
+env:
+ global:
+  - MOODLE_BRANCH=MOODLE_39_STABLE
+
  matrix:
-  include:
-    - php: 7.1
-    - env:
-        DB=pgsql
-        MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 7.1
-    - env:
-        DB=mysqli
-        MOODLE_BRANCH=MOODLE_36_STABLE
-
-before_install:
+  - DB=pgsql
+  - DB=mysqli
   - phpenv config-rm xdebug.ini
-  - nvm install 8.9
-  - nvm use 8.9
   - cd ../..
-  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
+  - composer create-project -n --no-dev --prefer-dist moodlehq/plugin-ci ci ^3
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
-
-install:
   - moodle-plugin-ci install
 
 script:
@@ -48,6 +43,7 @@ script:
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
+  - moodle-plugin-ci phpdoc
   - moodle-plugin-ci validate
   - moodle-plugin-ci savepoints
   - moodle-plugin-ci mustache
