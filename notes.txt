@@ -145,3 +145,6 @@ Diary Support Tracker.
     for included files. Currently getting:  Before calling format_text(),
     the content must be processed with file_rewrite_pluginfile_urls().
     Pushed ver '0.13.0 (Build: 2020082000)' to github.
+20200823 Submitted to moodle.org as new plugin.
+20200824 Pocessed and fixed many of the code prechecks errors/warnings listed.
+20200824 Bumped and pushed version to v1.0.1 Build: 2020082400.

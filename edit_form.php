@@ -16,6 +16,7 @@
 
 /**
  * This page opens the edit form instance of diary, in a particular course.
+ *
  * https://docs.moodle.org/dev/lib/formslib.php_Form_Definition
  * @package    mod_diary
  * @copyright  2019 AL Rachels (drachels@drachels.com)
@@ -26,6 +27,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/lib/formslib.php');
 
+/**
+ * Edit user entry form for Diary
+ *
+ * @copyright  2019 AL Rachels <drachels@drachels.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ **/
 class mod_diary_entry_form extends moodleform {
 
     public function definition() {

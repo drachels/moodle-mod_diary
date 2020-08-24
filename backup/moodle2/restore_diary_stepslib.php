@@ -14,10 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Define all the restore steps that will be used by the restore_diary_activity_task
+ *
+ * @package   mod_diary
+ * @copyright 2020 AL Rachels <drachels@drachels.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Define the complete diary structure for restore, with file and id annotations.
+ *
+ * @package   mod_diary
+ * @copyright 2020 AL Rachels <drachels@drachels.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class restore_diary_activity_structure_step extends restore_activity_structure_step {
 
+    /**
+     * Define the structure of the restore workflow.
+     *
+     * @return restore_path_element $structure
+     */
     protected function define_structure() {
 
         $paths = array();
@@ -30,6 +49,12 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         return $this->prepare_activity_structure($paths);
     }
 
+    /**
+     * Process a diary restore.
+     *
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_diary($data) {
 
         global $DB;
@@ -45,6 +70,11 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         $this->apply_activity_instance($newid);
     }
 
+    /**
+     * Process a diary entry restore.
+     * @param object $data The data in object form.
+     * @return void
+     */
     protected function process_diary_entry($data) {
 
         global $DB;
@@ -65,6 +95,10 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         $this->set_mapping('diary_entry', $oldid, $newid);
     }
 
+    /**
+     * Once the database tables have been fully restored, restore the files
+     * @return void
+     */
     protected function after_execute() {
         $this->add_related_files('mod_diary', 'intro', null);
         $this->add_related_files('mod_diary_entries', 'text', null);

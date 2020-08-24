@@ -50,7 +50,13 @@ class mod_diary_generator extends testing_module_generator {
         parent::reset();
     }
 
-
+    /**
+     * Create new diary module instance.
+     *
+     * @param array|stdClass $record
+     * @param array $options
+     * @return stdClass mod_diary_structure
+     */
     public function create_instance($record = null, array $options = null) {
         $record = (object)(array)$record;
 

@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page opens the current instance of a diary entry for editing,
- * in a particular diary in a particular course.
+ * This page opens the current instance of a diary entry for editing.
  *
  * @package    mod_diary
  * @copyright  2019 AL Rachels (drachels@drachels.com)

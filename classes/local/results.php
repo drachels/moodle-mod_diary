@@ -43,9 +43,9 @@ class results  {
     /**
      * Download entries in this diary activity.
      *
-     * @param array $array
-     * @param string $filename - The filename to use.
-     * @param string $delimiter - The character to use as a delimiter.
+     * @param array $context Context for this download.
+     * @param array $course  Course for this download.
+     * @param array $diary   Diary to download.
      * @return nothing
      */
     public static function download_entries($context, $course, $diary) {
@@ -151,7 +151,6 @@ class results  {
         }
         // Download the completed array.
         $csv->download_file();
-        //exit;
     }
 
     /**
@@ -308,7 +307,9 @@ class results  {
      * @param array $entry
      * @param array $course
      * @param array $cm
-     * return format_text
+     * return string $entrytext Text string containing a user entry.
+     * return int $entry-format Format for user entry.
+     * return array $formatoptions Array of options for a user entry.
      */
     public static function diary_format_entry_text($entry, $course = false, $cm = false) {
 
@@ -335,11 +336,13 @@ class results  {
     /**
      * Return the editor and attachment options when editing a diary entry
      *
-     * @param  stdClass $course  course object
-     * @param  stdClass $context context object
-     * @param  stdClass $entry   entry object
-     * @return array array containing the editor and attachment options
-     * @since  Moodle 3.2
+     * @param  stdClass $course         Course object.
+     * @param  stdClass $context        Context object.
+     * @param  stdClass $entry          Entry object.
+     * @param  stdClass $action         Action object.
+     * @param  stdClass $firstkey       Firstkey object.
+     * @return array $editoroptions     Array containing the editor and attachment options.
+     * @return array $attachmentoptions Array containing the editor and attachment options.
      */
     public static function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey) {
         $maxfiles = 99;                // TODO: add some setting.

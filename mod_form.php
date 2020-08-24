@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page opens the current mod_form instance of diary.
+ * This file contains the forms to create and edit an instance of the diary module.
  *
  * @package    mod_diary
  * @copyright  2019 AL Rachels (drachels@drachels.com)
@@ -25,8 +25,20 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
+/**
+ * Diary settings form.
+ *
+ * @package   mod_diary
+ * @copyright  2019 AL Rachels (drachels@drachels.com)
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_diary_mod_form extends moodleform_mod {
 
+    /**
+     * Define the diary activity settings form.
+     *
+     * @return void
+     */
     public function definition() {
         global $COURSE;
 
@@ -40,7 +52,7 @@ class mod_diary_mod_form extends moodleform_mod {
 
         $this->standard_intro_elements(get_string('diaryquestion', 'diary'));
 
-        // ----------------------------------------------------------------------
+        // Add the availability header.
         $mform->addElement('header', 'availibilityhdr', get_string('availability'));
 
         $options = array();
@@ -60,7 +72,7 @@ class mod_diary_mod_form extends moodleform_mod {
             $mform->setDefault('days', '0');
         }
 
-        // ----------------------------------------------------------------------
+        // Add the rest of the common settings.
 
         $this->standard_grading_coursemodule_elements();
 

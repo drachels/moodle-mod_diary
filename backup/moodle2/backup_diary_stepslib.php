@@ -14,9 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * @package mod_diary
+ * @subpackage backup-moodle2
+ * @copyright 2020 AL Rachels <drachels@drachels.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Define all the backup steps that will be used by the backup_diary_activity_task.
+ */
+
+/**
+ * Define the complete diary structure for backup, with file and id annotations.
+ */
 class backup_diary_activity_structure_step extends backup_activity_structure_step {
 
+    /**
+     * Define the structure for the diary activity.
+     * @return void
+     */
     protected function define_structure() {
 
         $diary = new backup_nested_element('diary', array('id'), array(

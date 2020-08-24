@@ -14,21 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Provides support for the conversion of moodle1 backup to the moodle2 format
+ *
+ * @package mod_diary
+ * @copyright  2020 AL Rachels <drachels@drachels.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * diary conversion handler
+ * Diary conversion handler.
  */
 class moodle1_mod_diary_handler extends moodle1_mod_handler {
 
     /**
-     * Declare the paths in moodle.xml we are able to convert
+     * Declare the paths in moodle.xml we are able to convert.
      *
      * The method returns list of {@link convert_path} instances.
      * For each path returned, the corresponding conversion method must be
      * defined.
      *
-     * @return array of {@link convert_path} instances
+     * Note that the path /MOODLE_BACKUP/COURSE/MODULES/MOD/DIARY does not
+     * actually exist in the file. The last element with the module name was
+     * appended by the moodle1_converter class.
+     *
+     * @return array of {@link convert_path} instances.
      */
     public function get_paths() {
         return array(
@@ -45,6 +57,13 @@ class moodle1_mod_diary_handler extends moodle1_mod_handler {
         );
     }
 
+    /**
+     * This is executed every time we have one /MOODLE_BACKUP/COURSE/MODULES/MOD/DIARY
+     * data available.
+     *
+     * @param array $data
+     * @return array $data
+     */
     public function process_diary($data) {
 
         // Get the course module id and context id.
@@ -68,7 +87,7 @@ class moodle1_mod_diary_handler extends moodle1_mod_handler {
     }
 
     /**
-     * This is executed when the parser reaches the <ENTRIES> opening element
+     * This is executed when the parser reaches the <ENTRIES> opening element.
      */
     public function on_entries_start() {
         $this->xmlwriter->begin_tag('entries');
@@ -76,21 +95,21 @@ class moodle1_mod_diary_handler extends moodle1_mod_handler {
 
     /**
      * This is executed every time we have one /MOODLE_BACKUP/COURSE/MODULES/MOD/DIARY/ENTRIES/ENTRY
-     * data available
+     * data available.
      */
     public function process_entry($data) {
         $this->write_xml('entry', $data, array('/entry/id'));
     }
 
     /**
-     * This is executed when the parser reaches the closing </ENTRIES> element
+     * This is executed when the parser reaches the closing </ENTRIES> element.
      */
     public function on_entries_end() {
         $this->xmlwriter->end_tag('entries');
     }
 
     /**
-     * This is executed when we reach the closing </MOD> tag of our 'diary' path
+     * This is executed when we reach the closing </MOD> tag of our 'diary' path.
      */
     public function on_diary_end() {
 

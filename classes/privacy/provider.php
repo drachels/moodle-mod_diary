@@ -15,15 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Data provider.
+ * Privacy class for requesting user data.
  *
  * @package    mod_diary
- * @copyright  2019 AL Rachels
- * @author     AL Rachels <drachels@drachels.com>
+ * @copyright  2019 AL Rachels <drachels@drachels.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_diary\privacy;
+
 defined('MOODLE_INTERNAL') || die();
 
 use context;
@@ -40,16 +40,23 @@ use core_privacy\local\request\writer;
 
 require_once($CFG->dirroot . '/mod/diary/lib.php');
 
+/**
+ * Privacy class for requesting user data.
+ *
+ * @package    mod_diary
+ * @copyright  2019 AL Rachels <drachels@drachels.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\core_userlist_provider,
     \core_privacy\local\request\plugin\provider {
 
     /**
-     * Returns metadata.
+     * Provides meta data that is stored about a user with mod_diary.
      *
-     * @param collection $collection The initialised collection to add items to.
-     * @return collection A listing of user data stored through this system.
+     * @param collection $collection The initialized collection to add items to.
+     * @return collection Returns the collection of metadata.
      */
     public static function get_metadata(collection $collection) : collection {
         $collection->add_database_table(

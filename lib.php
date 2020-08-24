@@ -26,13 +26,13 @@ defined('MOODLE_INTERNAL') || die();
 use \mod_diary\local\results;
 
 /**
- * CHECKED! - MAY NEED MORE WORK.
  * Given an object containing all the necessary data,
  * (defined by the form in mod.html) this function
  * will create a new instance and return the id number
  * of the new instance.
- * @param object $diary Object containing required diary properties
- * @return int diary ID
+ *
+ * @param object $diary Object containing required diary properties.
+ * @return int Diary ID.
  */
 function diary_add_instance($diary) {
     global $DB;
@@ -66,8 +66,8 @@ function diary_add_instance($diary) {
  * Given an object containing all the necessary diary data,
  * will update an existing instance with new diary data.
  *
- * @param object $diary Object containing required diary properties
- * @return boolean True if successful
+ * @param object $diary Object containing required diary properties.
+ * @return boolean True if successful.
  */
 function diary_update_instance($diary) {
     global $DB;
@@ -103,8 +103,8 @@ function diary_update_instance($diary) {
  * this function will permanently delete the instance
  * and any data that depends on it.
  *
- * @param int $id diary ID
- * @return boolean True if successful
+ * @param int $id Diary ID.
+ * @return boolean True if successful.
  */
 function diary_delete_instance($id) {
     global $DB;
@@ -130,19 +130,14 @@ function diary_delete_instance($id) {
  * Indicates API features that the diary supports.
  *
  * @uses FEATURE_MOD_INTRO
- * @uses FEATURE_GRADE_HAS_GRADE
- * @uses FEATURE_GRADE_OUTCOMES
  * @uses FEATURE_RATE
  * @uses FEATURE_GROUPS
  * @uses FEATURE_GROUPINGS
  * @uses FEATURE_GROUPMEMBERSONLY
  * @uses FEATURE_COMPLETION_TRACKS_VIEWS
-
- * @uses FEATURE_COMPLETION_HAS_RULES
-
-
- * @param string $feature FEATURE_xx constant for requested feature
- * @return mixed True if module supports feature, null if doesn't know
+ * @uses FEATURE__BACKUP_MOODLE2
+ * @param string $feature FEATURE_xx constant for requested feature.
+ * @return mixed True if module supports feature, null if doesn't know.
  */
 function diary_supports($feature) {
     switch($feature) {
@@ -202,7 +197,6 @@ function diary_get_post_actions() {
  *
  * Not used yet, as of 20200718.
  *
- * @global object
  * @param object $course
  * @param object $user
  * @param object $mod
@@ -225,13 +219,12 @@ function diary_user_outline($course, $user, $mod, $diary) {
 }
 
 /**
- * Prints all the records uploaded by this user
+ * Prints all the records uploaded by this user.
  *
- * @global object
  * @param object $course
  * @param object $user
  * @param object $mod
- * @param object $data
+ * @param object $diary
  */
 function diary_user_complete($course, $user, $mod, $diary) {
     global $DB, $OUTPUT;
@@ -261,6 +254,8 @@ function diary_user_complete($course, $user, $mod, $diary) {
 /**
  * Function to be run periodically according to the moodle cron.
  * Finds all diary notifications that have yet to be mailed out, and mails them.
+ *
+ * @return boolean True if successful.
  */
 function diary_cron() {
     global $CFG, $USER, $DB;
@@ -372,8 +367,6 @@ function diary_cron() {
  * that has occurred in diary activities and print it out.
  * Return true if there was output, or false if there was none.
  *
- * @global stdClass $DB
- * @global stdClass $OUTPUT
  * @param stdClass $course
  * @param bool $viewfullnames
  * @param int $timestart
@@ -475,10 +468,11 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
     return true;
 }
 /**
- * Returns the users with data in one diary
- * (users with records in diary_entries, students and teachers)
- * @param int $diaryid diary ID
- * @return array Array of user ids
+ * Returns the users with data in one diary.
+ * Users with records in diary_entries - students and teachers.
+ *
+ * @param int $diaryid Diary ID.
+ * @return array Array of user ids.
  */
 function diary_get_participants($diaryid) {
     global $DB;
@@ -507,10 +501,11 @@ function diary_get_participants($diaryid) {
 }
 
 /**
- * This function returns true if a scale is being used by one diary
- * @param int $diaryid diary ID
- * @param int $scaleid Scale ID
- * @return boolean True if a scale is being used by one diary
+ * This function returns true if a scale is being used by one diary.
+ *
+ * @param int $diaryid Diary ID.
+ * @param int $scaleid Scale ID.
+ * @return boolean True if a scale is being used by one diary.
  */
 function diary_scale_used ($diaryid, $scaleid) {
     global $DB;
@@ -526,11 +521,11 @@ function diary_scale_used ($diaryid, $scaleid) {
 }
 
 /**
- * Checks if scale is being used by any instance of diary
+ * Checks if scale is being used by any instance of diary.
  *
- * This is used to find out if scale used anywhere
+ * This is used to find out if scale used anywhere.
  * @param $scaleid int
- * @return boolean True if the scale is used by any diary
+ * @return boolean True if the scale is used by any diary.
  */
 function diary_scale_used_anywhere($scaleid) {
     global $DB;
@@ -546,7 +541,7 @@ function diary_scale_used_anywhere($scaleid) {
  * Implementation of the function for printing the form elements that control
  * whether the course reset functionality affects the diary.
  *
- * @param object $mform form passed by reference
+ * @param object $mform Form passed by reference.
  */
 function diary_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'diaryheader', get_string('modulenameplural', 'diary'));
@@ -567,8 +562,6 @@ function diary_reset_course_form_defaults($course) {
  * Actual implementation of the reset course functionality, delete all the
  * data responses for course $data->courseid.
  *
- * @global object
- * @global object
  * @param object $data the data submitted from the reset course.
  * @return array status array
  */
@@ -597,10 +590,10 @@ function diary_reset_userdata($data) {
 }
 
 /**
- * Print diary overview
+ * Print diary overview.
  *
  * @param object   $courses
- * @param boolean  $nullifnone   return null if grade does not exist
+ * @param boolean  $nullifnone   Return null if grade does not exist.
  */
 function diary_print_overview($courses, &$htmlarray) {
 
@@ -716,10 +709,7 @@ function diary_update_grades($diary, $userid=0, $nullifnone=true) {
     }
 }
 
-
 /**
- * CHECKED! 20190804
- *
  * Update/create grade item for given diary.
  *
  * @param object $diary object with extra cmidnumber
@@ -753,9 +743,7 @@ function diary_grade_item_update($diary, $grades=null) {
 }
 
 /**
- * CHECKED! 8/4/19
- *
- * Delete grade item for given diary
+ * Delete grade item for given diary.
  *
  * @param   object   $diary
  * @return  object   grade_item
@@ -822,7 +810,9 @@ function diary_get_users_done($diary, $currentgroup) {
 /**
  * Counts all the diary entries (optionally in a given group).
  *
- *
+ * @param array $diary
+ * @param int $groupid
+ * @return int count($diarys) Count of diary entries.
  */
 function diary_count_entries($diary, $groupid = 0) {
     global $DB;
@@ -867,7 +857,8 @@ function diary_count_entries($diary, $groupid = 0) {
 /**
  * Return entries that have not been emailed.
  *
- * return
+ * @param int $cutofftime
+ * @return object
  */
 function diary_get_unmailed_graded($cutofftime) {
     global $DB;
@@ -881,7 +872,8 @@ function diary_get_unmailed_graded($cutofftime) {
 /**
  * Return diary log info.
  *
- * return
+ * @param string $log
+ * @return object
  */
 function diary_log_info($log) {
     global $DB;
@@ -895,7 +887,7 @@ function diary_log_info($log) {
 }
 
 /**
- * Returns the diary instance course_module id
+ * Returns the diary instance course_module id.
  *
  * @param integer $diary
  * @return object
@@ -912,16 +904,14 @@ function diary_get_coursemodule($diaryid) {
 /**
  * Serves the diary files. THIS FUNCTION MAY BE ORPHANED. APPEARS TO BE SO IN JOURNAL.
  *
- * @package  mod_diary
- * @category files
- * @param stdClass $course course object
- * @param stdClass $cm course module object
- * @param stdClass $context context object
- * @param string $filearea file area
- * @param array $args extra arguments
- * @param bool $forcedownload whether or not force download
- * @param array $options additional options affecting the file serving
- * @return bool false if file not found, does not return if found - just send the file
+ * @param stdClass $course    Course object.
+ * @param stdClass $cm        Course module object.
+ * @param stdClass $context   Context object.
+ * @param string $filearea    File area.
+ * @param array $args         Extra arguments.
+ * @param bool $forcedownload Whether or not force download.
+ * @param array $options      Additional options affecting the file serving.
+ * @return bool               False if file not found, does not return if found - just send the file.
  */
 function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
     global $DB, $USER;
