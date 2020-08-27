@@ -717,7 +717,7 @@ function diary_update_grades($diary, $userid=0, $nullifnone=true) {
  * @return int 0 if ok, error code otherwise.
  */
 function diary_grade_item_update($diary, $grades=null) {
-// 20200718 Had to switch back to first one as I need the null.
+    // 20200718 Had to switch back to first one as I need the null.
 
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');

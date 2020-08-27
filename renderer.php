@@ -75,7 +75,8 @@ class mod_diary_renderer extends plugin_renderer_base {
      * @param int $firstkey  Id of the entry for the current sort order.
      * Return the toolbar     Return all the buttons that are part of the toolbar.
      */
-    public function toolbar($context, $course, $id, $diary, $firstkey) {
+    // TODO: public function toolbar($context, $course, $id, $diary, $firstkey) { // Check these.
+    public function toolbar($firstkey) {
         // TODO: global $DB, $CFG, $USER; Travis says unused.
         $output = '';
         $toolbuttons = array();
