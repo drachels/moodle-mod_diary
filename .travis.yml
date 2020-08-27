@@ -33,7 +33,7 @@ env:
   - IGNORE_NAMES=mobile_view_page.mustache
  matrix:
   - DB=pgsql
-  - DB=mysql
+  - DB=mysqli
 
 before_install:
   - phpenv config-rm xdebug.ini

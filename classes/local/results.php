@@ -157,6 +157,7 @@ class results  {
      * Prints the currently selected diary entry of student identified as $user, on the report page.
      *
      * @param integer $course
+     * @param integer $diary
      * @param integer $user
      * @param integer $entry
      * @param integer $teachers

@@ -14,6 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Define all the backup steps that will be used by the backup_diary_activity_task
+ *
+ * @package   mod_diary
+ * @copyright 2020 AL Rachels <drachels@drachels.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/diary/backup/moodle2/restore_diary_stepslib.php');

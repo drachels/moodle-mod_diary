@@ -200,7 +200,7 @@ function diary_get_post_actions() {
  * @param object $course
  * @param object $user
  * @param object $mod
- * @param object $data
+ * @param object $diary
  * @return object|null
  */
 function diary_user_outline($course, $user, $mod, $diary) {
@@ -524,7 +524,7 @@ function diary_scale_used ($diaryid, $scaleid) {
  * Checks if scale is being used by any instance of diary.
  *
  * This is used to find out if scale used anywhere.
- * @param $scaleid int
+ * @param int $scaleid
  * @return boolean True if the scale is used by any diary.
  */
 function diary_scale_used_anywhere($scaleid) {
@@ -592,8 +592,8 @@ function diary_reset_userdata($data) {
 /**
  * Print diary overview.
  *
- * @param object   $courses
- * @param boolean  $nullifnone   Return null if grade does not exist.
+ * @param object $courses
+ * @param array  $htmlarray
  */
 function diary_print_overview($courses, &$htmlarray) {
 
@@ -655,8 +655,8 @@ function diary_print_overview($courses, &$htmlarray) {
  * Get diary grades for a user.
  *
  * @param object   $diary        if is null, all diarys
- * @param int      $userid       if is false al users
- * @param boolean  $nullifnone   return null if grade does not exist
+ * @param int      $userid       if is false all users
+ * @return object  $grades
  */
 function diary_get_user_grades($diary, $userid=0) {
     global $CFG;
@@ -710,14 +710,15 @@ function diary_update_grades($diary, $userid=0, $nullifnone=true) {
 }
 
 /**
- * Update/create grade item for given diary.
+ * Update or create grade item for given diary.
  *
- * @param object $diary object with extra cmidnumber
+ * @param object $diary Object with extra cmidnumber.
  * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
- * @return int 0 if ok, error code otherwise
+ * @return int 0 if ok, error code otherwise.
  */
-// 20200718 Had to switch back to first one as I need the null.
 function diary_grade_item_update($diary, $grades=null) {
+// 20200718 Had to switch back to first one as I need the null.
+
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
@@ -761,7 +762,7 @@ function diary_grade_item_delete($diary) {
  * Used by report.php.
  *
  * @param   object   $diary
- * @return  object   currentgroup
+ * @param   object   $currentgroup
  * return   object   $diarys
  */
 function diary_get_users_done($diary, $currentgroup) {
@@ -889,7 +890,7 @@ function diary_log_info($log) {
 /**
  * Returns the diary instance course_module id.
  *
- * @param integer $diary
+ * @param integer $diaryid
  * @return object
  */
 function diary_get_coursemodule($diaryid) {

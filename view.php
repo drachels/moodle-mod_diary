@@ -181,7 +181,8 @@ if (!empty($action)) {
 
 // Header.
 $PAGE->set_url('/mod/diary/view.php', array('id' => $cm->id));
-$PAGE->navbar->add($diaryname);
+//$PAGE->navbar->add($diaryname);
+$PAGE->navbar->add(get_string("viewentries", "diary"));
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 

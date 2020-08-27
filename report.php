@@ -107,7 +107,7 @@ if (!empty($action)) {
 
 // Header.
 $PAGE->set_url('/mod/diary/report.php', array('id' => $id));
-$PAGE->navbar->add(get_string("entries", "diary"));
+$PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
 $PAGE->set_title(get_string("modulenameplural", "diary"));
 $PAGE->set_heading($course->fullname);
 

@@ -35,6 +35,9 @@ require_once($CFG->dirroot.'/lib/formslib.php');
  **/
 class mod_diary_entry_form extends moodleform {
 
+    /**
+     * Form definition
+     */
     public function definition() {
         global $CFG, $DB;
 
