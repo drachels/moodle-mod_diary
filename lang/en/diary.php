@@ -137,5 +137,6 @@ $string['timemarked'] = 'Time marked';
 $string['timemodified'] = 'Time modified';
 $string['userid'] = 'User id';
 $string['usertoolbar'] = 'User toolbar:';
+$string['viewalldiaries'] = 'View all course diaries';
 $string['viewallentries'] = 'View {$a} diary entries';
 $string['viewentries'] = 'View entries';

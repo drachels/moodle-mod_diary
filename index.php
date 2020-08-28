@@ -28,15 +28,14 @@ require_once("lib.php");
 
 $id = required_param('id', PARAM_INT);   // Course.
 
-if (! $course = $DB->get_record("course", array("id" => $id))) {
+if (! $course = $DB->get_record('course', array('id' => $id))) {
     print_error("Course ID is incorrect");
 }
 
 require_course_login($course);
 
-
 // Header.
-$strdiarys = get_string("modulenameplural", "diary");
+$strdiarys = get_string('modulenameplural', 'diary');
 $PAGE->set_pagelayout('incourse');
 $PAGE->set_url('/mod/diary/index.php', array('id' => $id));
 $PAGE->navbar->add($strdiarys);
@@ -46,8 +45,8 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($strdiarys);
 
-if (! $diarys = get_all_instances_in_course("diary", $course)) {
-    notice(get_string('thereareno', 'moodle', get_string("modulenameplural", "diary")), "../../course/view.php?id=$course->id");
+if (! $diarys = get_all_instances_in_course('diary', $course)) {
+    notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
     die;
 }
 

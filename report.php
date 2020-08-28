@@ -114,6 +114,9 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string($stringlable, "diary"));
 
+// 20200827 Added link to index.php page.
+echo '<div class="reportlink"><a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></div>';
+
 // Get a list of groups for this course.
 $currentgroup = groups_get_activity_group($cm, true);
 if ($currentgroup) {
