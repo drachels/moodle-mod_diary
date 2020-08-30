@@ -336,7 +336,8 @@ function diary_cron() {
             $postsubject = "$course->shortname: $msubject: ".format_string($entry->name, true);
             $posttext  = "$course->shortname -> $modnamepl -> ".format_string($entry->name, true)."\n";
             $posttext .= "---------------------------------------------------------------------\n";
-            $posttext .= get_string("diarymail", "diary", $diaryinfo)."\n";
+            // 20200829 Added users first and last name to message.
+            $posttext .= $user->firstname.' '.$user->lastname.',<br><br>'.get_string("diarymail", "diary", $diaryinfo)."\n";
             $posttext .= "---------------------------------------------------------------------\n";
             if ($user->mailformat == 1) {  // HTML.
                 $posthtml = "<p><font face=\"sans-serif\">".
@@ -344,7 +345,8 @@ function diary_cron() {
                 "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
                 "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">".format_string($entry->name, true)."</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
-                $posthtml .= "<p>".get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
+                // 20200829 Added users first and last name to message.
+                $posthtml .= "<p>".$user->firstname.' '.$user->lastname.',<br><br>'.get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
                 $posthtml .= "</font><hr />";
             } else {
                 $posthtml = "";
@@ -712,13 +714,11 @@ function diary_update_grades($diary, $userid=0, $nullifnone=true) {
 /**
  * Update or create grade item for given diary.
  *
- * @param object $diary Object with extra cmidnumber.
- * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
+ * @param stdClass $diary Object with extra cmidnumber.
+ * @param array $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise.
  */
 function diary_grade_item_update($diary, $grades=null) {
-    // 20200718 Had to switch back to first one as I need the null.
-
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 

@@ -203,8 +203,14 @@ if ($entriesmanager) {
     $entrycount = diary_count_entries($diary, $currentgroup);
 
     // 20200827 Add link to index.php page.
-    echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">'.
-        get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></div>';
+    echo '<div class="reportlink"><a href="report.php?id='
+        .$cm->id.'&action=currententry">'
+        .get_string('viewallentries', 'diary', $entrycount)
+        .'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?id='
+        .$course->id
+        .'">'
+        .get_string('viewalldiaries', 'diary')
+        .'</a></div>';
 }
 
 echo $output->introduction($diary, $cm); // Ouput introduction in renderer.php.

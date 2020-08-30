@@ -1,0 +1,27 @@
+This files describes API changes in the diary code.
+=== 1.2.0 ===
+* Added user names salutation to strings used for message/emails sent to user.
+* Cleanup of more code prechecks listed for 1.0.1.(10|4)
+
+=== 1.1.0 ===
+* Cleanup of more code prechecks listed for 1.0.1.(21|4)
+* Added link on view.php to index.php to show all Diary's in the course.
+* Added link on report.php to index.php to show all Diary's in the course.
+
+=== 1.0.1 ===
+* Cleanup of most code prechecks listed for 1.0.0.
+
+=== 1.0.0 ===
+* Cleanup of code prechecks.
+* Added toolbar with download, page reload, edit, and four sorts to view.php page.
+* Added toolbar with download, page reload, edit, and four sorts to report.php page.
+* Added page format color setting to control look of view.php and report.php pages.
+* Added capability to start new entry each calendar day.
+* Added Save all feedback and Return to Diary, buttons between each entry on report.php page.
+* Added, Entries per page, selector on the view.php page.
+* Added timecreated to use as title for each entry on the view.php page.
+* Added Details listing to each entry on the view.php page.
+* Added notice that an entry has not been given feedback or rated yet, for each entry on view.php page.
+* Added Rating system.
+* Removed hard coded text in print_errors in edit.php and report.php.
+* Added an edit link/icon after the title of every entry on view.php page

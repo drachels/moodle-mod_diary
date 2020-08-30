@@ -73,13 +73,15 @@ $string['diary:addentries'] = 'Add diary entries';
 $string['diary:addinstance'] = 'Add diary instances';
 $string['diary:manageentries'] = 'Manage diary entries';
 $string['diary:rate'] = 'Rate diary entries';
-$string['diarymail'] = '{$a->teacher} has posted some feedback on your diary entry for \'{$a->diary}\'
+$string['diarymail'] = 'Greetings {$a->firstname} {$a->lastname},
+{$a->teacher} has posted some feedback on your diary entry for \'{$a->diary}\'.
 
 You can see it appended to your diary entry:
 
     {$a->url}';
-$string['diarymailhtml'] = '{$a->teacher} has posted some feedback on your
-diary entry for \'<i>{$a->diary}</i>\'<br /><br />
+$string['diarymailhtml'] = 'Greetings {$a->firstname} {$a->lastname},
+{$a->teacher} has posted some feedback on your
+diary entry for \'<i>{$a->diary}</i>\'.<br /><br />
 You can see it appended to your <a href="{$a->url}">diary entry</a>.';
 $string['diaryname'] = 'Diary name';
 $string['diaryquestion'] = 'Diary question';
