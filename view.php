@@ -206,16 +206,18 @@ if ($entriesmanager) {
     echo '<div class="reportlink"><a href="report.php?id='
         .$cm->id.'&action=currententry">'
         .get_string('viewallentries', 'diary', $entrycount)
-        .'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?id='
-        .$course->id
-        .'">'
-        .get_string('viewalldiaries', 'diary')
-        .'</a></div>';
+        .'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?id='.$course->id.'">'
+        .get_string('viewalldiaries', 'diary').'</a></div>';
+} else {
+    // 20200831 Added to show link to index.php page for students.
+    echo '<div class="reportlink"><a href="index.php?id='.$course->id.'">'
+        .get_string('viewalldiaries', 'diary').'</a></div>';
 }
 
 echo $output->introduction($diary, $cm); // Ouput introduction in renderer.php.
 
-echo '<br />';
+// 20200901 Visual separator between activity info and entries.
+echo '<hr>';
 
 // Check to see if diary is currently available.
 $timenow = time();
@@ -246,7 +248,7 @@ if ($diary->assessed != 0) {
 $aggregatestr = results::get_diary_aggregation($diary->assessed);
 
 if ($timenow > $timestart) {
-
+    $perpage = 0; // Initialize now so it doesn't break if cannot edit.
     echo $OUTPUT->box_start();
     // Add Current entry Edit button and user toolbar.
     if ($timenow < $timefinish) {
@@ -322,7 +324,8 @@ if ($timenow > $timestart) {
 
     // Display entry with the $DB portion supplied/set by the toolbar.
     if ($entrys) {
-        $thispage = 1;
+        //$thispage = 1;
+        $thispage = 0;
         foreach ($entrys as $entry) {
             if (empty($entry->text)) {
                 echo '<p align="center"><b>'.get_string('blankentry', 'diary').'</b></p>';
@@ -348,10 +351,15 @@ if ($timenow > $timestart) {
                 $options['action'] = 'editentry';
                 $options['firstkey'] = $entry->id;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
-                $editthisentry = html_writer::link($url,
-                    $output->pix_icon('i/edit',
-                    get_string('editthisentry', 'diary')),
-                    array('class' => 'toolbutton'));
+                // 20200901 If editing time has expired, remove the edit toolbutton from the title.
+                if ($timenow < $timefinish) {
+                    $editthisentry = html_writer::link($url,
+                        $output->pix_icon('i/edit',
+                        get_string('editthisentry', 'diary')),
+                        array('class' => 'toolbutton'));
+                } else {
+                    $editthisentry = ' ';
+                }
 
                 // Add a heading for each entry on the page.
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '
@@ -367,7 +375,8 @@ if ($timenow > $timestart) {
                     border-radius:16px;">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
-                echo results::diary_format_entry_text($entry, $course, $cm).'</div></p>';
+                //echo results::diary_format_entry_text($entry, $course, $cm).'</div></p>';
+                echo results::diary_format_entry_text($entry, $course, $cm).'</div>';
 
                 // Info regarding last edit and word count.
                 if ($timenow < $timefinish) {
@@ -387,6 +396,7 @@ if ($timenow > $timestart) {
                         echo "</div>";
                     }
 
+                    // Added lines to mark entry as being dirty and needing regrade.
                     if (!empty($entry->timecreated) AND !empty($entry->timemodified) AND empty($entry->timemarked)) {
                         echo "<div class=\"needsedit\">".get_string("needsgrading", "diary"). "</div>";
                     } else if (!empty($entry->timemodified)
@@ -414,7 +424,8 @@ if ($timenow > $timestart) {
                     // Format output using renderer.php.
                     echo $output->diary_print_feedback($course, $entry, $grades);
                 }
-                echo '</div></p>';
+                //echo '</div></p>';
+                echo '</div>';
 
             }
 
