@@ -2,6 +2,9 @@ This files describes API changes in the diary code.
 === 1.2.0 ===
 * Added user names salutation to strings used for message/emails sent to user.
 * Cleanup of more code prechecks listed for 1.0.1.(10|4)
+* Changed edit mode to show, Diary description instead of, Diary question.
+* On the view.php page, added a link for students to index.php page.
+* Added code to enable, Expect completed on, date.
 
 === 1.1.0 ===
 * Cleanup of more code prechecks listed for 1.0.1.(21|4)
