@@ -92,6 +92,10 @@ function diary_update_instance($diary) {
 
     // Add calendar events if necessary.
     // Check data lib.php line 1106 for what to add here.
+    //data_set_events($diary); // This function is in the data locallib.php file at line 590.
+    $completionexpected = (!empty($diary->completionexpected)) ? $diary->completionexpected : null;
+    \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $completionexpected);
+
     diary_grade_item_update($diary);
 
     return true;
