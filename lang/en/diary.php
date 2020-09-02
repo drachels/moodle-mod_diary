@@ -84,7 +84,7 @@ $string['diarymailhtml'] = 'Greetings {$a->firstname} {$a->lastname},
 diary entry for \'<i>{$a->diary}</i>\'.<br /><br />
 You can see it appended to your <a href="{$a->url}">diary entry</a>.';
 $string['diaryname'] = 'Diary name';
-$string['diaryquestion'] = 'Diary question';
+$string['diarydescription'] = 'Diary description';
 $string['format'] = 'Format';
 $string['highestgradeentry'] = 'Highest rated entries:';
 $string['latestmodifiedentry'] = 'Most recently modified entries:';

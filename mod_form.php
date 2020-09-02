@@ -50,7 +50,7 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $this->standard_intro_elements(get_string('diaryquestion', 'diary'));
+        $this->standard_intro_elements(get_string('diarydescription', 'diary'));
 
         // Add the availability header.
         $mform->addElement('header', 'availibilityhdr', get_string('availability'));
