@@ -82,16 +82,20 @@ class restore_diary_activity_task extends restore_activity_task {
     }
 
     /**
+     * Added fix from https://tracker.moodle.org/browse/MDL-34172
+     */
+
+    /**
      * Define the restore log rules that will be applied
-     * by the {@link restore_logs_processor} when restoring
-     * glossary logs. It must return one array
-     * of {@link restore_log_rule} objects.
+     * by the restore_logs_processor when restoring
+     * diary logs. It must return one array
+     * of restore_log_rule objects.
      *
      * @return array of restore_log_rule
      */
     public static function define_restore_log_rules() {
-
         $rules = array();
+
         $rules[] = new restore_log_rule('diary', 'view', 'view.php?id={course_module}', '{diary}');
         $rules[] = new restore_log_rule('diary', 'view responses', 'report.php?id={course_module}', '{diary}');
         $rules[] = new restore_log_rule('diary', 'add entry', 'edit.php?id={course_module}', '{diary}');
@@ -103,9 +107,9 @@ class restore_diary_activity_task extends restore_activity_task {
 
     /**
      * Define the restore log rules that will be applied
-     * by the {@link restore_logs_processor} when restoring
+     * by the restore_logs_processor when restoring
      * course logs. It must return one array
-     * of {@link restore_log_rule} objects.
+     * of restore_log_rule objects.
      *
      * Note this rules are applied when restoring course logs
      * by the restore final task, but are defined here at
@@ -114,8 +118,8 @@ class restore_diary_activity_task extends restore_activity_task {
      * @return array
      */
     public static function define_restore_log_rules_for_course() {
-
         $rules = array();
+
         $rules[] = new restore_log_rule('diary', 'view all', 'index.php?id={course}', null);
 
         return $rules;
