@@ -72,6 +72,13 @@ class mod_diary_mod_form extends moodleform_mod {
             $mform->setDefault('days', '0');
         }
 
+        $mform->addElement('date_time_selector', 'timeopen',
+                           get_string('diaryopentime', 'diary'),
+                           array('optional' => true, 'step' => 1));
+        $mform->addElement('date_time_selector', 'timeclose',
+                           get_string('diaryclosetime', 'diary'),
+                           array('optional' => true, 'step' => 1));
+
         // Add the rest of the common settings.
 
         $this->standard_grading_coursemodule_elements();
