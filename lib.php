@@ -48,10 +48,10 @@ function diary_add_instance($diary) {
     $diary->timemodified = time();
     $diary->id = $DB->insert_record('diary', $diary);
 
-    // Will need this later when I implement calendar dates, maybe.
-    // TODO: diary_update_calendar($diary, $diary->coursemodule);.
-    // Add calendar events if necessary.
-    // TODO: diary_set_events($diary);.
+    // 20200903 Added calendar dates.
+    results::diary_update_calendar($diary, $diary->coursemodule);
+
+    // 20200901 Added expected completion date.
     if (!empty($diary->completionexpected)) {
         \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $diary->completionexpected);
     }
@@ -90,9 +90,10 @@ function diary_update_instance($diary) {
 
     $DB->update_record('diary', $diary);
 
-    // Add calendar events if necessary.
-    // Check data lib.php line 1106 for what to add here.
-    //data_set_events($diary); // This function is in the data locallib.php file at line 590.
+    // 20200903 Added calendar dates.
+    results::diary_update_calendar($diary, $diary->coursemodule);
+
+    // 20200901 Added expected completion date.
     $completionexpected = (!empty($diary->completionexpected)) ? $diary->completionexpected : null;
     \core_completion\api::update_completion_date_event($diary->coursemodule, 'diary', $diary->id, $completionexpected);
 
@@ -148,7 +149,7 @@ function diary_supports($feature) {
         case FEATURE_MOD_INTRO:
             return true;
         case FEATURE_GRADE_HAS_GRADE:
-            return false;
+            return true;
         case FEATURE_GRADE_OUTCOMES:
             return false;
         case FEATURE_RATE:
@@ -350,7 +351,9 @@ function diary_cron() {
                 "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">".format_string($entry->name, true)."</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
                 // 20200829 Added users first and last name to message.
-                $posthtml .= "<p>".$user->firstname.' '.$user->lastname.',<br><br>'.get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
+                $posthtml .= "<p>".$user->firstname.' '
+                             .$user->lastname.',<br><br>'
+                             .get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
                 $posthtml .= "</font><hr />";
             } else {
                 $posthtml = "";
