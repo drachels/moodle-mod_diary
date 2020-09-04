@@ -37,9 +37,28 @@ function xmldb_diary_upgrade($oldversion=0) {
 
     $result = true;
 
-    if ($result && $oldversion < 2020082200) {
+    if ($result && $oldversion < 2020090200) {
+
+        // Define field timeopen to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('timeopen', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+
+        // Conditionally launch add field timeopen.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field timeclose to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('timeclose', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timeopen');
+
+        // Conditionally launch add field timeclose.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2020082200, 'diary');
+        upgrade_mod_savepoint(true, 2020090200, 'diary');
     }
     return $result;
 }
