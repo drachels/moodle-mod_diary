@@ -202,7 +202,7 @@ if ($entriesmanager) {
 
     $entrycount = diary_count_entries($diary, $currentgroup);
 
-    // 20200827 Add link to index.php page.
+    // 20200827 Add link to index.php page right after the report.php link.
     echo '<div class="reportlink"><a href="report.php?id='
         .$cm->id.'&action=currententry">'
         .get_string('viewallentries', 'diary', $entrycount)
@@ -228,6 +228,11 @@ if ($course->format == 'weeks' and $diary->days) {
     } else {
         $timefinish = $course->enddate;
     }
+} else if (!(results::diary_available($diary))) {
+    // 20200904 If used, set calendar availability time limits on the diarys.
+    $timestart = $diary->timeopen;
+    $timefinish = $diary->timeclose;
+    $diary->days = 0;
 } else {
     // Have no time limits on the diarys.
     $timestart = $timenow - 1;
@@ -324,7 +329,6 @@ if ($timenow > $timestart) {
 
     // Display entry with the $DB portion supplied/set by the toolbar.
     if ($entrys) {
-        //$thispage = 1;
         $thispage = 0;
         foreach ($entrys as $entry) {
             if (empty($entry->text)) {
@@ -375,7 +379,6 @@ if ($timenow > $timestart) {
                     border-radius:16px;">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
-                //echo results::diary_format_entry_text($entry, $course, $cm).'</div></p>';
                 echo results::diary_format_entry_text($entry, $course, $cm).'</div>';
 
                 // Info regarding last edit and word count.
@@ -424,22 +427,19 @@ if ($timenow > $timestart) {
                     // Format output using renderer.php.
                     echo $output->diary_print_feedback($course, $entry, $grades);
                 }
-                //echo '</div></p>';
-                echo '</div>';
-
+                // This adds blank space between entries.
+                echo '</div></p>';
             }
-
         }
 
     } else {
-        echo '<span class="warning">'.get_string('notstarted', 'diary').'</span>';
+        echo '<span class="warning">'.get_string('notstarted', 'diary').'.</span>';
     }
     echo $OUTPUT->box_end();
 
-
 } else {
     echo '<div class="warning">'.get_string('notopenuntil', 'diary').': ';
-    echo userdate($timestart).'</div>';
+    echo userdate($timestart).'.</div>';
 }
 
 // Trigger module viewed event.
