@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Keyboard utilities for Diary.
+ * Results utilities for Diary.
  *
  * 2020071700 Moved these functions from lib.php to here.
  *
@@ -25,11 +25,14 @@
  */
 namespace mod_diary\local;
 defined('MOODLE_INTERNAL') || die();
+define('DIARY_EVENT_TYPE_OPEN', 'open');
+define('DIARY_EVENT_TYPE_CLOSE', 'close');
 
 use stdClass;
 use csv_export_writer;
 use html_writer;
 use context_module;
+use calendar_event;
 
 /**
  * Utility class for Diary results.
@@ -39,6 +42,122 @@ use context_module;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class results  {
+
+    /**
+     * Update the calendar entries for this diary activity.
+     *
+     * @param stdClass $diary the row from the database table diary.
+     * @param int $cmid The coursemodule id
+     * @return bool
+     */
+    public static function diary_update_calendar(stdClass $diary, $cmid) {
+        global $DB, $CFG;
+
+        if ($CFG->branch > 30) { // If Moodle less than version 3.1 skip this.
+            require_once($CFG->dirroot.'/calendar/lib.php');
+
+            // Get CMID if not sent as part of $diary.
+            if (!isset($diary->coursemodule)) {
+                $cm = get_coursemodule_from_instance('diary', $diary->id, $diary->course);
+                $diary->coursemodule = $cm->id;
+            }
+
+            // Diary start calendar events.
+            $event = new stdClass();
+            $event->eventtype = DIARY_EVENT_TYPE_OPEN;
+            // The MOOTYPER_EVENT_TYPE_OPEN event should only be an action event if no close time is specified.
+            $event->type = empty($diary->timeclose) ? CALENDAR_EVENT_TYPE_ACTION : CALENDAR_EVENT_TYPE_STANDARD;
+            if ($event->id = $DB->get_field('event', 'id',
+                array('modulename' => 'diary', 'instance' => $diary->id, 'eventtype' => $event->eventtype))) {
+                if ((!empty($diary->timeopen)) && ($diary->timeopen > 0)) {
+                    // Calendar event exists so update it.
+                    $event->name = get_string('calendarstart', 'diary', $diary->name);
+                    $event->description = format_module_intro('diary', $diary, $cmid);
+                    $event->timestart = $diary->timeopen;
+                    $event->timesort = $diary->timeopen;
+                    $event->visible = instance_is_visible('diary', $diary);
+                    $event->timeduration = 0;
+
+                    $calendarevent = calendar_event::load($event->id);
+                    $calendarevent->update($event, false);
+                } else {
+                    // Calendar event is no longer needed.
+                    $calendarevent = calendar_event::load($event->id);
+                    $calendarevent->delete();
+                }
+            } else {
+                // Event doesn't exist so create one.
+                if ((!empty($diary->timeopen)) && ($diary->timeopen > 0)) {
+                    $event->name = get_string('calendarstart', 'diary', $diary->name);
+                    $event->description = format_module_intro('diary', $diary, $cmid);
+                    $event->courseid = $diary->course;
+                    $event->groupid = 0;
+                    $event->userid = 0;
+                    $event->modulename = 'diary';
+                    $event->instance = $diary->id;
+                    $event->timestart = $diary->timeopen;
+                    $event->timesort = $diary->timeopen;
+                    $event->visible = instance_is_visible('diary', $diary);
+                    $event->timeduration = 0;
+
+                    calendar_event::create($event, false);
+                }
+            }
+
+            // Diary end calendar events.
+            $event = new stdClass();
+            $event->type = CALENDAR_EVENT_TYPE_ACTION;
+            $event->eventtype = DIARY_EVENT_TYPE_CLOSE;
+            if ($event->id = $DB->get_field('event', 'id',
+                array('modulename' => 'diary', 'instance' => $diary->id, 'eventtype' => $event->eventtype))) {
+                if ((!empty($diary->timeclose)) && ($diary->timeclose > 0)) {
+                    // Calendar event exists so update it.
+                    $event->name = get_string('calendarend', 'diary', $diary->name);
+                    $event->description = format_module_intro('diary', $diary, $cmid);
+                    $event->timestart = $diary->timeclose;
+                    $event->timesort = $diary->timeclose;
+                    $event->visible = instance_is_visible('diary', $diary);
+                    $event->timeduration = 0;
+
+                    $calendarevent = calendar_event::load($event->id);
+                    $calendarevent->update($event, false);
+                } else {
+                    // Calendar event is on longer needed.
+                    $calendarevent = calendar_event::load($event->id);
+                    $calendarevent->delete();
+                }
+            } else {
+                // Event doesn't exist so create one.
+                if ((!empty($diary->timeclose)) && ($diary->timeclose > 0)) {
+                    $event->name = get_string('calendarend', 'diary', $diary->name);
+                    $event->description = format_module_intro('diary', $diary, $cmid);
+                    $event->courseid = $diary->course;
+                    $event->groupid = 0;
+                    $event->userid = 0;
+                    $event->modulename = 'diary';
+                    $event->instance = $diary->id;
+                    $event->timestart = $diary->timeclose;
+                    $event->timesort = $diary->timeclose;
+                    $event->visible = instance_is_visible('diary', $diary);
+                    $event->timeduration = 0;
+
+                    calendar_event::create($event, false);
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Returns availability status.
+     * Added 20200903.
+     * @param var $diary
+     */
+    public static function diary_available($diary) {
+        $timeopen = $diary->timeopen;
+        $timeclose = $diary->timeclose;
+        return (($timeopen == 0 || time() >= $timeopen) && ($timeclose == 0 || time() < $timeclose));
+    }
 
     /**
      * Download entries in this diary activity.
