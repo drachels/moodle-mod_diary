@@ -253,7 +253,10 @@ if ($diary->assessed != 0) {
 $aggregatestr = results::get_diary_aggregation($diary->assessed);
 
 if ($timenow > $timestart) {
-    $perpage = 0; // Initialize now so it doesn't break if cannot edit.
+    // Initialize now so it doesn't break if cannot edit.
+    $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
+    $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
+
     echo $OUTPUT->box_start();
     // Add Current entry Edit button and user toolbar.
     if ($timenow < $timefinish) {
@@ -279,9 +282,6 @@ if ($timenow > $timestart) {
 
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
-
-            $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
-            $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
 
             if ($perpage < 2) {
                 $perpage = 2;
@@ -320,7 +320,8 @@ if ($timenow > $timestart) {
 
             echo get_string('pagesize', 'diary').': <select onchange="this.form.submit()" name="perpage">';
             echo '<option selected="true" value="'.$selection.'</option>';
-            echo '</select>';
+            // 20200905 Added count of all user entries.
+            echo '</select>'.get_string('outof', 'diary', (count($entrys)));
             echo '</form>';
 
             echo $output->box_end();
@@ -329,7 +330,14 @@ if ($timenow > $timestart) {
 
     // Display entry with the $DB portion supplied/set by the toolbar.
     if ($entrys) {
-        $thispage = 0;
+        // 20200905 Fixed Entries per page when activity is closed.
+        if ($timenow > $timefinish) {
+            // 20200905 If a diary is closed, show all entries to a user.
+            $perpage = (count($entrys));
+            $thispage = '1';
+        } else {
+            $thispage = '1';
+        }
         foreach ($entrys as $entry) {
             if (empty($entry->text)) {
                 echo '<p align="center"><b>'.get_string('blankentry', 'diary').'</b></p>';
