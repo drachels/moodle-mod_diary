@@ -109,6 +109,7 @@ $string['noentry'] = 'No entry';
 $string['noratinggiven'] = 'No rating given';
 $string['notopenuntil'] = 'This diary won\'t be open until';
 $string['notstarted'] = 'You have not started this diary yet';
+$string['outof'] = ' out of {$a} entries.';
 $string['overallrating'] = 'Overall rating';
 $string['pagesize'] = 'Entries per page';
 $string['pluginadministration'] = 'Diary module administration';
