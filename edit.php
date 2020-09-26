@@ -111,14 +111,14 @@ $data = file_prepare_standard_editor($data,
                                      $context,
                                      'mod_diary',
                                      'entry',
-                                     $data->id);
+                                     $data->entryid);
 $data = file_prepare_standard_filemanager($data,
                                           'attachment',
                                           $attachmentoptions,
                                           $context,
                                           'mod_diary',
                                           'attachment',
-                                          $data->id);
+                                          $data->entryid);
 
 $form = new mod_diary_entry_form(null, array('current' => $data,
                                              'cm' => $cm,
@@ -137,7 +137,7 @@ if ($form->is_cancelled()) {
     confirm_sesskey();
     $timenow = time();
 
-    // This will be overwriten after we have the entryid.
+    // This will be overwritten after we have the entryid.
     $newentry = new stdClass();
     $newentry->timecreated = $fromform->timecreated;
     $newentry->timemodified = $timenow;
