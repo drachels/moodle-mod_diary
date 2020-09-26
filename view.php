@@ -276,10 +276,12 @@ if ($timenow > $timestart) {
                .'&action=currententry'
                , get_string('startoredit', 'diary'), 'get',
                array("class" => "singlebutton diarystart"));
-            // Print user toolbar icons.
-            echo ' '.get_string('usertoolbar', 'diary');
-            echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey);
+            // Print user toolbar icons only if there is at least one entry for this user.
+            if ($entrys) {
+                echo ' '.get_string('usertoolbar', 'diary');
 
+                echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey);
+            }
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
 
