@@ -332,6 +332,8 @@ function diary_cron() {
             }
 
             $diaryinfo = new stdClass();
+            // 20200829 Added users first and last name to message.
+            $diaryinfo->user = $user->firstname.' '.$user->lastname;
             $diaryinfo->teacher = fullname($teacher);
             $diaryinfo->diary = format_string($entry->name, true);
             $diaryinfo->url = "$CFG->wwwroot/mod/diary/view.php?id=$mod->id";
@@ -341,8 +343,7 @@ function diary_cron() {
             $postsubject = "$course->shortname: $msubject: ".format_string($entry->name, true);
             $posttext  = "$course->shortname -> $modnamepl -> ".format_string($entry->name, true)."\n";
             $posttext .= "---------------------------------------------------------------------\n";
-            // 20200829 Added users first and last name to message.
-            $posttext .= $user->firstname.' '.$user->lastname.',<br><br>'.get_string("diarymail", "diary", $diaryinfo)."\n";
+            $posttext .= get_string("diarymail", "diary", $diaryinfo)."\n";
             $posttext .= "---------------------------------------------------------------------\n";
             if ($user->mailformat == 1) {  // HTML.
                 $posthtml = "<p><font face=\"sans-serif\">".
@@ -351,9 +352,7 @@ function diary_cron() {
                 "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">".format_string($entry->name, true)."</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
                 // 20200829 Added users first and last name to message.
-                $posthtml .= "<p>".$user->firstname.' '
-                             .$user->lastname.',<br><br>'
-                             .get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
+                $posthtml .= "<p>".get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
                 $posthtml .= "</font><hr />";
             } else {
                 $posthtml = "";
