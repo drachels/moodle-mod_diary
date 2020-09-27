@@ -296,7 +296,7 @@ class results  {
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
-            echo date(get_config('mod_diary', 'dateformat'), $entry->timecreated);
+            echo userdate($entry->timecreated);
             echo '</td><td></td>';
             echo '</tr>';
         }

@@ -377,7 +377,7 @@ if ($timenow > $timestart) {
 
                 // Add a heading for each entry on the page.
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '
-                    .date(get_config('mod_diary', 'dateformat'), $entry->timecreated)
+                    .userdate($entry->timecreated)
                     .'  '.$editthisentry);
 
                 // Start an inner division for the user's text entry container.
@@ -400,10 +400,10 @@ if ($timenow > $timestart) {
                            , 'two' => $diff->h]).'<br>';
 
                         echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
-                        echo date(get_config('mod_diary', 'dateformat'), $entry->timecreated).'<br>';
+                        echo userdate($entry->timecreated).'<br>';
 
                         echo '<strong> '.get_string('lastedited').': </strong> ';
-                        echo date(get_config('mod_diary', 'dateformat'), $entry->timemodified).'<br>';
+                        echo userdate($entry->timemodified).'<br>';
 
                         echo "</div>";
                     }
