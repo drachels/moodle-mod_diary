@@ -394,8 +394,7 @@ if ($timenow > $timestart) {
                 // Info regarding last edit and word count.
                 if ($timenow < $timefinish) {
                     if (!empty($entry->timemodified)) {
-
-                        echo '<div class="lastedit"><strong>Details: </strong> ('
+                        echo '<div class="lastedit"><strong>'.get_string('details', 'diary').'</strong> ('
                            .get_string('numwords', '', count_words($entry->text))
                            .') '.get_string('created', 'diary', ['one' => $diff->days
                            , 'two' => $diff->h]).'<br>';

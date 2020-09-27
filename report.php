@@ -309,7 +309,7 @@ if (!$users) {
                        , array('class' => 'toolbutton'));
 
         // This needs to become a string.
-        echo ' Toolbar: ';
+        echo get_string('toolbar', 'diary');
         // Add the toolbar to the top of the report page.
         echo $output = html_writer::alist($tools, array('id' => 'toolbar'));
     }
