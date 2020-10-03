@@ -9,11 +9,13 @@ language: php
 
 sudo: true
 
-dist: trusty
+#dist: trusty
+dist: xenial
 
 addons:
   firefox: "47.0.1"
-  postgresql: "9.5"
+  #postgresql: "9.5"
+  postgresql: "9.6"
   apt:
     packages:
       - openjdk-8-jre-headless
