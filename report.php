@@ -260,58 +260,60 @@ if (!$users) {
 
     // Create download, reload, current, oldest, lowest, highest, and most recent edit button for all entries in this diary.
     if (has_capability('mod/diary:manageentries', $context)) {
+        // 20201003 Changed toolbar code to $output instead of html_writer::alist.
         $options = array();
         $options['id'] = $id;
         $options['diary'] = $diary->id;
-
+        $output = ' ';
         // Add download button.
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('i/export'
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('i/export'
                        , get_string('csvexport', 'diary'))
                        , array('class' => 'toolbutton'));
 
         // Add reload toolbutton.
         $options['action'] = $stringlable;
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/reload'
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/reload'
                        , get_string('reload', 'diary'))
                        , array('class' => 'toolbutton'));
 
         $options['action'] = 'currententry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('i/edit'
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('i/edit'
                        , get_string('currententry', 'diary'))
                        , array('class' => 'toolbutton'));
 
         $options['action'] = 'firstentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/left'
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/left'
                        , get_string('firstentry', 'diary'))
                        , array('class' => 'toolbutton'));
 
         $options['action'] = 'lowestgradeentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/down'
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/down'
                        , get_string('lowestgradeentry', 'diary'))
                        , array('class' => 'toolbutton'));
 
         $options['action'] = 'highestgradeentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/up'
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/up'
                        , get_string('highestgradeentry', 'diary'))
                        , array('class' => 'toolbutton'));
 
         $options['action'] = 'latestmodifiedentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $tools[] = html_writer::link($url, $OUTPUT->pix_icon('t/right'
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/right'
                        , get_string('latestmodifiedentry', 'diary'))
                        , array('class' => 'toolbutton'));
 
         // This needs to become a string.
         echo get_string('toolbar', 'diary');
         // Add the toolbar to the top of the report page.
-        echo $output = html_writer::alist($tools, array('id' => 'toolbar'));
+        //echo $output = html_writer::alist($tools, array('id' => 'toolbar'));
+        echo $output;
     }
     // Next line is different from Journal line 171.
     $grades = make_grades_menu($diary->scale);

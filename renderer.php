@@ -72,23 +72,21 @@ class mod_diary_renderer extends plugin_renderer_base {
      * Return the toolbar    Return all the buttons that are part of the toolbar.
      */
     public function toolbar($firstkey) {
-        $output = '';
-        $toolbuttons = array();
-
+        // 20201003 Changed toolbar code to $output instead of html_writer::alist.
         $options = array();
         $options['id'] = $this->cm->id;
-
+        $output = ' ';
         // Print export to .csv file toolbutton.
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/export'
+        $output .= html_writer::link($url, $this->pix_icon('i/export'
             , get_string('csvexport', 'diary'))
             , array('class' => 'toolbutton'));
 
         // Print reload toolbutton.
         $options['action'] = 'reload';
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/reload'
+        $output .= html_writer::link($url, $this->pix_icon('t/reload'
             , get_string('reload', 'diary'))
             , array('class' => 'toolbutton'));
 
@@ -96,7 +94,7 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'editentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/edit.php', $options);
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('i/edit'
+        $output .= html_writer::link($url, $this->pix_icon('i/edit'
             , get_string('edittopoflist', 'diary'))
             , array('class' => 'toolbutton'));
 
@@ -104,7 +102,7 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'sortfirstentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/left'
+        $output .= html_writer::link($url, $this->pix_icon('t/left'
             , get_string('sortfirstentry', 'diary'))
             , array('class' => 'toolbutton'));
 
@@ -112,7 +110,7 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'lowestgradeentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/down'
+        $output .= html_writer::link($url, $this->pix_icon('t/down'
             , get_string('lowestgradeentry', 'diary'))
             , array('class' => 'toolbutton'));
 
@@ -120,7 +118,7 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'highestgradeentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/up'
+        $output .= html_writer::link($url, $this->pix_icon('t/up'
             , get_string('highestgradeentry', 'diary'))
             , array('class' => 'toolbutton'));
 
@@ -128,13 +126,12 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'latestmodifiedentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $toolbuttons[] = html_writer::link($url, $this->pix_icon('t/right'
+        $output .= html_writer::link($url, $this->pix_icon('t/right'
             , get_string('latestmodifiedentry', 'diary'))
             , array('class' => 'toolbutton'));
 
         $firstkey = '';
         // Return all available toolbuttons.
-        $output .= html_writer::alist($toolbuttons, array('id' => 'toolbar'));
         return $output;
     }
 
