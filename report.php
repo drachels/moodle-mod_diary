@@ -312,7 +312,6 @@ if (!$users) {
         // This needs to become a string.
         echo get_string('toolbar', 'diary');
         // Add the toolbar to the top of the report page.
-        //echo $output = html_writer::alist($tools, array('id' => 'toolbar'));
         echo $output;
     }
     // Next line is different from Journal line 171.
