@@ -351,7 +351,6 @@ function diary_cron() {
                 "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
                 "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">".format_string($entry->name, true)."</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
-                // 20200829 Added users first and last name to message.
                 $posthtml .= "<p>".get_string("diarymailhtml", "diary", $diaryinfo)."</p>";
                 $posthtml .= "</font><hr />";
             } else {
