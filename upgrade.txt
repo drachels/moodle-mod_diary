@@ -1,4 +1,27 @@
 This files describes API changes in the diary code.
+=== 1.7.0 ===
+* Fixed toolbar in render.php. Changed from html_writer::alist to $output.
+* Fixed toolbar in report.php. Changed from html_writer::alist to $output.
+
+=== 1.6.3 ===
+* Fixed incorrect greeting in emails sent to users notifying them of feedback.
+* Fixed dates so they translate to language in use.
+
+=== 1.6.2 ===
+* Fixed Embedded images missing when editing an entry. (#3)
+* Fixed hardcoded strings.
+
+=== 1.6.1 ===
+* Added Availability help icons to the mod_form.php.
+* Set mod_form.php to hide the Days available setting unless using course weekly topic format.
+* Fixed error when student trying to edit post. (#4)
+
+=== 1.6.0 ===
+* Added help icons for all three date available items.
+
+=== 1.5.1 ===
+* Fixed savepoints problem.
+
 === 1.5.0 ===
 * Fixed perpage selector that was broken by enabling timeopen and timeclose.
 * Fixed perpage count actually displayed that was off by one.
