@@ -1,4 +1,7 @@
 This files describes API changes in the diary code.
+=== 1.7.1 ===
+* Added missing space in front of Toolbar label on report.php page.
+
 === 1.7.0 ===
 * Fixed toolbar in render.php. Changed from html_writer::alist to $output.
 * Fixed toolbar in report.php. Changed from html_writer::alist to $output.

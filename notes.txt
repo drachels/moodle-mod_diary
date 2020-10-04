@@ -167,3 +167,5 @@ Diary Support Tracker.
 20200930 Currently on version 1.6.3.
 20201003 Finally tracked the toolbar render problem to html_writer::alist.
    Changed to $output in both render.php and report.php.
+20201004 Added a space between the group dropdown list and the Toolbar
+    label on the report.php page.
