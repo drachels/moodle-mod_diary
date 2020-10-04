@@ -309,8 +309,7 @@ if (!$users) {
                        , get_string('latestmodifiedentry', 'diary'))
                        , array('class' => 'toolbutton'));
 
-        // This needs to become a string.
-        echo get_string('toolbar', 'diary');
+        echo ' '.get_string('toolbar', 'diary');
         // Add the toolbar to the top of the report page.
         echo $output;
     }
