@@ -5,6 +5,8 @@ This files describes API changes in the diary code.
     so that they are also visible when the Diary activity is closed.
 * Added, Editing period has ended, message just under the heading, that is shown
     only when the activity is closed.
+* Added missing fields to the backup and restore.
+* Added function to create ratings in the restore process.
 
 === 1.7.0 ===
 * Fixed toolbar in render.php. Changed from html_writer::alist to $output.
