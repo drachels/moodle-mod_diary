@@ -60,11 +60,21 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         global $DB;
 
         $data = (Object)$data;
+        $oldid = $data->id;
+        $data->course = $this->get_courseid();
 
         unset($data->id);
 
         $data->course = $this->get_courseid();
+        $data->assesstimestart = $this->apply_date_offset($data->assesstimestart);
+        $data->assesstimefinish = $this->apply_date_offset($data->assesstimefinish);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
+        $data->timeopen = $this->apply_date_offset($data->timeopen);
+        $data->timeclose = $this->apply_date_offset($data->timeclose);
+
+        if ($data->scale < 0) { // Scale found, get mapping.
+            $data->scale = -($this->get_mappingid('scale', abs($data->scale)));
+        }
 
         $newid = $DB->insert_record('diary', $data);
         $this->apply_activity_instance($newid);
@@ -93,6 +103,36 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $newid = $DB->insert_record('diary_entries', $data);
         $this->set_mapping('diary_entry', $oldid, $newid);
+    }
+
+    /**
+     * Process diary entries to provide a rating restore.
+     * @param object $data The data in object form.
+     * @return void
+     */
+    protected function process_data_rating($data) {
+        global $DB;
+
+        $data = (object)$data;
+
+        // Cannot use ratings API, cause, it's missing the ability to specify times (modified/created)
+        $data->contextid = $this->task->get_contextid();
+        $data->itemid    = $this->get_new_parentid('data_record');
+        if ($data->scaleid < 0) { // scale found, get mapping
+            $data->scaleid = -($this->get_mappingid('scale', abs($data->scaleid)));
+        }
+        $data->rating = $data->value;
+        $data->userid = $this->get_mappingid('user', $data->userid);
+
+        // We need to check that component and ratingarea are both set here.
+        if (empty($data->component)) {
+            $data->component = 'mod_diary';
+        }
+        if (empty($data->ratingarea)) {
+            $data->ratingarea = 'entry';
+        }
+
+        $newitemid = $DB->insert_record('rating', $data);
     }
 
     /**
