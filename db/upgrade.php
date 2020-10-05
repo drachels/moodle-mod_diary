@@ -35,9 +35,7 @@ function xmldb_diary_upgrade($oldversion=0) {
     global $CFG, $DB;
     $dbman = $DB->get_manager();
 
-    $result = true;
-
-    if ($result && $oldversion < 2020090200) {
+    if ($oldversion < 2020090200) {
 
         // Define field timeopen to be added to diary.
         $table = new xmldb_table('diary');
@@ -60,5 +58,5 @@ function xmldb_diary_upgrade($oldversion=0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2020090200, 'diary');
     }
-    return $result;
+    return true;
 }
