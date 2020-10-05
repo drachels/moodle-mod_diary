@@ -169,3 +169,7 @@ Diary Support Tracker.
    Changed to $output in both render.php and report.php.
 20201004 Added a space between the group dropdown list and the Toolbar
     label on the report.php page.
+20201004 Moved the heading info on view.php up five lines so the info is
+    shown even when the Diary is closed.
+20201004 Added, Editing period has ended message, that is shown when the
+    activity is closed.

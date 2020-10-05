@@ -1,6 +1,10 @@
 This files describes API changes in the diary code.
-=== 1.7.1 ===
+=== 1.8.0 ===
 * Added missing space in front of Toolbar label on report.php page.
+* Moved view.php sort order and rating type heading labels up five lines in the code
+    so that they are also visible when the Diary activity is closed.
+* Added, Editing period has ended, message just under the heading, that is shown
+    only when the activity is closed.
 
 === 1.7.0 ===
 * Fixed toolbar in render.php. Changed from html_writer::alist to $output.
