@@ -258,15 +258,13 @@ if ($timenow > $timestart) {
     $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
 
     echo $OUTPUT->box_start();
+    // 20200815 Added type of rating and current rating. 20201004 Moved info here.
+    echo '<table style="width:100%"><tr><td>'.get_string('sortorder', 'diary').'</td>'
+        .'<td> </td><td><h5>'.$aggregatestr.'</h5></td></tr>';
+    echo '<tr><td>'.$sortorderinfo.'</td><td> </td><td><h5>'.$currentuserrating.' </h5></td></table>';
     // Add Current entry Edit button and user toolbar.
     if ($timenow < $timefinish) {
-
         if ($canadd) {
-            // 20200815 Added type of rating and current rating.
-            echo '<table style="width:100%"><tr><td>'.get_string('sortorder', 'diary').'</td>'
-                .'<td> </td><td><h5>'.$aggregatestr.'</h5></td></tr>';
-            echo '<tr><td>'.$sortorderinfo.'</td><td> </td><td><h5>'.$currentuserrating.' </h5></td></table>';
-
             echo $output->box_start();
 
             // Add button for editing current entry or starting a new entry.
@@ -328,6 +326,10 @@ if ($timenow > $timestart) {
 
             echo $output->box_end();
         }
+    } else {
+        // 20201004 added Editing period has ended message.
+        echo '<div class="editend"><strong>'.get_string('editingended', 'diary').': </strong> ';
+        echo userdate($timefinish).'</div>';
     }
 
     // Display entry with the $DB portion supplied/set by the toolbar.
