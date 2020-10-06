@@ -57,16 +57,16 @@ class backup_diary_activity_task extends backup_activity_task {
         $base = preg_quote($CFG->wwwroot.'/mod/diary', '#');
 
         $pattern = "#(".$base."\/index.php\?id\=)([0-9]+)#";
-        $content = preg_replace($pattern, '$@diaryINDEX*$2@$', $content);
+        $content = preg_replace($pattern, '$@DIARYINDEX*$2@$', $content);
 
         $pattern = "#(".$base."\/view.php\?id\=)([0-9]+)#";
-        $content = preg_replace($pattern, '$@diaryVIEWBYID*$2@$', $content);
+        $content = preg_replace($pattern, '$@DIARYVIEWBYID*$2@$', $content);
 
         $pattern = "#(".$base."\/report.php\?id\=)([0-9]+)#";
-        $content = preg_replace($pattern, '$@diaryREPORT*$2@$', $content);
+        $content = preg_replace($pattern, '$@DIARYREPORT*$2@$', $content);
 
         $pattern = "#(".$base."\/edit.php\?id\=)([0-9]+)#";
-        $content = preg_replace($pattern, '$@diaryEDIT*$2@$', $content);
+        $content = preg_replace($pattern, '$@DIARYEDIT*$2@$', $content);
 
         return $content;
     }

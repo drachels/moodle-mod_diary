@@ -174,3 +174,4 @@ Diary Support Tracker.
 20201004 Added, Editing period has ended message, that is shown when the
     activity is closed.
 20201005 Added missing data to the backup and restore process.
+20201006 Worked on backup restore some more.

@@ -39,14 +39,32 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
      */
     protected function define_structure() {
 
-        $diary = new backup_nested_element('diary', array('id'), array(
-            'name', 'intro', 'introformat', 'days', 'scale', 'assessed', 'assesstimestart', 'assesstimefinish', 'timemodified', 'timeopen', 'timeclose'));
+        $diary = new backup_nested_element('diary', array('id'),
+                                           array('name',
+                                                 'intro',
+                                                 'introformat',
+                                                 'days',
+                                                 'scale',
+                                                 'assessed',
+                                                 'assesstimestart',
+                                                 'assesstimefinish',
+                                                 'timemodified',
+                                                 'timeopen',
+                                                 'timeclose'));
 
         $entries = new backup_nested_element('entries');
 
-        $entry = new backup_nested_element('entry', array('id'), array(
-            'userid', 'timecreated', 'timemodified', 'text', 'format', 'rating',
-            'entrycomment', 'teacher', 'timemarked', 'mailed'));
+        $entry = new backup_nested_element('entry', array('id'),
+                                           array('userid',
+                                                 'timecreated',
+                                                 'timemodified',
+                                                 'text',
+                                                 'format',
+                                                 'rating',
+                                                 'entrycomment',
+                                                 'teacher',
+                                                 'timemarked',
+                                                 'mailed'));
 
         $diary->add_child($entries);
         $entries->add_child($entry);
