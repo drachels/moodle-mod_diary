@@ -175,3 +175,5 @@ Diary Support Tracker.
     activity is closed.
 20201005 Added missing data to the backup and restore process.
 20201006 Worked on backup restore some more.
+20201008 Yesterday and today worked on the restore process. Tentatively,
+    it now seems to be working correctly.

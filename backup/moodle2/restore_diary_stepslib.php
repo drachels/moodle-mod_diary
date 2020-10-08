@@ -21,6 +21,7 @@
  * @copyright 2020 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use \mod_diary\local\results;
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -46,63 +47,93 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
             $paths[] = new restore_path_element('diary_entry', '/activity/diary/entries/entry');
         }
 
+        // Return the paths wrapped into standard activity structure
         return $this->prepare_activity_structure($paths);
     }
 
     /**
      * Process a diary restore.
      *
-     * @param object $data The data in object form
+     * @param object $diary The diary in object form
      * @return void
      */
-    protected function process_diary($data) {
+    protected function process_diary($diary) {
 
         global $DB;
 
-        $data = (Object)$data;
-        $oldid = $data->id;
-        $data->course = $this->get_courseid();
+        $diary = (Object)$diary;
+        $oldid = $diary->id;
+        $diary->course = $this->get_courseid();
 
-        unset($data->id);
+        unset($diary->id);
 
-        $data->course = $this->get_courseid();
-        $data->assesstimestart = $this->apply_date_offset($data->assesstimestart);
-        $data->assesstimefinish = $this->apply_date_offset($data->assesstimefinish);
-        $data->timemodified = $this->apply_date_offset($data->timemodified);
-        $data->timeopen = $this->apply_date_offset($data->timeopen);
-        $data->timeclose = $this->apply_date_offset($data->timeclose);
+        $diary->course = $this->get_courseid();
+        $diary->assesstimestart = $this->apply_date_offset($diary->assesstimestart);
+        $diary->assesstimefinish = $this->apply_date_offset($diary->assesstimefinish);
+        $diary->timemodified = $this->apply_date_offset($diary->timemodified);
+        $diary->timeopen = $this->apply_date_offset($diary->timeopen);
+        $diary->timeclose = $this->apply_date_offset($diary->timeclose);
 
-        if ($data->scale < 0) { // Scale found, get mapping.
-            $data->scale = -($this->get_mappingid('scale', abs($data->scale)));
+        if ($diary->scale < 0) { // Scale found, get mapping.
+            $diary->scale = -($this->get_mappingid('scale', abs($diary->scale)));
         }
 
-        $newid = $DB->insert_record('diary', $data);
+        $newid = $DB->insert_record('diary', $diary);
         $this->apply_activity_instance($newid);
     }
 
     /**
-     * Process a diary entry restore.
-     * @param object $data The data in object form.
+     * Process a diary_entry restore.
+     * @param object $diary_entry The diary_entry in object form.
      * @return void
      */
-    protected function process_diary_entry($data) {
+    protected function process_diary_entry($diary_entry) {
 
         global $DB;
 
-        $data = (Object)$data;
+        $diary_entry = (Object)$diary_entry;
 
-        $oldid = $data->id;
-        unset($data->id);
+        $oldid = $diary_entry->id;
+        unset($diary_entry->id);
 
-        $data->diary = $this->get_new_parentid('diary');
-        $data->timemcreated = $this->apply_date_offset($data->timecreated);
-        $data->timemodified = $this->apply_date_offset($data->timemodified);
-        $data->timemarked = $this->apply_date_offset($data->timemarked);
-        $data->userid = $this->get_mappingid('user', $data->userid);
-        $data->teacher = $this->get_mappingid('user', $data->teacher);
+        $diary_entry->diary = $this->get_new_parentid('diary');
+        $diary_entry->timemcreated = $this->apply_date_offset($diary_entry->timecreated);
+        $diary_entry->timemodified = $this->apply_date_offset($diary_entry->timemodified);
+        $diary_entry->timemarked = $this->apply_date_offset($diary_entry->timemarked);
+        $diary_entry->userid = $this->get_mappingid('user', $diary_entry->userid);
 
-        $newid = $DB->insert_record('diary_entries', $data);
+        $newid = $DB->insert_record('diary_entries', $diary_entry);
         $this->set_mapping('diary_entry', $oldid, $newid);
+
+        $diary_entry->contextid = $this->task->get_contextid();
+        $diary_entry->itemid    = $this->get_new_parentid('diary_entry');
+
+        $diary = $DB->get_record('diary', array ('id' => $diary_entry->diary));
+
+        if ($diary->assessed != RATING_AGGREGATE_NONE) {
+            // 20201008 Added this to restore each rating table entry.
+            $ratingoptions = new stdClass;
+            $ratingoptions->contextid = $diary_entry->contextid;
+            $ratingoptions->component = 'mod_diary';
+            $ratingoptions->ratingarea = 'entry';
+            $ratingoptions->itemid = $diary_entry->itemid;
+            $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
+            $ratingoptions->scaleid = $diary->scale;
+            $ratingoptions->rating = $diary_entry->rating;
+            $ratingoptions->userid = $diary_entry->userid;
+            $ratingoptions->timecreated = $diary_entry->timecreated;
+            $ratingoptions->timemodified = $diary_entry->timemodified;
+
+            $ratingoptions->assesstimestart = $diary->assesstimestart;
+            $ratingoptions->assesstimefinish = $diary->assesstimefinish;
+            // 20201008 Check if there is already a rating, and if so, just update it.
+            if ($rec = results::check_rating_entry($ratingoptions)) {
+                $ratingoptions->id = $rec->id;
+                $DB->update_record('rating', $ratingoptions, false);
+            } else {
+                $DB->insert_record('rating', $ratingoptions, false);
+            }
+        }
     }
 
     /**
@@ -110,15 +141,16 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      * @param object $data The data in object form.
      * @return void
      */
-    protected function process_data_rating($data) {
+/*
+    protected function process_diary_rating($data) {
         global $DB;
 
         $data = (object)$data;
 
         // Cannot use ratings API, cause, it's missing the ability to specify times (modified/created)
         $data->contextid = $this->task->get_contextid();
-        $data->itemid    = $this->get_new_parentid('data_record');
-        if ($data->scaleid < 0) { // scale found, get mapping
+        $data->itemid    = $this->get_new_parentid('diary_entries');
+        if ($data->scaleid < 0) { // Scale found, get mapping.
             $data->scaleid = -($this->get_mappingid('scale', abs($data->scaleid)));
         }
         $data->rating = $data->value;
@@ -134,6 +166,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $newitemid = $DB->insert_record('rating', $data);
     }
+*/
 
     /**
      * Once the database tables have been fully restored, restore the files

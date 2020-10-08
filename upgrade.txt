@@ -1,11 +1,15 @@
 This files describes API changes in the diary code.
+=== 1.9.0 ===
+* Fixed restore so that ratings are now being generated as expected.
+* Modified travis.yml file and now getting email saying it passed.
+
 === 1.8.2 ===
-* Added some more missing code to the backup and restore processes.
+* Added some more missing code to the backup and restore processes. Still not working as expected.
 * Modified travis.yml file.
 
 === 1.8.1 ===
 * Added missing fields to the backup and restore.
-* Added function to create ratings in the restore process.
+* Added function to create ratings in the restore process. Not working as expected.
 
 === 1.8.0 ===
 * Added missing space in front of Toolbar label on report.php page.
