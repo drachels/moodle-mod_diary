@@ -177,3 +177,8 @@ Diary Support Tracker.
 20201006 Worked on backup restore some more.
 20201008 Yesterday and today worked on the restore process. Tentatively,
     it now seems to be working correctly.
+20201008 Five minutes after I wrote the last entry, I realized I was doing
+    it wrong. Checked database backup steps, and sure enough, I am not
+    backing up the ratings.
+20201009 Finally got a backup to include ratings in the backup file. Now
+    to work on the restore process.

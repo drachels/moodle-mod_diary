@@ -1,6 +1,9 @@
 This files describes API changes in the diary code.
+=== 2.0.0 ===
+* Fixed backup file to include ratings.
+
 === 1.9.0 ===
-* Fixed restore so that ratings are now being generated as expected.
+* Fixed a temporary restore so that ratings are now being generated as expected.
 * Modified travis.yml file and now getting email saying it passed.
 
 === 1.8.2 ===
