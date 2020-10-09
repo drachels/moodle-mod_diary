@@ -27,10 +27,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2020100800;      // The current module version (Date: YYYYMMDDXX).
+$plugin->version  = 2020100900;      // The current module version (Date: YYYYMMDDXX).
 $plugin->requires = 2015111600;      // Requires Moodle 3.0 version.
 $plugin->cron     = 60;              // Period for cron to check this module (secs).
 $plugin->component = 'mod_diary';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.9.0 (Build: 2020100800)'; // User-friendly version number.
+$plugin->release = '2.0.0 (Build: 2020100900)'; // User-friendly version number.
 
