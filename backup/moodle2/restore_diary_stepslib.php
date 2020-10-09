@@ -41,10 +41,13 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
     protected function define_structure() {
 
         $paths = array();
+
         $paths[] = new restore_path_element('diary', '/activity/diary');
 
         if ($this->get_setting_value('userinfo')) {
             $paths[] = new restore_path_element('diary_entry', '/activity/diary/entries/entry');
+            $paths[] = new restore_path_element('diary_entry_rating', '/activity/diary/entries/ratings/rating');
+            $paths[] = new restore_path_element('diary_entry_tag', '/activity/diary/entries/tags/tag');
         }
 
         // Return the paths wrapped into standard activity structure
@@ -67,6 +70,8 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         unset($diary->id);
 
+        // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
+        // See MDL-9367.
         $diary->course = $this->get_courseid();
         $diary->assesstimestart = $this->apply_date_offset($diary->assesstimestart);
         $diary->assesstimefinish = $this->apply_date_offset($diary->assesstimefinish);
@@ -78,6 +83,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
             $diary->scale = -($this->get_mappingid('scale', abs($diary->scale)));
         }
 
+        // Insert the data record.
         $newid = $DB->insert_record('diary', $diary);
         $this->apply_activity_instance($newid);
     }
@@ -104,7 +110,8 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $newid = $DB->insert_record('diary_entries', $diary_entry);
         $this->set_mapping('diary_entry', $oldid, $newid);
-
+/////////////////////////////
+/*
         $diary_entry->contextid = $this->task->get_contextid();
         $diary_entry->itemid    = $this->get_new_parentid('diary_entry');
 
@@ -134,6 +141,29 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
                 $DB->insert_record('rating', $ratingoptions, false);
             }
         }
+*/
+    }
+
+    /**
+     * Add tags to restored entries.
+     *
+     * @param stdClass $data Tag
+     */
+    protected function process_diary_entry_tag($data) {
+        $data = (object)$data;
+
+        if (!core_tag_tag::is_enabled('mod_diary', 'diary_entries')) { // Tags disabled in server, nothing to process.
+            return;
+        }
+
+        if (!$itemid = $this->get_mappingid('diary_entries', $data->itemid)) {
+            // Some orphaned tag, we could not find the data record for it - ignore.
+            return;
+        }
+
+        $tag = $data->rawname;
+        $context = context_module::instance($this->task->get_moduleid());
+        core_tag_tag::add_item_tag('mod_diary', 'diary_entries', $itemid, $context, $tag);
     }
 
     /**
@@ -141,12 +171,14 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      * @param object $data The data in object form.
      * @return void
      */
-/*
-    protected function process_diary_rating($data) {
+
+    protected function process_diary_entry_rating($data) {
         global $DB;
 
         $data = (object)$data;
-
+print_object('in the process_diary_entry_rating function printing $data');
+print_object($data);
+die;
         // Cannot use ratings API, cause, it's missing the ability to specify times (modified/created)
         $data->contextid = $this->task->get_contextid();
         $data->itemid    = $this->get_new_parentid('diary_entries');
@@ -166,7 +198,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $newitemid = $DB->insert_record('rating', $data);
     }
-*/
+
 
     /**
      * Once the database tables have been fully restored, restore the files
