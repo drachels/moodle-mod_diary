@@ -39,7 +39,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
      */
     protected function define_structure() {
 
-        // To know if we are including userinfo
+        // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated.
@@ -88,7 +88,6 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $diary->add_child($entries);
         $entries->add_child($entry);
 
-        //$entries->add_child($ratings);
         $entry->add_child($ratings);
         $ratings->add_child($rating);
 
@@ -136,8 +135,6 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $diary->annotate_files('mod_diary', 'intro', null); // This file areas haven't itemid.
         $entry->annotate_files('mod_diary_entries', 'entry', 'id');
 
-        //$entry->annotate_files('mod_diary_entries', 'text', null); // This file areas haven't itemid.
-        //$entry->annotate_files('mod_diary_entries', 'entrycomment', null); // This file areas haven't itemid.
         $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
 
         return $this->prepare_activity_structure($diary);

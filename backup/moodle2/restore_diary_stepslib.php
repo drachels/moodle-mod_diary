@@ -41,16 +41,17 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
     protected function define_structure() {
 
         $paths = array();
+        $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('diary', '/activity/diary');
 
-        if ($this->get_setting_value('userinfo')) {
+        if ($userinfo) {
             $paths[] = new restore_path_element('diary_entry', '/activity/diary/entries/entry');
-            $paths[] = new restore_path_element('diary_entry_rating', '/activity/diary/entries/ratings/rating');
-            $paths[] = new restore_path_element('diary_entry_tag', '/activity/diary/entries/tags/tag');
+            $paths[] = new restore_path_element('diary_entry_rating', '/activity/diary/entries/entry/ratings/rating');
+            $paths[] = new restore_path_element('diary_entry_tag', '/activity/diary/entriestags/tag');
         }
 
-        // Return the paths wrapped into standard activity structure
+        // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
 
@@ -89,59 +90,27 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
     }
 
     /**
-     * Process a diary_entry restore.
-     * @param object $diary_entry The diary_entry in object form.
+     * Process a diaryentry restore.
+     * @param object $diaryentry The diaryentry in object form.
      * @return void
      */
-    protected function process_diary_entry($diary_entry) {
+    protected function process_diary_entry($diaryentry) {
 
         global $DB;
 
-        $diary_entry = (Object)$diary_entry;
+        $diaryentry = (Object)$diaryentry;
 
-        $oldid = $diary_entry->id;
-        unset($diary_entry->id);
+        $oldid = $diaryentry->id;
+        unset($diaryentry->id);
 
-        $diary_entry->diary = $this->get_new_parentid('diary');
-        $diary_entry->timemcreated = $this->apply_date_offset($diary_entry->timecreated);
-        $diary_entry->timemodified = $this->apply_date_offset($diary_entry->timemodified);
-        $diary_entry->timemarked = $this->apply_date_offset($diary_entry->timemarked);
-        $diary_entry->userid = $this->get_mappingid('user', $diary_entry->userid);
+        $diaryentry->diary = $this->get_new_parentid('diary');
+        $diaryentry->timemcreated = $this->apply_date_offset($diaryentry->timecreated);
+        $diaryentry->timemodified = $this->apply_date_offset($diaryentry->timemodified);
+        $diaryentry->timemarked = $this->apply_date_offset($diaryentry->timemarked);
+        $diaryentry->userid = $this->get_mappingid('user', $diaryentry->userid);
 
-        $newid = $DB->insert_record('diary_entries', $diary_entry);
+        $newid = $DB->insert_record('diary_entries', $diaryentry);
         $this->set_mapping('diary_entry', $oldid, $newid);
-/////////////////////////////
-/*
-        $diary_entry->contextid = $this->task->get_contextid();
-        $diary_entry->itemid    = $this->get_new_parentid('diary_entry');
-
-        $diary = $DB->get_record('diary', array ('id' => $diary_entry->diary));
-
-        if ($diary->assessed != RATING_AGGREGATE_NONE) {
-            // 20201008 Added this to restore each rating table entry.
-            $ratingoptions = new stdClass;
-            $ratingoptions->contextid = $diary_entry->contextid;
-            $ratingoptions->component = 'mod_diary';
-            $ratingoptions->ratingarea = 'entry';
-            $ratingoptions->itemid = $diary_entry->itemid;
-            $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
-            $ratingoptions->scaleid = $diary->scale;
-            $ratingoptions->rating = $diary_entry->rating;
-            $ratingoptions->userid = $diary_entry->userid;
-            $ratingoptions->timecreated = $diary_entry->timecreated;
-            $ratingoptions->timemodified = $diary_entry->timemodified;
-
-            $ratingoptions->assesstimestart = $diary->assesstimestart;
-            $ratingoptions->assesstimefinish = $diary->assesstimefinish;
-            // 20201008 Check if there is already a rating, and if so, just update it.
-            if ($rec = results::check_rating_entry($ratingoptions)) {
-                $ratingoptions->id = $rec->id;
-                $DB->update_record('rating', $ratingoptions, false);
-            } else {
-                $DB->insert_record('rating', $ratingoptions, false);
-            }
-        }
-*/
     }
 
     /**
@@ -176,12 +145,10 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         global $DB;
 
         $data = (object)$data;
-print_object('in the process_diary_entry_rating function printing $data');
-print_object($data);
-die;
-        // Cannot use ratings API, cause, it's missing the ability to specify times (modified/created)
+
+        // Cannot use ratings API, cause, it's missing the ability to specify times (modified/created).
         $data->contextid = $this->task->get_contextid();
-        $data->itemid    = $this->get_new_parentid('diary_entries');
+        $data->itemid    = $this->get_new_parentid('diary_entry');
         if ($data->scaleid < 0) { // Scale found, get mapping.
             $data->scaleid = -($this->get_mappingid('scale', abs($data->scaleid)));
         }
