@@ -488,14 +488,14 @@ function diary_get_participants($diaryid) {
     $students = $DB->get_records_sql("SELECT DISTINCT u.id
                                       FROM {user} u,
                                       {diary_entries} d
-                                      WHERE d.diary = '$diaryid' and
-                                      u.id = d.userid");
+                                      WHERE d.diary = ? and
+                                      u.id = d.userid", array($diaryid));
     // Get teachers.
     $teachers = $DB->get_records_sql("SELECT DISTINCT u.id
                                       FROM {user} u,
                                       {diary_entries} d
-                                      WHERE d.diary = '$diaryid' and
-                                      u.id = d.teacher");
+                                      WHERE d.diary = ? and
+                                      u.id = d.teacher", array($diaryid));
 
     // Add teachers to students.
     if ($teachers) {
