@@ -85,12 +85,13 @@ class mod_diary_mod_form extends moodleform_mod {
                            array('optional' => true, 'step' => 1));
         $mform->addHelpButton('timeclose', 'diaryclosetime', 'diary');
 
+        // 20201015 Added Edit all, enable/disable setting.
+        $mform->addElement('selectyesno', 'editall', get_string('editall', 'diary'));
+        $mform->addHelpButton('editall', 'editall', 'diary');
+
         // Add the rest of the common settings.
-
         $this->standard_grading_coursemodule_elements();
-
         $this->standard_coursemodule_elements();
-
         $this->add_action_buttons();
     }
 

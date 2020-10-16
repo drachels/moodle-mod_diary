@@ -37,6 +37,10 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('diary/overview', get_string('showoverview', 'diary'),
                                               get_string('showoverview', 'diary'), 1,
                                               array('0' => get_string('no'), '1' => get_string('yes'))));
+    // 20201015 Default edit all entries setting.
+    $settings->add(new admin_setting_configselect('diary/editall', get_string('editall', 'diary'),
+                                              get_string('editall_help', 'diary'), 1,
+                                              array('0' => get_string('no'), '1' => get_string('yes'))));
 
     // Appearance settings.
     $settings->add(new admin_setting_heading('mod_diary/appearance', get_string('appearance'), ''));
