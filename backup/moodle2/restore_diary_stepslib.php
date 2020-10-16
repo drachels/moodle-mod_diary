@@ -140,7 +140,6 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      * @param object $data The data in object form.
      * @return void
      */
-
     protected function process_diary_entry_rating($data) {
         global $DB;
 

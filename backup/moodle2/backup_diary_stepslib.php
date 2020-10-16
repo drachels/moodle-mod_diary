@@ -54,7 +54,8 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                                                  'assesstimefinish',
                                                  'timemodified',
                                                  'timeopen',
-                                                 'timeclose'));
+                                                 'timeclose',
+                                                  'editall'));
 
         $entries = new backup_nested_element('entries');
         $entry = new backup_nested_element('entry', array('id'),
@@ -87,10 +88,8 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         // Build the tree.
         $diary->add_child($entries);
         $entries->add_child($entry);
-
         $entry->add_child($ratings);
         $ratings->add_child($rating);
-
         $diary->add_child($tags);
         $tags->add_child($tag);
 
@@ -124,17 +123,14 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
 
         // Define id annotations.
         $diary->annotate_ids('scale', 'scale');
-
         $entry->annotate_ids('user', 'userid');
         $entry->annotate_ids('user', 'teacher');
-
         $rating->annotate_ids('scale', 'scaleid');
         $rating->annotate_ids('user', 'userid');
 
         // Define file annotations
         $diary->annotate_files('mod_diary', 'intro', null); // This file areas haven't itemid.
         $entry->annotate_files('mod_diary_entries', 'entry', 'id');
-
         $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
 
         return $this->prepare_activity_structure($diary);
