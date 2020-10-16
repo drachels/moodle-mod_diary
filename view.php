@@ -60,7 +60,7 @@ if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
     print_error('invalidcoursemodule');
 }
 
-// Ge the name for this diary activity.
+// Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, array('context' => $context));
 
 // Get local renderer.
