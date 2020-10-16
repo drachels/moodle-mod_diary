@@ -184,4 +184,6 @@ Diary Support Tracker.
     to work on the restore process.
 20201010 Changed published tickets to closed.
 20201014 Added two new toolbuttons for sort lastname ascending and descending.
-20201015 Added new, Edit all,, setting
+20201015 Added new, Edit all, setting.
+20201016 Added missing header label for sort order at top of report.php page.
+20201016 Added missing diary name header label at top of report.php page.

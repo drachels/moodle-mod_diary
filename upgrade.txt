@@ -1,4 +1,8 @@
 This files describes API changes in the diary code.
+=== 2.1.1 ===
+* Added missing header label for sort order at top of report.php page.
+* Added missing diary name header label at top of report.php page.
+
 === 2.1.0 ===
 * Changed sql for lib.php, function diary_get_participants($diaryid).
 * Changed sql for lib.php, function diary_get_users_done($diary, $currentgroup, $sortoption)
