@@ -58,5 +58,19 @@ function xmldb_diary_upgrade($oldversion=0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2020090200, 'diary');
     }
+    if ($oldversion < 2020101500) {
+
+        // Define field editall to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('editall', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'timeclose');
+
+        // Conditionally launch add field editall.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2020101500, 'diary');
+    }
     return true;
 }
