@@ -768,9 +768,10 @@ function diary_grade_item_delete($diary) {
  *
  * @param   object   $diary
  * @param   object   $currentgroup
+ * @param   object   $sortoption
  * return   object   $diarys
  */
-function diary_get_users_done($diary, $currentgroup) {
+function diary_get_users_done($diary, $currentgroup, $sortoption) {
     global $DB;
 
     $params = array();
@@ -783,14 +784,11 @@ function diary_get_users_done($diary, $currentgroup) {
         $sql .= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid = ?";
         $params[] = $currentgroup;
     }
-    // The old version of this line puts users with new entries at the bottom of report.
-    // However, with DESC, newest entries are at the top, except for admin?
-    // $sql .= " WHERE de.diary = ? ORDER BY de.timemodified DESC";.
-
-    // Modified 20190615 to give alphabetical listing on report.php page.
-    $sql .= " WHERE de.diary = ? ORDER BY u.lastname ASC, u.firstname ASC";
+    // 20201014 Changed to a sort option preference to sort lastname ascending or descending.
+    $sql .= " WHERE de.diary = ? ORDER BY ".$sortoption;
 
     $params[] = $diary->id;
+
     $diarys = $DB->get_records_sql($sql, $params);
 
     $cm = diary_get_coursemodule($diary->id);
