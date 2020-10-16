@@ -368,7 +368,8 @@ if ($timenow > $timestart) {
                 $options['firstkey'] = $entry->id;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
-                if ($timenow < $timefinish) {
+                // 20201015 Enable/disable check of the edit old entries editing tool.
+                if ($timenow < $timefinish && $diary->editall) {
                     $editthisentry = html_writer::link($url,
                         $output->pix_icon('i/edit',
                         get_string('editthisentry', 'diary')),
