@@ -48,6 +48,14 @@ if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     print_error('invalidid', 'diary');
 }
 
+// 20201014 Set a default sorting order for entry retrieval.
+if ($sortoption = get_user_preferences('sortoption')) {
+    $sortoption = get_user_preferences('sortoption');
+} else {
+    set_user_preference('sortoption', 'u.lastname ASC, u.firstname ASC');
+    $sortoption = get_user_preferences('sortoption');
+}
+
 // Handle toolbar capabilities.
 if (!empty($action)) {
     switch ($action) {
@@ -55,6 +63,24 @@ if (!empty($action)) {
             if (has_capability('mod/diary:manageentries', $context)) {
                 // Call download entries function in lib.php.
                 results::download_entries($context, $course, $diary);
+            }
+            break;
+        case 'lastnameasc':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                $stringlable = 'lastnameasc';
+                // 20201014 Set order and get ALL diary entries in lastname ascending order.
+                set_user_preference('sortoption', 'u.lastname ASC, u.firstname ASC');
+                $sortoption = get_user_preferences('sortoption');
+                $eee = $DB->get_records("diary_entries", array("diary" => $diary->id));
+            }
+            break;
+        case 'lastnamedesc':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                $stringlable = 'lastnamedesc';
+                // 20201014 Set order and get ALL diary entries in lastname descending order.
+                set_user_preference('sortoption', 'u.lastname DESC, u.firstname DESC');
+                $sortoption = get_user_preferences('sortoption');
+                $eee = $DB->get_records("diary_entries", array("diary" => $diary->id));
             }
             break;
         case 'currententry':
@@ -145,8 +171,7 @@ if ($data = data_submitted()) {
     confirm_sesskey();
     $feedback = array();
     $data = (array)$data;
-    // My single data entry contains id, sesskey, and three other items,entry, feedback, and ???
-
+    // My single data entry contains id, sesskey, and three other items, entry, feedback, and ???
     // Peel out all the data from variable names.
     foreach ($data as $key => $val) {
         if (strpos($key, 'r') === 0 || strpos($key, 'c') === 0) {
@@ -265,11 +290,26 @@ if (!$users) {
         $options['id'] = $id;
         $options['diary'] = $diary->id;
         $output = ' ';
+
         // Add download button.
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/report.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('i/export'
                        , get_string('csvexport', 'diary'))
+                       , array('class' => 'toolbutton'));
+
+        // Add sort by lastname ascending button.
+        $options['action'] = 'lastnameasc';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/sort_asc'
+                       , get_string('lastnameasc', 'diary'))
+                       , array('class' => 'toolbutton'));
+
+        // Add sort by lastname descending button.
+        $options['action'] = 'lastnamedesc';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/sort_desc'
+                       , get_string('lastnamedesc', 'diary'))
                        , array('class' => 'toolbutton'));
 
         // Add reload toolbutton.
@@ -313,6 +353,7 @@ if (!$users) {
         // Add the toolbar to the top of the report page.
         echo $output;
     }
+
     // Next line is different from Journal line 171.
     $grades = make_grades_menu($diary->scale);
 
@@ -328,13 +369,11 @@ if (!$users) {
     $saveallbutton .= "<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
     $saveallbutton .= "<input type=\"submit\" class='btn btn-primary' value=\"".get_string("saveallfeedback", "diary")."\" />";
 
-
     // 20200421 Added a return button.
     $url = $CFG->wwwroot . '/mod/diary/view.php?id='.$id;
     $saveallbutton .= ' <a href="'.$url
         .'" class="btn btn-secondary" role="button">'
         .get_string('returnto', 'diary', $diary->name).'</a>';
-
 
     $saveallbutton .= "</p>";
 
@@ -343,8 +382,9 @@ if (!$users) {
 
     $dcolor3 = get_config('mod_diary', 'entrybgc');
     $dcolor4 = get_config('mod_diary', 'entrytextbgc');
+
     // Print a list of users who have completed at least one entry.
-    if ($usersdone = diary_get_users_done($diary, $currentgroup)) {
+    if ($usersdone = diary_get_users_done($diary, $currentgroup, $sortoption)) {
         foreach ($usersdone as $user) {
             echo '<div align="center" style="font-size:1em;
                 font-weight:bold;background: '.$dcolor3.';
@@ -352,6 +392,7 @@ if (!$users) {
                 -webkit-border-radius:16px;
                 -moz-border-radius:16px;border-radius:16px;">';
             // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
+
             echo results::diary_print_user_entry($course, $diary, $user, $entrybyuser[$user->id], $teachers, $grades);
             echo '</div>';
 
