@@ -1,4 +1,12 @@
 This files describes API changes in the diary code.
+=== 2.1.0 ===
+* Changed sql for lib.php, function diary_get_participants($diaryid).
+* Changed sql for lib.php, function diary_get_users_done($diary, $currentgroup, $sortoption)
+    by adding the $sortoption for the new toolbuttons on report.php page.
+* Added two new sort order toolbuttons to report.php for sort lastname ascending and descending.
+* Added, Edit all, setting to enable editing all entries. Disable means user can edit the
+    entry for the current day only.
+
 === 2.0.0 ===
 * Fixed backup file to include ratings.
 

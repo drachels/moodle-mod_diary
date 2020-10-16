@@ -182,3 +182,6 @@ Diary Support Tracker.
     backing up the ratings.
 20201009 Finally got a backup to include ratings in the backup file. Now
     to work on the restore process.
+20201010 Changed published tickets to closed.
+20201014 Added two new toolbuttons for sort lastname ascending and descending.
+20201015 Added new, Edit all,, setting
