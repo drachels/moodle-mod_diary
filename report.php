@@ -48,6 +48,9 @@ if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     print_error('invalidid', 'diary');
 }
 
+// 20201016 Get the name for this diary activity.
+$diaryname = format_string($diary->name, true, array('context' => $context));
+
 // 20201014 Set a default sorting order for entry retrieval.
 if ($sortoption = get_user_preferences('sortoption')) {
     $sortoption = get_user_preferences('sortoption');
@@ -134,11 +137,15 @@ if (!empty($action)) {
 // Header.
 $PAGE->set_url('/mod/diary/report.php', array('id' => $id));
 $PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
-$PAGE->set_title(get_string("modulenameplural", "diary"));
+$PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string($stringlable, "diary"));
+echo $OUTPUT->heading($diaryname);
+
+// 20201016 Added missing header label.
+echo $OUTPUT->heading('<h5>'.get_string('sortorder', "diary").'</h5>');
+echo $OUTPUT->heading('<h5>'.get_string($stringlable, "diary").'</h5>');
 
 // 20200827 Added link to index.php page.
 echo '<div class="reportlink"><a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></div>';
@@ -391,8 +398,8 @@ if (!$users) {
                 border:2px solid black;
                 -webkit-border-radius:16px;
                 -moz-border-radius:16px;border-radius:16px;">';
-            // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
 
+            // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
             echo results::diary_print_user_entry($course, $diary, $user, $entrybyuser[$user->id], $teachers, $grades);
             echo '</div>';
 
