@@ -8,26 +8,56 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Definition of log events
  *
- * @package    mod_diary
- * @copyright  2020 AL Rachels <drachels@drachels.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_diary
+ * @copyright 2020 AL Rachels <drachels@drachels.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
 $logs = array(
-    array('module' => 'diary', 'action' => 'view', 'mtable' => 'diary', 'field' => 'name'),
-    array('module' => 'diary', 'action' => 'view all', 'mtable' => 'diary', 'field' => 'name'),
-    array('module' => 'diary', 'action' => 'view responses', 'mtable' => 'diary', 'field' => 'name'),
-    array('module' => 'diary', 'action' => 'add entry', 'mtable' => 'diary', 'field' => 'name'),
-    array('module' => 'diary', 'action' => 'update entry', 'mtable' => 'diary', 'field' => 'name'),
-    array('module' => 'diary', 'action' => 'update feedback', 'mtable' => 'diary', 'field' => 'name')
+    array(
+        'module' => 'diary',
+        'action' => 'view',
+        'mtable' => 'diary',
+        'field' => 'name'
+    ),
+    array(
+        'module' => 'diary',
+        'action' => 'view all',
+        'mtable' => 'diary',
+        'field' => 'name'
+    ),
+    array(
+        'module' => 'diary',
+        'action' => 'view responses',
+        'mtable' => 'diary',
+        'field' => 'name'
+    ),
+    array(
+        'module' => 'diary',
+        'action' => 'add entry',
+        'mtable' => 'diary',
+        'field' => 'name'
+    ),
+    array(
+        'module' => 'diary',
+        'action' => 'update entry',
+        'mtable' => 'diary',
+        'field' => 'name'
+    ),
+    array(
+        'module' => 'diary',
+        'action' => 'update feedback',
+        'mtable' => 'diary',
+        'field' => 'name'
+    )
 );

@@ -8,20 +8,19 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Search area for mod_diary activities.
  *
- * @package    mod_diary
- * @copyright  2019 AL Rachels (drachels@drachels.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_diary
+ * @copyright 2019 AL Rachels (drachels@drachels.com)
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 namespace mod_diary\search;
 
 defined('MOODLE_INTERNAL') || die();
@@ -29,18 +28,20 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Search area for mod_diary activities.
  *
- * @package    mod_diary
- * @copyright  2019 AL Rachels (drachels@drachels.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_diary
+ * @copyright 2019 AL Rachels (drachels@drachels.com)
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class activity extends \core_search\base_activity {
+class activity extends \core_search\base_activity
+{
 
     /**
      * Returns true if this area uses file indexing.
      *
      * @return bool
      */
-    public function uses_file_indexing() {
+    public function uses_file_indexing()
+    {
         return true;
     }
 
@@ -50,8 +51,12 @@ class activity extends \core_search\base_activity {
      *
      * @return array
      */
-    public function get_search_fileareas() {
-        $fileareas = array('intro', DIARY_INTROATTACHMENT_FILEAREA); // Fileareas.
+    public function get_search_fileareas()
+    {
+        $fileareas = array(
+            'intro',
+            DIARY_INTROATTACHMENT_FILEAREA
+        ); // Fileareas.
         return $fileareas;
     }
 }

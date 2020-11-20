@@ -1,4 +1,9 @@
 This files describes API changes in the diary code.
+=== 2.2.0 ===
+* Diary_585 - Need capability to create an entry for a skipped day. Added
+    date time selector and language string for use on edit_form.php that
+    allows a user to change the date of the entry being edited.
+    
 === 2.1.1 ===
 * Added missing header label for sort order at top of report.php page.
 * Added missing diary name header label at top of report.php page.

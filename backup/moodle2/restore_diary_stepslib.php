@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Define all the restore steps that will be used by the restore_diary_activity_task
@@ -21,7 +21,7 @@
  * @copyright 2020 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use \mod_diary\local\results;
+use mod_diary\local\results;
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -31,15 +31,16 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2020 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_diary_activity_structure_step extends restore_activity_structure_step {
+class restore_diary_activity_structure_step extends restore_activity_structure_step
+{
 
     /**
      * Define the structure of the restore workflow.
      *
      * @return restore_path_element $structure
      */
-    protected function define_structure() {
-
+    protected function define_structure()
+    {
         $paths = array();
         $userinfo = $this->get_setting_value('userinfo');
 
@@ -58,14 +59,15 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
     /**
      * Process a diary restore.
      *
-     * @param object $diary The diary in object form
+     * @param object $diary
+     *            The diary in object form
      * @return void
      */
-    protected function process_diary($diary) {
-
+    protected function process_diary($diary)
+    {
         global $DB;
 
-        $diary = (Object)$diary;
+        $diary = (object) $diary;
         $oldid = $diary->id;
         $diary->course = $this->get_courseid();
 
@@ -81,7 +83,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         $diary->timeclose = $this->apply_date_offset($diary->timeclose);
 
         if ($diary->scale < 0) { // Scale found, get mapping.
-            $diary->scale = -($this->get_mappingid('scale', abs($diary->scale)));
+            $diary->scale = - ($this->get_mappingid('scale', abs($diary->scale)));
         }
 
         // Insert the data record.
@@ -91,14 +93,16 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
     /**
      * Process a diaryentry restore.
-     * @param object $diaryentry The diaryentry in object form.
+     *
+     * @param object $diaryentry
+     *            The diaryentry in object form.
      * @return void
      */
-    protected function process_diary_entry($diaryentry) {
-
+    protected function process_diary_entry($diaryentry)
+    {
         global $DB;
 
-        $diaryentry = (Object)$diaryentry;
+        $diaryentry = (object) $diaryentry;
 
         $oldid = $diaryentry->id;
         unset($diaryentry->id);
@@ -116,16 +120,18 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
     /**
      * Add tags to restored entries.
      *
-     * @param stdClass $data Tag
+     * @param stdClass $data
+     *            Tag
      */
-    protected function process_diary_entry_tag($data) {
-        $data = (object)$data;
+    protected function process_diary_entry_tag($data)
+    {
+        $data = (object) $data;
 
-        if (!core_tag_tag::is_enabled('mod_diary', 'diary_entries')) { // Tags disabled in server, nothing to process.
+        if (! core_tag_tag::is_enabled('mod_diary', 'diary_entries')) { // Tags disabled in server, nothing to process.
             return;
         }
 
-        if (!$itemid = $this->get_mappingid('diary_entries', $data->itemid)) {
+        if (! $itemid = $this->get_mappingid('diary_entries', $data->itemid)) {
             // Some orphaned tag, we could not find the data record for it - ignore.
             return;
         }
@@ -137,19 +143,22 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
     /**
      * Process diary entries to provide a rating restore.
-     * @param object $data The data in object form.
+     *
+     * @param object $data
+     *            The data in object form.
      * @return void
      */
-    protected function process_diary_entry_rating($data) {
+    protected function process_diary_entry_rating($data)
+    {
         global $DB;
 
-        $data = (object)$data;
+        $data = (object) $data;
 
         // Cannot use ratings API, cause, it's missing the ability to specify times (modified/created).
         $data->contextid = $this->task->get_contextid();
-        $data->itemid    = $this->get_new_parentid('diary_entry');
+        $data->itemid = $this->get_new_parentid('diary_entry');
         if ($data->scaleid < 0) { // Scale found, get mapping.
-            $data->scaleid = -($this->get_mappingid('scale', abs($data->scaleid)));
+            $data->scaleid = - ($this->get_mappingid('scale', abs($data->scaleid)));
         }
         $data->rating = $data->value;
         $data->userid = $this->get_mappingid('user', $data->userid);
@@ -165,12 +174,13 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         $newitemid = $DB->insert_record('rating', $data);
     }
 
-
     /**
      * Once the database tables have been fully restored, restore the files
+     *
      * @return void
      */
-    protected function after_execute() {
+    protected function after_execute()
+    {
         $this->add_related_files('mod_diary', 'intro', null);
         $this->add_related_files('mod_diary_entries', 'text', null);
         $this->add_related_files('mod_diary_entries', 'entrycomment', null);

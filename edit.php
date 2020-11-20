@@ -8,34 +8,36 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This page opens the current instance of a diary entry for editing.
  *
- * @package    mod_diary
- * @copyright  2019 AL Rachels (drachels@drachels.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- **/
-use \mod_diary\local\results;
+ * @package   mod_diary
+ * @copyright 2019 AL Rachels (drachels@drachels.com)
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+use mod_diary\local\results;
 
-require_once("../../config.php");
-require_once('lib.php'); // May not need this.
-require_once('./edit_form.php');
+require_once ("../../config.php");
+require_once ('lib.php'); // May not need this.
+require_once ('./edit_form.php');
 
-$id = required_param('id', PARAM_INT);    // Course Module ID.
-$action  = optional_param('action', 'currententry', PARAM_ACTION);  // Action(default to current entry).
-$firstkey  = optional_param('firstkey', '', PARAM_INT);  // Which entry to edit.
+$id = required_param('id', PARAM_INT); // Course Module ID.
+$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+$firstkey = optional_param('firstkey', '', PARAM_INT); // Which entry to edit.
 
-if (!$cm = get_coursemodule_from_id('diary', $id)) {
+if (! $cm = get_coursemodule_from_id('diary', $id)) {
     print_error('invalidcoursemodule');
 }
 
-if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
+if (! $course = $DB->get_record("course", array(
+    "id" => $cm->course
+))) {
     print_error('coursemisconf');
 }
 
@@ -45,12 +47,16 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
+if (! $diary = $DB->get_record("diary", array(
+    "id" => $cm->instance
+))) {
     print_error('invalidcourse');
 }
 
 // Header.
-$PAGE->set_url('/mod/diary/edit.php', array('id' => $id));
+$PAGE->set_url('/mod/diary/edit.php', array(
+    'id' => $id
+));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
@@ -65,7 +71,10 @@ $parameters = array(
 );
 
 // Get the single record specified by firstkey.
-$entry = $DB->get_record("diary_entries", array("userid" => $USER->id, 'id' => $firstkey));
+$entry = $DB->get_record("diary_entries", array(
+    "userid" => $USER->id,
+    'id' => $firstkey
+));
 
 if ($action == 'currententry' && $entry) {
     $data->entryid = $entry->id;
@@ -94,37 +103,24 @@ if ($action == 'currententry' && $entry) {
     $data->text = '';
     $data->textformat = FORMAT_HTML;
 } else {
-        print_error('There has been an error.');
+    print_error('There has been an error.');
 }
 
 $data->id = $cm->id;
 
-list($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
-                                                                                            $context,
-                                                                                            $entry,
-                                                                                            $action,
-                                                                                            $firstkey);
+list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey);
 
-$data = file_prepare_standard_editor($data,
-                                     'text',
-                                     $editoroptions,
-                                     $context,
-                                     'mod_diary',
-                                     'entry',
-                                     $data->entryid);
-$data = file_prepare_standard_filemanager($data,
-                                          'attachment',
-                                          $attachmentoptions,
-                                          $context,
-                                          'mod_diary',
-                                          'attachment',
-                                          $data->entryid);
+$data = file_prepare_standard_editor($data, 'text', $editoroptions, $context, 'mod_diary', 'entry', $data->entryid);
+$data = file_prepare_standard_filemanager($data, 'attachment', $attachmentoptions, $context, 'mod_diary', 'attachment', $data->entryid);
 
-$form = new mod_diary_entry_form(null, array('current' => $data,
-                                             'cm' => $cm,
-                                             'diary' => $diary,
-                                             'editoroptions' => $editoroptions,
-                                             'attachmentoptions' => $attachmentoptions));
+// 20201119 Added $diary->editdates setting.
+$form = new mod_diary_entry_form(null, array(
+    'current' => $data,
+    'cm' => $cm,
+    'diary' => $diary->editdates,
+    'editoroptions' => $editoroptions,
+    'attachmentoptions' => $attachmentoptions
+));
 
 // Set existing data loaded from the database for this entry.
 $form->set_data($data);
@@ -146,21 +142,20 @@ if ($form->is_cancelled()) {
 
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
-        if (!$DB->update_record("diary_entries", $newentry)) {
+        if (! $DB->update_record("diary_entries", $newentry)) {
             print_error("Could not update your diary");
         }
     } else {
         $newentry->userid = $USER->id;
         $newentry->diary = $diary->id;
-        if (!$newentry->id = $DB->insert_record("diary_entries", $newentry)) {
+        if (! $newentry->id = $DB->insert_record("diary_entries", $newentry)) {
             print_error("Could not insert a new diary entry");
         }
     }
 
     // Relink using the proper entryid.
     // We need to do this as draft area didn't have an itemid associated when creating the entry.
-    $fromform = file_postupdate_standard_editor($fromform, 'text', $editoroptions,
-        $editoroptions['context'], 'mod_diary', 'entry', $newentry->id);
+    $fromform = file_postupdate_standard_editor($fromform, 'text', $editoroptions, $editoroptions['context'], 'mod_diary', 'entry', $newentry->id);
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
     $newentry->timecreated = $fromform->timecreated;
@@ -179,17 +174,15 @@ if ($form->is_cancelled()) {
             'objectid' => $diary->id,
             'context' => $context
         ));
-
     }
     $event->add_record_snapshot('course_modules', $cm);
     $event->add_record_snapshot('course', $course);
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
 
-    redirect(new moodle_url('/mod/diary/view.php?id='.$cm->id));
-    die;
+    redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
+    die();
 }
-
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($diary->name));

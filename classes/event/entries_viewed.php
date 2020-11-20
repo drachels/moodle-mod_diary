@@ -8,37 +8,39 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * The mod_diary entries viewed event.
  *
- * @package     mod_diary
- * @copyright   2014 drachels@drachels.com
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_diary
+ * @copyright 2014 drachels@drachels.com
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 namespace mod_diary\event;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * The mod_diary entries viewed event class.
  *
- * @package    mod_diary
- * @since      Moodle 2.7
- * @copyright  2014 drachels@drachels.com
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_diary
+ * @since     Moodle 2.7
+ * @copyright 2014 drachels@drachels.com
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class entries_viewed extends \core\event\base {
+class entries_viewed extends \core\event\base
+{
 
     /**
      * Init method.
      */
-    protected function init() {
+    protected function init()
+    {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
         $this->data['objecttable'] = 'diary';
@@ -49,7 +51,8 @@ class entries_viewed extends \core\event\base {
      *
      * @return string
      */
-    public static function get_name() {
+    public static function get_name()
+    {
         return get_string('evententriesviewed', 'mod_diary');
     }
 
@@ -58,17 +61,22 @@ class entries_viewed extends \core\event\base {
      *
      * @return string
      */
-    public function get_description() {
+    public function get_description()
+    {
         return "The user with id '$this->userid' has viewed the entries for the diary activity with the course module id
             '$this->contextinstanceid'";
     }
 
     /**
      * Returns relevant URL.
+     *
      * @return \moodle_url
      */
-    public function get_url() {
-        return new \moodle_url('/mod/diary/report.php', array('id' => $this->contextinstanceid));
+    public function get_url()
+    {
+        return new \moodle_url('/mod/diary/report.php', array(
+            'id' => $this->contextinstanceid
+        ));
     }
 
     /**
@@ -76,8 +84,18 @@ class entries_viewed extends \core\event\base {
      *
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('report.php', array('id' => $this->contextinstanceid));
-        return array($this->courseid, 'diary', 'report', $url->out(), $this->objectid, $this->contextinstanceid);
+    protected function get_legacy_logdata()
+    {
+        $url = new \moodle_url('report.php', array(
+            'id' => $this->contextinstanceid
+        ));
+        return array(
+            $this->courseid,
+            'diary',
+            'report',
+            $url->out(),
+            $this->objectid,
+            $this->contextinstanceid
+        );
     }
 }

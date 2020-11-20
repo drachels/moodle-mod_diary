@@ -8,20 +8,19 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * English strings for diary plugin.
  *
- * @package    mod_diary
- * @copyright  2019 AL Rachels (drachels@drachels.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_diary
+ * @copyright 2019 AL Rachels (drachels@drachels.com)
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['eventdiarycreated'] = 'Diary created';
@@ -56,11 +55,14 @@ $string['dateformat'] = 'Default date format';
 $string['details'] = 'Details: ';
 $string['diaryclosetime'] = 'Close time';
 $string['diaryclosetime_help'] = 'If enabled, you can set a date for the diary to be closed and no longer open for use.';
+$string['diaryentrydate'] = 'Set date for this entry';
 $string['diaryopentime'] = 'Open time';
 $string['diaryopentime_help'] = 'If enabled, you can set a date for the diary to be opened for use.';
 $string['edittopoflist'] = 'Edit top of the list';
 $string['editall'] = 'Edit all entries';
 $string['editall_help'] = 'When enabled, users can edit any entry.';
+$string['editdates'] = 'Edit entry dates';
+$string['editdates_help'] = 'When enabled, users can edit the date of any entry.';
 $string['editingended'] = 'Editing period has ended';
 $string['editingends'] = 'Editing period ends';
 $string['editthisentry'] = 'Edit this entry';
