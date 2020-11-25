@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * mod_diary data generator.
@@ -47,8 +47,7 @@ class mod_diary_generator extends testing_module_generator
      *
      * @return void
      */
-    public function reset()
-    {
+    public function reset() {
         $this->diarycount = 0;
         parent::reset();
     }
@@ -60,8 +59,7 @@ class mod_diary_generator extends testing_module_generator
      * @param array $options
      * @return stdClass mod_diary_structure
      */
-    public function create_instance($record = null, array $options = null)
-    {
+    public function create_instance($record = null, array $options = null) {
         $record = (object) (array) $record;
 
         if (! isset($record->name)) {

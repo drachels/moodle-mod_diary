@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This page opens the current report instance of diary.
@@ -23,9 +23,9 @@
  */
 use mod_diary\local\results;
 
-require_once ("../../config.php");
-require_once ("lib.php");
-require_once ($CFG->dirroot . '/rating/lib.php');
+require_once("../../config.php");
+require_once("lib.php");
+require_once($CFG->dirroot . '/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
@@ -401,7 +401,10 @@ if (! $users) {
 
     // 20200421 Added a return button.
     $url = $CFG->wwwroot . '/mod/diary/view.php?id=' . $id;
-    $saveallbutton .= ' <a href="' . $url . '" class="btn btn-secondary" role="button">' . get_string('returnto', 'diary', $diary->name) . '</a>';
+    $saveallbutton .= ' <a href="'.$url
+                     .'" class="btn btn-secondary" role="button">'
+                     .get_string('returnto', 'diary', $diary->name)
+                     .'</a>';
 
     $saveallbutton .= "</p>";
 
@@ -421,7 +424,12 @@ if (! $users) {
                 -moz-border-radius:16px;border-radius:16px;">';
 
             // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
-            echo results::diary_print_user_entry($course, $diary, $user, $entrybyuser[$user->id], $teachers, $grades);
+            echo results::diary_print_user_entry($course,
+                                                 $diary,
+                                                 $user,
+                                                 $entrybyuser[$user->id],
+                                                 $teachers,
+                                                 $grades);
             echo '</div>';
 
             // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.

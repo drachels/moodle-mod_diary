@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Privacy class for requesting user data.
@@ -36,7 +36,7 @@ use core_privacy\local\request\helper;
 use core_privacy\local\request\transform;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
-require_once ($CFG->dirroot . '/mod/diary/lib.php');
+require_once($CFG->dirroot . '/mod/diary/lib.php');
 
 /**
  * Privacy class for requesting user data.
@@ -45,18 +45,17 @@ require_once ($CFG->dirroot . '/mod/diary/lib.php');
  * @copyright 2019 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\provider, \core_privacy\local\request\core_userlist_provider, \core_privacy\local\request\plugin\provider
-{
+class provider implements \core_privacy\local\metadata\provider,
+                          \core_privacy\local\request\core_userlist_provider,
+                          \core_privacy\local\request\plugin\provider {
 
     /**
      * Provides meta data that is stored about a user with mod_diary.
      *
-     * @param collection $collection
-     *            The initialized collection to add items to.
+     * @param collection $collection The initialized collection to add items to.
      * @return collection Returns the collection of metadata.
      */
-    public static function get_metadata(collection $collection): collection
-    {
+    public static function get_metadata(collection $collection): collection {
         $collection->add_database_table('diary_entries', [
             'userid' => 'privacy:metadata:diary_entries:userid',
             'timecreated' => 'privacy:metadata:diary_entries:timecreated',
@@ -72,12 +71,10 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
     /**
      * Get the list of contexts that contain user information for the specified user.
      *
-     * @param int $userid
-     *            The user to search.
+     * @param int $userid The user to search.
      * @return contextlist $contextlist The contextlist containing the list of contexts used in this plugin.
      */
-    public static function get_contexts_for_userid(int $userid): contextlist
-    {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         $sql = "
             SELECT DISTINCT ctx.id
               FROM {%s} fc
@@ -104,12 +101,9 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
     /**
      * Get the list of users who have data within a context.
      *
-     * @param userlist $userlist
-     *            The userlist containing the list of users who have data in this context/plugin combination.
-     *            
+     * @param userlist $userlist The userlist containing the list of users who have data in this context/plugin combination.
      */
-    public static function get_users_in_context(userlist $userlist)
-    {
+    public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
         if (! is_a($context, \context_module::class)) {
@@ -141,11 +135,9 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
     /**
      * Export all user data for the specified user, in the specified contexts.
      *
-     * @param approved_contextlist $contextlist
-     *            The approved contexts to export information for.
+     * @param approved_contextlist $contextlist The approved contexts to export information for.
      */
-    public static function export_user_data(approved_contextlist $contextlist)
-    {
+    public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
 
         if (! count($contextlist)) {
@@ -156,20 +148,19 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         $userid = $user->id;
         list ($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
-        $sql = "SELECT
-                    den.id,
-                    den.userid,
-                    den.timecreated,
-                    den.timemodified,
-                    den.text,
-                    den.rating,
-                    den.entrycomment
-                    FROM {context} c
-                    INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
-                    INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-                    INNER JOIN {diary} j ON j.id = cm.instance
-                    LEFT JOIN {diary_entries} as den ON den.diary = j.id
-                    WHERE den.userid = :userid AND c.id {$contextsql}";
+        $sql = "SELECT den.id,
+                       den.userid,
+                       den.timecreated,
+                       den.timemodified,
+                       den.text,
+                       den.rating,
+                       den.entrycomment
+                  FROM {context} c
+            INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
+            INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+            INNER JOIN {diary} j ON j.id = cm.instance
+             LEFT JOIN {diary_entries} as den ON den.diary = j.id
+                 WHERE den.userid = :userid AND c.id {$contextsql}";
         $params = [
             'contextlevel' => CONTEXT_MODULE,
             'modname' => 'diary',
@@ -211,11 +202,9 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
     /**
      * Delete all data for all users in the specified context.
      *
-     * @param context $context
-     *            The specific context to delete data for.
+     * @param context $context The specific context to delete data for.
      */
-    public static function delete_data_for_all_users_in_context(\context $context)
-    {
+    public static function delete_data_for_all_users_in_context(\context $context) {
         global $DB;
 
         // This should not happen, but just in case.
@@ -250,11 +239,9 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
     /**
      * Delete all user data for the specified user, in the specified contexts.
      *
-     * @param approved_contextlist $contextlist
-     *            The approved contexts and user information to delete information for.
+     * @param approved_contextlist $contextlist The approved contexts and user information to delete information for.
      */
-    public static function delete_data_for_user(approved_contextlist $contextlist)
-    {
+    public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
         $userid = $contextlist->get_user()->id;
 
@@ -293,11 +280,9 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
     /**
      * Delete multiple users within a single context.
      *
-     * @param approved_userlist $userlist
-     *            The approved context and user information to delete information for.
+     * @param approved_userlist $userlist The approved context and user information to delete information for.
      */
-    public static function delete_data_for_users(approved_userlist $userlist)
-    {
+    public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
 
         $context = $userlist->get_context();

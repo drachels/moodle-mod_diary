@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * The mod_diary course module viewed event.
@@ -33,16 +33,14 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2014 drachels@drachels.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_module_viewed extends \core\event\course_module_viewed
-{
+class course_module_viewed extends \core\event\course_module_viewed {
 
     /**
      * Init method.
      *
      * @return void
      */
-    protected function init()
-    {
+    protected function init() {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
         $this->data['objecttable'] = 'diary';
@@ -53,8 +51,7 @@ class course_module_viewed extends \core\event\course_module_viewed
      *
      * @return \moodle_url
      */
-    public function get_url()
-    {
+    public function get_url() {
         return new \moodle_url('/mod/diary/view.php', array(
             'id' => $this->objectid
         ));
@@ -65,8 +62,7 @@ class course_module_viewed extends \core\event\course_module_viewed
      *
      * @return array|null
      */
-    protected function get_legacy_logdata()
-    {
+    protected function get_legacy_logdata() {
         $url = new \moodle_url('view.php', array(
             'id' => $this->contextinstanceid
         ));

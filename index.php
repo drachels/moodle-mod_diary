@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This page lists all the instances of diary in a particular course
@@ -21,8 +21,8 @@
  * @copyright 1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once (__DIR__ . "/../../config.php");
-require_once ("lib.php");
+require_once(__DIR__ . "/../../config.php");
+require_once("lib.php");
 
 $id = required_param('id', PARAM_INT); // Course.
 
@@ -133,7 +133,8 @@ foreach ($diarys as $diary) {
         }
 
         $entrycount = diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
-        $table->data[$i][] = "<a href=\"report.php?id=$diary->coursemodule\">" . get_string("viewallentries", "diary", $entrycount) . "</a>";
+        $table->data[$i][] = "<a href=\"report.php?id=$diary->coursemodule\">"
+            . get_string("viewallentries", "diary", $entrycount) . "</a>";
     } else if (! empty($managersomewhere)) {
         $table->data[$i][] = "";
     }

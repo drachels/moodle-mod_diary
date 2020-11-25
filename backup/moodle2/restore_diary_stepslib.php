@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Define all the restore steps that will be used by the restore_diary_activity_task
@@ -31,16 +31,14 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2020 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_diary_activity_structure_step extends restore_activity_structure_step
-{
+class restore_diary_activity_structure_step extends restore_activity_structure_step {
 
     /**
      * Define the structure of the restore workflow.
      *
      * @return restore_path_element $structure
      */
-    protected function define_structure()
-    {
+    protected function define_structure() {
         $paths = array();
         $userinfo = $this->get_setting_value('userinfo');
 
@@ -63,8 +61,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      *            The diary in object form
      * @return void
      */
-    protected function process_diary($diary)
-    {
+    protected function process_diary($diary) {
         global $DB;
 
         $diary = (object) $diary;
@@ -98,8 +95,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      *            The diaryentry in object form.
      * @return void
      */
-    protected function process_diary_entry($diaryentry)
-    {
+    protected function process_diary_entry($diaryentry) {
         global $DB;
 
         $diaryentry = (object) $diaryentry;
@@ -123,8 +119,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      * @param stdClass $data
      *            Tag
      */
-    protected function process_diary_entry_tag($data)
-    {
+    protected function process_diary_entry_tag($data) {
         $data = (object) $data;
 
         if (! core_tag_tag::is_enabled('mod_diary', 'diary_entries')) { // Tags disabled in server, nothing to process.
@@ -148,8 +143,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      *            The data in object form.
      * @return void
      */
-    protected function process_diary_entry_rating($data)
-    {
+    protected function process_diary_entry_rating($data) {
         global $DB;
 
         $data = (object) $data;
@@ -179,8 +173,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      *
      * @return void
      */
-    protected function after_execute()
-    {
+    protected function after_execute() {
         $this->add_related_files('mod_diary', 'intro', null);
         $this->add_related_files('mod_diary_entries', 'text', null);
         $this->add_related_files('mod_diary_entries', 'entrycomment', null);

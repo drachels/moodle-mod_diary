@@ -8,12 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
-
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * Defines the version of Diary.
  *
@@ -32,4 +31,3 @@ $plugin->cron = 60;             // Period for cron to check this module (secs).
 $plugin->component = 'mod_diary';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->release = '3.0.0 (Build: 2020111900)'; // User-friendly version number.
-

@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This page opens the current lib instance of diary.
@@ -34,8 +34,7 @@ use mod_diary\local\results;
  *            Object containing required diary properties.
  * @return int Diary ID.
  */
-function diary_add_instance($diary)
-{
+function diary_add_instance($diary) {
     global $DB;
 
     if (empty($diary->assessed)) {
@@ -71,8 +70,7 @@ function diary_add_instance($diary)
  *            Object containing required diary properties.
  * @return boolean True if successful.
  */
-function diary_update_instance($diary)
-{
+function diary_update_instance($diary) {
     global $DB;
 
     $diary->timemodified = time();
@@ -115,8 +113,7 @@ function diary_update_instance($diary)
  *            Diary ID.
  * @return boolean True if successful.
  */
-function diary_delete_instance($id)
-{
+function diary_delete_instance($id) {
     global $DB;
 
     $result = true;
@@ -156,8 +153,7 @@ function diary_delete_instance($id)
  *            FEATURE_xx constant for requested feature.
  * @return mixed True if module supports feature, null if doesn't know.
  */
-function diary_supports($feature)
-{
+function diary_supports($feature) {
     switch ($feature) {
         case FEATURE_MOD_INTRO:
             return true;
@@ -192,8 +188,7 @@ function diary_supports($feature)
  *
  * @return array
  */
-function diary_get_view_actions()
-{
+function diary_get_view_actions() {
     return array(
         'view',
         'view all',
@@ -211,8 +206,7 @@ function diary_get_view_actions()
  *
  * @return array
  */
-function diary_get_post_actions()
-{
+function diary_get_post_actions() {
     return array(
         'add entry',
         'update entry',
@@ -231,8 +225,7 @@ function diary_get_post_actions()
  * @param object $diary
  * @return object|null
  */
-function diary_user_outline($course, $user, $mod, $diary)
-{
+function diary_user_outline($course, $user, $mod, $diary) {
     global $DB;
 
     if ($entry = $DB->get_record("diary_entries", array(
@@ -258,8 +251,7 @@ function diary_user_outline($course, $user, $mod, $diary)
  * @param object $mod
  * @param object $diary
  */
-function diary_user_complete($course, $user, $mod, $diary)
-{
+function diary_user_complete($course, $user, $mod, $diary) {
     global $DB, $OUTPUT;
 
     if ($entry = $DB->get_record("diary_entries", array(
@@ -292,8 +284,7 @@ function diary_user_complete($course, $user, $mod, $diary)
  *
  * @return boolean True if successful.
  */
-function diary_cron()
-{
+function diary_cron() {
     global $CFG, $USER, $DB;
 
     $cutofftime = time() - $CFG->maxeditingtime;
@@ -302,7 +293,8 @@ function diary_cron()
         $timenow = time();
 
         $usernamefields = get_all_user_name_fields();
-        $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, ' . implode(', ', $usernamefields);
+        $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, '
+            .implode(', ', $usernamefields);
 
         // To save some db queries.
         $users = array();
@@ -382,7 +374,12 @@ function diary_cron()
             $posttext .= get_string("diarymail", "diary", $diaryinfo) . "\n";
             $posttext .= "---------------------------------------------------------------------\n";
             if ($user->mailformat == 1) { // HTML.
-                $posthtml = "<p><font face=\"sans-serif\">" . "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->" . "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->" . "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">" . format_string($entry->name, true) . "</a></font></p>";
+                $posthtml = "<p><font face=\"sans-serif\">"
+                    ."<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->"
+                    ."<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->"
+                    ."<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">"
+                    .format_string($entry->name, true)
+                    ."</a></font></p>";
                 $posthtml .= "<hr /><font face=\"sans-serif\">";
                 $posthtml .= "<p>" . get_string("diarymailhtml", "diary", $diaryinfo) . "</p>";
                 $posthtml .= "</font><hr />";
@@ -414,8 +411,7 @@ function diary_cron()
  * @param int $timestart
  * @return bool
  */
-function diary_print_recent_activity($course, $viewfullnames, $timestart)
-{
+function diary_print_recent_activity($course, $viewfullnames, $timestart) {
     global $CFG, $USER, $DB, $OUTPUT;
 
     if (! get_config('diary', 'showrecentactivity')) {
@@ -429,15 +425,13 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart)
     );
     $namefields = user_picture::fields('u', null, 'userid');
     $sql = "SELECT de.id, de.timemodified, cm.id AS cmid, $namefields
-         FROM {diary_entries} de
-              JOIN {diary} d         ON d.id = de.diary
+              FROM {diary_entries} de
+              JOIN {diary} d ON d.id = de.diary
               JOIN {course_modules} cm ON cm.instance = d.id
-              JOIN {modules} md        ON md.id = cm.module
-              JOIN {user} u            ON u.id = de.userid
-         WHERE de.timemodified > ? AND
-               d.course = ? AND
-               md.name = ?
-         ORDER BY u.lastname ASC, u.firstname ASC
+              JOIN {modules} md ON md.id = cm.module
+              JOIN {user} u ON u.id = de.userid
+             WHERE de.timemodified > ? AND d.course = ? AND md.name = ?
+          ORDER BY u.lastname ASC, u.firstname ASC
     ";
     // Changed on 20190622 original line 310: ORDER BY de.timemodified ASC.
     $newentries = $DB->get_records_sql($sql, $dbparams);
@@ -517,26 +511,17 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart)
  *            Diary ID.
  * @return array Array of user ids.
  */
-function diary_get_participants($diaryid)
-{
+function diary_get_participants($diaryid) {
     global $DB;
 
     // Get students.
     $students = $DB->get_records_sql("SELECT DISTINCT u.id
-                                      FROM {user} u,
-                                      {diary_entries} d
-                                      WHERE d.diary = ? and
-                                      u.id = d.userid", array(
-        $diaryid
-    ));
+                                        FROM {user} u, {diary_entries} d
+                                       WHERE d.diary = ? AND u.id = d.userid", array($diaryid));
     // Get teachers.
     $teachers = $DB->get_records_sql("SELECT DISTINCT u.id
-                                      FROM {user} u,
-                                      {diary_entries} d
-                                      WHERE d.diary = ? and
-                                      u.id = d.teacher", array(
-        $diaryid
-    ));
+                                        FROM {user} u, {diary_entries} d
+                                       WHERE d.diary = ? AND u.id = d.teacher", array($diaryid));
 
     // Add teachers to students.
     if ($teachers) {
@@ -557,8 +542,7 @@ function diary_get_participants($diaryid)
  *            Scale ID.
  * @return boolean True if a scale is being used by one diary.
  */
-function diary_scale_used($diaryid, $scaleid)
-{
+function diary_scale_used($diaryid, $scaleid) {
     global $DB;
     $return = false;
 
@@ -582,28 +566,23 @@ function diary_scale_used($diaryid, $scaleid)
  * @param int $scaleid
  * @return boolean True if the scale is used by any diary.
  */
-function diary_scale_used_anywhere($scaleid)
-{
+function diary_scale_used_anywhere($scaleid) {
     global $DB;
 
     if (empty($scaleid)) {
         return false;
     }
 
-    return $DB->record_exists('diary', [
-        'scale' => $scaleid * - 1
-    ]);
+    return $DB->record_exists('diary', ['scale' => $scaleid * - 1]);
 }
 
 /**
  * Implementation of the function for printing the form elements that control
  * whether the course reset functionality affects the diary.
  *
- * @param object $mform
- *            Form passed by reference.
+ * @param object $mform Form passed by reference.
  */
-function diary_reset_course_form_definition(&$mform)
-{
+function diary_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'diaryheader', get_string('modulenameplural', 'diary'));
     $mform->addElement('advcheckbox', 'reset_diary', get_string('removemessages', 'diary'));
 }
@@ -614,26 +593,21 @@ function diary_reset_course_form_definition(&$mform)
  * @param object $course
  * @return array
  */
-function diary_reset_course_form_defaults($course)
-{
-    return array(
-        'reset_diary' => 1
-    );
+function diary_reset_course_form_defaults($course) {
+    return array('reset_diary' => 1);
 }
 
 /**
  * Actual implementation of the reset course functionality, delete all the
  * data responses for course $data->courseid.
  *
- * @param object $data
- *            the data submitted from the reset course.
+ * @param object $data the data submitted from the reset course.
  * @return array status array
  */
-function diary_reset_userdata($data)
-{
+function diary_reset_userdata($data) {
     global $CFG, $DB;
-    require_once ($CFG->libdir . '/filelib.php');
-    require_once ($CFG->dirroot . '/rating/lib.php');
+    require_once($CFG->libdir . '/filelib.php');
+    require_once($CFG->dirroot . '/rating/lib.php');
 
     $status = array();
     // THIS FUNCTION NEEDS REWRITE!
@@ -664,8 +638,7 @@ function diary_reset_userdata($data)
  * @param object $courses
  * @param array $htmlarray
  */
-function diary_print_overview($courses, &$htmlarray)
-{
+function diary_print_overview($courses, &$htmlarray) {
     global $USER, $CFG, $DB;
 
     if (! get_config('diary', 'overview')) {
@@ -707,7 +680,12 @@ function diary_print_overview($courses, &$htmlarray)
         }
 
         if ($diaryopen) {
-            $str = '<div class="diary overview"><div class="name">' . $strdiary . ': <a ' . ($diary->visible ? '' : ' class="dimmed"') . ' href="' . $CFG->wwwroot . '/mod/diary/view.php?id=' . $diary->coursemodule . '">' . $diary->name . '</a></div></div>';
+            $str = '<div class="diary overview"><div class="name">'
+                .$strdiary.': <a '
+                .($diary->visible ? '' : ' class="dimmed"')
+                .' href="'.$CFG->wwwroot.'/mod/diary/view.php?id='
+                .$diary->coursemodule.'">'
+                .$diary->name.'</a></div></div>';
 
             if (empty($htmlarray[$diary->course]['diary'])) {
                 $htmlarray[$diary->course]['diary'] = $str;
@@ -727,11 +705,10 @@ function diary_print_overview($courses, &$htmlarray)
  *            if is false all users
  * @return object $grades
  */
-function diary_get_user_grades($diary, $userid = 0)
-{
+function diary_get_user_grades($diary, $userid = 0) {
     global $CFG;
 
-    require_once ($CFG->dirroot . '/rating/lib.php');
+    require_once($CFG->dirroot . '/rating/lib.php');
     // 20200812 Fixed ratings.
     $ratingoptions = new stdClass();
     $ratingoptions->component = 'mod_diary';
@@ -753,17 +730,13 @@ function diary_get_user_grades($diary, $userid = 0)
  * Update diary activity grades.
  *
  * @category grade
- * @param object $diary
- *            If is null, then all diaries.
- * @param int $userid
- *            If is false, then all users.
- * @param boolean $nullifnone
- *            Return null if grade does not exist.
+ * @param object $diary If is null, then all diaries.
+ * @param int $userid If is false, then all users.
+ * @param boolean $nullifnone Return null if grade does not exist.
  */
-function diary_update_grades($diary, $userid = 0, $nullifnone = true)
-{
+function diary_update_grades($diary, $userid = 0, $nullifnone = true) {
     global $CFG;
-    require_once ($CFG->libdir . '/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
     $cm = get_coursemodule_from_instance('diary', $diary->id);
     $diary->cmidnumber = $cm->idnumber;
     if (! $diary->assessed) {
@@ -783,16 +756,13 @@ function diary_update_grades($diary, $userid = 0, $nullifnone = true)
 /**
  * Update or create grade item for given diary.
  *
- * @param stdClass $diary
- *            Object with extra cmidnumber.
- * @param array $grades
- *            optional array/object of grade(s); 'reset' means reset grades in gradebook
+ * @param stdClass $diary Object with extra cmidnumber.
+ * @param array $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise.
  */
-function diary_grade_item_update($diary, $grades = null)
-{
+function diary_grade_item_update($diary, $grades = null) {
     global $CFG;
-    require_once ($CFG->libdir . '/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     $params = array(
         'itemname' => $diary->name,
@@ -824,11 +794,10 @@ function diary_grade_item_update($diary, $grades = null)
  * @param object $diary
  * @return object grade_item
  */
-function diary_grade_item_delete($diary)
-{
+function diary_grade_item_delete($diary) {
     global $CFG;
 
-    require_once ($CFG->libdir . '/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, null, array(
         'deleted' => 1
@@ -841,17 +810,15 @@ function diary_grade_item_delete($diary)
  *
  * @param object $diary
  * @param object $currentgroup
- * @param object $sortoption
- *            return object $diarys
+ * @param object $sortoption return object $diarys
  */
-function diary_get_users_done($diary, $currentgroup, $sortoption)
-{
+function diary_get_users_done($diary, $currentgroup, $sortoption) {
     global $DB;
 
     $params = array();
 
     $sql = "SELECT DISTINCT u.* FROM {diary_entries} de
-            JOIN {user} u ON de.userid = u.id ";
+              JOIN {user} u ON de.userid = u.id ";
 
     // Group users.
     if ($currentgroup != 0) {
@@ -892,8 +859,7 @@ function diary_get_users_done($diary, $currentgroup, $sortoption)
  * @param int $groupid
  * @return int count($diarys) Count of diary entries.
  */
-function diary_count_entries($diary, $groupid = 0)
-{
+function diary_count_entries($diary, $groupid = 0) {
     global $DB;
 
     $cm = diary_get_coursemodule($diary->id);
@@ -902,9 +868,9 @@ function diary_count_entries($diary, $groupid = 0)
     if ($groupid) { // How many in a particular group?
 
         $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
-                JOIN {groups_members} g ON g.userid = d.userid
-                JOIN {user} u ON u.id = g.userid
-                WHERE d.diary = ? AND g.groupid = ?";
+                  JOIN {groups_members} g ON g.userid = d.userid
+                  JOIN {user} u ON u.id = g.userid
+                 WHERE d.diary = ? AND g.groupid = ?";
         $diarys = $DB->get_records_sql($sql, array(
             $diary->id,
             $groupid
@@ -912,8 +878,8 @@ function diary_count_entries($diary, $groupid = 0)
     } else { // Count all the entries from the whole course.
 
         $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
-                JOIN {user} u ON u.id = d.userid
-                WHERE d.diary = ?";
+                  JOIN {user} u ON u.id = d.userid
+                 WHERE d.diary = ?";
         $diarys = $DB->get_records_sql($sql, array(
             $diary->id
         ));
@@ -943,13 +909,12 @@ function diary_count_entries($diary, $groupid = 0)
  * @param int $cutofftime
  * @return object
  */
-function diary_get_unmailed_graded($cutofftime)
-{
+function diary_get_unmailed_graded($cutofftime) {
     global $DB;
 
     $sql = "SELECT de.*, d.course, d.name FROM {diary_entries} de
-            JOIN {diary} d ON de.diary = d.id
-            WHERE de.mailed = '0' AND de.timemarked < ? AND de.timemarked > 0";
+              JOIN {diary} d ON de.diary = d.id
+             WHERE de.mailed = '0' AND de.timemarked < ? AND de.timemarked > 0";
     return $DB->get_records_sql($sql, array(
         $cutofftime
     ));
@@ -961,15 +926,14 @@ function diary_get_unmailed_graded($cutofftime)
  * @param string $log
  * @return object
  */
-function diary_log_info($log)
-{
+function diary_log_info($log) {
     global $DB;
 
     $sql = "SELECT d.*, u.firstname, u.lastname
-            FROM {diary} d
-            JOIN {diary_entries} de ON de.diary = d.id
-            JOIN {user} u ON u.id = de.userid
-            WHERE de.id = ?";
+              FROM {diary} d
+              JOIN {diary_entries} de ON de.diary = d.id
+              JOIN {user} u ON u.id = de.userid
+             WHERE de.id = ?";
     return $DB->get_record_sql($sql, array(
         $log->info
     ));
@@ -981,13 +945,12 @@ function diary_log_info($log)
  * @param integer $diaryid
  * @return object
  */
-function diary_get_coursemodule($diaryid)
-{
+function diary_get_coursemodule($diaryid) {
     global $DB;
 
     return $DB->get_record_sql("SELECT cm.id FROM {course_modules} cm
-                                JOIN {modules} m ON m.id = cm.module
-                                WHERE cm.instance = ? AND m.name = 'diary'", array(
+                                  JOIN {modules} m ON m.id = cm.module
+                                 WHERE cm.instance = ? AND m.name = 'diary'", array(
         $diaryid
     ));
 }
@@ -996,24 +959,16 @@ function diary_get_coursemodule($diaryid)
  * Serves the diary files.
  * THIS FUNCTION MAY BE ORPHANED. APPEARS TO BE SO IN JOURNAL.
  *
- * @param stdClass $course
- *            Course object.
- * @param stdClass $cm
- *            Course module object.
- * @param stdClass $context
- *            Context object.
- * @param string $filearea
- *            File area.
- * @param array $args
- *            Extra arguments.
- * @param bool $forcedownload
- *            Whether or not force download.
- * @param array $options
- *            Additional options affecting the file serving.
+ * @param stdClass $course Course object.
+ * @param stdClass $cm Course module object.
+ * @param stdClass $context Context object.
+ * @param string $filearea File area.
+ * @param array $args Extra arguments.
+ * @param bool $forcedownload Whether or not force download.
+ * @param array $options Additional options affecting the file serving.
  * @return bool False if file not found, does not return if found - just send the file.
  */
-function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array())
-{
+function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
     global $DB, $USER;
 
     if ($context->contextlevel != CONTEXT_MODULE) {

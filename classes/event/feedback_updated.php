@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * The mod_diary feedback updated event.
@@ -33,14 +33,12 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2014 drachels@drachels.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class feedback_updated extends \core\event\base
-{
+class feedback_updated extends \core\event\base {
 
     /**
      * Init method.
      */
-    protected function init()
-    {
+    protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
         $this->data['objecttable'] = 'diary';
@@ -51,8 +49,7 @@ class feedback_updated extends \core\event\base
      *
      * @return string
      */
-    public static function get_name()
-    {
+    public static function get_name() {
         return get_string('eventfeedbackupdated', 'mod_diary');
     }
 
@@ -61,8 +58,7 @@ class feedback_updated extends \core\event\base
      *
      * @return string
      */
-    public function get_description()
-    {
+    public function get_description() {
         return "The user with id '$this->userid' has updated feedback for the diary activity with the course module id
             '$this->contextinstanceid'";
     }
@@ -72,8 +68,7 @@ class feedback_updated extends \core\event\base
      *
      * @return \moodle_url
      */
-    public function get_url()
-    {
+    public function get_url() {
         return new \moodle_url('/mod/diary/report.php', array(
             'id' => $this->contextinstanceid
         ));
@@ -84,8 +79,7 @@ class feedback_updated extends \core\event\base
      *
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
-    protected function get_legacy_logdata()
-    {
+    protected function get_legacy_logdata() {
         $url = new \moodle_url('report.php', array(
             'id' => $this->contextinstanceid
         ));

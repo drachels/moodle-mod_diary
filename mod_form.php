@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This file contains the forms to create and edit an instance of the diary module.
@@ -23,7 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once ($CFG->dirroot . '/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
 /**
  * Diary settings form.
@@ -32,16 +32,14 @@ require_once ($CFG->dirroot . '/course/moodleform_mod.php');
  * @copyright 2019 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_diary_mod_form extends moodleform_mod
-{
+class mod_diary_mod_form extends moodleform_mod {
 
     /**
      * Define the diary activity settings form.
      *
      * @return void
      */
-    public function definition()
-    {
+    public function definition() {
         global $COURSE;
 
         $mform = &$this->_form;
@@ -94,11 +92,10 @@ class mod_diary_mod_form extends moodleform_mod
         // 20201015 Added Edit all, enable/disable setting.
         $mform->addElement('selectyesno', 'editall', get_string('editall', 'diary'));
         $mform->addHelpButton('editall', 'editall', 'diary');
-        
+
         // 20201119 Added Edit dates, enable/disable setting.
         $mform->addElement('selectyesno', 'editdates', get_string('editdates', 'diary'));
         $mform->addHelpButton('editdates', 'editdates', 'diary');
-        
 
         // Add the rest of the common settings.
         $this->standard_grading_coursemodule_elements();

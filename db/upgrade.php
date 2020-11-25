@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Upgrade code for install
@@ -23,7 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once ($CFG->dirroot . '/mod/diary/lib.php');
+require_once($CFG->dirroot . '/mod/diary/lib.php');
 
 /**
  * Upgrade this diary instance - this function could be skipped but it will be needed later.
@@ -32,8 +32,7 @@ require_once ($CFG->dirroot . '/mod/diary/lib.php');
  *            The old version of the diary module
  * @return bool
  */
-function xmldb_diary_upgrade($oldversion = 0)
-{
+function xmldb_diary_upgrade($oldversion = 0) {
     global $CFG, $DB;
     $dbman = $DB->get_manager();
 
@@ -75,16 +74,16 @@ function xmldb_diary_upgrade($oldversion = 0)
         upgrade_mod_savepoint(true, 2020101500, 'diary');
     }
     if ($oldversion < 2020111900) {
-        
+
         // Define field editdates to be added to diary.
         $table = new xmldb_table('diary');
         $field = new xmldb_field('editdates', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'editall');
-        
+
         // Conditionally launch add field editdates.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2020111900, 'diary');
     }

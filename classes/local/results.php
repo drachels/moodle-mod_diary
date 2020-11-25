@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Results utilities for Diary.
@@ -42,24 +42,20 @@ use calendar_event;
  * @copyright AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class results
-{
+class results {
 
     /**
      * Update the calendar entries for this diary activity.
      *
-     * @param stdClass $diary
-     *            the row from the database table diary.
-     * @param int $cmid
-     *            The coursemodule id
+     * @param stdClass $diary the row from the database table diary.
+     * @param int $cmid The coursemodule id
      * @return bool
      */
-    public static function diary_update_calendar(stdClass $diary, $cmid)
-    {
+    public static function diary_update_calendar(stdClass $diary, $cmid) {
         global $DB, $CFG;
 
         if ($CFG->branch > 30) { // If Moodle less than version 3.1 skip this.
-            require_once ($CFG->dirroot . '/calendar/lib.php');
+            require_once($CFG->dirroot . '/calendar/lib.php');
 
             // Get CMID if not sent as part of $diary.
             if (! isset($diary->coursemodule)) {
@@ -165,8 +161,7 @@ class results
      *
      * @param var $diary
      */
-    public static function diary_available($diary)
-    {
+    public static function diary_available($diary) {
         $timeopen = $diary->timeopen;
         $timeclose = $diary->timeclose;
         return (($timeopen == 0 || time() >= $timeopen) && ($timeclose == 0 || time() < $timeclose));
@@ -175,18 +170,14 @@ class results
     /**
      * Download entries in this diary activity.
      *
-     * @param array $context
-     *            Context for this download.
-     * @param array $course
-     *            Course for this download.
-     * @param array $diary
-     *            Diary to download.
+     * @param array $context Context for this download.
+     * @param array $course Course for this download.
+     * @param array $diary Diary to download.
      * @return nothing
      */
-    public static function download_entries($context, $course, $diary)
-    {
+    public static function download_entries($context, $course, $diary) {
         global $CFG, $DB, $USER;
-        require_once ($CFG->libdir . '/csvlib.class.php');
+        require_once($CFG->libdir . '/csvlib.class.php');
         $data = new stdClass();
         $data->diary = $diary->id;
 
@@ -314,11 +305,10 @@ class results
      * @param integer $teachers
      * @param integer $grades
      */
-    public static function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades)
-    {
+    public static function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
         global $USER, $OUTPUT, $DB, $CFG;
 
-        require_once ($CFG->dirroot . '/lib/gradelib.php');
+        require_once($CFG->dirroot . '/lib/gradelib.php');
         $dcolor3 = get_config('mod_diary', 'entrybgc');
         $dcolor4 = get_config('mod_diary', 'entrytextbgc');
 
@@ -342,7 +332,11 @@ class results
         echo '</td>';
         echo '<td class="userfullname">' . fullname($user);
         if ($entry) {
-            echo ' <span class="lastedit">' . get_string("timecreated", 'diary') . ':  ' . userdate($entry->timecreated) . ' ' . get_string("lastedited") . ': ' . userdate($entry->timemodified) . ' </span>';
+            echo ' <span class="lastedit">'
+                .get_string("timecreated", 'diary').':  '
+                .userdate($entry->timecreated).' '
+                .get_string("lastedited").': '
+                .userdate($entry->timemodified).' </span>';
         }
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
@@ -406,7 +400,9 @@ class results
             ));
 
             if (! empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
-                if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked || $gradinginfo->items[0]->grades[$user->id]->overridden) {
+                if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
+                    || $gradinginfo->items[0]->grades[$user->id]->overridden) {
+
                     $attrs['disabled'] = 'disabled';
                     $hiddengradestr = '<input type="hidden" name="r' . $entry->id . '" value="' . $entry->rating . '"/>';
                     $gradebooklink = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' . $course->id . '">';
@@ -463,12 +459,11 @@ class results
      * @param array $entry
      * @param array $course
      * @param array $cm
-     *            return string $entrytext Text string containing a user entry.
-     *            return int $entry-format Format for user entry.
-     *            return array $formatoptions Array of options for a user entry.
+     * @return string $entrytext Text string containing a user entry.
+     * @return int $entry-format Format for user entry.
+     * @return array $formatoptions Array of options for a user entry.
      */
-    public static function diary_format_entry_text($entry, $course = false, $cm = false)
-    {
+    public static function diary_format_entry_text($entry, $course = false, $cm = false) {
         if (! $cm) {
             if ($course) {
                 $courseid = $course->id;
@@ -492,21 +487,15 @@ class results
     /**
      * Return the editor and attachment options when editing a diary entry
      *
-     * @param stdClass $course
-     *            Course object.
-     * @param stdClass $context
-     *            Context object.
-     * @param stdClass $entry
-     *            Entry object.
-     * @param stdClass $action
-     *            Action object.
-     * @param stdClass $firstkey
-     *            Firstkey object.
+     * @param stdClass $course Course object.
+     * @param stdClass $context Context object.
+     * @param stdClass $entry Entry object.
+     * @param stdClass $action Action object.
+     * @param stdClass $firstkey Firstkey object.
      * @return array $editoroptions Array containing the editor and attachment options.
      * @return array $attachmentoptions Array containing the editor and attachment options.
      */
-    public static function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey)
-    {
+    public static function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey) {
         $maxfiles = 99; // TODO: add some setting.
         $maxbytes = $course->maxbytes; // TODO: add some setting.
 
@@ -538,8 +527,7 @@ class results
      *
      * @param array $diary
      */
-    public static function is_available($diary)
-    {
+    public static function is_available($diary) {
         $timeopen = $diary->timeopen;
         $timeclose = $diary->timeclose;
         return (($timeopen == 0 || time() >= $timeopen) && ($timeclose == 0 || time() < $timeclose));
@@ -550,19 +538,19 @@ class results
      *
      * Used in lib.php.
      *
-     * @param int $diary
-     *            ID of the current Diary activity.
-     * @param int $user
-     *            ID of the current user.
-     * @param int $timecreated
-     *            Unix time when Diary entry was created.
-     * @param int $timemodified
-     *            Unix time when Diary entry was last changed.
+     * @param int $diary ID of the current Diary activity.
+     * @param int $user ID of the current user.
+     * @param int $timecreated Unix time when Diary entry was created.
+     * @param int $timemodified Unix time when Diary entry was last changed.
      */
-    public static function get_grade_entry($diary, $user, $timecreated, $timemodified)
-    {
+    public static function get_grade_entry($diary, $user, $timecreated, $timemodified) {
         global $USER, $DB, $CFG;
-        $sql = "SELECT * FROM " . $CFG->prefix . "diary_entries" . " WHERE diary = " . $diary . " AND userid = " . $user . " AND timecreated = " . $timecreated . " AND timemodified = " . $timemodified . " ORDER BY timecreated";
+        $sql = "SELECT * FROM ".$CFG->prefix."diary_entries"
+                     ." WHERE diary = ".$diary
+                        ."AND userid = ".$user
+                        ."AND timecreated = ".$timecreated
+                        ."AND timemodified = ".$timemodified
+                        ."ORDER BY timecreated";
 
         if ($rec = $DB->get_record_sql($sql, array())) {
             return $rec;
@@ -576,12 +564,10 @@ class results
      *
      * Used in report.php.
      *
-     * @param array $ratingoptions
-     *            An array of current entry data.
+     * @param array $ratingoptions An array of current entry data.
      * @return array $rec An entry was found, so return it for update.
      */
-    public static function check_rating_entry($ratingoptions)
-    {
+    public static function check_rating_entry($ratingoptions) {
         global $USER, $DB, $CFG;
         $params = array();
         $params['contextid'] = $ratingoptions->contextid;
@@ -591,7 +577,13 @@ class results
         $params['userid'] = $ratingoptions->userid;
         $params['timecreated'] = $ratingoptions->timecreated;
 
-        $sql = 'SELECT * FROM ' . $CFG->prefix . 'rating' . ' WHERE contextid =  ?' . ' AND component =  ?' . ' AND ratingarea =  ?' . ' AND itemid =  ?' . ' AND userid =  ?' . ' AND timecreated = ?';
+        $sql = 'SELECT * FROM '.$CFG->prefix.'rating'
+                      .'WHERE contextid =  ?'
+                        .'AND component =  ?'
+                        .'AND ratingarea =  ?'
+                        .'AND itemid =  ?'
+                        .'AND userid =  ?'
+                        .'AND timecreated = ?';
 
         if ($rec = $DB->record_exists_sql($sql, $params)) {
             $rec = $DB->get_record_sql($sql, $params);
@@ -606,12 +598,10 @@ class results
      *
      * Used in view.php.
      *
-     * @param int $aggregate
-     *            The Diary rating method.
+     * @param int $aggregate The Diary rating method.
      * @return string $aggregatestr Return the language string for the rating method.
      */
-    public static function get_diary_aggregation($aggregate)
-    {
+    public static function get_diary_aggregation($aggregate) {
         $aggregatestr = null;
         switch ($aggregate) {
             case 0:

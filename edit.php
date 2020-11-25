@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This page opens the current instance of a diary entry for editing.
@@ -23,9 +23,9 @@
  */
 use mod_diary\local\results;
 
-require_once ("../../config.php");
-require_once ('lib.php'); // May not need this.
-require_once ('./edit_form.php');
+require_once("../../config.php");
+require_once('lib.php'); // May not need this.
+require_once('./edit_form.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
@@ -108,10 +108,26 @@ if ($action == 'currententry' && $entry) {
 
 $data->id = $cm->id;
 
-list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey);
+list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
+                                                                                             $context,
+                                                                                             $entry,
+                                                                                             $action,
+                                                                                             $firstkey);
 
-$data = file_prepare_standard_editor($data, 'text', $editoroptions, $context, 'mod_diary', 'entry', $data->entryid);
-$data = file_prepare_standard_filemanager($data, 'attachment', $attachmentoptions, $context, 'mod_diary', 'attachment', $data->entryid);
+$data = file_prepare_standard_editor($data,
+                                     'text',
+                                     $editoroptions,
+                                     $context,
+                                     'mod_diary',
+                                     'entry',
+                                     $data->entryid);
+$data = file_prepare_standard_filemanager($data,
+                                          'attachment',
+                                          $attachmentoptions,
+                                          $context,
+                                          'mod_diary',
+                                          'attachment',
+                                          $data->entryid);
 
 // 20201119 Added $diary->editdates setting.
 $form = new mod_diary_entry_form(null, array(
@@ -155,7 +171,13 @@ if ($form->is_cancelled()) {
 
     // Relink using the proper entryid.
     // We need to do this as draft area didn't have an itemid associated when creating the entry.
-    $fromform = file_postupdate_standard_editor($fromform, 'text', $editoroptions, $editoroptions['context'], 'mod_diary', 'entry', $newentry->id);
+    $fromform = file_postupdate_standard_editor($fromform,
+                                                'text',
+                                                $editoroptions,
+                                                $editoroptions['context'],
+                                                'mod_diary',
+                                                'entry',
+                                                $newentry->id);
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
     $newentry->timecreated = $fromform->timecreated;

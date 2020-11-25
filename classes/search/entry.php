@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Diary entries search.
@@ -25,8 +25,8 @@ namespace mod_diary\search;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once ($CFG->dirroot . '/mod/diary/lib.php');
-require_once ($CFG->dirroot . '/lib/grouplib.php');
+require_once($CFG->dirroot . '/mod/diary/lib.php');
+require_once($CFG->dirroot . '/lib/grouplib.php');
 
 /**
  * Diary entries search.
@@ -35,8 +35,7 @@ require_once ($CFG->dirroot . '/lib/grouplib.php');
  * @copyright 2019 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class entry extends \core_search\base_mod
-{
+class entry extends \core_search\base_mod {
 
     /**
      *
@@ -47,14 +46,11 @@ class entry extends \core_search\base_mod
     /**
      * Returns recordset containing required data for indexing diary entries.
      *
-     * @param int $modifiedfrom
-     *            timestamp
-     * @param \context|null $context
-     *            Optional context to restrict scope of returned results
+     * @param int $modifiedfrom timestamp
+     * @param \context|null $context Optional context to restrict scope of returned results
      * @return moodle_recordset|null Recordset (or null if no results)
      */
-    public function get_document_recordset($modifiedfrom = 0, \context $context = null)
-    {
+    public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
         global $DB;
 
         list ($contextjoin, $contextparams) = $this->get_context_restriction_sql($context, 'diary', 'd', SQL_PARAMS_NAMED);
@@ -76,19 +72,18 @@ class entry extends \core_search\base_mod
     /**
      * Returns the documents associated with this diary entry id.
      *
-     * @param stdClass $entry
-     *            diary entry.
+     * @param stdClass $entry diary entry.
      * @param array $options
      * @return \core_search\document
      */
-    public function get_document($entry, $options = array())
-    {
+    public function get_document($entry, $options = array()) {
         try {
             $cm = $this->get_cm('diary', $entry->diary, $entry->course);
             $context = \context_module::instance($cm->id);
         } catch (\dml_missing_record_exception $ex) {
             // Notify it as we run here as admin, we should see everything.
-            debugging('Error retrieving mod_diary ' . $entry->id . ' document, not all required data is available: ' . $ex->getMessage(), DEBUG_DEVELOPER);
+            debugging('Error retrieving mod_diary '.$entry->id.' document, not all required data is available: '
+                .$ex->getMessage(), DEBUG_DEVELOPER);
             return false;
         } catch (\dml_exception $ex) {
             // Notify it as we run here as admin, we should see everything.
@@ -121,12 +116,10 @@ class entry extends \core_search\base_mod
      *
      * @throws \dml_missing_record_exception
      * @throws \dml_exception
-     * @param int $id
-     *            Glossary entry id
+     * @param int $id Diary entry id
      * @return bool
      */
-    public function check_access($id)
-    {
+    public function check_access($id) {
         global $USER;
 
         try {
@@ -155,8 +148,7 @@ class entry extends \core_search\base_mod
      * @param \core_search\document $doc
      * @return \moodle_url
      */
-    public function get_doc_url(\core_search\document $doc)
-    {
+    public function get_doc_url(\core_search\document $doc) {
         global $USER;
 
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
@@ -179,8 +171,7 @@ class entry extends \core_search\base_mod
      * @param \core_search\document $doc
      * @return \moodle_url
      */
-    public function get_context_url(\core_search\document $doc)
-    {
+    public function get_context_url(\core_search\document $doc) {
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
         return new \moodle_url('/mod/diary/view.php', array(
             'id' => $contextmodule->instanceid
@@ -196,13 +187,10 @@ class entry extends \core_search\base_mod
      * @param int $entryid
      * @return stdClass
      */
-    protected function get_entry($entryid)
-    {
+    protected function get_entry($entryid) {
         global $DB;
         return $DB->get_record_sql("SELECT de.*, d.course FROM {diary_entries} de
                                       JOIN {diary} d ON d.id = de.diary
-                                    WHERE de.id = ?", array(
-            'id' => $entryid
-        ), MUST_EXIST);
+                                     WHERE de.id = ?", array('id' => $entryid), MUST_EXIST);
     }
 }
