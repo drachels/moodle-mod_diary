@@ -187,3 +187,5 @@ Diary Support Tracker.
 20201015 Added new, Edit all, setting.
 20201016 Added missing header label for sort order at top of report.php page.
 20201016 Added missing diary name header label at top of report.php page.
+20201120 Added new capability to add a specific (missed) date and a setting
+    to enable/disable it.
