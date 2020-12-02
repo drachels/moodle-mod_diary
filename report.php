@@ -447,7 +447,12 @@ if (! $users) {
             border:2px solid black;
             -webkit-border-radius:16px;
             -moz-border-radius:16px;border-radius:16px;">';
-        echo results::diary_print_user_entry($course, $diary, $user, null, $teachers, $grades);
+        echo results::diary_print_user_entry($course,
+                                             $diary,
+                                             $user,
+                                             null,
+                                             $teachers,
+                                             $grades);
         echo '</div><br>';
     }
     // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.

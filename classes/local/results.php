@@ -55,7 +55,7 @@ class results {
         global $DB, $CFG;
 
         if ($CFG->branch > 30) { // If Moodle less than version 3.1 skip this.
-            require_once($CFG->dirroot . '/calendar/lib.php');
+            require_once($CFG->dirroot.'/calendar/lib.php');
 
             // Get CMID if not sent as part of $diary.
             if (! isset($diary->coursemodule)) {
@@ -177,7 +177,7 @@ class results {
      */
     public static function download_entries($context, $course, $diary) {
         global $CFG, $DB, $USER;
-        require_once($CFG->libdir . '/csvlib.class.php');
+        require_once($CFG->libdir.'/csvlib.class.php');
         $data = new stdClass();
         $data->diary = $diary->id;
 
@@ -198,16 +198,16 @@ class results {
         } else if (has_capability('mod/diary:manageentries', $context)) {
             $whichdiary = ('AND d.diary = ');
             $whichdiary .= ($diary->id);
-            $csv->filename = clean_filename(($course->shortname) . '_');
+            $csv->filename = clean_filename(($course->shortname).'_');
             $csv->filename .= clean_filename(($diary->name));
         } else if (has_capability('mod/diary:addentries', $context)) {
             $whichdiary = ('AND d.diary = ');
             $whichdiary .= ($diary->id);
-            $whichuser = (' AND d.userid = ' . $USER->id); // Not an admin or teacher so can only get their OWN entries.
-            $csv->filename = clean_filename(($course->shortname) . '_');
+            $whichuser = (' AND d.userid = '.$USER->id); // Not an admin or teacher so can only get their OWN entries.
+            $csv->filename = clean_filename(($course->shortname).'_');
             $csv->filename .= clean_filename(($diary->name));
         }
-        $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary') . gmdate("Ymd_Hi") . 'GMT.csv');
+        $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary').gmdate("Ymd_Hi").'GMT.csv');
 
         $fields = array();
         $fields = array(
@@ -308,16 +308,16 @@ class results {
     public static function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
         global $USER, $OUTPUT, $DB, $CFG;
 
-        require_once($CFG->dirroot . '/lib/gradelib.php');
+        require_once($CFG->dirroot.'/lib/gradelib.php');
         $dcolor3 = get_config('mod_diary', 'entrybgc');
         $dcolor4 = get_config('mod_diary', 'entrytextbgc');
 
         // Create a table for the current users entry with area for teacher feedback.
-        echo '<table class="diaryuserentry" id="entry-' . $user->id . '">';
+        echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
         if ($entry) {
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
-            echo '<td style="width:35px;">' . get_string('entry', 'diary') . ':</td><td>';
+            echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
             echo userdate($entry->timecreated);
             echo '</td><td></td>';
             echo '</tr>';
@@ -330,7 +330,7 @@ class results {
             'alttext' => true
         ));
         echo '</td>';
-        echo '<td class="userfullname">' . fullname($user);
+        echo '<td class="userfullname">'.fullname($user);
         if ($entry) {
             echo ' <span class="lastedit">'
                 .get_string("timecreated", 'diary').':  '
@@ -344,7 +344,7 @@ class results {
         // Add the second of two rows, this one containing the users text for this entry.
         echo '<tr><td>';
         echo '<div align="left" style="font-size:1em; padding: 5px;
-            font-weight:bold;background: ' . $dcolor4 . ';
+            font-weight:bold;background: '.$dcolor4.';
             border:1px solid black;
             -webkit-border-radius:16px;
             -moz-border-radius:16px;border-radius:16px;">';
@@ -386,7 +386,7 @@ class results {
                 'alttext' => true
             ));
             echo '</td>';
-            echo '<td>' . get_string('rating', 'diary') . ':  ';
+            echo '<td>'.get_string('rating', 'diary').':  ';
 
             $attrs = array();
             $hiddengradestr = '';
@@ -404,10 +404,10 @@ class results {
                     || $gradinginfo->items[0]->grades[$user->id]->overridden) {
 
                     $attrs['disabled'] = 'disabled';
-                    $hiddengradestr = '<input type="hidden" name="r' . $entry->id . '" value="' . $entry->rating . '"/>';
-                    $gradebooklink = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' . $course->id . '">';
-                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade . '</a>';
-                    $gradebookgradestr = '<br/>' . get_string("gradeingradebook", "diary") . ':&nbsp;' . $gradebooklink;
+                    $hiddengradestr = '<input type="hidden" name="r'.$entry->id.'" value="'.$entry->rating.'"/>';
+                    $gradebooklink = '<a href="'.$CFG->wwwroot.'/grade/report/grader/index.php?id='.$course->id.'">';
+                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade.'</a>';
+                    $gradebookgradestr = '<br/>'.get_string("gradeingradebook", "diary").':&nbsp;'.$gradebooklink;
 
                     $feedbackdisabledstr = 'disabled="disabled"';
                     $feedbacktext = $gradinginfo->items[0]->grades[$user->id]->str_feedback;
@@ -415,38 +415,38 @@ class results {
             }
 
             // Grade selector.
-            $attrs['id'] = 'r' . $entry->id;
+            $attrs['id'] = 'r'.$entry->id;
 
-            echo html_writer::label(fullname($user) . " " . get_string('grade'), 'r' . $entry->id, true, array(
+            echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array(
                 'class' => 'accesshide'
             ));
 
             if ($diary->assessed > 0) {
-                echo html_writer::select($grades, 'r' . $entry->id, $entry->rating, get_string("nograde") . '...', $attrs);
+                echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
             }
             echo $hiddengradestr;
 
             // Rewrote next three lines to show entry needs to be regraded due to resubmission.
             if (! empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
-                echo ' <span class="needsedit">' . get_string("needsregrade", "diary") . ' </span>';
+                echo ' <span class="needsedit">'.get_string("needsregrade", "diary").' </span>';
             } else if ($entry->timemarked) {
-                echo ' <span class="lastedit">' . userdate($entry->timemarked) . ' </span>';
+                echo ' <span class="lastedit">'.userdate($entry->timemarked).' </span>';
             }
             echo $gradebookgradestr;
 
             // 20200816 Added overall rating type and rating.
-            echo '<br>' . $aggregatestr . ' ' . $currentuserrating;
+            echo '<br>'.$aggregatestr.' '.$currentuserrating;
 
             // Feedback text.
-            echo html_writer::label(fullname($user) . " " . get_string('feedback'), 'c' . $entry->id, true, array(
+            echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array(
                 'class' => 'accesshide'
             ));
-            echo '<p><textarea id="c' . $entry->id . '" name="c' . $entry->id . '" rows="6" cols="60" $feedbackdisabledstr>';
+            echo '<p><textarea id="c'.$entry->id.'" name="c'.$entry->id.'" rows="6" cols="60" $feedbackdisabledstr>';
             echo p($feedbacktext);
             echo '</textarea></p>';
 
             if ($feedbackdisabledstr != '') {
-                echo '<input type="hidden" name="c' . $entry->id . '" value="' . $feedbacktext . '"/>';
+                echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
             }
             echo '</td></tr>';
         }
@@ -578,12 +578,12 @@ class results {
         $params['timecreated'] = $ratingoptions->timecreated;
 
         $sql = 'SELECT * FROM '.$CFG->prefix.'rating'
-                      .'WHERE contextid =  ?'
-                        .'AND component =  ?'
-                        .'AND ratingarea =  ?'
-                        .'AND itemid =  ?'
-                        .'AND userid =  ?'
-                        .'AND timecreated = ?';
+                      .' WHERE contextid =  ?'
+                        .' AND component =  ?'
+                        .' AND ratingarea =  ?'
+                        .' AND itemid =  ?'
+                        .' AND userid =  ?'
+                        .' AND timecreated = ?';
 
         if ($rec = $DB->record_exists_sql($sql, $params)) {
             $rec = $DB->get_record_sql($sql, $params);
@@ -624,7 +624,7 @@ class results {
                 break;
             default:
                 $aggregatestr = 'AVG'; // Default to this to avoid real breakage - MDL-22270.
-                debugging('Incorrect call to get_aggregation_method(), incorrect aggregate method ' . $aggregate, DEBUG_DEVELOPER);
+                debugging('Incorrect call to get_aggregation_method(), incorrect aggregate method '.$aggregate, DEBUG_DEVELOPER);
         }
         return $aggregatestr;
     }
