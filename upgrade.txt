@@ -1,4 +1,8 @@
 This files describes API changes in the diary code.
+=== 3.0.1 ===
+* Fixed some code style errors in results.php and report.php.
+
+
 === 3.0.0 ===
 * Diary_585 - Need capability to create an entry for a skipped day. Added
     date time selector and language string for use on edit_form.php that

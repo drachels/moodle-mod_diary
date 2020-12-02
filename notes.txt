@@ -189,3 +189,5 @@ Diary Support Tracker.
 20201016 Added missing diary name header label at top of report.php page.
 20201120 Added new capability to add a specific (missed) date and a setting
     to enable/disable it.
+20201201 Fixed some code style errors in results.php and report.php.
+20201202 Bumped version to 3.0.1.
