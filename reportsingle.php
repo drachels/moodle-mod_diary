@@ -176,7 +176,6 @@ if ($data = data_submitted()) {
                 $ratingoptions->timecreated = $entry->timecreated;
                 $ratingoptions->timemodified = $entry->timemodified;
                 $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id'.$id;
-
                 $ratingoptions->assesstimestart = $diary->assesstimestart;
                 $ratingoptions->assesstimefinish = $diary->assesstimefinish;
                 // 20200813 Check if there is already a rating, and if so, just update it.

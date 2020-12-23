@@ -4,6 +4,9 @@ This files describes API changes in the diary code.
 * Added new reportsingle.php that lets the teacher see all of the
     entries for a single user. Can then grade and add feedback
     to one or more of the individual entries.
+* Fixed edit_form.php Edit all dates calendar selector. HideIf not enabled
+    and using Moodle 3.4 and higher. DisableIf not enabled and using
+    Moodle 3.3 and lower.
 
 === 3.0.0 ===
 * Diary_585 - Need capability to create an entry for a skipped day. Added

@@ -193,3 +193,6 @@ Diary Support Tracker.
 20201223 Added capability for teacher to list all entries of a diary for
     a single user, and to add grade and feedback to one or more of the entries.
 20201223 Bumped version to 3.1.0.
+20201223 Fixed edit_form.php Edit all calendar selector. M3.4 and higher use hideif
+    and M3.3 and lower us disableIf.
+20201223 Bumped version to 3.1.1.

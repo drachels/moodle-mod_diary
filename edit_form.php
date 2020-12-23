@@ -52,7 +52,13 @@ class mod_diary_entry_form extends moodleform
         // 20201119 Added date selector. Can show/hide depending on the, Edit entry dates, setting.
         $mform->addElement('date_time_selector', 'timecreated', get_string('diaryentrydate', 'diary'));
         $mform->setType('timecreated', PARAM_INT);
-        $mform->hideIf('timecreated', 'diary', 'neq', '1');
+        // 20201223 For Moodle 3.4 and higher, hide calendar selector, if not enabled.
+        // For Moodle 3.3 and lower, disable calendar selector, if not enabled.
+        if ($CFG->branch > 33) {
+            $mform->hideIf('timecreated', 'diary', 'neq', '1');
+        } else {
+            $mform->disabledIf('timecreated', 'diary', 'neq', '1');
+        }
 
         $mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'), null, $this->_customdata['editoroptions']);
         $mform->setType('text_editor', PARAM_RAW);
