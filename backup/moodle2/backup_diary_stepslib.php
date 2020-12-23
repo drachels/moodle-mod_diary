@@ -129,7 +129,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $rating->annotate_ids('scale', 'scaleid');
         $rating->annotate_ids('user', 'userid');
 
-        // Define file annotations
+        // Define file annotations.
         $diary->annotate_files('mod_diary', 'intro', null); // This file areas haven't itemid.
         $entry->annotate_files('mod_diary_entries', 'entry', 'id');
         $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
