@@ -23,117 +23,116 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 #page-mod-diary-view .feedbackbox { /* Used in renderer.php. */
-	width: 85%;
-	border-collapse: separate;
+    width: 85%;
+    border-collapse: separate;
 }
 
 #page-mod-diary-view .entrycontent { /* Used in renderer.php. */
-	padding: 3px;
+    padding: 3px;
 }
 
 #page-mod-diary-view .picture { /* Used in renderer.php with left. */
-	width: 35px;
+    width: 35px;
 }
 
 #page-mod-diary-view .info { /* Cannot find this in use, anywhere. */
-	margin-bottom: 5px;
-	text-align: right;
+    margin-bottom: 5px;
+    text-align: right;
 }
 
 #page-mod-diary-view .diarystart, /* Used in view.php. */
-	#page-mod-diary-report .feedbacksave {
-	text-align: center;
+    #page-mod-diary-report .feedbacksave {
+    text-align: center;
 }
 
 #page-mod-diary-view .lastedit, #page-mod-diary-view .editend {
-	font-size: 0.7em;
-	margin: 5px;
-	text-align: center;
+    font-size: 0.7em;
+    margin: 5px;
+    text-align: center;
 }
 
 #page-mod-diary-view .needsedit, #page-mod-diary-view .editend {
-	font-size: 0.9em;
-	color: red;
-	text-align: center;
+    font-size: 0.9em;
+    color: red;
+    text-align: center;
 }
 
 #page-mod-diary-view .author {
-	font-size: 1em;
-	font-weight: bold;
+    font-size: 1em;
+    font-weight: bold;
 }
 
 #page-mod-diary-view .time {
-	font-size: 0.7em;
-	font-style: italic;
+    font-size: 0.7em;
+    font-style: italic;
 }
 
 #page-mod-diary-view .grade {
-	font-weight: bold;
-	font-style: italic;
-	text-align: right;
+    font-weight: bold;
+    font-style: italic;
+    text-align: right;
 }
 
 #page-mod-diary-index .cell {
-	font-size: 0.8em;
+    font-size: 0.8em;
 }
 
-#page-mod-diary-view .feedbackbox .left, #page-mod-diary-view .feedbackbox .entryheader
-	{
-	background-color: #ddd;
+#page-mod-diary-view .feedbackbox .left, #page-mod-diary-view .feedbackbox .entryheader {
+    background-color: #ddd;
 }
 
 #page-mod-diary-view .feedbackbox {
-	-moz-border-radius-bottomleft: 15px;
-	-moz-border-radius-bottomright: 15px;
-	border-spacing: 0;
-	margin: 0 auto;
+    -moz-border-radius-bottomleft: 15px;
+    -moz-border-radius-bottomright: 15px;
+    border-spacing: 0;
+    margin: 0 auto;
 }
 
 #page-mod-diary-view .feedbackbox .side {
-	-moz-border-radius-bottomleft: 15px;
+    -moz-border-radius-bottomleft: 15px;
 }
 
 #page-mod-diary-view .feedbackbox .entrycontent {
-	-moz-border-radius-bottomright: 15px;
+    -moz-border-radius-bottomright: 15px;
 }
 
 #page-mod-diary-report .diaryuserentry {
-	/*border: 1px solid #000000;*/
-	border-collapse: collapse;
-	border-spacing: 0;
+    /*border: 1px solid #000000;*/
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
 #page-mod-diary-report .diaryuserentry td {
-	padding: 10px;
-	vertical-align: top;
-	width: 100%;
+    padding: 10px;
+    vertical-align: top;
+    width: 100%;
 }
 
 #page-mod-diary-report .diaryuserentry td.userpix {
-	width: 35px;
+    width: 35px;
 }
 
 #page-mod-diary-report .diaryuserentry td.userfullname {
-	white-space: nowrap;
+    white-space: nowrap;
 }
 
 #page-mod-diary-report .diaryuserentry td .lastedit {
-	font-size: 0.7em;
-	margin-left: 10px;
+    font-size: 0.7em;
+    margin-left: 10px;
 }
 
 #page-mod-diary-report .diaryuserentry td .needsedit {
-	font-size: 0.9em;
-	color: red;
-	margin-left: 10px;
+    font-size: 0.9em;
+    color: red;
+    margin-left: 10px;
 }
 
 #page-mod-diary-report .mediaplugin {
-	width: 100%;
+    width: 100%;
 }
 
 #lastedit {
-	font-size: 0.7em;
-	margin: 5px;
-	text-align: center;
+    font-size: 0.7em;
+    margin: 5px;
+    text-align: center;
 }
