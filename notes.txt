@@ -190,4 +190,6 @@ Diary Support Tracker.
 20201120 Added new capability to add a specific (missed) date and a setting
     to enable/disable it.
 20201201 Fixed some code style errors in results.php and report.php.
-20201202 Bumped version to 3.0.1.
+20201223 Added capability for teacher to list all entries of a diary for
+    a single user, and to add grade and feedback to one or more of the entries.
+20201223 Bumped version to 3.1.0.

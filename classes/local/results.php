@@ -307,6 +307,7 @@ class results {
      */
     public static function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
         global $USER, $OUTPUT, $DB, $CFG;
+        $id = required_param('id', PARAM_INT); // Course module.
 
         require_once($CFG->dirroot.'/lib/gradelib.php');
         $dcolor3 = get_config('mod_diary', 'entrybgc');
@@ -319,7 +320,11 @@ class results {
             echo '<tr>';
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
             echo userdate($entry->timecreated);
-            echo '</td><td></td>';
+            // 20201202 Added link to all entries for a single user.
+            echo '  <a href="reportsingle.php?id='.$id
+            .'&user='.$user->id
+            .'&action=allentries">'.get_string('reportsingle', 'diary')
+            .'</a></td><td></td>';
             echo '</tr>';
         }
         // Add first of two rows, this one containing details showing the user, timecreated, and time last edited.

@@ -1,7 +1,9 @@
 This files describes API changes in the diary code.
-=== 3.0.1 ===
+=== 3.1.0 ===
 * Fixed some code style errors in results.php and report.php.
-
+* Added new reportsingle.php that lets the teacher see all of the
+    entries for a single user. Can then grade and add feedback
+    to one or more of the individual entries.
 
 === 3.0.0 ===
 * Diary_585 - Need capability to create an entry for a skipped day. Added
