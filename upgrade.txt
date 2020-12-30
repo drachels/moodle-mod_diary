@@ -1,6 +1,7 @@
 This files describes API changes in the diary code.
 === 3.1.2 ===
 * Fixed  CSS problems in styles.css reported by Moodle for v3.1.1.
+* Modified method to show/hide date time selector for editing entry dates.
 
 === 3.1.1 ===
 * Added new reportsingle.php that lets the teacher see all of the

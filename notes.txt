@@ -196,3 +196,7 @@ Diary Support Tracker.
 20201223 Fixed edit_form.php Edit all calendar selector. M3.4 and higher use hideif
     and M3.3 and lower us disableIf.
 20201223 Bumped version to 3.1.1.
+20201224 Uploaded new version 3.1.1 to moodle.org.
+20201224 Fixed CSS problems listed by moodle.org for new release.
+20201230 Possible fix for issue#9 at github.
+20201230 Bumped version to 3.1.2.
