@@ -45,13 +45,15 @@
     text-align: center;
 }
 
-#page-mod-diary-view .lastedit, #page-mod-diary-view .editend {
+#page-mod-diary-view .lastedit,
+    #page-mod-diary-view .editend {
     font-size: 0.7em;
     margin: 5px;
     text-align: center;
 }
 
-#page-mod-diary-view .needsedit, #page-mod-diary-view .editend {
+#page-mod-diary-view .needsedit,
+    #page-mod-diary-view .editend {
     font-size: 0.9em;
     color: red;
     text-align: center;
@@ -77,7 +79,8 @@
     font-size: 0.8em;
 }
 
-#page-mod-diary-view .feedbackbox .left, #page-mod-diary-view .feedbackbox .entryheader {
+#page-mod-diary-view .feedbackbox .left,
+    #page-mod-diary-view .feedbackbox .entryheader {
     background-color: #ddd;
 }
 
