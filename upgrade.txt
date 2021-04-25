@@ -1,4 +1,9 @@
 This files describes API changes in the diary code.
+=== 3.2.0 ===
+Diary_696 - Need mode to start new entry each time you click the new
+    entry button. Added code in edit.php about line 87. Added new string.
+    Added code in view.php to decide what text to put on the Button.
+
 === 3.1.2 ===
 * Fixed  CSS problems in styles.css reported by Moodle for v3.1.1.
 * Modified method to show/hide date time selector for editing entry dates.

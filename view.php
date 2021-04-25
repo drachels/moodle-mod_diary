@@ -285,12 +285,21 @@ if ($timenow > $timestart) {
         if ($canadd) {
             echo $output->box_start();
 
-            // Add button for editing current entry or starting a new entry.
-            echo $OUTPUT->single_button('edit.php?id='.$cm->id
-                .'&firstkey='.$firstkey
-                .'&action=currententry', get_string('startoredit', 'diary'), 'get', array(
-                "class" => "singlebutton diarystart"
-            ));
+            if ($diary->editdates) {
+                // 20210425 Add button for starting a new entry.
+                echo $OUTPUT->single_button('edit.php?id='.$cm->id
+                    .'&firstkey='.$firstkey
+                    .'&action=currententry', get_string('startnewentry', 'diary'), 'get', array(
+                    "class" => "singlebutton diarystart"
+                ));
+            } else {
+                // Add button for editing current entry or starting a new entry.
+                echo $OUTPUT->single_button('edit.php?id='.$cm->id
+                    .'&firstkey='.$firstkey
+                    .'&action=currententry', get_string('startoredit', 'diary'), 'get', array(
+                    "class" => "singlebutton diarystart"
+                ));
+            }
             // Print user toolbar icons only if there is at least one entry for this user.
             if ($entrys) {
                 echo ' '.get_string('usertoolbar', 'diary');

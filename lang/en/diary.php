@@ -150,6 +150,7 @@ $string['sortlowestentry'] = 'From lowest rated diary entry to the highest entry
 $string['sorthighestentry'] = 'From highest rated diary entry to the lowest rated entry.';
 $string['sortlastentry'] = 'From latest modified diary entry to the oldest modified entry.';
 $string['sortoptions'] = ' Sort options: ';
+$string['startnewentry'] = 'Start new entry';
 $string['startoredit'] = 'Start new or edit today\'s entry';
 $string['teacher'] = 'Teacher';
 $string['text'] = 'Text';

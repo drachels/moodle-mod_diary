@@ -83,13 +83,14 @@ if ($action == 'currententry' && $entry) {
     $data->textformat = $entry->format;
 
     // Check the timecreated of the current entry to see if now is a new calendar day .
-    if (strtotime('today midnight') > $entry->timecreated) {
+    // 20210425 If can edit dates, just start a new entry.
+    if ((strtotime('today midnight') > $entry->timecreated) || ($action == 'currententry' && $diary->editdates)) {
         $entry = '';
         $data->entryid = null;
         $data->timecreated = time();
         $data->text = '';
         $data->textformat = FORMAT_HTML;
-    }
+    } 
 } else if ($action == 'editentry' && $entry) {
     $data->entryid = $entry->id;
     $data->timecreated = $entry->timecreated;
