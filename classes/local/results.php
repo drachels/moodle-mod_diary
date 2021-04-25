@@ -490,7 +490,7 @@ class results {
     }
 
     /**
-     * Return the editor and attachment options when editing a diary entry
+     * Return the editor and attachment options when editing a diary entry.
      *
      * @param stdClass $course Course object.
      * @param stdClass $context Context object.
