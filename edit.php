@@ -104,7 +104,7 @@ if ($action == 'currententry' && $entry) {
     $data->text = '';
     $data->textformat = FORMAT_HTML;
 } else {
-    throw new moodle_exception(get_string('generalerror', 'diary');
+    throw new moodle_exception(get_string('generalerror', 'diary'));
 }
 
 $data->id = $cm->id;
@@ -160,13 +160,13 @@ if ($form->is_cancelled()) {
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
         if (! $DB->update_record("diary_entries", $newentry)) {
-            throw new moodle_exception('generalerrorupdate', 'diary');
+            throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
         }
     } else {
         $newentry->userid = $USER->id;
         $newentry->diary = $diary->id;
         if (! $newentry->id = $DB->insert_record("diary_entries", $newentry)) {
-            throw new moodle_exception('generalerrorinsert', 'diary');
+            throw new moodle_exception(get_string('generalerrorinsert', 'diary'));
         }
     }
 
