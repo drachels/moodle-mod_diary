@@ -175,7 +175,7 @@ class mod_diary_renderer extends plugin_renderer_base {
         if (! $teacher = $DB->get_record('user', array(
             'id' => $entry->teacher
         ))) {
-            throw new moodle_exception(get_string('generalerror', 'diary');
+            throw new moodle_exception(get_string('generalerror', 'diary'));
         }
 
         echo '<table class="feedbackbox">';
