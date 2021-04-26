@@ -32,13 +32,13 @@ $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(defa
 $user = required_param('user', PARAM_INT); // Course module.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
-    print_error('invalidcoursemodule');
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
 if (! $course = $DB->get_record("course", array(
     "id" => $cm->course
 ))) {
-    print_error('coursemisconf');
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 require_login($course, false, $cm);
@@ -50,7 +50,7 @@ require_capability('mod/diary:manageentries', $context);
 if (! $diary = $DB->get_record("diary", array(
     "id" => $cm->instance
 ))) {
-    print_error('invalidid', 'diary');
+    throw new moodle_exception(get_string('invalidid', 'diary'));
 }
 
 // 20201016 Get the name for this diary activity.
@@ -229,7 +229,7 @@ if (! $users) {
     $grades = make_grades_menu($diary->scale);
 
     if (! $teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
-        print_error('noentriesmanagers', 'diary');
+        throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
     }
     // Start the page area where feedback and grades are added and will need to be saved.
     // Set up to return to report.php upon saving feedback.

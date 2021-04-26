@@ -54,7 +54,7 @@ class restore_diary_activity_task extends restore_activity_task {
      *
      * @return array
      */
-    static public function define_decode_contents() {
+    public static function define_decode_contents() {
         $contents = array();
         $contents[] = new restore_decode_content('diary', array(
             'intro'
@@ -73,7 +73,7 @@ class restore_diary_activity_task extends restore_activity_task {
      *
      * @return array of restore_decode_rule
      */
-    static public function define_decode_rules() {
+    public static function define_decode_rules() {
         $rules = array();
         // List of Diary's in the course.
         $rules[] = new restore_decode_rule('DIARYINDEX', '/mod/diary/index.php?id=$1', 'course');

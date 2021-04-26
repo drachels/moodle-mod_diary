@@ -35,11 +35,11 @@ $course = $DB->get_record('course', array(
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
 if (! $cm) {
-    print_error('invalidcoursemodule');
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
 if (! $course) {
-    print_error('coursemisconf');
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 $context = context_module::instance($cm->id);
@@ -51,19 +51,19 @@ $entriesmanager = has_capability('mod/diary:manageentries', $context);
 $canadd = has_capability('mod/diary:addentries', $context);
 
 if (! $entriesmanager && ! $canadd) {
-    print_error('accessdenied', 'diary');
+    throw new moodle_exception(get_string('accessdenied', 'diary'));
 }
 
 if (! $diary = $DB->get_record("diary", array(
     "id" => $cm->instance
 ))) {
-    print_error('invalidcoursemodule');
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
 if (! $cw = $DB->get_record("course_sections", array(
     "id" => $cm->section
 ))) {
-    print_error('invalidcoursemodule');
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
 // Get the name for this diary activity.

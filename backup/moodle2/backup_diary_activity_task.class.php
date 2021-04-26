@@ -23,6 +23,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace Moodle\Diary;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/diary/backup/moodle2/backup_diary_stepslib.php');
@@ -30,7 +32,8 @@ require_once($CFG->dirroot.'/mod/diary/backup/moodle2/backup_diary_stepslib.php'
 /**
  * Provides the steps to perform one complete backup of the Diary instance.
  */
-class backup_diary_activity_task extends backup_activity_task {
+class backup_diary_activity_task extends backup_activity_task
+{
 
     /**
      * No specific settings for this activity.
@@ -51,7 +54,7 @@ class backup_diary_activity_task extends backup_activity_task {
      * @param string $content some HTML text that eventually contains URLs to the activity instance scripts.
      * @return string $content The content with the URLs encoded.
      */
-    static public function encode_content_links($content) {
+    public static function encode_content_links($content) {
 
         global $CFG;
 

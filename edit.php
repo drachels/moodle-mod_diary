@@ -32,13 +32,13 @@ $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(defa
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which entry to edit.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
-    print_error('invalidcoursemodule');
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
 if (! $course = $DB->get_record("course", array(
     "id" => $cm->course
 ))) {
-    print_error('coursemisconf');
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 $context = context_module::instance($cm->id);
@@ -50,7 +50,7 @@ require_capability('mod/diary:addentries', $context);
 if (! $diary = $DB->get_record("diary", array(
     "id" => $cm->instance
 ))) {
-    print_error('invalidcourse');
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 // Header.
@@ -90,7 +90,7 @@ if ($action == 'currententry' && $entry) {
         $data->timecreated = time();
         $data->text = '';
         $data->textformat = FORMAT_HTML;
-    } 
+    }
 } else if ($action == 'editentry' && $entry) {
     $data->entryid = $entry->id;
     $data->timecreated = $entry->timecreated;
@@ -104,7 +104,7 @@ if ($action == 'currententry' && $entry) {
     $data->text = '';
     $data->textformat = FORMAT_HTML;
 } else {
-    print_error('There has been an error.');
+    throw new moodle_exception(get_string('generalerror', 'diary');
 }
 
 $data->id = $cm->id;
@@ -160,13 +160,13 @@ if ($form->is_cancelled()) {
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
         if (! $DB->update_record("diary_entries", $newentry)) {
-            print_error("Could not update your diary");
+            throw new moodle_exception('generalerrorupdate', 'diary');
         }
     } else {
         $newentry->userid = $USER->id;
         $newentry->diary = $diary->id;
         if (! $newentry->id = $DB->insert_record("diary_entries", $newentry)) {
-            print_error("Could not insert a new diary entry");
+            throw new moodle_exception('generalerrorinsert', 'diary');
         }
     }
 
