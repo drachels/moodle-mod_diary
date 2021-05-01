@@ -1,4 +1,8 @@
 This files describes API changes in the diary code.
+=== 3.2.1 ===
+ Diary_703 - print_error deprecated - in multiple files. Fixed in
+    Multiple places.
+
 === 3.2.0 ===
 Diary_696 - Need mode to start new entry each time you click the new
     entry button. Added code in edit.php about line 87. Added new string.
