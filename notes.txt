@@ -202,7 +202,8 @@ Diary Support Tracker.
 20201230 Bumped version to 3.1.2.
 20210425 Added new code to start a new entry when editdates is enabled.
 20210425 Bumped version to 3.2.0.
-20210426 Ran codechecker and got a bunch of print_error deprecated notices.
-    Changed them all to something similar to this:
-    throw new moodle_exception(get_string('incorrectmodule', 'diary')); 
+20210426 Ran codechecker and got a bunch of print_error deprecated notices. Changed
+    them all to something similar to this: throw new moodle_exception(get_string('incorrectmodule', 'diary')); 
 20210426 Bumped version to 3.2.1 and published changes.
+20210504 Got emails regarding issues #12 and #13.Deleted line 26 in file,
+    backup_diary_activity_task.class.php: namespace Moodle\Diary;

@@ -1,6 +1,10 @@
 This files describes API changes in the diary code.
+=== 3.2.2 ===
+Diary_710 - Backup is broken, see issue #12 and #13 on github. Deleted
+    line 26 in file, backup_diary_activity_task.class.php: namespace Moodle\Diary;
+
 === 3.2.1 ===
- Diary_703 - print_error deprecated - in multiple files. Fixed in
+Diary_703 - print_error deprecated - in multiple files. Fixed in
     Multiple places.
 
 === 3.2.0 ===
