@@ -67,10 +67,11 @@ $table = new html_table();
 $table->head = array();
 $table->align = array();
 if ($usesections) {
+    // Add column heading based on the course format. e.g. Week, Topic.
     $table->head[] = get_string('sectionname', 'format_' . $course->format);
-    $table->align[] = 'center';
+    $table->align[] = 'left';
 }
-
+// Add activity, Name, and activity, Description, headings.
 $table->head[] = get_string('name');
 $table->align[] = 'left';
 $table->head[] = get_string('description');

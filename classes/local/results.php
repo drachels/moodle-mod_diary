@@ -348,11 +348,8 @@ class results {
 
         // Add the second of two rows, this one containing the users text for this entry.
         echo '<tr><td>';
-        echo '<div align="left" style="font-size:1em; padding: 5px;
-            font-weight:bold;background: '.$dcolor4.';
-            border:1px solid black;
-            -webkit-border-radius:16px;
-            -moz-border-radius:16px;border-radius:16px;">';
+        echo '<div class="entry" style="background: '.$dcolor4.';">';
+
         // If there is a user entry, format it and show it.
         if ($entry) {
             echo self::diary_format_entry_text($entry, $course);
@@ -419,12 +416,15 @@ class results {
                 }
             }
 
-            // Grade selector.
+            // 20210510 Modified Grade selector to check for Moodle version.
             $attrs['id'] = 'r'.$entry->id;
-
-            echo html_writer::label(fullname($user)." ".get_string('grade'), 'r'.$entry->id, true, array(
-                'class' => 'accesshide'
-            ));
+            if ($CFG->branch < 311) {
+                echo html_writer::label(fullname($user)." ".get_string('grade'),
+                    'r'.$entry->id, true, array('class' => 'accesshide'));
+            } else {
+                echo html_writer::label(fullname($user)." ".get_string('gradenoun'),
+                    'r'.$entry->id, true, array('class' => 'accesshide'));
+            }
 
             if ($diary->assessed > 0) {
                 echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);

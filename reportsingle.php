@@ -86,12 +86,13 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
-// 20201016 Added missing header label.
-echo $OUTPUT->heading('<h5>'.get_string('sortorder', "diary").'</h5>');
-echo $OUTPUT->heading('<h5>'.get_string($stringlable, "diary").'</h5>');
+// 20201016 Added missing header label. 20210511 Changed to remove hard coded <h5>'s.
+echo '<div>'.(get_string('sortorder', "diary"));
+echo (get_string($stringlable, "diary"));
 
 // 20200827 Added link to index.php page.
-echo '<div class="reportlink"><a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></div>';
+echo '<span style="float: right;"><a href="index.php?id='.$course->id.'">'
+    .get_string('viewalldiaries', 'diary').'</a></span></div>';
 
 // Save our current user id and also get his details. CHECK - might not need this.
 $users = $user;
@@ -257,11 +258,8 @@ if (! $users) {
     $dcolor4 = get_config('mod_diary', 'entrytextbgc');
 
     foreach ($eee as $ee) {
-        echo '<div align="center" style="font-size:1em;
-            font-weight:bold;background: '.$dcolor3.';
-            border:2px solid black;
-            -webkit-border-radius:16px;
-            -moz-border-radius:16px;border-radius:16px;">';
+        // 20210511 Changed to using class.
+        echo '<div class="entry" style="background: '.$dcolor3.'">';
 
         // Based on the single selected user, print all their entries on screen.
         echo results::diary_print_user_entry($course,

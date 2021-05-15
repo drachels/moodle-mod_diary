@@ -89,7 +89,7 @@ if (! empty($action)) {
         case 'reload':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
                 $entrys = $DB->get_records('diary_entries', array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -105,7 +105,7 @@ if (! empty($action)) {
         case 'currententry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
                 $entrys = $DB->get_records('diary_entries', array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -120,7 +120,7 @@ if (! empty($action)) {
         // Sort the list of entries from oldest to newest based on timecreated.
         case 'sortfirstentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sortfirstentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortfirstentry', 'diary'));
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -135,7 +135,7 @@ if (! empty($action)) {
         // Sort the list from lowest grade to highest grade. Show ungraded first, from oldest to newest.
         case 'lowestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sortlowestentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortlowestentry', 'diary'));
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -150,7 +150,7 @@ if (! empty($action)) {
         // Sort list from highest grade to lowest grade. If tie grade, further sort from newest to oldest.
         case 'highestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sorthighestentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sorthighestentry', 'diary'));
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -165,7 +165,7 @@ if (! empty($action)) {
         // Sort list from most recently modified to the one modified the longest time ago.
         case 'latestmodifiedentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sortlastentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortlastentry', 'diary'));
                 // May be needed for future version if editing old entries is allowed.
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
@@ -181,7 +181,7 @@ if (! empty($action)) {
         default:
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
                 $entrys = $DB->get_records('diary_entries', array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -209,28 +209,27 @@ if ($CFG->branch > 31) {
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
+echo $output->introduction($diary, $cm); // Ouput introduction in renderer.php.
 
 // If viewer is a manager, create a link to report.php showing diary entries made by users.
 if ($entriesmanager) {
     // Check to see if groups are being used here.
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
-    groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
+    $ouput = groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
 
     $entrycount = diary_count_entries($diary, $currentgroup);
 
-    // 20200827 Add link to index.php page right after the report.php link.
-    echo '<div class="reportlink"><a href="report.php?id='.$cm->id
-        .'&action=currententry">'.get_string('viewallentries', 'diary', $entrycount)
-        .'</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary')
-        .'</a></div>';
-} else {
-    // 20200831 Added to show link to index.php page for students.
-    echo '<div class="reportlink"><a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></div>';
-}
+    // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
+    $temp = '<span  class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
+    $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
+    $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></span>';
+    echo $temp;
 
-echo $output->introduction($diary, $cm); // Ouput introduction in renderer.php.
+} else {
+    // 20200831 Added to show link to index.php page for students. 20210501 modified to remove div.
+    echo '<a class="reportlink" href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
+}
 
 // 20200901 Visual separator between activity info and entries.
 echo '<hr>';
@@ -274,12 +273,13 @@ if ($timenow > $timestart) {
     $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
 
     echo $OUTPUT->box_start();
-    // 20200815 Added type of rating and current rating. 20201004 Moved info here.
-    echo '<table style="width:100%"><tr><td>'
-        .get_string('sortorder', 'diary').'</td>'
-        .'<td> </td>
-        <td><h5>'.$aggregatestr.'</h5></td></tr>';
-    echo '<tr><td>'.$sortorderinfo.'</td><td> </td><td><h5>'.$currentuserrating.' </h5></td></table>';
+    // 20200815 Create table and added sort order and type of rating and current rating. 20201004 Moved info here.
+    echo '<table class="sortandaggregate">'
+        .'<tr><td>'.get_string('sortorder', 'diary').'</td>'
+        .'<td> </td>'
+        .'<td class="cell">'.$aggregatestr.'</td></tr>'
+        . '<tr><td>'.$sortorderinfo.'</td><td> </td><td class="cell">'.$currentuserrating.' </td></tr></table>';
+
     // Add Current entry Edit button and user toolbar.
     if ($timenow < $timefinish) {
         if ($canadd) {
@@ -376,12 +376,8 @@ if ($timenow > $timestart) {
                 $color3 = get_config('mod_diary', 'entrybgc');
                 $color4 = get_config('mod_diary', 'entrytextbgc');
 
-                // Start a division to contain the overall entry.
-                echo '<div align="left" style="font-size:1em; padding: 5px;
-                    font-weight:bold;background: '.$color3.';
-                    border:2px solid black;
-                    -webkit-border-radius:16px;
-                    -moz-border-radius:16px;border-radius:16px;">';
+                // 20210501 Changed to class, start a division to contain the overall entry.
+                echo '<div class="entry" style="background: '.$color3.';">';
 
                 $date1 = new DateTime(date('Y-m-d G:i:s', time()));
                 $date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
@@ -401,21 +397,16 @@ if ($timenow > $timestart) {
                     $editthisentry = ' ';
                 }
 
-                // Add a heading for each entry on the page.
+                // Add, Entry, then date time group heading for each entry on the page.
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
 
-                // Start an inner division for the user's text entry container.
-                echo '<div align="left" style="font-size:1em; padding: 5px;
-                    font-weight:bold;background: '.$color4.';
-                    border:1px solid black;
-                    -webkit-border-radius:16px;
-                    -moz-border-radius:16px;
-                    border-radius:16px;">';
+                // 20210511 Start an inner division for the user's text entry container.
+                echo '<div class="entry" style="background: '.$color4.';">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
                 echo results::diary_format_entry_text($entry, $course, $cm).'</div>';
 
-                // Info regarding last edit and word count.
+                // Info regarding entry details with simple word count, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
                     if (! empty($entry->timemodified)) {
                         echo '<div class="lastedit"><strong>'
@@ -425,7 +416,7 @@ if ($timenow > $timestart) {
                             ['one' => $diff->days, 'two' => $diff->h]).'<br>';
 
                         echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
-                        echo userdate($entry->timecreated).'<br>';
+                        echo userdate($entry->timecreated).' | ';
 
                         echo '<strong> '.get_string('lastedited').': </strong> ';
                         echo userdate($entry->timemodified).'<br>';
@@ -433,12 +424,12 @@ if ($timenow > $timestart) {
                         echo "</div>";
                     }
 
-                    // Added lines to mark entry as being dirty and needing regrade.
+                    // Added lines to mark entry as needing regrade.
                     if (! empty($entry->timecreated) and ! empty($entry->timemodified) and empty($entry->timemarked)) {
-                        echo "<div class=\"needsedit\">".get_string("needsgrading", "diary")."</div>";
+                        echo '<div class="needsedit">'.get_string('needsgrading', 'diary').'</div>';
                     } else if (! empty($entry->timemodified) and ! empty($entry->timemarked)
                               and $entry->timemodified > $entry->timemarked) {
-                        echo "<div class=\"needsedit\">".get_string("needsregrade", "diary")."</div>";
+                        echo '<div class="needsedit">'.get_string('needsregrade', 'diary').'</div>';
                     }
 
                     if (! empty($diary->days)) {

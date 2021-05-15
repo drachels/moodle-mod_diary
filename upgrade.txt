@@ -1,7 +1,15 @@
 This files describes API changes in the diary code.
-=== 3.2.2 ===
-Diary_710 - Backup is broken, see issue #12 and #13 on github. Deleted
-    line 26 in file, backup_diary_activity_task.class.php: namespace Moodle\Diary;
+=== 3.3.0 ===
+Diary_707 - link to index.php page on report.php page should be on the same
+    line as the toolbar. Moved the Index link down to the same line as the
+    group selector and the toolbar.
+Diary_581 - Need to redo the styles.css file and remove un-used entries.
+    Made changes as needed. Added a lot of comments.
+Diary_711 - File report.php has hard coded tags that should be removed. Removed
+    as part of CSS changes. 
+Diary_712 - In Moodle 3.11 - String [grade,core] is deprecated. Added a
+    branch check in results.php file about line 427.
+
 
 === 3.2.1 ===
 Diary_703 - print_error deprecated - in multiple files. Fixed in

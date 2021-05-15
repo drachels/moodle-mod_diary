@@ -165,12 +165,14 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
-// 20201016 Added missing header label.
-echo $OUTPUT->heading('<h5>' . get_string('sortorder', "diary") . '</h5>');
-echo $OUTPUT->heading('<h5>' . get_string($stringlable, "diary") . '</h5>');
+// 20210511 Changed to using div and span.
+echo '<div class="sortandaggregate">';
+echo ('<span>'.get_string('sortorder', "diary"));
+echo (get_string($stringlable, "diary").'</span>');
 
-// 20200827 Added link to index.php page.
-echo '<div class="reportlink"><a href="index.php?id=' . $course->id . '">' . get_string('viewalldiaries', 'diary') . '</a></div>';
+// 20200827 Added link to index.php page. 20210501 Moved to here.
+echo '<span><a style="float: right;" href="index.php?id='.$course->id.'">'
+    .get_string('viewalldiaries', 'diary').'</a></span></div>';
 
 // Get a list of groups for this course.
 $currentgroup = groups_get_activity_group($cm, true);
@@ -311,15 +313,13 @@ if ($data = data_submitted()) {
 if (! $users) {
     echo $OUTPUT->heading(get_string("nousersyet"));
 } else {
-    groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id");
-
-    // Create download, reload, current, oldest, lowest, highest, and most recent edit button for all entries in this diary.
+    $output = '';
+    // Create download, reload, current, oldest, lowest, highest, and most recent tool buttons for all entries.
     if (has_capability('mod/diary:manageentries', $context)) {
         // 20201003 Changed toolbar code to $output instead of html_writer::alist.
         $options = array();
         $options['id'] = $id;
         $options['diary'] = $diary->id;
-        $output = ' ';
 
         // Add download button.
         $options['action'] = 'download';
@@ -379,9 +379,9 @@ if (! $users) {
             'class' => 'toolbutton'
         ));
 
-        echo ' ' . get_string('toolbar', 'diary');
-        // Add the toolbar to the top of the report page.
-        echo $output;
+        // 20210511 Reorganized group and toolbar output.
+        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/report.php?id=$cm->id")
+            .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
     }
 
     // Next line is different from Journal line 171.
@@ -417,13 +417,9 @@ if (! $users) {
     // Print a list of users who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup, $sortoption)) {
         foreach ($usersdone as $user) {
-            echo '<div align="center" style="font-size:1em;
-                font-weight:bold;background: ' . $dcolor3 . ';
-                border:2px solid black;
-                -webkit-border-radius:16px;
-                -moz-border-radius:16px;border-radius:16px;">';
+            echo '<div class="entry" style="background: '.$dcolor3.'">';
 
-            // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
+            // Based on toolbutton and on list of users with at least one entry, print the entries on screen.
             echo results::diary_print_user_entry($course,
                                                  $diary,
                                                  $user,
@@ -442,11 +438,9 @@ if (! $users) {
 
     // List remaining users with no entries.
     foreach ($users as $user) {
-        echo '<div align="center" style="font-size:1em;
-            font-weight:bold;background: ' . $dcolor3 . ';
-            border:2px solid black;
-            -webkit-border-radius:16px;
-            -moz-border-radius:16px;border-radius:16px;">';
+        // 20210511 Changed to class.
+        echo '<div class="entry" style="background: '.$dcolor3.'">';
+
         echo results::diary_print_user_entry($course,
                                              $diary,
                                              $user,
