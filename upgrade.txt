@@ -8,8 +8,9 @@ Diary_581 - Need to redo the styles.css file and remove un-used entries.
 Diary_711 - File report.php has hard coded tags that should be removed. Removed
     as part of CSS changes. 
 Diary_712 - In Moodle 3.11 - String [grade,core] is deprecated. Added a
-    branch check in results.php file about line 427.
-
+    branch check in results.php file about line 421.
+Diary_722 - Should move toolbar to the right like I did on the report.php page.
+    Used span to float it to the right. 
 
 === 3.2.1 ===
 Diary_703 - print_error deprecated - in multiple files. Fixed in

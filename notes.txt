@@ -210,3 +210,5 @@ Diary Support Tracker.
     styles over to classes. Mainly working in view.php so far.
 20210510 Adding version check <311 to use grade string else gradenoun string.
 20210511 Worked on CSS changes to view. report and reportsingle pages.
+20210516 For the past few days I've been working on getting Diary ready
+    for Moodle 3.11.
