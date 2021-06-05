@@ -23,9 +23,13 @@
  */
 use mod_diary\local\results;
 
-require_once("../../config.php");
-require_once("lib.php");
-require_once($CFG->dirroot.'/lib/gradelib.php');
+//require_once("../../config.php");
+//require_once("lib.php");
+//require_once($CFG->dirroot.'/lib/gradelib.php');
+// 20210605 Changed to this format.
+require_once(__DIR__ .'/../../config.php');
+require_once(__DIR__ .'/lib.php');
+require_once(__DIR__ .'/../../lib/gradelib.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
@@ -408,9 +412,12 @@ if ($timenow > $timestart) {
                 // Info regarding entry details with simple word count, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
                     if (! empty($entry->timemodified)) {
+                        $charcount = (strlen($entry->text));
                         echo '<div class="lastedit"><strong>'
-                            .get_string('details', 'diary').'</strong> ('
-                            .get_string('numwords', '', count_words($entry->text)).') '
+                            .get_string('details', 'diary').'</strong> '
+                            .get_string('numwords', '', count_words($entry->text))
+                            .get_string('and', 'diary')
+                            .$charcount.' characters | '
                             .get_string('created', 'diary',
                             ['one' => $diff->days, 'two' => $diff->h]).'<br>';
 

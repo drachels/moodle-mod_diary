@@ -1,4 +1,9 @@
 This files describes API changes in the diary code.
+=== 3.3.1 ===
+20210605 Diary_728 - Need to add word and character count to the report and
+    reportsingle page, entries. Added needed code and two new strings. Added
+    character count to view.php page entries, also.
+       
 === 3.3.0 ===
 Diary_707 - link to index.php page on report.php page should be on the same
     line as the toolbar. Moved the Index link down to the same line as the

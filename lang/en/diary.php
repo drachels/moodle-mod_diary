@@ -39,11 +39,13 @@ $string['aliases'] = 'Keyword(s)';
 $string['aliases_help'] = 'Each diary entry can have an associated list of keywords (or aliases).
 
 Enter each keyword on a new line (not separated by commas).';
+$string['and'] = ' and ';
 $string['attachment'] = 'Attachment';
 $string['attachment_help'] = 'You can optionally attach one or more files to a diary entry.';
 $string['blankentry'] = 'Blank entry';
 $string['calendarend'] = '{$a} closes';
 $string['calendarstart'] = '{$a} opens';
+$string['charcount'] = '{$a} characters';
 $string['configdateformat'] = 'This defines how dates are shown in diary reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
 $string['created'] = 'Created {$a->one} days and {$a->two} hours ago.';
 $string['csvexport'] = 'Export to .csv';

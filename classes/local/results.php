@@ -28,12 +28,14 @@ namespace mod_diary\local;
 defined('MOODLE_INTERNAL') || die();
 define('DIARY_EVENT_TYPE_OPEN', 'open');
 define('DIARY_EVENT_TYPE_CLOSE', 'close');
+use mod_diary\local\results;
 
 use stdClass;
 use csv_export_writer;
 use html_writer;
 use context_module;
 use calendar_event;
+
 
 /**
  * Utility class for Diary results.
@@ -309,7 +311,10 @@ class results {
         global $USER, $OUTPUT, $DB, $CFG;
         $id = required_param('id', PARAM_INT); // Course module.
 
-        require_once($CFG->dirroot.'/lib/gradelib.php');
+        //require_once($CFG->dirroot.'/lib/gradelib.php');
+        // 20210605 Changed to this format.
+        require_once(__DIR__ .'/../../../../lib/gradelib.php');
+
         $dcolor3 = get_config('mod_diary', 'entrybgc');
         $dcolor4 = get_config('mod_diary', 'entrytextbgc');
 
@@ -327,6 +332,7 @@ class results {
             .'</a></td><td></td>';
             echo '</tr>';
         }
+
         // Add first of two rows, this one containing details showing the user, timecreated, and time last edited.
         echo '<tr>';
         echo '<td class="userpix" rowspan="2">';
@@ -337,12 +343,20 @@ class results {
         echo '</td>';
         echo '<td class="userfullname">'.fullname($user);
         if ($entry) {
+            $charcount = (strlen($entry->text));
+            // 20210604 Added for Details in each report entry.
             echo ' <span class="lastedit">'
+                .get_string('details', 'diary').'</strong> '
+                .get_string('numwords', '', count_words($entry->text))
+                .get_string('and', 'diary')
+                .get_string('charcount', 'diary', $charcount).' <br> '
                 .get_string("timecreated", 'diary').':  '
                 .userdate($entry->timecreated).' '
                 .get_string("lastedited").': '
                 .userdate($entry->timemodified).' </span>';
         }
+        
+        
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
 

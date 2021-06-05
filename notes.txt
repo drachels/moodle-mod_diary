@@ -212,3 +212,6 @@ Diary Support Tracker.
 20210511 Worked on CSS changes to view. report and reportsingle pages.
 20210516 For the past few days I've been working on getting Diary ready
     for Moodle 3.11.
+20210605 Not much time spent on Diary for a while due to medical reasons
+    and working on other plugins. However, today I redid word count a little
+    and also added a new character count. This required two new strings.
