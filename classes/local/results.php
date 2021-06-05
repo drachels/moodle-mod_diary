@@ -36,7 +36,6 @@ use html_writer;
 use context_module;
 use calendar_event;
 
-
 /**
  * Utility class for Diary results.
  *
@@ -311,7 +310,6 @@ class results {
         global $USER, $OUTPUT, $DB, $CFG;
         $id = required_param('id', PARAM_INT); // Course module.
 
-        //require_once($CFG->dirroot.'/lib/gradelib.php');
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
 
@@ -355,8 +353,7 @@ class results {
                 .get_string("lastedited").': '
                 .userdate($entry->timemodified).' </span>';
         }
-        
-        
+
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
 
