@@ -90,8 +90,7 @@ function diary_update_instance($diary) {
     }
 
     $DB->update_record('diary', $diary);
-print_object($diary);
-//die;
+
     // 20200903 Added calendar dates.
     results::diary_update_calendar($diary, $diary->coursemodule);
 

@@ -215,3 +215,8 @@ Diary Support Tracker.
 20210605 Not much time spent on Diary for a while due to medical reasons
     and working on other plugins. However, today I redid word count a little
     and also added a new character count. This required two new strings.
+20210606 WOrked on word and character counts. At the last minute, I think
+    I have a way of getting the desired results.
+20210607 Have gotten the word and character counts to work for raw, clean,
+    and standardized 5 character word counts.
+

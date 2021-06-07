@@ -23,9 +23,6 @@
  */
 use mod_diary\local\results;
 
-//require_once("../../config.php");
-//require_once("lib.php");
-//require_once($CFG->dirroot.'/lib/gradelib.php');
 // 20210605 Changed to this format.
 require_once(__DIR__ .'/../../config.php');
 require_once(__DIR__ .'/lib.php');
@@ -412,14 +409,30 @@ if ($timenow > $timestart) {
                 // Info regarding entry details with simple word count, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
                     if (! empty($entry->timemodified)) {
-                        $charcount = (strlen($entry->text));
+                        // 20210606 Added word/character counts.
+                        $rawwordcount = count_words($entry->text);
+                        $rawwordcharcount = strlen($entry->text);
+                        $rawwordspacecount = substr_count($entry->text, ' ');
+                        $plaintxt = htmlspecialchars(trim(strip_tags($entry->text)));
+                        $clnwordcount = count_words($plaintxt);
+                        $clnwordspacecount = substr_count($plaintxt, ' ');
+                        $clnwordcharcount = ((strlen($plaintxt)) - $clnwordspacecount);
+                        $stdwordcount = (strlen($plaintxt)) / 5;
+                        $stdwordcharcount = strlen($plaintxt);
+                        $stdwordspacecount = substr_count($plaintxt, ' ');
                         echo '<div class="lastedit"><strong>'
                             .get_string('details', 'diary').'</strong> '
-                            .get_string('numwords', '', count_words($entry->text))
-                            .get_string('and', 'diary')
-                            .$charcount.' characters | '
-                            .get_string('created', 'diary',
-                            ['one' => $diff->days, 'two' => $diff->h]).'<br>';
+                            .get_string('numwordsraw', 'diary', ['one' => $rawwordcount,
+                                                                 'two' => $rawwordcharcount,
+                                                                 'three' => $rawwordspacecount]).'<br>'
+                            .get_string('numwordscln', 'diary', ['one' => $clnwordcount,
+                                                                 'two' => $clnwordcharcount,
+                                                                 'three' => $clnwordspacecount]).'<br>'
+                            .get_string('numwordsstd', 'diary', ['one' => $stdwordcount,
+                                                                 'two' => $stdwordcharcount,
+                                                                 'three' => $stdwordspacecount]).'<br>'
+                            .get_string('created', 'diary', ['one' => $diff->days,
+                                                             'two' => $diff->h]).'<br>';
 
                         echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
                         echo userdate($entry->timecreated).' | ';

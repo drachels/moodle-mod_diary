@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 define('DIARY_EVENT_TYPE_OPEN', 'open');
 define('DIARY_EVENT_TYPE_CLOSE', 'close');
 use mod_diary\local\results;
-
 use stdClass;
 use csv_export_writer;
 use html_writer;
@@ -339,19 +338,35 @@ class results {
             'alttext' => true
         ));
         echo '</td>';
-        echo '<td class="userfullname">'.fullname($user);
+        echo '<td class="userfullname">'.fullname($user).'<br>';
         if ($entry) {
-            $charcount = (strlen($entry->text));
+            // 20210606 Added word/character counts.
+            $rawwordcount = count_words($entry->text);
+            $rawwordcharcount = strlen($entry->text);
+            $rawwordspacecount = substr_count($entry->text, ' ');
+            $plaintxt = htmlspecialchars(trim(strip_tags($entry->text)));
+            $clnwordcount = count_words($plaintxt);
+            $clnwordspacecount = substr_count($plaintxt, ' ');
+            $clnwordcharcount = ((strlen($plaintxt)) - $clnwordspacecount);
+            $stdwordcount = (strlen($plaintxt)) / 5;
+            $stdwordcharcount = strlen($plaintxt);
+            $stdwordspacecount = substr_count($plaintxt, ' ');
             // 20210604 Added for Details in each report entry.
-            echo ' <span class="lastedit">'
-                .get_string('details', 'diary').'</strong> '
-                .get_string('numwords', '', count_words($entry->text))
-                .get_string('and', 'diary')
-                .get_string('charcount', 'diary', $charcount).' <br> '
+            echo '<div class="lastedit">'
+                .get_string('details', 'diary').' '
+                .get_string('numwordsraw', 'diary', ['one' => $rawwordcount,
+                                                     'two' => $rawwordcharcount,
+                                                     'three' => $rawwordspacecount]).'<br>'
+                .get_string('numwordscln', 'diary', ['one' => $clnwordcount,
+                                                     'two' => $clnwordcharcount,
+                                                     'three' => $clnwordspacecount]).'<br>'
+                .get_string('numwordsstd', 'diary', ['one' => $stdwordcount,
+                                                     'two' => $stdwordcharcount,
+                                                     'three' => $stdwordspacecount]).'<br>'
                 .get_string("timecreated", 'diary').':  '
                 .userdate($entry->timecreated).' '
                 .get_string("lastedited").': '
-                .userdate($entry->timemodified).' </span>';
+                .userdate($entry->timemodified).' </div>';
         }
 
         echo '</td><td style="width:55px;"></td>';
