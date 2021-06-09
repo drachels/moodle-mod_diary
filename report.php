@@ -436,6 +436,7 @@ if (! $users) {
         }
     }
 
+
     // List remaining users with no entries.
     foreach ($users as $user) {
         // 20210511 Changed to class.
@@ -449,8 +450,12 @@ if (! $users) {
                                              $grades);
         echo '</div><br>';
     }
-    // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
-    echo $saveallbutton;
+    // 20210609 Check for empty list to prevent two sets of buttons at bottom of the report page.
+    if ($users) {
+        // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
+        echo $saveallbutton;
+    }
+    
     // End the page area where feedback and grades are added and will need to be saved.
     echo "</form>";
 }
