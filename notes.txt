@@ -218,5 +218,10 @@ Diary Support Tracker.
 20210606 WOrked on word and character counts. At the last minute, I think
     I have a way of getting the desired results.
 20210607 Have gotten the word and character counts to work for raw, clean,
-    and standardized 5 character word counts.
-
+    and standardized 5 character word counts. Pushed to github and
+    created Diary v3.3.1.
+20210608 Discovered two minor bugs. There are two sets of buttons at bottom
+    of report when everyone has at least one entry, and String [grade,core]
+    is deprecated.
+20210609 Fixed the two sets of buttons problem. Pushed to github.
+20210609 Fixed the grade string deprecated problem. Pushed to github.
