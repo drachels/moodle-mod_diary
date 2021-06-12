@@ -225,3 +225,5 @@ Diary Support Tracker.
     is deprecated.
 20210609 Fixed the two sets of buttons problem. Pushed to github.
 20210609 Fixed the grade string deprecated problem. Pushed to github.
+20210611 Fixed deprecated item in lib.php.
+20210612 Pushed current changes to github.

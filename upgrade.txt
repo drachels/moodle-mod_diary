@@ -1,11 +1,13 @@
 This files describes API changes in the diary code.
+=== 3.3.3 ===
+Diary_731 - In Moodle 3.11 user_picture::fields() is deprecated. Added a branch
+    check and code to fix the deprecated item.
+    
 === 3.3.2 ===
 Diary_729 - two sets of buttons at bottom of report when everyone has at least one
     entry. Added a check for empty $user list and if empty, skip last button set.
 Diary_730 - String [grade,core] is deprecated. Added a branch check for string
     compatibility in renderer.php, diary_print_feedback function, about line 209.
-
-
 
 === 3.3.1 ===
 Diary_142 - link to index.php page on report.php page should be on the same line
