@@ -322,8 +322,7 @@ function diary_cron() {
                 $course = $courses[$entry->course];
             } else {
                 if (! $course = $DB->get_record('course', array(
-                    'id' => $entry->course
-                ), 'id, shortname')) {
+                    'id' => $entry->course), 'id, shortname')) {
                     echo "Could not find course $entry->course\n";
                     continue;
                 }
@@ -334,8 +333,7 @@ function diary_cron() {
                 $teacher = $users[$entry->teacher];
             } else {
                 if (! $teacher = $DB->get_record("user", array(
-                    "id" => $entry->teacher
-                ), $requireduserfields)) {
+                    "id" => $entry->teacher), $requireduserfields)) {
                     echo "Could not find teacher $entry->teacher\n";
                     continue;
                 }
@@ -423,7 +421,13 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
         $course->id,
         'diary'
     );
-    $namefields = user_picture::fields('u', null, 'userid');
+    // 20210611 Added Moodle branch check.
+    if ($CFG->branch < 311) {
+        $namefields = user_picture::fields('u', null, 'userid');
+    } else {
+        $userfieldsapi = \core_user\fields::for_userpic();
+        $namefields = $userfieldsapi->get_sql('u', false, '', 'userid', false)->selects;;
+    }
     $sql = "SELECT de.id, de.timemodified, cm.id AS cmid, $namefields
               FROM {diary_entries} de
               JOIN {diary} d ON d.id = de.diary
