@@ -526,11 +526,15 @@ class results {
      * @return array $editoroptions Array containing the editor and attachment options.
      * @return array $attachmentoptions Array containing the editor and attachment options.
      */
-    public static function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey) {
+    public static function diary_get_editor_and_attachment_options($course, $context, $diary, $entry, $action, $firstkey) {
         $maxfiles = 99; // TODO: add some setting.
         $maxbytes = $course->maxbytes; // TODO: add some setting.
 
+        // 20210613 Added more custom data to use in edit_form.php to prevent illegal access.
         $editoroptions = array(
+            'timeclose' => $diary->timeclose,
+            'editall' => $diary->editall,
+            'editdates' => $diary->editdates,
             'action' => $action,
             'firstkey' => $firstkey,
             'trusttext' => true,
