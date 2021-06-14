@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_diary\local\results;
+use \mod_diary\event\invalid_access_attempt;
 
 require_once("../../config.php");
 require_once('lib.php'); // May not need this.
@@ -35,9 +36,7 @@ if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
-if (! $course = $DB->get_record("course", array(
-    "id" => $cm->course
-))) {
+if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -47,10 +46,23 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-if (! $diary = $DB->get_record("diary", array(
-    "id" => $cm->instance
-))) {
+if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
+}
+
+// 20210613 Added check to prevent direct access to create new entry when activity is closed.
+if (($diary->timeclose) && (time() > $diary->timeclose)) {
+    // Trigger invalid_access_attempt with redirect to the view page.
+    $params = array(
+        'objectid' => $id,
+        'context' => $context,
+        'other' => array(
+            'file' => 'edit.php'
+        )
+    );
+    $event = invalid_access_attempt::create($params);
+    $event->trigger();
+    redirect('view.php?id='.$id, get_string('invalidaccessexp', 'mootyper'));
 }
 
 // Header.
@@ -111,6 +123,7 @@ $data->id = $cm->id;
 
 list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
                                                                                              $context,
+                                                                                             $diary,
                                                                                              $entry,
                                                                                              $action,
                                                                                              $firstkey);
