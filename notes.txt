@@ -227,3 +227,6 @@ Diary Support Tracker.
 20210609 Fixed the grade string deprecated problem. Pushed to github.
 20210611 Fixed deprecated item in lib.php.
 20210612 Pushed current changes to github.
+20210613 I think I have fixed github issue #9. Also added fix to prevent
+    direct access to the edit.php page when the Diary is closed.
+    
