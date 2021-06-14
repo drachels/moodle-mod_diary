@@ -455,7 +455,7 @@ if (! $users) {
         // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
         echo $saveallbutton;
     }
-    
+
     // End the page area where feedback and grades are added and will need to be saved.
     echo "</form>";
 }
