@@ -520,6 +520,7 @@ class results {
      *
      * @param stdClass $course Course object.
      * @param stdClass $context Context object.
+     * @param stdClass $diary Diary object.
      * @param stdClass $entry Entry object.
      * @param stdClass $action Action object.
      * @param stdClass $firstkey Firstkey object.
