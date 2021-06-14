@@ -229,4 +229,3 @@ Diary Support Tracker.
 20210612 Pushed current changes to github.
 20210613 I think I have fixed github issue #9. Also added fix to prevent
     direct access to the edit.php page when the Diary is closed.
-    
