@@ -1,20 +1,24 @@
 This files describes API changes in the diary code.
-=== 3.3.3 ===
-Diary_731 - In Moodle 3.11 user_picture::fields() is deprecated. Added a branch
-    check and code to fix the deprecated item.
-    
-=== 3.3.2 ===
-Diary_729 - two sets of buttons at bottom of report when everyone has at least one
-    entry. Added a check for empty $user list and if empty, skip last button set.
-Diary_730 - String [grade,core] is deprecated. Added a branch check for string
-    compatibility in renderer.php, diary_print_feedback function, about line 209.
 
-=== 3.3.1 ===
+=== 3.4.0 ===
 Diary_142 - link to index.php page on report.php page should be on the same line
     as the toolbar. Made code changes to move the link.
 Diary_728 - Need to add word and character count to the report and
     reportsingle page, entries. Added needed code and three new strings. Added
     counts to view.php page entries, also. (raw, clean, and standardized)
+Diary_729 - two sets of buttons at bottom of report when everyone has at least one
+    entry. Added a check for empty $user list and if empty, skip last button set.
+Diary_730 - String [grade,core] is deprecated. Added a branch check for string
+    compatibility in renderer.php, diary_print_feedback function, about line 209.
+Diary_731 - In Moodle 3.11 user_picture::fields() is deprecated. Added a branch
+    check and code to fix the deprecated item.
+Diary_738 - It is possible to add entries for past dates. Added check in edit_form.php
+    that prevents sending the hidden calendar/date selector to the client computer.
+Diary_739 - A user can directly access edit.php via URL change when the diary is
+    closed. Added code to check to see if the diary is closed, and if so, log an
+    invalid access about it.
+
+
        
 === 3.3.0 ===
 Diary_707 - link to index.php page on report.php page should be on the same
