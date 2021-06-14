@@ -3,6 +3,12 @@ This files describes API changes in the diary code.
 === 3.4.0 ===
 Diary_142 - link to index.php page on report.php page should be on the same line
     as the toolbar. Made code changes to move the link.
+Diary_143 - Backup is broken, see issue #12 and #13 on github. These two issues
+    were actually fixed in an earlier v3.2.x, but I forgot to close the ticket.
+Diary_145 - In Moodle 3.11 - String [grade,core] is deprecated. Added branch
+    check. 3.11 and above use gradenoun. 3.10 and below use grade.
+Diary_148 - Recent activity in M3.11 is showing user_picture::fields() is deprecated.
+    a branch check M3.11 and above use new method. M3.10 and below use old one.
 Diary_728 - Need to add word and character count to the report and
     reportsingle page, entries. Added needed code and three new strings. Added
     counts to view.php page entries, also. (raw, clean, and standardized)
