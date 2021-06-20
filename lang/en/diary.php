@@ -31,6 +31,7 @@ $string['eventdownloadentriess'] = 'Download entries';
 $string['evententryupdated'] = 'Diary entry updated';
 $string['evententrycreated'] = 'Diary entry created';
 $string['eventfeedbackupdated'] = 'Diary feedback updated';
+$string['eventinvalidentrycreated'] = 'Diary invalid entry created';
 
 $string['accessdenied'] = 'Access denied';
 $string['alwaysopen'] = 'Always open';
@@ -129,6 +130,10 @@ $string['notopenuntil'] = 'This diary won\'t be open until';
 $string['numwordsraw'] = '{$a->one} raw text words using  {$a->two} characters, including {$a->three} spaces. ';
 $string['numwordscln'] = '{$a->one} clean text words using {$a->two} characters, NOT including {$a->three} spaces. ';
 $string['numwordsstd'] = '{$a->one} standardized words using {$a->two} characters, including {$a->three} spaces. ';
+
+$string['numwordsnew'] = 'New calculation: {$a->one} raw text words using {$a->two} characters, in {$a->three} sentences, in {$a->four} paragraphs. ';
+
+
 $string['notstarted'] = 'You have not started this diary yet';
 $string['outof'] = ' out of {$a} entries.';
 $string['overallrating'] = 'Overall rating';
