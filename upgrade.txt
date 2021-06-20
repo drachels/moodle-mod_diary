@@ -1,4 +1,11 @@
 This files describes API changes in the diary code.
+=== 3.4.1 ===
+Diary_741 - In results.php, function is_available, is duplicate of, function
+    diary_available . Removed code for, function is_available.
+Diary_742 - Issue#9 Possible to add entries for past date. Same fix as 743.
+Diary_743 - When editdates is disabled, Save, is broken. Added code that detects
+    a changed timecreated, and prevents it while automatically adding info about
+    the attempted change in the entry feeback (entrycomment) area.
 
 === 3.4.0 ===
 Diary_142 - link to index.php page on report.php page should be on the same line

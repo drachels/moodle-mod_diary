@@ -229,3 +229,12 @@ Diary Support Tracker.
 20210612 Pushed current changes to github.
 20210613 I think I have fixed github issue #9. Also added fix to prevent
     direct access to the edit.php page when the Diary is closed.
+20210615 Worked on combining the code for, Details, in view.php, report.php,
+    and reportsingle.php. The code for the latter two is actually in the
+    results.php file. Also working on increasing the details to include
+    other statistics.
+20210619 Spent the past three days trying to fix the code for detecting
+    a user attempt to cheat by changing the timecreated. Finally seem to
+    have it working, but still need to decide what to do about the rating.
+20210620 CLean up code and push to github for test release.
+
