@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_diary\local\results;
+use mod_diary\local\diarystats;
+//use core_text;
 
 // 20210605 Changed to this format.
 require_once(__DIR__ .'/../../config.php');
@@ -409,17 +411,44 @@ if ($timenow > $timestart) {
                 // Info regarding entry details with simple word count, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
                     if (! empty($entry->timemodified)) {
-                        // 20210606 Added word/character counts.
+                        // 20210606 Calculate raw word/character counts.
                         $rawwordcount = count_words($entry->text);
                         $rawwordcharcount = strlen($entry->text);
                         $rawwordspacecount = substr_count($entry->text, ' ');
-                        $plaintxt = htmlspecialchars(trim(strip_tags($entry->text)));
-                        $clnwordcount = count_words($plaintxt);
-                        $clnwordspacecount = substr_count($plaintxt, ' ');
-                        $clnwordcharcount = ((strlen($plaintxt)) - $clnwordspacecount);
-                        $stdwordcount = (strlen($plaintxt)) / 5;
-                        $stdwordcharcount = strlen($plaintxt);
-                        $stdwordspacecount = substr_count($plaintxt, ' ');
+                        // Calculate cleaned text word/character counts.
+                        $plaintext = htmlspecialchars(trim(strip_tags($entry->text)));
+                        $clnwordcount = count_words($plaintext);
+                        $clnwordspacecount = substr_count($plaintext, ' ');
+                        $clnwordcharcount = ((strlen($plaintext)) - $clnwordspacecount);
+                        // Calculate standardized details from clean text
+                        $stdwordcount = (strlen($plaintext)) / 5;
+                        $stdwordcharcount = strlen($plaintext);
+                        $stdwordspacecount = substr_count($plaintext, ' ');
+
+                        //$newwordcount = str_word_count($entry->text, 0);
+                        $newwordcount = count_words($plaintext);
+                        $newcharcount = (core_text::strlen($plaintext) - $clnwordspacecount);
+                        //$newcharcount = ((strlen($plaintext)) - $clnwordspacecount);
+                        //$newsentencecount = preg_split('/[!?.]+(?![0-9])/', $entry->text);
+                        $newsentencecount = preg_split('/[!?.]+(?![0-9])/', $plaintext);
+
+                        $newsentencecount = array_filter($newsentencecount);
+                        $newsentencecount = count($newsentencecount);
+
+
+                        $data = diarystats::get_diary_stats($entry->text);
+                        //print_object($data);
+                        $temp = get_string('numwordsnew', 'diary', ['one' => $data['words'],
+                                                                    'two' => $data['chars'],
+                                                                    'three' => $data['sentences'],
+                                                                    'four' => $data['paragraphs']]);
+                        print_object($temp);
+                        //$entry->entrycomment .= " This is the diarystats: ";
+                        //$entry->entrycomment .= $data->chars;
+                        //$entry->teacher = 2;
+                        //$entry->timemarked = time();
+                        //$DB->update_record("diary_entries", $entry);
+                        
                         echo '<div class="lastedit"><strong>'
                             .get_string('details', 'diary').'</strong> '
                             .get_string('numwordsraw', 'diary', ['one' => $rawwordcount,
@@ -432,7 +461,11 @@ if ($timenow > $timestart) {
                                                                  'two' => $stdwordcharcount,
                                                                  'three' => $stdwordspacecount]).'<br>'
                             .get_string('created', 'diary', ['one' => $diff->days,
-                                                             'two' => $diff->h]).'<br>';
+                                                             'two' => $diff->h]).'<br>'
+                            .get_string('numwordsnew', 'diary', ['one' => $newwordcount,
+                                                                 'two' => $newcharcount,
+                                                                 'three' => $newsentencecount,
+                                                                 'four' => $data['paragraphs']]).'<br>' ;
 
                         echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
                         echo userdate($entry->timecreated).' | ';
