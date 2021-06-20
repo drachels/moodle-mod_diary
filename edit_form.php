@@ -67,6 +67,9 @@ class mod_diary_entry_form extends moodleform
             } else {
                 $mform->disabledIf('timecreated', 'diary', 'neq', '1');
             }
+        } else {
+            $mform->addElement('hidden', 'timecreated');
+            $mform->setType('timecreated', PARAM_INT);
         }
 
         $mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'), null, $this->_customdata['editoroptions']);

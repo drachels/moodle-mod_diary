@@ -27,10 +27,10 @@ use \mod_diary\event\invalid_access_attempt;
 require_once("../../config.php");
 require_once('lib.php'); // May not need this.
 require_once('./edit_form.php');
-
+global $DB;
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
-$firstkey = optional_param('firstkey', '', PARAM_INT); // Which entry to edit.
+$firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -66,9 +66,7 @@ if (($diary->timeclose) && (time() > $diary->timeclose)) {
 }
 
 // Header.
-$PAGE->set_url('/mod/diary/edit.php', array(
-    'id' => $id
-));
+$PAGE->set_url('/mod/diary/edit.php', array('id' => $id));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
@@ -170,8 +168,35 @@ if ($form->is_cancelled()) {
     $newentry->text = $fromform->text_editor['text'];
     $newentry->format = $fromform->text_editor['format'];
 
+    if (! $diary->editdates) {
+        // If editdates is NOT enabled do attempted cheat testing here.
+        // 20210619 Before we update, see if there is an entry in database with the same entryid.
+        $entry = $DB->get_record("diary_entries", array(
+            "userid" => $USER->id,
+            'id' => $fromform->entryid
+        ));
+    }
+
+    // 20210619 If user tries to change timecreated, prevent it.
+    // TODO: Need to add code to implement automatic rating.
+    // Currently not taking effect on the overall user grade unless the teacher rates it.
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
+        if (!($entry->timecreated == $newentry->timecreated)) {
+            // TODO: Need to convert text to strings
+            $newentry->entrycomment = "The times DO NOT match! ";
+            $newentry->entrycomment .= "The original time was: ".userdate($entry->timecreated).' ';
+            $newentry->entrycomment .= "The changed time was: ".userdate($newentry->timecreated).' ';
+            $newentry->rating = 1;
+            $newentry->teacher = 2;
+            $newentry->timemodified = time();
+            $newentry->timemarked = time();
+            $newentry->timecreated = $entry->timecreated;
+            $fromform->timecreated = $entry->timecreated;
+            // TODO: Need to convert text to strings
+            $newentry->entrycomment .= "The time was reset to: ".userdate($newentry->timecreated);
+            $DB->update_record("diary_entries", $newentry);
+        }
         if (! $DB->update_record("diary_entries", $newentry)) {
             throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
         }
