@@ -557,19 +557,6 @@ class results {
     }
 
     /**
-     * Check to see if this Diary is available for use.
-     *
-     * Used in view.php. 20200718 Not found in view.php now.
-     *
-     * @param array $diary
-     */
-    public static function is_available($diary) {
-        $timeopen = $diary->timeopen;
-        $timeclose = $diary->timeclose;
-        return (($timeopen == 0 || time() >= $timeopen) && ($timeclose == 0 || time() < $timeclose));
-    }
-
-    /**
      * Get the latest entry in mdl_diary_entries for the current user.
      *
      * Used in lib.php.
