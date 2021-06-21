@@ -62,7 +62,7 @@ if (($diary->timeclose) && (time() > $diary->timeclose)) {
     );
     $event = invalid_access_attempt::create($params);
     $event->trigger();
-    redirect('view.php?id='.$id, get_string('invalidaccessexp', 'mootyper'));
+    redirect('view.php?id='.$id, get_string('invalidaccessexp', 'diary'));
 }
 
 // Header.
@@ -178,24 +178,37 @@ if ($form->is_cancelled()) {
     }
 
     // 20210619 If user tries to change timecreated, prevent it.
-    // TODO: Need to add code to implement automatic rating.
+    // TODO: Need to move new code to up to just after getting $entry, to make a nested if.
     // Currently not taking effect on the overall user grade unless the teacher rates it.
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
-        if (!($entry->timecreated == $newentry->timecreated)) {
-            // TODO: Need to convert text to strings
-            $newentry->entrycomment = "The times DO NOT match! ";
-            $newentry->entrycomment .= "The original time was: ".userdate($entry->timecreated).' ';
-            $newentry->entrycomment .= "The changed time was: ".userdate($newentry->timecreated).' ';
-            $newentry->rating = 1;
+        if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
+            // 20210620 New code to prevent attempts to change timecreated.
+            $newentry->entrycomment = get_string('invalidtimechange', 'diary');
+            $newentry->entrycomment .= get_string('invalidtimechangeoriginal', 'diary', ['one' => userdate($entry->timecreated)]);
+            $newentry->entrycomment .= get_string('invalidtimechangenewtime', 'diary', ['one' => userdate($newentry->timecreated)]);
+            // Probably do not want to just arbitraily set a rating.
+            // Should leave it up to the teacher, otherwise will need to acertain rating settings for the activity.
+            //$newentry->rating = 1;
             $newentry->teacher = 2;
             $newentry->timemodified = time();
             $newentry->timemarked = time();
             $newentry->timecreated = $entry->timecreated;
             $fromform->timecreated = $entry->timecreated;
-            // TODO: Need to convert text to strings
-            $newentry->entrycomment .= "The time was reset to: ".userdate($newentry->timecreated);
+            $newentry->entrycomment .=  get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
             $DB->update_record("diary_entries", $newentry);
+            // Trigger module entry updated event.
+            $event = \mod_diary\event\invalid_entry_attempt::create(array(
+                'objectid' => $diary->id,
+                'context' => $context
+            ));
+            $event->add_record_snapshot('course_modules', $cm);
+            $event->add_record_snapshot('course', $course);
+            $event->add_record_snapshot('diary', $diary);
+            $event->trigger();
+
+            redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
+            die();
         }
         if (! $DB->update_record("diary_entries", $newentry)) {
             throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
