@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_diary entry created event.
+ * The mod_diary invalid entry attempt event.
  *
  * @package   mod_diary
  * @copyright 2021 Al Rachels
@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2021 Al Rachels
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class invalid_entry_created extends \core\event\base {
+class invalid_entry_attempt extends \core\event\base {
 
     /**
      * Init method.
@@ -50,7 +50,7 @@ class invalid_entry_created extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventinvalidentrycreated', 'mod_diary');
+        return get_string('eventinvalidentryattempt', 'mod_diary');
     }
 
     /**
@@ -59,8 +59,8 @@ class invalid_entry_created extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has created an invalid entry for the diary activity with " .
-            "the course module id '$this->contextinstanceid'";
+        return "The user with id '$this->userid' has attempted to make an invalid entry for the diary activity with " .
+            "the course module id '$this->contextinstanceid'.";
     }
 
     /**
