@@ -43,7 +43,7 @@ class diarystats {
     /**
      * Update the diary statistics for this diary activity.
      *
-     * @param $diary->text The text for this entry.
+     * @param string $entry The text for this entry.
      * @return bool
      */
     public static function get_diary_stats($entry) {
@@ -65,7 +65,10 @@ class diarystats {
     }
 
     /**
-     * get_stats_chars
+     * Update the diary character count statistics for this diary activity.
+     *
+     * @param string $entry The text for this entry.
+     * @ return int The number of characters.
      */
     public static function get_stats_chars($entry) {
         return core_text::strlen($entry);
@@ -74,14 +77,20 @@ class diarystats {
     }
 
     /**
-     * get_stats_words
+     * Update the diary word count statistics for this diary activity.
+     *
+     * @param string $entry The text for this entry.
+     * @ return int The number of words.
      */
     public static function get_stats_words($entry) {
         return count_words($entry);
     }
 
     /**
-     * get_stats_sentences
+     * Update the diary sentence count statistics for this diary activity.
+     *
+     * @param string $entry The text for this entry.
+     * @ return int The number of sentences.
      */
     public static function get_stats_sentences($entry) {
         $items = preg_split('/[!?.]+(?![0-9])/', $entry);
@@ -90,7 +99,10 @@ class diarystats {
     }
 
     /**
-     * get_stats_paragraphs
+     * Update the diary paragraph count statistics for this diary activity.
+     *
+     * @param string $entry The text for this entry.
+     * @ return int The number of paragraphs.
      */
     public static function get_stats_paragraphs($entry) {
         $items = explode("\n", $entry);
@@ -99,7 +111,10 @@ class diarystats {
     }
 
     /**
-     * get_stats_uniquewords
+     * Update the diary unique word count statistics for this diary activity.
+     *
+     * @param string $entry The text for this entry.
+     * @return int The number of unique words.
      */
     public static function get_stats_uniquewords($entry) {
         $items = core_text::strtolower($entry);
