@@ -189,13 +189,14 @@ if ($form->is_cancelled()) {
             $newentry->entrycomment .= get_string('invalidtimechangenewtime', 'diary', ['one' => userdate($newentry->timecreated)]);
             // Probably do not want to just arbitraily set a rating.
             // Should leave it up to the teacher, otherwise will need to acertain rating settings for the activity.
-            //$newentry->rating = 1;
+            // @codingStandardsIgnoreLine
+            // $newentry->rating = 1;
             $newentry->teacher = 2;
             $newentry->timemodified = time();
             $newentry->timemarked = time();
             $newentry->timecreated = $entry->timecreated;
             $fromform->timecreated = $entry->timecreated;
-            $newentry->entrycomment .=  get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
+            $newentry->entrycomment .= get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
             $DB->update_record("diary_entries", $newentry);
             // Trigger module entry updated event.
             $event = \mod_diary\event\invalid_entry_attempt::create(array(

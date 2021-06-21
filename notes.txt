@@ -239,4 +239,3 @@ Diary Support Tracker.
 20210620 Added new strings. Clean up code and push to github for test release.
 20210621 Made one more change that prevents failure when creating a new entry
     and settings are No and Yes.
-    

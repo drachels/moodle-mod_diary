@@ -26,15 +26,10 @@
 namespace mod_diary\local;
 
 defined('MOODLE_INTERNAL') || die();
-//define('DIARY_EVENT_TYPE_OPEN', 'open');
-//define('DIARY_EVENT_TYPE_CLOSE', 'close');
+
 use mod_diary\local\diarystats;
 use stdClass;
 use core_text;
-//use csv_export_writer;
-//use html_writer;
-//use context_module;
-//use calendar_event;
 
 /**
  * Utility class for Diary stats.
@@ -52,8 +47,9 @@ class diarystats {
      * @return bool
      */
     public static function get_diary_stats($entry) {
-    //public function get_diary_stats($entry) {
-        //global $DB, $CFG;
+    // @codingStandardsIgnoreLine
+    // public function get_diary_stats($entry) {
+        // global $DB, $CFG;
         $precision = 1;
         $diarystats = array();
         $diarystats['words'] = self::get_stats_words($entry);
@@ -61,9 +57,9 @@ class diarystats {
         $diarystats['sentences'] = self::get_stats_sentences($entry);
         $diarystats['paragraphs'] = self::get_stats_paragraphs($entry);
         $diarystats['uniquewords'] = self::get_stats_uniquewords($entry);
-
-        //print_object('This is the $diarystats array.');
-        //print_object($diarystats);
+        // @codingStandardsIgnoreLine
+        // print_object('This is the $diarystats array.');
+        // print_object($diarystats);
 
         return $diarystats;
     }
@@ -71,10 +67,10 @@ class diarystats {
     /**
      * get_stats_chars
      */
-    //protected function get_stats_chars($entry) {
     public static function get_stats_chars($entry) {
         return core_text::strlen($entry);
-        //return strlen($entry);
+        // @codingStandardsIgnoreLine
+        // return strlen($entry);
     }
 
     /**
@@ -107,7 +103,8 @@ class diarystats {
      */
     public static function get_stats_uniquewords($entry) {
         $items = core_text::strtolower($entry);
-        //$items = strtolower($entry);
+        // @codingStandardsIgnoreLine
+        // $items = strtolower($entry);
         $items = str_word_count($items, 1);
         $items = array_unique($items);
         return count($items);

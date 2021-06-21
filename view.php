@@ -23,7 +23,8 @@
  */
 use mod_diary\local\results;
 use mod_diary\local\diarystats;
-//use core_text;
+// @codingStandardsIgnoreLine
+// use core_text;
 
 // 20210605 Changed to this format.
 require_once(__DIR__ .'/../../config.php');
@@ -420,16 +421,17 @@ if ($timenow > $timestart) {
                         $clnwordcount = count_words($plaintext);
                         $clnwordspacecount = substr_count($plaintext, ' ');
                         $clnwordcharcount = ((strlen($plaintext)) - $clnwordspacecount);
-                        // Calculate standardized details from clean text
+                        // Calculate standardized details from clean text.
                         $stdwordcount = (strlen($plaintext)) / 5;
                         $stdwordcharcount = strlen($plaintext);
                         $stdwordspacecount = substr_count($plaintext, ' ');
-
-                        //$newwordcount = str_word_count($entry->text, 0);
+                        // @codingStandardsIgnoreLine
+                        // $newwordcount = str_word_count($entry->text, 0);
                         $newwordcount = count_words($plaintext);
                         $newcharcount = (core_text::strlen($plaintext) - $clnwordspacecount);
-                        //$newcharcount = ((strlen($plaintext)) - $clnwordspacecount);
-                        //$newsentencecount = preg_split('/[!?.]+(?![0-9])/', $entry->text);
+                        // @codingStandardsIgnoreLine
+                        // $newcharcount = ((strlen($plaintext)) - $clnwordspacecount);
+                        // $newsentencecount = preg_split('/[!?.]+(?![0-9])/', $entry->text);
                         $newsentencecount = preg_split('/[!?.]+(?![0-9])/', $plaintext);
 
                         $newsentencecount = array_filter($newsentencecount);
@@ -437,18 +439,18 @@ if ($timenow > $timestart) {
 
 
                         $data = diarystats::get_diary_stats($entry->text);
-                        //print_object($data);
                         $temp = get_string('numwordsnew', 'diary', ['one' => $data['words'],
                                                                     'two' => $data['chars'],
                                                                     'three' => $data['sentences'],
                                                                     'four' => $data['paragraphs']]);
-                        //print_object($temp);
-                        //$entry->entrycomment .= " This is the diarystats: ";
-                        //$entry->entrycomment .= $data->chars;
-                        //$entry->teacher = 2;
-                        //$entry->timemarked = time();
-                        //$DB->update_record("diary_entries", $entry);
-/*
+                        // @codingStandardsIgnoreLine
+                        // $entry->entrycomment .= " This is the diarystats: ";
+                        // $entry->entrycomment .= $data->chars;
+                        // $entry->teacher = 2;
+                        // $entry->timemarked = time();
+                        // $DB->update_record("diary_entries", $entry);
+                        // @codingStandardsIgnoreLine
+                        /*
                         echo '<div class="lastedit"><strong>'
                             .get_string('details', 'diary').'</strong> '
                             .get_string('numwordsraw', 'diary', ['one' => $rawwordcount,
@@ -466,7 +468,7 @@ if ($timenow > $timestart) {
                                                                  'two' => $newcharcount,
                                                                  'three' => $newsentencecount,
                                                                  'four' => $data['paragraphs']]).'<br>' ;
-*/
+                            */
 
                         echo '<div class="lastedit"><strong>'
                             .get_string('details', 'diary').'</strong> '
@@ -480,7 +482,7 @@ if ($timenow > $timestart) {
                                                                  'two' => $stdwordcharcount,
                                                                  'three' => $stdwordspacecount]).'<br>'
                             .get_string('created', 'diary', ['one' => $diff->days,
-                                                             'two' => $diff->h]).'<br>' ;
+                                                             'two' => $diff->h]).'<br>';
 
                         echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
                         echo userdate($entry->timecreated).' | ';
