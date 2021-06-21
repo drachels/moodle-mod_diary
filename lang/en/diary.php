@@ -31,7 +31,7 @@ $string['eventdownloadentriess'] = 'Download entries';
 $string['evententryupdated'] = 'Diary entry updated';
 $string['evententrycreated'] = 'Diary entry created';
 $string['eventfeedbackupdated'] = 'Diary feedback updated';
-$string['eventinvalidentrycreated'] = 'Diary invalid entry created';
+$string['eventinvalidentryattempt'] = 'Diary invalid entry attempt';
 
 $string['accessdenied'] = 'Access denied';
 $string['alwaysopen'] = 'Always open';
@@ -108,6 +108,11 @@ $string['incorrectcourseid'] = 'Course ID is incorrect';
 $string['incorrectmodule'] = 'Course Module ID was incorrect';
 $string['invalidaccess'] = 'Invalid access';
 $string['invalidaccessexp'] = 'You do not have permission to view the page you attempted to access! The attempt was logged!';
+$string['invalidtimechange'] = 'An invalid attempt to change this entry\'s, Time created, has been detected. ';
+$string['invalidtimechangeoriginal'] = 'The original time was: {$a->one}. ';
+$string['invalidtimechangenewtime'] = 'The changed time was: {$a->one}. ';
+$string['invalidtimeresettime'] = 'The time was reset to the original time of: {$a->one}.';
+
 $string['lastnameasc'] = 'Last name ascending:';
 $string['lastnamedesc'] = 'Last name descending:';
 $string['latestmodifiedentry'] = 'Most recently modified entries:';
