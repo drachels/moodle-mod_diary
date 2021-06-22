@@ -351,6 +351,11 @@ class results {
             $stdwordcount = (strlen($plaintxt)) / 5;
             $stdwordcharcount = strlen($plaintxt);
             $stdwordspacecount = substr_count($plaintxt, ' ');
+
+            $data = diarystats::get_diary_stats($entry->text);
+
+
+
             // 20210604 Added for Details in each report entry.
             echo '<div class="lastedit">'
                 .get_string('details', 'diary').' '
