@@ -352,7 +352,9 @@ class results {
             $stdwordcharcount = strlen($plaintxt);
             $stdwordspacecount = substr_count($plaintxt, ' ');
 
-            $data = diarystats::get_diary_stats($entry->text);
+            // Temporary error fix.
+            //$errors = array();
+            $data = diarystats::get_diary_stats($entry->text, $entry->format);
 
 
 
@@ -376,7 +378,13 @@ class results {
 
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
+        
+        
+        
 
+        
+        
+        
         // Add the second of two rows, this one containing the users text for this entry.
         echo '<tr><td>';
         echo '<div class="entry" style="background: '.$dcolor4.';">';
@@ -389,6 +397,35 @@ class results {
         }
         echo '</div></td><td style="width:55px;"></td></tr>';
 
+//////////////////////////////////////////////////////////////////////////////////
+
+        echo '</table>';
+
+        echo '<table class="generaltable" style="margin-left:auto;margin-right:auto;">'
+            .'<tr><td>'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
+                .'<td>'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
+                .'<td> </td>'
+                .'<td> </td></tr>'
+            .'<tr><td>'.get_string('chars', 'diary').' '.$data->chars.'</td>'
+                .'<td>'.get_string('words', 'diary').' '.$data->words.'</td>'
+                .'<td>'.get_string('sentences', 'diary').' '.$data->sentences.'</td>'
+                .'<td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
+            .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td>'
+                .'<td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td>'
+                .'<td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td>'
+                .'<td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
+            .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td>'
+                .'<td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td>'
+                .'<td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td>'
+                .'<td>'.get_string('commonerror', 'diary').' '.$data->commonerrors.'</td></tr>'
+            .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td>'
+                .'<td>Total Syllables '.$data->totalsyllabels.' </td>'
+                .'<td>FK Grade '.$data->fkgrade.' </td>'
+                .'<td>FK Reading Ease '.$data->fkreadease.' </td></tr>'
+            .'</table>';
+        echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
+ 
+//////////////////////////////////////////////////////////////////////////////////
         // If there is a user entry, add a teacher feedback area for grade
         // and comments. Add previous grades and comments, if available.
         if ($entry) {

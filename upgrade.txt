@@ -1,4 +1,13 @@
-This files describes API changes in the diary code.
+This files describes API changes and other work in the diary code.
+=== 3.5.0 ===
+Diary_750 - V3.4.1 has three code style errors. Added the missing final blank line
+    to files diarystats.php, renderer.php, and settings.php. Pushed to github.
+Diary_753 - Need to develope additional statistics for each diary entry. Have
+    created 20 stats and now need to thoroughly test them. Still in development!
+Diary_756 - Need a way to selectivly turn off autosave. It is not needed when
+    starting a totally new entry. 
+
+
 === 3.4.1 ===
 Diary_741 - In results.php, function is_available, is duplicate of, function
     diary_available . Removed code for, function is_available.

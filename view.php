@@ -437,12 +437,85 @@ if ($timenow > $timestart) {
                         $newsentencecount = array_filter($newsentencecount);
                         $newsentencecount = count($newsentencecount);
 
+                        // Temporary error fix.
+                        //$errors = array();
+                        //$temp = htmlspecialchars(trim(strip_tags($entry->text)));
+                        $temp = $entry->text;
+                        $format = $entry->format;
+                        //$data = diarystats::get_diary_stats($entry->text);
 
-                        $data = diarystats::get_diary_stats($entry->text);
-                        $temp = get_string('numwordsnew', 'diary', ['one' => $data['words'],
-                                                                    'two' => $data['chars'],
-                                                                    'three' => $data['sentences'],
-                                                                    'four' => $data['paragraphs']]);
+                        $data = diarystats::get_diary_stats($temp, $format);
+                        //$test = diarystats::update_current_response($temp);
+                        //$data = diarystats::get_diary_stats(question_utils::to_plain_text($entry->text));
+
+                        //print_object($data);
+                        // Plain list 1.
+                        /*
+                        echo '<table class="generaltable">'
+                             .'<tr><td>'.get_string('details', 'diary').'</td></tr><br>'
+                             .'<tr><td>'.get_string('chars', 'diary').' '.$data->chars.'</td></tr>'
+                             .'<tr><td>'.get_string('words', 'diary').' '.$data->words.'</td></tr>'
+                             .'<tr><td>'.get_string('sentences', 'diary').' '.$data->sentences.'</td></tr>'
+                             .'<tr><td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
+                             .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td></tr>'
+                             .'<tr><td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td></tr>'
+                             .'<tr><td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td></tr>'
+                             .'<tr><td>'.get_string('commonerror', 'diary').' '.$data->commonerrors.'</td></tr>'
+                             .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td></tr>'
+                             .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td></tr>'
+                             .'<tr><td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td></tr>'
+                             .'<tr><td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
+                             .'<tr><td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td></tr>'
+                             .'</table>';
+                        */
+                             
+                        /*
+                        echo '<table class="generaltable">'
+                             .'<tr><th>'.get_string('details', 'diary').'</th><th>Characters</th><th>Words</th><th>Sentences</th><th>Spaces</th></tr>'
+                             .'<tr><td>Raw Text</td><td>'.$rawwordcharcount.'</td><td>'.$rawwordcount.'</td><td>'.$data->sentences.'</td><td>'.$rawwordspacecount.'</td></tr>'
+                             .'<tr><td>Clean Text</td><td>'.$clnwordcharcount.'</td><td>'.$clnwordcount.'</td><td>'.$data->sentences.'</td><td>'.$clnwordspacecount.'</td></tr>'
+                             .'<tr><td>Standardized Text</td><td>'.$stdwordcharcount.'</td><td>'.$stdwordcount.'</td><td>'.$data->sentences.'</td><td>'.$stdwordspacecount.'</td></tr>'
+                             .'<tr><td>'.get_string('details', 'diary').'</td><td>char</td><td>words</td><td>sentences</td></tr>'
+                             .'<tr><td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
+                             .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td></tr>'
+                             .'<tr><td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td></tr>'
+                             .'<tr><td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td></tr>'
+                             .'<tr><td>'.get_string('commonerror', 'diary').' '.$data->commonerrors.'</td></tr>'
+                             .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td></tr>'
+                             .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td></tr>'
+                             .'<tr><td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td></tr>'
+                             .'<tr><td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
+                             .'<tr><td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td></tr>'
+                             .'</table>';
+                        */
+
+                        echo '<table class="generaltable">'
+                             .'<tr><td style="width: 25%">'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
+                                 .'<td style="width: 25%">'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
+                                 .'<td style="width: 25%">'.get_string('created', 'diary', ['one' => $diff->days, 'two' => $diff->h]).'</td>'
+                                 .'<td style="width: 25%"> </td>'
+                             .'<tr><td>'.get_string('chars', 'diary').' '.$data->chars.'</td>'
+                                 .'<td>'.get_string('words', 'diary').' '.$data->words.'</td>'
+                                 .'<td>'.get_string('sentences', 'diary').' '.$data->sentences.'</td>'
+                                 .'<td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
+                             .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td>'
+                                 .'<td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td>'
+                                 .'<td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td>'
+                                 .'<td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
+                             .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td>'
+                                 .'<td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td>'
+                                 .'<td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td>'
+                                 .'<td>'.get_string('commonerror', 'diary').' '.$data->commonerrors.'</td></tr>'
+                             .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td>'
+                                 .'<td>Total Syllables '.$data->totalsyllabels.' </td>'
+                                 .'<td>FK Grade '.$data->fkgrade.' </td>'
+                                 .'<td>FK Reading Ease '.$data->fkreadease.' </td></tr>'
+                             .'</table>';
+
+                        //$temp = get_string('numwordsnew', 'diary', ['one' => $data['words'],
+                        //                                            'two' => $data['chars'],
+                        //                                            'three' => $data['sentences'],
+                        //                                            'four' => $data['paragraphs']]);
                         // @codingStandardsIgnoreLine
                         // $entry->entrycomment .= " This is the diarystats: ";
                         // $entry->entrycomment .= $data->chars;
@@ -491,6 +564,7 @@ if ($timenow > $timestart) {
                         echo userdate($entry->timemodified).'<br>';
 
                         echo "</div>";
+
                     }
 
                     // Added lines to mark entry as needing regrade.

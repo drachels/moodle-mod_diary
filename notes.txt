@@ -239,3 +239,25 @@ Diary Support Tracker.
 20210620 Added new strings. Clean up code and push to github for test release.
 20210621 Made one more change that prevents failure when creating a new entry
     and settings are No and Yes.
+20210622 Finished testing and released Diary v3.4.1.
+20210622 Started work on adding more statistics with the eventual goal of
+    automatic grading like the essayautograde quiz question.
+20210626 Finally got the paragraph count to "look" right by changing the
+    explode to let me check for multiple delimiters.
+20210627 Worked more on paragraphs and now have it using my version
+    of to_plain_text and standardize_white_space.
+20210628 Converted all the stats over to using the same clean text I
+    use for calculating paragraphs. Spent a bunch of time on textarea
+    trying to come up with a workable auto-size for the width. Gave up.
+    Think I'll just try to switch to using a texteditor. I also compared
+    my stats results to the essay (autograde) stats and they match right
+    down the line. When I compare to a couple of the online checkers,
+    almost nothing seems to match. Of course, they require a fairly
+    large, minimum number of words, I guess to make it "difficult"
+    to prove their results are wrong.
+20210629 Researched on adding new fields to the mdl_diary table for use
+    with the new statistics.
+20210630 Spent a lot of time today working on using the Atto text editor on
+    the report and reportsingle pages. Got it mostly working, but then threw
+    away all of the code changes. I DID save a copy on this computer in:
+    c:\Users\drach\Downloads\ProgrammingForMoodle\diary\diarywithattoeditorinreporandreportsingle

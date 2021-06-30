@@ -184,3 +184,31 @@ $string['usertoolbar'] = 'User toolbar:';
 $string['viewalldiaries'] = 'View all course diaries';
 $string['viewallentries'] = 'View {$a} diary entries';
 $string['viewentries'] = 'View entries';
+
+$string['chars'] = 'Characters';
+$string['charspersentence'] = 'Characters per sentence';
+$string['commonerror'] = 'Common error';
+$string['commonerrors_help'] = 'The common errors are defined in the "Glossary of errors" associated with this question.';
+$string['fogindex_help'] = 'The Gunning fog index is a measure of readability. It is calculated using the following formula.
+
+* ((words per sentence) + (long words per sentence)) x 0.4
+
+For more information see: <https://en.wikipedia.org/wiki/Gunning_fog_index>';
+$string['fogindex'] = 'Fog index';
+$string['lexicaldensity_help'] = 'The lexical density is a percentage calculated using the following formula.
+
+* 100 x (number of unique words) / (total number of words)
+
+Thus, an essay in which many words are repeated has a low lexical density, while a essay with many unique words has a high lexical density.';
+$string['lexicaldensity'] = 'Lexical density';
+$string['longwords_help'] = '"Long words" are words that have three or more syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
+$string['longwords'] = 'Long words';
+$string['longwordspersentence'] = 'Long words per sentence';
+$string['missing'] = 'Missing';
+$string['paragraphs'] = 'Paragraphs';
+$string['present'] = 'Present';
+$string['sentences'] = 'Sentences';
+$string['sentencesperparagraph'] = 'Sentences per paragraph';
+$string['uniquewords'] = 'Unique words';
+$string['words'] = 'Words';
+$string['wordspersentence'] = 'Words per sentence';
