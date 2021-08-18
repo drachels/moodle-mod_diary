@@ -318,7 +318,7 @@ print_object('5 plugin_constant function printing $plugin::$name and here it is:
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
-        // 20210711 Added heading for statistics options section.
+        // 20210711 Added heading for text statistics options section.
         $name = 'statshdr';
         $label = get_string($name, $plugin);
         $mform->addElement('header', $name, $label);
@@ -347,7 +347,6 @@ print_object('5 plugin_constant function printing $plugin::$name and here it is:
         $mform->addGroup($elements, $name, $label, html_writer::empty_tag('br'), false);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'showtextstats', 'eq', $this->plugin_constant('SHOW_NONE'));
         $mform->disabledIf($name, 'showtextstats', 'eq', 0);
         $mform->disabledIf($name.'[commonerrors]', 'errorcmid', 'eq', 0);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
@@ -362,6 +361,12 @@ print_object('5 plugin_constant function printing $plugin::$name and here it is:
             $mform->setType($name."[$value]", PARAM_INT);
             //$mform->setDefault($name."[$value]", in_array($value, $defaults));
         }
+
+print_object('test');
+print_object('test');
+print_object('test');
+print_object('test');
+print_object('test');
 
         // 20210703 Added the common errors header.
         $name = 'commonerrors';

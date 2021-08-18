@@ -300,5 +300,6 @@ Diary Support Tracker.
 20210719 Added two new class files based off Dave Child code on github.
     Greatly improved syllable count accuracy. Files are pluralise.php
     and syllables.php.
-20210814 Not able to work much over the pat few days, but have added another
+20210814 Not able to work much over the past few days, but have added another
     field, enablestats. Lets me show stats without autorating.
+20210818 Doing some code cleanup and finally published an ALPHA version.
