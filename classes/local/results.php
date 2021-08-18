@@ -305,15 +305,15 @@ class results {
      * @param integer $teachers
      * @param integer $grades
      */
-    public static function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
+    public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
         global $USER, $OUTPUT, $DB, $CFG;
         $id = required_param('id', PARAM_INT); // Course module.
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
 
-        $dcolor3 = get_config('mod_diary', 'entrybgc');
-        $dcolor4 = get_config('mod_diary', 'entrytextbgc');
+        // 20210705 Added new activity color setting.
+        $dcolor4 = $diary->entrytextbgc;
 
         // Create a table for the current users entry with area for teacher feedback.
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
@@ -324,9 +324,9 @@ class results {
             echo userdate($entry->timecreated);
             // 20201202 Added link to all entries for a single user.
             echo '  <a href="reportsingle.php?id='.$id
-            .'&user='.$user->id
-            .'&action=allentries">'.get_string('reportsingle', 'diary')
-            .'</a></td><td></td>';
+                .'&user='.$user->id
+                .'&action=allentries">'.get_string('reportsingle', 'diary')
+                .'</a></td><td></td>';
             echo '</tr>';
         }
 
@@ -339,6 +339,9 @@ class results {
         ));
         echo '</td>';
         echo '<td class="userfullname">'.fullname($user).'<br>';
+
+        // 20210814 Do not really need the old, limited info, stats.
+/*
         if ($entry) {
             // 20210606 Added word/character counts.
             $rawwordcount = count_words($entry->text);
@@ -354,7 +357,7 @@ class results {
 
             // Temporary error fix.
             //$errors = array();
-            $data = diarystats::get_diary_stats($entry->text, $entry->format);
+            //$data = diarystats::get_diary_stats($entry->text, $entry->format);
 
 
 
@@ -375,7 +378,7 @@ class results {
                 .get_string("lastedited").': '
                 .userdate($entry->timemodified).' </div>';
         }
-
+*/
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
         
@@ -391,16 +394,53 @@ class results {
 
         // If there is a user entry, format it and show it.
         if ($entry) {
+            $temp = $entry;
             echo self::diary_format_entry_text($entry, $course);
+            // 20210701 Moved copy 1 of 2 here due to new stats.
+            echo '</div></td><td style="width:55px;"></td></tr>';
+            // 20210703 Moved to here from up above so the table gets rendered in the right spot.
+            //$data = diarystats::get_diary_stats($entry->text, $entry->format);
+            //$data = diarystats::get_diary_stats($temp, $diary->errorcmid);
+            $data = diarystats::get_diary_stats($temp, $diary);
+/*
+            // 20210701 Moved stats here to prevent error for users without an entry.
+            echo '<table class="generaltable" style="margin-left:auto;margin-right:auto;">'
+            .'<tr><td>'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
+                .'<td>'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
+                .'<td> </td>'
+                .'<td> </td></tr>'
+            .'<tr><td>'.get_string('chars', 'diary').' '.$data->chars.'</td>'
+                .'<td>'.get_string('words', 'diary').' '.$data->words.'</td>'
+                .'<td>'.get_string('sentences', 'diary').' '.$data->sentences.'</td>'
+                .'<td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
+            .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td>'
+                .'<td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td>'
+                .'<td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td>'
+                .'<td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
+            .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td>'
+                .'<td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td>'
+                .'<td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td>'
+                .'<td>'.get_string('commonerrors', 'diary').' '.$data->commonerrors.'</td></tr>'
+            .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td>'
+                .'<td>Total Syllables '.$data->totalsyllabels.' </td>'
+                .'<td>FK Grade '.$data->fkgrade.' </td>'
+                .'<td>FK Reading Ease '.$data->fkreadease.' </td></tr>'
+            .'</table>';
+*/
         } else {
             print_string("noentry", "diary");
+            // 20210701 Moved copy 2 of 2 here due to new stats.
+            echo '</div></td><td style="width:55px;"></td></tr>';
+
         }
-        echo '</div></td><td style="width:55px;"></td></tr>';
+        // 20210701 Commented out due to new stats required copies  in the if just above here.
+        //echo '</div></td><td style="width:55px;"></td></tr>';
 
 //////////////////////////////////////////////////////////////////////////////////
 
         echo '</table>';
 
+/*
         echo '<table class="generaltable" style="margin-left:auto;margin-right:auto;">'
             .'<tr><td>'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
                 .'<td>'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
@@ -423,6 +463,8 @@ class results {
                 .'<td>FK Grade '.$data->fkgrade.' </td>'
                 .'<td>FK Reading Ease '.$data->fkreadease.' </td></tr>'
             .'</table>';
+            
+*/
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
  
 //////////////////////////////////////////////////////////////////////////////////
@@ -439,7 +481,6 @@ class results {
                     'id' => $entry->teacher
                 ));
             }
-
             // 20200816 Get the current rating for this user!
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
                 $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
@@ -451,12 +492,15 @@ class results {
             }
             $aggregatestr = self::get_diary_aggregation($diary->assessed);
 
+            // Add picture of the last teacher to rate this entry.
             echo $OUTPUT->user_picture($teachers[$entry->teacher], array(
                 'courseid' => $course->id,
                 'alttext' => true
             ));
             echo '</td>';
-            echo '<td>'.get_string('rating', 'diary').':  ';
+            //20210707 Added teachers name to go with their picture.
+            echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname;
+            echo '<br>'.get_string('rating', 'diary').':  ';
 
             $attrs = array();
             $hiddengradestr = '';
@@ -518,11 +562,30 @@ class results {
             echo p($feedbacktext);
             echo '</textarea></p>';
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// The context that I deleted, probably really needs to be used. The autosave table is now
+// showing a contextid of 1 instead of the expected 331.
+// I added $context to the other 6 variables  coming into this function.
+// Down below the autosave = false does NOT seem to be working as I am getting LOTS of new entries
+// in which the drafttext is the feedback comment! Refer to about line 225 of edit.php. I think
+// my problem is probably due to not issuing the file_postupdate_standard_editor call.
+// This makes me really think I need to delete all my work from today, and try doing it
+// as a results_form or report_form.
+
+            // 20210630 Switched from plain textarea to an editor.
+            $editor = editors_get_preferred_editor(FORMAT_HTML);
+            //echo '<p>'.$editor->use_editor('c'.$entry->id).'</p>';
+            echo $editor->use_editor('c'.$entry->id, ['context' => $context, 'autosave' => false], ['return_types' => FILE_EXTERNAL]);
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
             if ($feedbackdisabledstr != '') {
                 echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
             }
             echo '</td></tr>';
         }
+        //echo '<tr><td class="userpix"> test 1</td><td>';
+
+        //echo 'Will try to add a text editor for a form.</td></tr>';
         echo '</table>';
     }
 

@@ -56,7 +56,24 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                                                  'timemodified',
                                                  'timeopen',
                                                  'timeclose',
-                                                  'editall'));
+                                                 'editall',
+                                                 'editdates',
+                                                 'entrybgc',
+                                                 'entrytextbgc',
+                                                 'enablestats',
+                                                 'mincharlimit',
+                                                 'maxcharlimit',
+                                                 'minwordlimit',
+                                                 'maxwordlimit',
+                                                 'minmaxpercent',
+                                                 'enableautorating',
+                                                 'itemtype',
+                                                 'itemcount',
+                                                 'itempercent',
+                                                 'showtextstats',
+                                                 'textstatitems',
+                                                 'errorcmid',
+                                                 'errorpercent'));
 
         $entries = new backup_nested_element('entries');
         $entry = new backup_nested_element('entry', array('id'),

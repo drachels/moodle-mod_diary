@@ -22,20 +22,23 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 defined('MOODLE_INTERNAL') || die();
+use mod_diary\local\diarystats;
 
 if ($ADMIN->fulltree) {
+
+
 
     // Availability settings.
     $settings->add(new admin_setting_heading('mod_diary/availibility', get_string('availability'), ''));
 
-    $settings->add(new admin_setting_configselect('diary/showrecentactivity',
+    $settings->add(new admin_setting_configselect('mod_diary/showrecentactivity',
         get_string('showrecentactivity', 'diary'),
         get_string('showrecentactivity', 'diary'), 1, array(
         '0' => get_string('no'),
         '1' => get_string('yes')
     )));
 
-    $settings->add(new admin_setting_configselect('diary/overview',
+    $settings->add(new admin_setting_configselect('mod_diary/overview',
         get_string('showoverview', 'diary'),
         get_string('showoverview', 'diary'), 1, array(
         '0' => get_string('no'),
@@ -43,7 +46,7 @@ if ($ADMIN->fulltree) {
     )));
 
     // 20201015 Default edit all entries setting.
-    $settings->add(new admin_setting_configselect('diary/editall',
+    $settings->add(new admin_setting_configselect('mod_diary/editall',
         get_string('editall', 'diary'),
         get_string('editall_help', 'diary'), 1, array(
         '0' => get_string('no'),
@@ -51,7 +54,7 @@ if ($ADMIN->fulltree) {
     )));
 
     // 20201119 Default edit the date of any entry setting.
-    $settings->add(new admin_setting_configselect('diary/editdates',
+    $settings->add(new admin_setting_configselect('mod_diary/editdates',
         get_string('editdates', 'diary'),
         get_string('editdates_help', 'diary'), 1, array(
         '0' => get_string('no'),
@@ -84,4 +87,190 @@ if ($ADMIN->fulltree) {
     $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
+
+///////////////////// New stuff.
+
+    // 20210812 Diary show/hide statistics setting.
+    $name = 'mod_diary/enablestats';
+    $title = get_string('enablestats_title', 'diary');
+    $description = get_string('enablestats_descr', 'diary');
+    $default = 1;
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        array(
+        '0' => get_string('no'),
+        '1' => get_string('yes')
+    )));
+
+    // 20210704 Added heading for autorating options section.
+    $name = 'autorating';
+    $label = get_string('autorating', 'mod_diary');
+    $description = get_string('autorating_help', 'mod_diary');
+    $settings->add(new admin_setting_heading($name, $label, $description));
+    
+    // 20210708 Diary enable autorating setting.
+    $name = 'mod_diary/autorating';
+    $title = get_string('autorating_title', 'diary');
+    $description = get_string('autorating_descr', 'diary');
+    $default = 1;
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        array(
+        '0' => get_string('no'),
+        '1' => get_string('yes')
+    )));
+
+    // 20210708 Diary itemtype setting.
+    $name = 'mod_diary/itemtype';
+    $title = get_string('itemtype_title', 'diary');
+    $description = get_string('itemtype_descr', 'diary');
+    $default = 0;
+    $itemtypes = array();
+    $itemtypes = diarystats::get_item_types($itemtypes);
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        $itemtypes));
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+
+    // 20210708 Diary expected number of items setting.
+    $settings->add(new admin_setting_configtext('mod_diary/itemcount',
+        get_string('itemcount', 'diary'),
+        get_string('itemcount_help', 'diary'), '', PARAM_INT, 10));
+
+    // 20210712 Diary expected number of items error percentage setting.
+    $name = 'mod_diary/itempercent';
+    $plugin = 'mod_diary';
+    $title = get_string('itempercent', 'diary');
+    $description = get_string('itempercent_help', 'diary');
+    $default = 0;
+    $options = array();
+    $options = diarystats::get_rating_options($plugin);
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        $options, 10));
+
+/////////////////////
+    // 20210712 Added heading for min/max options section.
+    $name = 'minmaxhdr';
+    $label = get_string('minmaxhdr', 'mod_diary');
+    $description = get_string('minmaxhdr_help', 'mod_diary');
+    $settings->add(new admin_setting_heading($name, $label, $description));
+    
+    // 20210708 Diary minimum characters setting.
+    $settings->add(new admin_setting_configtext('mod_diary/mincharlimit',
+        get_string('mincharlimit', 'diary'),
+        get_string('mincharlimit_help', 'diary'), '', PARAM_INT, 10));
+
+    // 20210708 Diary maximum characters setting.
+    $settings->add(new admin_setting_configtext('mod_diary/maxcharlimit',
+        get_string('maxcharlimit', 'diary'),
+        get_string('maxcharlimit_help', 'diary'), '', PARAM_INT, 10));
+
+    // 20210708 Diary minimum words setting.
+    $settings->add(new admin_setting_configtext('mod_diary/minwordlimit',
+        get_string('minwordlimit', 'diary'),
+        get_string('minwordlimit', 'diary'), '', PARAM_INT, 10));
+
+    // 20210708 Diary maximum words setting.
+    $settings->add(new admin_setting_configtext('mod_diary/maxwordlimit',
+        get_string('maxwordlimit', 'diary'),
+        get_string('maxwordlimit', 'diary'), '', PARAM_INT, 10));
+
+    // 20210712 Diary expected min/max error percentage setting.
+    $name = 'mod_diary/minmaxpercent';
+    $plugin = 'mod_diary';
+    $title = get_string('minmaxpercent', 'diary');
+    $description = get_string('minmaxpercent_help', 'diary');
+    $default = 0;
+    $options = array();
+    $options = diarystats::get_rating_options($plugin);
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        $options, 10));
+
+/////////////////////
+    // 20210712 Added heading for text stats options section.
+    $name = 'statshdr';
+    $label = get_string('statshdr', 'mod_diary');
+    $description = get_string('statshdr_help', 'mod_diary');
+    $settings->add(new admin_setting_heading($name, $label, $description));
+
+    // 20210712 Added enable/disable show statistics setting.
+    $name = 'mod_diary/showtextstats';
+    $plugin = 'mod_diary';
+    $title = get_string('showtextstats', 'diary');
+    $description = get_string('showtextstats_help', 'diary');
+    $default = 0;
+    $options = array();
+    $options = diarystats::get_showhide_options($plugin);
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        $options, 10));
+/*
+// Need to finish this setting as it is currently incomplete.
+
+    // 20210712 Added list of statistics items setting that can be enabled/disabled.
+    $name = 'mod_diary/textstatitems';
+    $plugin = 'mod_diary';
+    $title = get_string('textstatitems', 'diary');
+    $description = get_string('textstatitems_help', 'diary');
+    $default = 0;
+    $options = array();
+    $options = diarystats::get_textstatitems_options(true);
+    $elements = array();
+    foreach ($options as $value => $text) {
+        $elements[] = $mform->createElement('checkbox', $name."[$value]",  '', $text);
+    }
+*/
+
+
+
+/////////////////////
+    // 20210712 Added heading for common errors options section.
+    $name = 'commonerrors';
+    $label = get_string('commonerrors', 'mod_diary');
+    $description = get_string('commonerrors_help', 'mod_diary');
+    $settings->add(new admin_setting_heading($name, $label, $description));
+/*
+    // NOT SURE THAT I CAN ADD A SETTING FOR THE GLOSSARY NAME
+    // 20210712 Added selector to pick a glossary of common errors.
+    $name = 'mod_diary/errorcmid';
+    $plugin = 'mod_diary';
+    $title = get_string('errorcmid', 'diary');
+    $description = get_string('errorcmid_help', 'diary');
+    $default = 0;
+    $options = array();
+    $options = diarystats::get_rating_options($plugin);
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        $options, 10));
+*/
+    // 20210712 Diary expected common error percentage setting.
+    $name = 'mod_diary/errorpercent';
+    $plugin = 'mod_diary';
+    $title = get_string('errorpercent', 'diary');
+    $description = get_string('errorpercent_help', 'diary');
+    $default = 0;
+    $options = array();
+    $options = diarystats::get_rating_options($plugin);
+    $settings->add(new admin_setting_configselect($name,
+        $title,
+        $description,
+        $default,
+        $options, 10));
 }

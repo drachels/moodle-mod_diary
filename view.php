@@ -58,10 +58,14 @@ if (! $entriesmanager && ! $canadd) {
     throw new moodle_exception(get_string('accessdenied', 'diary'));
 }
 
-if (! $diary = $DB->get_record("diary", array(
-    "id" => $cm->instance
-))) {
+if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
+} else {
+    // 20210705 Added new activity color setting.
+    // Moved here so it is set only once. Old location executed for every entry.
+    $color3 = $diary->entrybgc;
+    $color4 = $diary->entrytextbgc;
+    $errorcmid = $diary->errorcmid;
 }
 
 if (! $cw = $DB->get_record("course_sections", array(
@@ -74,6 +78,47 @@ if (! $cw = $DB->get_record("course_sections", array(
 $diaryname = format_string($diary->name, true, array(
     'context' => $context
 ));
+
+// 20210710 Add autorating info into the description only if autorating is enabled.
+if ($diary->enableautorating) {
+/*
+    // 20210710 Add check and description addition for type of countable items.
+    $itemtypes['0'] = get_string('none');
+    $itemtypes['1'] = get_string('chars', 'diary');
+    $itemtypes['2'] = get_string('words', 'diary');
+    $itemtypes['3'] = get_string('sentences', 'diary');
+    $itemtypes['4'] = get_string('paragraphs', 'diary');
+    $itemtypes['5'] = get_string('files', 'diary');
+*/
+    // 20210711 In the intro (description), add the item type and how many of them must be used in this diary entry.
+    $itemtypes = array();
+    $itemtypes = diarystats::get_item_types($itemtypes);
+    if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
+        $diary->intro .= get_string('itemtype_desc', 'diary', ['one' => $itemtypes[$diary->itemtype], 'two' => $diary->itemcount]).'<br>';
+    }
+
+    // 20210711 In the intro (description), add the minimum and maximum character and word counts that must be used in this diary entry.
+    // 20210712 Moved from here to, function get_minmaxes($diary), in diarystats and simplified the execution.
+    //$minmaxes = array();
+    //$minmaxes = diarystats::get_minmaxes($diary);
+    diarystats::get_minmaxes($diary);
+
+/*
+    // 20210710 Add checks and description additions for mins and maxes. This is temporary and probably needs to be moved to somewhere else so it can be shown on the edit.php page, too.
+    if ($diary->mincharlimit > 0) {
+        $diary->intro .= get_string('mincharlimit_desc', 'diary', ($diary->mincharlimit)).'<br>';
+    }
+    if ($diary->maxcharlimit > 0) {
+        $diary->intro .= get_string('maxcharlimit_desc', 'diary', ($diary->maxcharlimit)).'<br>';
+    }
+    if ($diary->minwordlimit > 0) {
+    $diary->intro .= get_string('minwordlimit_desc', 'diary', ($diary->minwordlimit)).'<br>';
+    }
+    if ($diary->maxwordlimit > 0) {
+        $diary->intro .= get_string('maxwordlimit_desc', 'diary', ($diary->maxwordlimit)).'<br>';
+    }
+*/
+}
 
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
@@ -376,8 +421,12 @@ if ($timenow > $timestart) {
                 echo '<p align="center"><b>'.get_string('blankentry', 'diary').'</b></p>';
             } else if ($thispage <= $perpage) {
                 $thispage ++;
-                $color3 = get_config('mod_diary', 'entrybgc');
-                $color4 = get_config('mod_diary', 'entrytextbgc');
+                //$color3 = get_config('mod_diary', 'entrybgc'); 20210704 Switched to a setting.
+                //$color4 = get_config('mod_diary', 'entrytextbgc'); 20210704 Switched to a setting.
+
+                // 20210705 Added new activity color setting. 20210704 Switched to a setting.
+                //$color3 = $diary->entrybgc; 20210704 Switched to a setting.
+                //$color4 = $diary->entrytextbgc; 20210704 Switched to a setting.
 
                 // 20210501 Changed to class, start a division to contain the overall entry.
                 echo '<div class="entry" style="background: '.$color3.';">';
@@ -411,6 +460,8 @@ if ($timenow > $timestart) {
 
                 // Info regarding entry details with simple word count, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
+                    /*
+                    // 20210715 Need to move all these former minor stats to the diarystats.php file.
                     if (! empty($entry->timemodified)) {
                         // 20210606 Calculate raw word/character counts.
                         $rawwordcount = count_words($entry->text);
@@ -426,123 +477,18 @@ if ($timenow > $timestart) {
                         $stdwordcharcount = strlen($plaintext);
                         $stdwordspacecount = substr_count($plaintext, ' ');
                         // @codingStandardsIgnoreLine
-                        // $newwordcount = str_word_count($entry->text, 0);
                         $newwordcount = count_words($plaintext);
                         $newcharcount = (core_text::strlen($plaintext) - $clnwordspacecount);
                         // @codingStandardsIgnoreLine
-                        // $newcharcount = ((strlen($plaintext)) - $clnwordspacecount);
-                        // $newsentencecount = preg_split('/[!?.]+(?![0-9])/', $entry->text);
                         $newsentencecount = preg_split('/[!?.]+(?![0-9])/', $plaintext);
-
                         $newsentencecount = array_filter($newsentencecount);
                         $newsentencecount = count($newsentencecount);
 
-                        // Temporary error fix.
-                        //$errors = array();
-                        //$temp = htmlspecialchars(trim(strip_tags($entry->text)));
-                        $temp = $entry->text;
-                        $format = $entry->format;
-                        //$data = diarystats::get_diary_stats($entry->text);
-
-                        $data = diarystats::get_diary_stats($temp, $format);
-                        //$test = diarystats::update_current_response($temp);
-                        //$data = diarystats::get_diary_stats(question_utils::to_plain_text($entry->text));
-
-                        //print_object($data);
-                        // Plain list 1.
-                        /*
-                        echo '<table class="generaltable">'
-                             .'<tr><td>'.get_string('details', 'diary').'</td></tr><br>'
-                             .'<tr><td>'.get_string('chars', 'diary').' '.$data->chars.'</td></tr>'
-                             .'<tr><td>'.get_string('words', 'diary').' '.$data->words.'</td></tr>'
-                             .'<tr><td>'.get_string('sentences', 'diary').' '.$data->sentences.'</td></tr>'
-                             .'<tr><td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
-                             .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td></tr>'
-                             .'<tr><td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td></tr>'
-                             .'<tr><td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td></tr>'
-                             .'<tr><td>'.get_string('commonerror', 'diary').' '.$data->commonerrors.'</td></tr>'
-                             .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td></tr>'
-                             .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td></tr>'
-                             .'<tr><td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td></tr>'
-                             .'<tr><td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
-                             .'<tr><td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td></tr>'
-                             .'</table>';
-                        */
-                             
-                        /*
-                        echo '<table class="generaltable">'
-                             .'<tr><th>'.get_string('details', 'diary').'</th><th>Characters</th><th>Words</th><th>Sentences</th><th>Spaces</th></tr>'
-                             .'<tr><td>Raw Text</td><td>'.$rawwordcharcount.'</td><td>'.$rawwordcount.'</td><td>'.$data->sentences.'</td><td>'.$rawwordspacecount.'</td></tr>'
-                             .'<tr><td>Clean Text</td><td>'.$clnwordcharcount.'</td><td>'.$clnwordcount.'</td><td>'.$data->sentences.'</td><td>'.$clnwordspacecount.'</td></tr>'
-                             .'<tr><td>Standardized Text</td><td>'.$stdwordcharcount.'</td><td>'.$stdwordcount.'</td><td>'.$data->sentences.'</td><td>'.$stdwordspacecount.'</td></tr>'
-                             .'<tr><td>'.get_string('details', 'diary').'</td><td>char</td><td>words</td><td>sentences</td></tr>'
-                             .'<tr><td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
-                             .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td></tr>'
-                             .'<tr><td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td></tr>'
-                             .'<tr><td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td></tr>'
-                             .'<tr><td>'.get_string('commonerror', 'diary').' '.$data->commonerrors.'</td></tr>'
-                             .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td></tr>'
-                             .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td></tr>'
-                             .'<tr><td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td></tr>'
-                             .'<tr><td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
-                             .'<tr><td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td></tr>'
-                             .'</table>';
-                        */
-
-                        echo '<table class="generaltable">'
-                             .'<tr><td style="width: 25%">'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
-                                 .'<td style="width: 25%">'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
-                                 .'<td style="width: 25%">'.get_string('created', 'diary', ['one' => $diff->days, 'two' => $diff->h]).'</td>'
-                                 .'<td style="width: 25%"> </td>'
-                             .'<tr><td>'.get_string('chars', 'diary').' '.$data->chars.'</td>'
-                                 .'<td>'.get_string('words', 'diary').' '.$data->words.'</td>'
-                                 .'<td>'.get_string('sentences', 'diary').' '.$data->sentences.'</td>'
-                                 .'<td>'.get_string('paragraphs', 'diary').' '.$data->paragraphs.'</td></tr>'
-                             .'<tr><td>'.get_string('uniquewords', 'diary').' '.$data->uniquewords.'</td>'
-                                 .'<td>'.get_string('longwords', 'diary').' '.$data->longwords.'</td>'
-                                 .'<td>'.get_string('wordspersentence', 'diary').' '.$data->wordspersentence.'</td>'
-                                 .'<td>'.get_string('longwordspersentence', 'diary').' '.$data->longwordspersentence.'</td></tr>'
-                             .'<tr><td>'.get_string('charspersentence', 'diary').' '.$data->charspersentence.'</td>'
-                                 .'<td>'.get_string('sentencesperparagraph', 'diary').' '.$data->sentencesperparagraph.'</td>'
-                                 .'<td>'.get_string('fogindex', 'diary').' '.$data->fogindex.'</td>'
-                                 .'<td>'.get_string('commonerror', 'diary').' '.$data->commonerrors.'</td></tr>'
-                             .'<tr><td>'.get_string('lexicaldensity', 'diary').' '.$data->lexicaldensity.'</td>'
-                                 .'<td>Total Syllables '.$data->totalsyllabels.' </td>'
-                                 .'<td>FK Grade '.$data->fkgrade.' </td>'
-                                 .'<td>FK Reading Ease '.$data->fkreadease.' </td></tr>'
-                             .'</table>';
-
-                        //$temp = get_string('numwordsnew', 'diary', ['one' => $data['words'],
-                        //                                            'two' => $data['chars'],
-                        //                                            'three' => $data['sentences'],
-                        //                                            'four' => $data['paragraphs']]);
-                        // @codingStandardsIgnoreLine
-                        // $entry->entrycomment .= " This is the diarystats: ";
-                        // $entry->entrycomment .= $data->chars;
-                        // $entry->teacher = 2;
-                        // $entry->timemarked = time();
-                        // $DB->update_record("diary_entries", $entry);
-                        // @codingStandardsIgnoreLine
-                        /*
-                        echo '<div class="lastedit"><strong>'
-                            .get_string('details', 'diary').'</strong> '
-                            .get_string('numwordsraw', 'diary', ['one' => $rawwordcount,
-                                                                 'two' => $rawwordcharcount,
-                                                                 'three' => $rawwordspacecount]).'<br>'
-                            .get_string('numwordscln', 'diary', ['one' => $clnwordcount,
-                                                                 'two' => $clnwordcharcount,
-                                                                 'three' => $clnwordspacecount]).'<br>'
-                            .get_string('numwordsstd', 'diary', ['one' => $stdwordcount,
-                                                                 'two' => $stdwordcharcount,
-                                                                 'three' => $stdwordspacecount]).'<br>'
-                            .get_string('created', 'diary', ['one' => $diff->days,
-                                                             'two' => $diff->h]).'<br>'
-                            .get_string('numwordsnew', 'diary', ['one' => $newwordcount,
-                                                                 'two' => $newcharcount,
-                                                                 'three' => $newsentencecount,
-                                                                 'four' => $data['paragraphs']]).'<br>' ;
-                            */
-
+*/
+                        // 20210704 Go calculate stats and print stats table.
+                        $data = diarystats::get_diary_stats($entry, $diary);
+// THIS IS THE REAL ONE!
+/*
                         echo '<div class="lastedit"><strong>'
                             .get_string('details', 'diary').'</strong> '
                             .get_string('numwordsraw', 'diary', ['one' => $rawwordcount,
@@ -562,10 +508,10 @@ if ($timenow > $timestart) {
 
                         echo '<strong> '.get_string('lastedited').': </strong> ';
                         echo userdate($entry->timemodified).'<br>';
-
                         echo "</div>";
 
                     }
+                    */
 
                     // Added lines to mark entry as needing regrade.
                     if (! empty($entry->timecreated) and ! empty($entry->timemodified) and empty($entry->timemarked)) {
@@ -591,7 +537,11 @@ if ($timenow > $timestart) {
                     // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
                     // Format output using renderer.php.
+                    
+                    
+                    
                     echo $output->diary_print_feedback($course, $entry, $grades);
+                    //echo $output->result::diary_format_entry_text($course, $entry, $grades);
                 }
                 // This adds blank space between entries.
                 echo '</div></p>';

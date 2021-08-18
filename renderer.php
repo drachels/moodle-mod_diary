@@ -218,7 +218,8 @@ class mod_diary_renderer extends plugin_renderer_base {
         echo '</div>';
 
         // Feedback text.
-        echo format_text($entry->entrycomment, FORMAT_PLAIN);
+        // Original code, echo format_text($entry->entrycomment, FORMAT_PLAIN); followed by new code.
+        echo format_text($entry->entrycomment, FORMAT_HTML);
         echo '</td></tr></table>';
     }
 }

@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_diary\local\results;
+use mod_diary\local\diarystats;
 use \mod_diary\event\invalid_access_attempt;
 
 require_once("../../config.php");
@@ -64,6 +65,9 @@ if (($diary->timeclose) && (time() > $diary->timeclose)) {
     $event->trigger();
     redirect('view.php?id='.$id, get_string('invalidaccessexp', 'diary'));
 }
+
+// 20210817 Add min/max info to the description so user can see them while editing an entry.
+diarystats::get_minmaxes($diary);
 
 // Header.
 $PAGE->set_url('/mod/diary/edit.php', array('id' => $id));
@@ -237,6 +241,10 @@ if ($form->is_cancelled()) {
 
     $DB->update_record('diary_entries', $newentry);
 
+    // Try adding autosave cleanup here.
+    // will need to search the mdl_editor_atto_autosave table
+    // will need to find a match with contextid and user id.
+
     if ($entry) {
         // Trigger module entry updated event.
         $event = \mod_diary\event\entry_updated::create(array(
@@ -263,6 +271,7 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($diary->name));
 
 $intro = format_module_intro('diary', $diary, $cm->id);
+//$intro .= 'this is a test';
 echo $OUTPUT->box($intro);
 
 // Otherwise fill and print the form.

@@ -87,5 +87,156 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2020111900, 'diary');
     }
+
+    if ($oldversion < 2021081200) {
+
+        // Define field entrybgc to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('entrybgc', XMLDB_TYPE_CHAR, '25', null, XMLDB_NOTNULL, null, '#93FC84', 'editdates');
+
+        // Conditionally launch add field entrybgc.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field entrytextbgc to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('entrytextbgc', XMLDB_TYPE_CHAR, '25', null, XMLDB_NOTNULL, null, '#EEFC84', 'entrybgc');
+
+        // Conditionally launch add field entrytextbgc.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field enablestats to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('enablestats', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'entrytextbgc');
+
+        // Conditionally launch add field enablestats.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field mincharlimit to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('mincharlimit', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'enablestats');
+
+        // Conditionally launch add field mincharlimit.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field maxcharlimit to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('maxcharlimit', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'mincharlimit');
+
+        // Conditionally launch add field maxcharlimit.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field minwordlimit to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('minwordlimit', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'maxcharlimit');
+
+        // Conditionally launch add field minwordlimit.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field maxwordlimit to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('maxwordlimit', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'minwordlimit');
+
+        // Conditionally launch add field maxwordlimit.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field minmaxpercent to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('minmaxpercent', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '0', 'maxwordlimit');
+
+        // Conditionally launch add field minmaxpercent.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field enableautorating to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('enableautorating', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'minmaxpercent');
+
+        // Conditionally launch add field enableautorating.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field itemtype to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('itemtype', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'enableautorating');
+
+        // Conditionally launch add field itemtype.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field itemcount to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('itemcount', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '0', 'itemtype');
+
+        // Conditionally launch add field itemcount.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field itempercent to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('itempercent', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '0', 'itemcount');
+
+        // Conditionally launch add field itempercent.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field showtextstats to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('showtextstats', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'itempercent');
+
+        // Conditionally launch add field showtextstats.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field textstatitems to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('textstatitems', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'showtextstats');
+
+        // Conditionally launch add field textstatitems.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field errorcmid to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('errorcmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'textstatitems');
+
+        // Conditionally launch add field errorcmid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field errorpercent to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('errorpercent', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '0', 'errorcmid');
+
+        // Conditionally launch add field errorpercent.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2021081200, 'diary');
+    }
+
     return true;
 }

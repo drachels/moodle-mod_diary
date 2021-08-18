@@ -13,21 +13,26 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * Defines the version of Diary.
- *
- * This code fragment is called by moodle_needs_upgrading() and
- * /admin/index.php
+ * Definition of Diary scheduled tasks.
  *
  * @package   mod_diary
- * @copyright 2019 onwards AL Rachels drachels@drachels.com
+ * @category  task
+ * @copyright 2021 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021081200;      // The current module version (Date: YYYYMMDDXX).
-$plugin->requires  = 2015111600;      // Requires Moodle 3.0 version.
-$plugin->cron      = 60;              // Period for cron to check this module (secs).
-$plugin->component = 'mod_diary';
-$plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '3.5.0 (Build: 2021081200)'; // User-friendly version number.
+$tasks = array(
+    array(
+        'classname' => 'mod_diary\task\cron_task',
+        'blocking' => 0,
+        'minute' => '*',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*'
+    )
+);

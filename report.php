@@ -411,8 +411,12 @@ if (! $users) {
     // Add save button at the top of the list of users with entries.
     echo $saveallbutton;
 
-    $dcolor3 = get_config('mod_diary', 'entrybgc');
-    $dcolor4 = get_config('mod_diary', 'entrytextbgc');
+    //$dcolor3 = get_config('mod_diary', 'entrybgc');
+    //$dcolor4 = get_config('mod_diary', 'entrytextbgc');
+    //print_object($diary);
+    // 20210705 Added new activity color setting. Only the overall background here. Entry text is in results.
+    $dcolor3 = $diary->entrybgc;
+    //$dcolor4 = $diary->entrytextbgc;
 
     // Print a list of users who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup, $sortoption)) {
@@ -420,7 +424,8 @@ if (! $users) {
             echo '<div class="entry" style="background: '.$dcolor3.'">';
 
             // Based on toolbutton and on list of users with at least one entry, print the entries on screen.
-            echo results::diary_print_user_entry($course,
+            echo results::diary_print_user_entry($context,
+                                                 $course,
                                                  $diary,
                                                  $user,
                                                  $entrybyuser[$user->id],
@@ -442,7 +447,8 @@ if (! $users) {
         // 20210511 Changed to class.
         echo '<div class="entry" style="background: '.$dcolor3.'">';
 
-        echo results::diary_print_user_entry($course,
+        echo results::diary_print_user_entry($context,
+                                             $course,
                                              $diary,
                                              $user,
                                              null,

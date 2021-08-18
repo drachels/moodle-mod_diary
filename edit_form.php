@@ -78,10 +78,8 @@ class mod_diary_entry_form extends moodleform
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
-
         $mform->addElement('hidden', 'firstkey');
         $mform->setType('firstkey', PARAM_INT);
-
         $mform->addElement('hidden', 'entryid');
         $mform->setType('entryid', PARAM_INT);
 

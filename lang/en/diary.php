@@ -48,6 +48,7 @@ $string['calendarend'] = '{$a} closes';
 $string['calendarstart'] = '{$a} opens';
 $string['configdateformat'] = 'This defines how dates are shown in diary reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
 $string['created'] = 'Created {$a->one} days and {$a->two} hours ago.';
+$string['crontask'] = 'Background processing for Diary module';
 $string['csvexport'] = 'Export to .csv';
 $string['currententry'] = 'Current diary entries:';
 $string['daysavailable'] = 'Days available';
@@ -70,12 +71,16 @@ $string['editingends'] = 'Editing period ends';
 $string['editthisentry'] = 'Edit this entry';
 $string['entries'] = 'Entries';
 $string['entry'] = 'Entry';
-$string['entrybgc_title'] = 'Diary entry/feedback background color';
-$string['entrybgc_descr'] = 'This sets the background color of a diary entry/feedback.';
 $string['entrybgc_colour'] = '#93FC84';
+$string['entrybgc_descr'] = 'This sets the background color of a diary entry/feedback.';
+$string['entrybgc_help'] = 'This sets the overall background color of each diary entry and feedback.';
+$string['entrybgc'] = 'Diary entry/feedback background color';
+$string['entrybgc_title'] = 'Diary entry/feedback background color';
 $string['entrycomment'] = 'Entry comment';
+$string['entrytextbgc'] = 'Diary text background color';
 $string['entrytextbgc_title'] = 'Diary text background color';
 $string['entrytextbgc_descr'] = 'This sets the background color of the text in a diary entry.';
+$string['entrytextbgc_help'] = 'This sets the background color of the text in a diary entry.';
 $string['entrytextbgc_colour'] = '#EEFC84';
 $string['exportfilename'] = 'entries.csv';
 $string['exportfilenamep1'] = 'All_Site';
@@ -185,30 +190,114 @@ $string['viewalldiaries'] = 'View all course diaries';
 $string['viewallentries'] = 'View {$a} diary entries';
 $string['viewentries'] = 'View entries';
 
+
+$string['autorating'] = 'Auto-rating';
+$string['autorating_help'] = 'These settings define the defaults for autorating in all new diarys.';
+$string['autorating_title'] = 'Auto-rating enable';
+$string['autorating_descr'] = 'If enabled, the rating for an entry will be automatically entered based on the other autorating settings.';
+$string['availabilityhdr'] = 'Availability';
 $string['chars'] = 'Characters';
 $string['charspersentence'] = 'Characters per sentence';
-$string['commonerror'] = 'Common error';
+$string['commonerrors'] = 'Common errors';
 $string['commonerrors_help'] = 'The common errors are defined in the "Glossary of errors" associated with this question.';
+$string['enableautorating_help'] = 'Enable, or disable, automatic ratings';
+$string['enableautorating'] = 'Enable automatic rating';
+$string['enablestats_help'] = 'Enable, or disable, viewing statistics for each entry.';
+$string['enablestats'] = 'Enable statistics';
+
+$string['enablestats_title'] = 'Enable statistics';
+$string['enablestats_descr'] = 'If enabled, the statistics for each entry will be shown.';
+
+$string['errorcmid_help'] = 'Choose the Glossary that contains a list of common errors. Each time one of the errors is found in the essay response, the specified penalty will be deducted from the student\'s rating for this entry.';
+$string['errorcmid'] = 'Glossary of errors';
+$string['errorpercent_help'] = 'Select the percentage of total rating that should be deducted for each error that is found in the response.';
+$string['errorpercent'] = 'Penalty per error';
+$string['files'] = 'Files';
+$string['fkgrade'] = 'FK Grade';
+$string['fkgrade_help'] = 'Flesch Kincaid grade level indicates the number of years of education generally required to understand this text. Try to aim for a grade level below 10.';
+$string['freadingease'] = 'Flesch reading ease';
+$string['freadingease_help'] = 'Flesch reading ease: high scores indicate your text is easier to read while lower scores indicate your text is more difficult to read. Try to aim for a reading ease over 60.';
 $string['fogindex_help'] = 'The Gunning fog index is a measure of readability. It is calculated using the following formula.
 
-* ((words per sentence) + (long words per sentence)) x 0.4
+ ((words per sentence) + (long words per sentence)) x 0.4
 
-For more information see: <https://en.wikipedia.org/wiki/Gunning_fog_index>';
+Try to aim for a grade level below 10. For more information see: <https://en.wikipedia.org/wiki/Gunning_fog_index>';
 $string['fogindex'] = 'Fog index';
+$string['itemcount_help'] = 'The minimum number of countable items that must be in the essay text in order to achieve the maximum rating for this entry.
+
+Note, that this value may be rendered ineffective by the rating bands, if any, defined below.';
+$string['itemcount'] = 'Expected number of items';
+$string['itempercent'] = 'Penalty per item';
+$string['itempercent_help'] = 'Select the percentage of total rating that should be deducted for each missing countable item.';
+$string['itemtype_help'] = 'Select the type of items in the essay text that will contribute to the auto-rating.';
+$string['itemtype'] = 'Type of countable items';
+$string['itemtypenone'] = 'None';
+$string['itemtypenchars'] = 'Characters';
+$string['itemtypewords'] = 'Words';
+$string['itemtypensentences'] = 'Sentences';
+$string['itemtypeparagraphs'] = 'Paragraphs';
+$string['itemtypefiles'] = 'Files';
+$string['itemtype_title'] = 'Type of countable items';
+$string['itemtype_desc'] = 'The type of items in the essay text that will contribute to the auto-rating is, <strong>{$a->one}</strong>, and for full marks you must use, <strong>{$a->two}</strong>, of them.';
+$string['itemtype_descr'] = 'Select the type of items in the essay text that will contribute to the auto-rating.';
 $string['lexicaldensity_help'] = 'The lexical density is a percentage calculated using the following formula.
 
-* 100 x (number of unique words) / (total number of words)
+ 100 x (number of unique words) / (total number of words)
 
 Thus, an essay in which many words are repeated has a low lexical density, while a essay with many unique words has a high lexical density.';
 $string['lexicaldensity'] = 'Lexical density';
-$string['longwords_help'] = '"Long words" are words that have three or more syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
-$string['longwords'] = 'Long words';
+$string['longwords_help'] = 'Long words are words that have three or more syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
+$string['longwords'] = 'Unique long words';
+
+$string['mediumwords_help'] = 'Medium words are words that have two syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
+$string['mediumwords'] = 'Unique medium words';
+
+$string['shortwords_help'] = 'Short words are words that have only one syllable. Note that the algorithm for determining the number of syllables yields only approximate results.';
+$string['shortwords'] = 'Unique short words';
+
 $string['longwordspersentence'] = 'Long words per sentence';
+
+$string['mincharlimit'] = 'Minimum character count';
+$string['mincharlimit_help'] = 'If a number is entered, the user must use more characters than the minimum number listed.';
+$string['mincharlimit_desc'] = 'Note: This entry must use a <strong>minimum of {$a} characters.</strong>';
+
+$string['maxcharlimit'] = 'Maximum character count';
+$string['maxcharlimit_help'] = 'If a number is entered, the user must use less characters than the maximum number listed.';
+$string['maxcharlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} characters.</strong>';
+
+$string['minmaxhdr'] = 'Min/Max counts';
+$string['minmaxhdr_help'] = 'These settings define the defaults for minimum and maximum character and word counts in all new diarys.';
+$string['minmaxpercent'] = 'Penalty per Min/Max count error';
+$string['minmaxpercent_help'] = 'Select the percentage of total rating that should be deducted for each Min/Max count error.';
+
+$string['minwordlimit'] = 'Minimum word count';
+$string['minwordlimit_help'] = 'If a number is entered, the user must use more words than the minimum number listed.';
+$string['minwordlimit_desc'] = 'Note: This entry must use a <strong>minimum of {$a} words.</strong>';
+
+$string['maxwordlimit'] = 'Maximum word count';
+$string['maxwordlimit_help'] = 'If a number is entered, the user must use less words than the maximum number listed.';
+$string['maxwordlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} words.</strong>';
+
 $string['missing'] = 'Missing';
 $string['paragraphs'] = 'Paragraphs';
+$string['percentofentryrating'] = '{$a}% of the entry rating.';
 $string['present'] = 'Present';
 $string['sentences'] = 'Sentences';
 $string['sentencesperparagraph'] = 'Sentences per paragraph';
+$string['shownone'] = 'Show none';
+$string['showstudentsonly'] = 'Show students only';
+$string['showteachersonly'] = 'Show teachers only';
+$string['showteacherandstudents'] = 'Show teacher and students';
+$string['showtextstats_help'] = 'If this option is enabled, statistics about the text will be shown.';
+$string['showtextstats'] = 'Show text statistics?';
+$string['showtostudentsonly'] = 'Yes, show to students only';
+$string['showtoteachersonly'] = 'Yes, show to teachers only';
+$string['showtoteachersandstudents'] = 'Yes, show to teachers and students';
+$string['statshdr'] = 'Text statistics';
+$string['statshdr_help'] = 'These settings dfine the defaults for the statistics in all new diarys.';
+$string['textstatitems_help'] = 'Select any items here that you wish to appear in the text statistics that are shown on a view page, report page, and reportsingle page.';
+$string['textstatitems'] = 'Statistical items';
+$string['totalsyllables'] = 'Total Syllables';
 $string['uniquewords'] = 'Unique words';
 $string['words'] = 'Words';
 $string['wordspersentence'] = 'Words per sentence';

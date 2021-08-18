@@ -254,15 +254,19 @@ if (! $users) {
     // Add save button at the top of the list of users with entries.
     echo $saveallbutton;
 
-    $dcolor3 = get_config('mod_diary', 'entrybgc');
-    $dcolor4 = get_config('mod_diary', 'entrytextbgc');
+    //$dcolor3 = get_config('mod_diary', 'entrybgc');
+    //$dcolor4 = get_config('mod_diary', 'entrytextbgc');
+    // 20210705 Added new activity color setting. Only need to set the overall background color here.
+    $dcolor3 = $diary->entrybgc;
+    //$dcolor4 = $diary->entrytextbgc;
 
     foreach ($eee as $ee) {
         // 20210511 Changed to using class.
         echo '<div class="entry" style="background: '.$dcolor3.'">';
 
         // Based on the single selected user, print all their entries on screen.
-        echo results::diary_print_user_entry($course,
+        echo results::diary_print_user_entry($context,
+                                             $course,
                                              $diary,
                                              $user,
                                              $ee,
