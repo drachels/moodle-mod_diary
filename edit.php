@@ -22,22 +22,22 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_diary\local\results;
+use mod_diary\local\diarystats;
+use \mod_diary\event\invalid_access_attempt;
 
 require_once("../../config.php");
 require_once('lib.php'); // May not need this.
 require_once('./edit_form.php');
-
+global $DB;
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
-$firstkey = optional_param('firstkey', '', PARAM_INT); // Which entry to edit.
+$firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
-if (! $course = $DB->get_record("course", array(
-    "id" => $cm->course
-))) {
+if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -47,16 +47,30 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-if (! $diary = $DB->get_record("diary", array(
-    "id" => $cm->instance
-))) {
+if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
+// 20210613 Added check to prevent direct access to create new entry when activity is closed.
+if (($diary->timeclose) && (time() > $diary->timeclose)) {
+    // Trigger invalid_access_attempt with redirect to the view page.
+    $params = array(
+        'objectid' => $id,
+        'context' => $context,
+        'other' => array(
+            'file' => 'edit.php'
+        )
+    );
+    $event = invalid_access_attempt::create($params);
+    $event->trigger();
+    redirect('view.php?id='.$id, get_string('invalidaccessexp', 'diary'));
+}
+
+// 20210817 Add min/max info to the description so user can see them while editing an entry.
+diarystats::get_minmaxes($diary);
+
 // Header.
-$PAGE->set_url('/mod/diary/edit.php', array(
-    'id' => $id
-));
+$PAGE->set_url('/mod/diary/edit.php', array('id' => $id));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
@@ -111,6 +125,7 @@ $data->id = $cm->id;
 
 list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
                                                                                              $context,
+                                                                                             $diary,
                                                                                              $entry,
                                                                                              $action,
                                                                                              $firstkey);
@@ -157,8 +172,49 @@ if ($form->is_cancelled()) {
     $newentry->text = $fromform->text_editor['text'];
     $newentry->format = $fromform->text_editor['format'];
 
+    if (! $diary->editdates) {
+        // If editdates is NOT enabled do attempted cheat testing here.
+        // 20210619 Before we update, see if there is an entry in database with the same entryid.
+        $entry = $DB->get_record("diary_entries", array(
+            "userid" => $USER->id,
+            'id' => $fromform->entryid
+        ));
+    }
+
+    // 20210619 If user tries to change timecreated, prevent it.
+    // TODO: Need to move new code to up to just after getting $entry, to make a nested if.
+    // Currently not taking effect on the overall user grade unless the teacher rates it.
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
+        if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
+            // 20210620 New code to prevent attempts to change timecreated.
+            $newentry->entrycomment = get_string('invalidtimechange', 'diary');
+            $newentry->entrycomment .= get_string('invalidtimechangeoriginal', 'diary', ['one' => userdate($entry->timecreated)]);
+            $newentry->entrycomment .= get_string('invalidtimechangenewtime', 'diary', ['one' => userdate($newentry->timecreated)]);
+            // Probably do not want to just arbitraily set a rating.
+            // Should leave it up to the teacher, otherwise will need to acertain rating settings for the activity.
+            // @codingStandardsIgnoreLine
+            // $newentry->rating = 1;
+            $newentry->teacher = 2;
+            $newentry->timemodified = time();
+            $newentry->timemarked = time();
+            $newentry->timecreated = $entry->timecreated;
+            $fromform->timecreated = $entry->timecreated;
+            $newentry->entrycomment .= get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
+            $DB->update_record("diary_entries", $newentry);
+            // Trigger module entry updated event.
+            $event = \mod_diary\event\invalid_entry_attempt::create(array(
+                'objectid' => $diary->id,
+                'context' => $context
+            ));
+            $event->add_record_snapshot('course_modules', $cm);
+            $event->add_record_snapshot('course', $course);
+            $event->add_record_snapshot('diary', $diary);
+            $event->trigger();
+
+            redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
+            die();
+        }
         if (! $DB->update_record("diary_entries", $newentry)) {
             throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
         }
@@ -184,6 +240,10 @@ if ($form->is_cancelled()) {
     $newentry->timecreated = $fromform->timecreated;
 
     $DB->update_record('diary_entries', $newentry);
+
+    // Try adding autosave cleanup here.
+    // will need to search the mdl_editor_atto_autosave table
+    // will need to find a match with contextid and user id.
 
     if ($entry) {
         // Trigger module entry updated event.
@@ -211,6 +271,7 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($diary->name));
 
 $intro = format_module_intro('diary', $diary, $cm->id);
+//$intro .= 'this is a test';
 echo $OUTPUT->box($intro);
 
 // Otherwise fill and print the form.

@@ -1,4 +1,120 @@
-This files describes API changes in the diary code.
+This files describes API changes and other work in the diary code.
+=== 3.5.0 ===
+Diary_514 - Sort order label needs css setting. Removed all the hard coded h5's.
+    There were about 21 of them, 19 in view.php and two in the language file. 
+    Added classes, one for the whole table and one for some table cells.
+Diary_654 - There is a request for using Atto editor in report.php for feedback.
+    Have added the Atto editor so it appears on both the report.php and
+    reportsingle.php pages. Still need to add file handling.
+Diary_707 - link to index.php page on report.php page should be on the same line
+    as the toolbar. Made code changes as needed to move the link.
+Diary_711 - File report.php has hard coded tags that should be removed. Removed
+    them as part of my work in CSS changes.
+Diary_722 - Should move toolbar to the right like I did on the report.php page.
+    Moved toolbar to the right on view.php page.
+Diary_730 - Need an enablestats setting. 20210812 Created the new setting
+    along with new fields, selector, strings, and code as needed.
+20210812 Tested and seems to be working.
+Diary_732 - Missing the Diary icon on moodle.org. 20210815 This was Diary_765
+    on moodle311. 20210815 Forget what day I did it, but I changed from svg file
+    to gif and the icon now shows on moodle.org.
+Diary_733 - See about moving functions from mod_form to diarystats. Was Diary_764
+    which I have abandoned on moodle311. 20210712 Moved function get_item_types($itemtypes).
+    20210712 Moved function get_rating_options($plugin). 20210712 Moved 
+    get_showhide_options($plugin).
+Diary_734 - Need to convert from lib.php cron function to /classes/task/cron_task.php.
+    Added tasks.php file in db folder. Added task folder in classes folder. Added
+    cron_task.php file in classes/task/. The file, cron_tasks.php, still needs
+    some more work.
+Diary_736 - Need a way to slectively turn off autosave. It is not needed when
+    starting a totally new entry.
+
+Diary_737 - Config settings are not all named the same. Added mod_ to the four
+    items that were missing it.
+
+
+Diary_738 - Need activity color setting for entry's. Added new fields for the
+    two colors in mdl_diary table. Made changes to the install.xml and upgrade.php
+    to add two new fields, entrybgc and entrytextbgc. Updated the mod_form.php
+    file to now have appearances settings for the two colors. Added code changes
+    so the new settings are actually used. Added code changes to backup, which
+    was tested and it worked as expected.
+Diary_739 - Teacher's name is missing from reports. Added a new line break which
+    moved Rating and Average of ratings down one line. Then added code to output
+    the name of the last teacher to give feedback/rating. Seems to be working as
+    expected.
+Diary_740 - Need new DB fields for new statistics settings. Added nine new fields
+    to the mdl_diary table. Have gone back and added more fields for added ratings.
+Diary_742 - Need to pass diary->errorcmid to the get common errors function. Instead
+    of just passing $text(cleaned plain text) and $errorcmid(actually $diary->errorcmid),
+    I switched to passing $text and $diary. I found that I needed another item from
+    $diary, so it is easiest just to use the whole $diary array.
+Diary_743 - The mod_form.php needs updating for new settings. Added new settings
+    and other bits of code as needed to implement the new settings. The list still
+    needs work. It is not saving and restoring, yet.
+
+Diary_744 - The settings.php needs updating for new settings. Added headings, strings,
+    and settings as needed. STILL NEEDS WORK!
+
+Diary_745 - Need to develope additional statistics for each diary entry. Have
+    created 20 stats and now need to thoroughly test them. Still in development!
+    20210718 Rewrote count_syllables function and totalsyllables. 20210719 Added
+    two new class files: pluralise.php and syllables.php that greatly improve
+    the syllable count accuracy.
+Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive, and errorignorebreaks.
+    Added fileds to the xml file. Updated the upgrade.php file. Updated backup files.
+    Updated the mod_form.php file.
+Diary_749 - Multiple errors when, Type of countable items, is None. Added a check
+    to detect and prohibit when trying to autograde with None. 
+Diary_750 - V3.4.1 has three code style errors. Added the missing final blank line
+    to files diarystats.php, renderer.php, and settings.php. Pushed to github.
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+=== 3.4.1 ===
+Diary_741 - In results.php, function is_available, is duplicate of, function
+    diary_available . Removed code for, function is_available.
+Diary_742 - Issue#9 Possible to add entries for past date. Same fix as 743.
+Diary_743 - When editdates is disabled, Save, is broken. Added code that detects
+    a changed timecreated, and prevents it while automatically adding info about
+    the attempted change in the entry feeback (entrycomment) area.
+
+=== 3.4.0 ===
+Diary_142 - link to index.php page on report.php page should be on the same line
+    as the toolbar. Made code changes to move the link.
+Diary_143 - Backup is broken, see issue #12 and #13 on github. These two issues
+    were actually fixed in an earlier v3.2.x, but I forgot to close the ticket.
+Diary_145 - In Moodle 3.11 - String [grade,core] is deprecated. Added branch
+    check. 3.11 and above use gradenoun. 3.10 and below use grade.
+Diary_148 - Recent activity in M3.11 is showing user_picture::fields() is deprecated.
+    a branch check M3.11 and above use new method. M3.10 and below use old one.
+Diary_728 - Need to add word and character count to the report and
+    reportsingle page, entries. Added needed code and three new strings. Added
+    counts to view.php page entries, also. (raw, clean, and standardized)
+Diary_729 - two sets of buttons at bottom of report when everyone has at least one
+    entry. Added a check for empty $user list and if empty, skip last button set.
+Diary_730 - String [grade,core] is deprecated. Added a branch check for string
+    compatibility in renderer.php, diary_print_feedback function, about line 209.
+Diary_731 - In Moodle 3.11 user_picture::fields() is deprecated. Added a branch
+    check and code to fix the deprecated item.
+Diary_738 - It is possible to add entries for past dates. Added check in edit_form.php
+    that prevents sending the hidden calendar/date selector to the client computer.
+Diary_739 - A user can directly access edit.php via URL change when the diary is
+    closed. Added code to check to see if the diary is closed, and if so, log an
+    invalid access about it.
+
 === 3.3.0 ===
 Diary_707 - link to index.php page on report.php page should be on the same
     line as the toolbar. Moved the Index link down to the same line as the
@@ -11,6 +127,9 @@ Diary_712 - In Moodle 3.11 - String [grade,core] is deprecated. Added a
     branch check in results.php file about line 421.
 Diary_722 - Should move toolbar to the right like I did on the report.php page.
     Used span to float it to the right. 
+Diary_144 - File report.php has hard coded tags that should be removed. Removed
+    tags as needed.
+Diary_66 - Sort order label needs css setting. Removed hard coded css.
 
 === 3.2.1 ===
 Diary_703 - print_error deprecated - in multiple files. Fixed in

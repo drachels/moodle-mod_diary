@@ -278,128 +278,7 @@ function diary_user_complete($course, $user, $mod, $diary) {
     }
 }
 
-/**
- * Function to be run periodically according to the moodle cron.
- * Finds all diary notifications that have yet to be mailed out, and mails them.
- *
- * @return boolean True if successful.
- */
-function diary_cron() {
-    global $CFG, $USER, $DB;
 
-    $cutofftime = time() - $CFG->maxeditingtime;
-
-    if ($entries = diary_get_unmailed_graded($cutofftime)) {
-        $timenow = time();
-
-        $usernamefields = get_all_user_name_fields();
-        $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, '
-            .implode(', ', $usernamefields);
-
-        // To save some db queries.
-        $users = array();
-        $courses = array();
-
-        foreach ($entries as $entry) {
-
-            echo "Processing diary entry $entry->id\n";
-
-            if (! empty($users[$entry->userid])) {
-                $user = $users[$entry->userid];
-            } else {
-                if (! $user = $DB->get_record("user", array(
-                    "id" => $entry->userid
-                ), $requireduserfields)) {
-                    echo "Could not find user $entry->userid\n";
-                    continue;
-                }
-                $users[$entry->userid] = $user;
-            }
-
-            $USER->lang = $user->lang;
-
-            if (! empty($courses[$entry->course])) {
-                $course = $courses[$entry->course];
-            } else {
-                if (! $course = $DB->get_record('course', array(
-                    'id' => $entry->course
-                ), 'id, shortname')) {
-                    echo "Could not find course $entry->course\n";
-                    continue;
-                }
-                $courses[$entry->course] = $course;
-            }
-
-            if (! empty($users[$entry->teacher])) {
-                $teacher = $users[$entry->teacher];
-            } else {
-                if (! $teacher = $DB->get_record("user", array(
-                    "id" => $entry->teacher
-                ), $requireduserfields)) {
-                    echo "Could not find teacher $entry->teacher\n";
-                    continue;
-                }
-                $users[$entry->teacher] = $teacher;
-            }
-
-            // All cached.
-            $coursediarys = get_fast_modinfo($course)->get_instances_of('diary');
-            if (empty($coursediarys) || empty($coursediarys[$entry->diary])) {
-                echo "Could not find course module for diary id $entry->diary\n";
-                continue;
-            }
-            $mod = $coursediarys[$entry->diary];
-
-            // This is already cached internally.
-            $context = context_module::instance($mod->id);
-            $canadd = has_capability('mod/diary:addentries', $context, $user);
-            $entriesmanager = has_capability('mod/diary:manageentries', $context, $user);
-
-            if (! $canadd and $entriesmanager) {
-                continue; // Not an active participant.
-            }
-
-            $diaryinfo = new stdClass();
-            // 20200829 Added users first and last name to message.
-            $diaryinfo->user = $user->firstname . ' ' . $user->lastname;
-            $diaryinfo->teacher = fullname($teacher);
-            $diaryinfo->diary = format_string($entry->name, true);
-            $diaryinfo->url = "$CFG->wwwroot/mod/diary/view.php?id=$mod->id";
-            $modnamepl = get_string('modulenameplural', 'diary');
-            $msubject = get_string('mailsubject', 'diary');
-
-            $postsubject = "$course->shortname: $msubject: " . format_string($entry->name, true);
-            $posttext = "$course->shortname -> $modnamepl -> " . format_string($entry->name, true) . "\n";
-            $posttext .= "---------------------------------------------------------------------\n";
-            $posttext .= get_string("diarymail", "diary", $diaryinfo) . "\n";
-            $posttext .= "---------------------------------------------------------------------\n";
-            if ($user->mailformat == 1) { // HTML.
-                $posthtml = "<p><font face=\"sans-serif\">"
-                    ."<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->"
-                    ."<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->"
-                    ."<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$mod->id\">"
-                    .format_string($entry->name, true)
-                    ."</a></font></p>";
-                $posthtml .= "<hr /><font face=\"sans-serif\">";
-                $posthtml .= "<p>" . get_string("diarymailhtml", "diary", $diaryinfo) . "</p>";
-                $posthtml .= "</font><hr />";
-            } else {
-                $posthtml = "";
-            }
-
-            if (! email_to_user($user, $teacher, $postsubject, $posttext, $posthtml)) {
-                echo "Error: Diary cron: Could not send out mail for id $entry->id to user $user->id ($user->email)\n";
-            }
-            if (! $DB->set_field("diary_entries", "mailed", "1", array(
-                "id" => $entry->id
-            ))) {
-                echo "Could not update the mailed field for id $entry->id\n";
-            }
-        }
-    }
-
-    return true;
-}
 
 /**
  * Given a course and a time, this module should find recent activity
@@ -423,7 +302,13 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
         $course->id,
         'diary'
     );
-    $namefields = user_picture::fields('u', null, 'userid');
+    // 20210611 Added Moodle branch check.
+    if ($CFG->branch < 311) {
+        $namefields = user_picture::fields('u', null, 'userid');
+    } else {
+        $userfieldsapi = \core_user\fields::for_userpic();
+        $namefields = $userfieldsapi->get_sql('u', false, '', 'userid', false)->selects;;
+    }
     $sql = "SELECT de.id, de.timemodified, cm.id AS cmid, $namefields
               FROM {diary_entries} de
               JOIN {diary} d ON d.id = de.diary
@@ -904,23 +789,6 @@ function diary_count_entries($diary, $groupid = 0) {
 }
 
 /**
- * Return entries that have not been emailed.
- *
- * @param int $cutofftime
- * @return object
- */
-function diary_get_unmailed_graded($cutofftime) {
-    global $DB;
-
-    $sql = "SELECT de.*, d.course, d.name FROM {diary_entries} de
-              JOIN {diary} d ON de.diary = d.id
-             WHERE de.mailed = '0' AND de.timemarked < ? AND de.timemarked > 0";
-    return $DB->get_records_sql($sql, array(
-        $cutofftime
-    ));
-}
-
-/**
  * Return diary log info.
  *
  * @param string $log
@@ -1009,4 +877,38 @@ function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownlo
 
     // Finally send the file.
     send_stored_file($file, null, 0, $forcedownload, $options);
+}
+
+
+/**
+ * Extends the settings navigation with the diary settings.
+ *
+ * This function is called when the context for the page is a diary module. This is not called by AJAX
+ * so it is safe to rely on the $PAGE.
+ *
+ * @param settings_navigation $settingsnav {@link settings_navigation}
+ * @param navigation_node $navref {@link navigation_node}
+ */
+function diary_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $navref) {
+    global $PAGE, $DB, $USER;
+
+    $cm = $PAGE->cm;
+    if (!$cm) {
+        return;
+    }
+
+    $context = $cm->context;
+    $course = $PAGE->course;
+
+    if (!$course) {
+        return;
+    }
+
+    // Link to transfer Journal entries to Diary entries. Visible to admin only.
+    if (is_siteadmin()) {
+        $link = new moodle_url('journaltodiaryxfr.php', array('id' => $cm->id));
+        $linkname = get_string('journaltodiaryxfr', 'diary');
+        $icon = new pix_icon('icon', '', 'diary', array('class' => 'icon'));
+        $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
+    }
 }

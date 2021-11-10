@@ -22,10 +22,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_diary\local\results;
+use mod_diary\local\diarystats;
+// @codingStandardsIgnoreLine
+// use core_text;
 
-require_once("../../config.php");
-require_once("lib.php");
-require_once($CFG->dirroot.'/lib/gradelib.php');
+// 20210605 Changed to this format.
+require_once(__DIR__ .'/../../config.php');
+require_once(__DIR__ .'/lib.php');
+require_once(__DIR__ .'/../../lib/gradelib.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
@@ -54,10 +58,14 @@ if (! $entriesmanager && ! $canadd) {
     throw new moodle_exception(get_string('accessdenied', 'diary'));
 }
 
-if (! $diary = $DB->get_record("diary", array(
-    "id" => $cm->instance
-))) {
+if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
+} else {
+    // 20210705 Added new activity color setting.
+    // Moved here so it is set only once. Old location executed for every entry.
+    $color3 = $diary->entrybgc;
+    $color4 = $diary->entrytextbgc;
+    $errorcmid = $diary->errorcmid;
 }
 
 if (! $cw = $DB->get_record("course_sections", array(
@@ -70,6 +78,25 @@ if (! $cw = $DB->get_record("course_sections", array(
 $diaryname = format_string($diary->name, true, array(
     'context' => $context
 ));
+//print_object($diary);
+// 20210710 Add autorating info into the description only if autorating is enabled.
+if ($diary->enableautorating) {
+
+    // 20210711 In the intro (description), add the item type and how many of them must be used in this diary entry.
+    $itemtypes = array();
+    $itemtypes = diarystats::get_item_types($itemtypes);
+    if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
+        $diary->intro .= get_string('itemtype_desc', 'diary', ['one' => $itemtypes[$diary->itemtype], 'two' => $diary->itemcount]).'<br>';
+    }
+
+    // 20210711 In the intro (description), add the minimum and maximum character and word counts that must be used in this diary entry.
+    // 20210712 Moved from here to, function get_minmaxes($diary), in diarystats and simplified the execution.
+    //$minmaxes = array();
+    //$minmaxes = diarystats::get_minmaxes($diary);
+    diarystats::get_minmaxes($diary);
+
+
+}
 
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
@@ -372,8 +399,12 @@ if ($timenow > $timestart) {
                 echo '<p align="center"><b>'.get_string('blankentry', 'diary').'</b></p>';
             } else if ($thispage <= $perpage) {
                 $thispage ++;
-                $color3 = get_config('mod_diary', 'entrybgc');
-                $color4 = get_config('mod_diary', 'entrytextbgc');
+                //$color3 = get_config('mod_diary', 'entrybgc'); 20210704 Switched to a setting.
+                //$color4 = get_config('mod_diary', 'entrytextbgc'); 20210704 Switched to a setting.
+
+                // 20210705 Added new activity color setting. 20210704 Switched to a setting.
+                //$color3 = $diary->entrybgc; 20210704 Switched to a setting.
+                //$color4 = $diary->entrytextbgc; 20210704 Switched to a setting.
 
                 // 20210501 Changed to class, start a division to contain the overall entry.
                 echo '<div class="entry" style="background: '.$color3.';">';
@@ -407,21 +438,10 @@ if ($timenow > $timestart) {
 
                 // Info regarding entry details with simple word count, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
-                    if (! empty($entry->timemodified)) {
-                        echo '<div class="lastedit"><strong>'
-                            .get_string('details', 'diary').'</strong> ('
-                            .get_string('numwords', '', count_words($entry->text)).') '
-                            .get_string('created', 'diary',
-                            ['one' => $diff->days, 'two' => $diff->h]).'<br>';
 
-                        echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
-                        echo userdate($entry->timecreated).' | ';
+                        // 20210704 Go calculate stats and print stats table.
+                        $data = diarystats::get_diary_stats($entry, $diary);
 
-                        echo '<strong> '.get_string('lastedited').': </strong> ';
-                        echo userdate($entry->timemodified).'<br>';
-
-                        echo "</div>";
-                    }
 
                     // Added lines to mark entry as needing regrade.
                     if (! empty($entry->timecreated) and ! empty($entry->timemodified) and empty($entry->timemarked)) {
@@ -447,7 +467,11 @@ if ($timenow > $timestart) {
                     // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
                     // Format output using renderer.php.
+                    
+                    
+                    
                     echo $output->diary_print_feedback($course, $entry, $grades);
+                    //echo $output->result::diary_format_entry_text($course, $entry, $grades);
                 }
                 // This adds blank space between entries.
                 echo '</div></p>';

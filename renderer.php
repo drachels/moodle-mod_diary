@@ -204,9 +204,13 @@ class mod_diary_renderer extends plugin_renderer_base {
             $entry->userid
         ));
 
-        // My preference.
+        // 20210609 Added branch check for string compatibility.
         if (! empty($grades)) {
-            echo get_string('grade') . ': ';
+            if ($CFG->branch > 310) {
+                echo get_string('gradenoun') . ': ';
+            } else {
+                echo get_string('grade') . ': ';
+            }
             echo $grades . '/' . number_format($gradinginfo->items[0]->grademax, 2);
         } else {
             print_string('nograde');
@@ -214,7 +218,8 @@ class mod_diary_renderer extends plugin_renderer_base {
         echo '</div>';
 
         // Feedback text.
-        echo format_text($entry->entrycomment, FORMAT_PLAIN);
+        // Original code, echo format_text($entry->entrycomment, FORMAT_PLAIN); followed by new code.
+        echo format_text($entry->entrycomment, FORMAT_HTML);
         echo '</td></tr></table>';
     }
 }

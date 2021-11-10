@@ -28,7 +28,7 @@ namespace mod_diary\local;
 defined('MOODLE_INTERNAL') || die();
 define('DIARY_EVENT_TYPE_OPEN', 'open');
 define('DIARY_EVENT_TYPE_CLOSE', 'close');
-
+use mod_diary\local\results;
 use stdClass;
 use csv_export_writer;
 use html_writer;
@@ -305,13 +305,15 @@ class results {
      * @param integer $teachers
      * @param integer $grades
      */
-    public static function diary_print_user_entry($course, $diary, $user, $entry, $teachers, $grades) {
+    public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
         global $USER, $OUTPUT, $DB, $CFG;
         $id = required_param('id', PARAM_INT); // Course module.
 
-        require_once($CFG->dirroot.'/lib/gradelib.php');
-        $dcolor3 = get_config('mod_diary', 'entrybgc');
-        $dcolor4 = get_config('mod_diary', 'entrytextbgc');
+        // 20210605 Changed to this format.
+        require_once(__DIR__ .'/../../../../lib/gradelib.php');
+
+        // 20210705 Added new activity color setting.
+        $dcolor4 = $diary->entrytextbgc;
 
         // Create a table for the current users entry with area for teacher feedback.
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
@@ -320,14 +322,15 @@ class results {
             echo '<tr>';
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
             echo userdate($entry->timecreated);
-            // 20201202 Added link to all entries for a single user.
+            // 20201202 Added link to show all entries for a single user.
             echo '  <a href="reportsingle.php?id='.$id
-            .'&user='.$user->id
-            .'&action=allentries">'.get_string('reportsingle', 'diary')
-            .'</a></td><td></td>';
+                .'&user='.$user->id
+                .'&action=allentries">'.get_string('reportsingle', 'diary')
+                .'</a></td><td></td>';
             echo '</tr>';
         }
-        // Add first of two rows, this one containing details showing the user, timecreated, and time last edited.
+
+        // Add first of two rows, this one showing the user picture and users name.
         echo '<tr>';
         echo '<td class="userpix" rowspan="2">';
         echo $OUTPUT->user_picture($user, array(
@@ -335,14 +338,7 @@ class results {
             'alttext' => true
         ));
         echo '</td>';
-        echo '<td class="userfullname">'.fullname($user);
-        if ($entry) {
-            echo ' <span class="lastedit">'
-                .get_string("timecreated", 'diary').':  '
-                .userdate($entry->timecreated).' '
-                .get_string("lastedited").': '
-                .userdate($entry->timemodified).' </span>';
-        }
+        echo '<td class="userfullname">'.fullname($user).'<br>';
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
 
@@ -352,12 +348,29 @@ class results {
 
         // If there is a user entry, format it and show it.
         if ($entry) {
+            $temp = $entry;
             echo self::diary_format_entry_text($entry, $course);
+            // 20210701 Moved copy 1 of 2 here due to new stats.
+            echo '</div></td><td style="width:55px;"></td></tr>';
+            // 20210703 Moved to here from up above so the table gets rendered in the right spot.
+            $data = diarystats::get_diary_stats($temp, $diary);
         } else {
             print_string("noentry", "diary");
-        }
-        echo '</div></td><td style="width:55px;"></td></tr>';
+            // 20210701 Moved copy 2 of 2 here due to new stats.
+            echo '</div></td><td style="width:55px;"></td></tr>';
 
+        }
+        // 20210701 Commented out due to new stats required copies  in the if just above here.
+        //echo '</div></td><td style="width:55px;"></td></tr>';
+
+//////////////////////////////////////////////////////////////////////////////////
+
+        echo '</table>';
+
+
+        echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
+ 
+//////////////////////////////////////////////////////////////////////////////////
         // If there is a user entry, add a teacher feedback area for grade
         // and comments. Add previous grades and comments, if available.
         if ($entry) {
@@ -371,7 +384,6 @@ class results {
                     'id' => $entry->teacher
                 ));
             }
-
             // 20200816 Get the current rating for this user!
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
                 $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
@@ -383,12 +395,18 @@ class results {
             }
             $aggregatestr = self::get_diary_aggregation($diary->assessed);
 
+            // Add picture of the last teacher to rate this entry.
             echo $OUTPUT->user_picture($teachers[$entry->teacher], array(
                 'courseid' => $course->id,
                 'alttext' => true
             ));
             echo '</td>';
-            echo '<td>'.get_string('rating', 'diary').':  ';
+            // 20210707 Added teachers name to go with their picture.
+            // 20211027 Added button to add/delete auto grade stats and rating to feedback.
+            echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
+                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">Add to feedback</a>'.
+                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">Clear feedback</a>'.
+                 '<br>'.get_string('rating', 'diary').':  ';
 
             $attrs = array();
             $hiddengradestr = '';
@@ -433,14 +451,15 @@ class results {
 
             // Rewrote next three lines to show entry needs to be regraded due to resubmission.
             if (! empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
-                echo ' <span class="needsedit">'.get_string("needsregrade", "diary").' </span>';
+                echo ' <span class="needsedit">'.get_string("needsregrade", "diary").'</span>';
             } else if ($entry->timemarked) {
-                echo ' <span class="lastedit">'.userdate($entry->timemarked).' </span>';
+                echo ' <span class="lastedit"> '.userdate($entry->timemarked).'</span>';
             }
             echo $gradebookgradestr;
 
             // 20200816 Added overall rating type and rating.
             echo '<br>'.$aggregatestr.' '.$currentuserrating;
+            //echo '<br>'.$aggregatestr.' '.$currentuserrating.' test 3-0';
 
             // Feedback text.
             echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array(
@@ -450,11 +469,30 @@ class results {
             echo p($feedbacktext);
             echo '</textarea></p>';
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// The context that I deleted, probably really needs to be used. The autosave table is now
+// showing a contextid of 1 instead of the expected 331.
+// I added $context to the other 6 variables  coming into this function.
+// Down below the autosave = false does NOT seem to be working as I am getting LOTS of new entries
+// in which the drafttext is the feedback comment! Refer to about line 225 of edit.php. I think
+// my problem is probably due to not issuing the file_postupdate_standard_editor call.
+// This makes me really think I need to delete all my work from today, and try doing it
+// as a results_form or report_form.
+
+            // 20210630 Switched from plain textarea to an editor.
+            $editor = editors_get_preferred_editor(FORMAT_HTML);
+            //echo '<p>'.$editor->use_editor('c'.$entry->id).'</p>';
+            echo $editor->use_editor('c'.$entry->id, ['context' => $context, 'autosave' => false], ['return_types' => FILE_EXTERNAL]);
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
             if ($feedbackdisabledstr != '') {
                 echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
             }
             echo '</td></tr>';
         }
+        //echo '<tr><td class="userpix"> test 1</td><td>';
+
+        //echo 'Will try to add a text editor for a form.</td></tr>';
         echo '</table>';
     }
 
@@ -494,17 +532,22 @@ class results {
      *
      * @param stdClass $course Course object.
      * @param stdClass $context Context object.
+     * @param stdClass $diary Diary object.
      * @param stdClass $entry Entry object.
      * @param stdClass $action Action object.
      * @param stdClass $firstkey Firstkey object.
      * @return array $editoroptions Array containing the editor and attachment options.
      * @return array $attachmentoptions Array containing the editor and attachment options.
      */
-    public static function diary_get_editor_and_attachment_options($course, $context, $entry, $action, $firstkey) {
+    public static function diary_get_editor_and_attachment_options($course, $context, $diary, $entry, $action, $firstkey) {
         $maxfiles = 99; // TODO: add some setting.
         $maxbytes = $course->maxbytes; // TODO: add some setting.
 
+        // 20210613 Added more custom data to use in edit_form.php to prevent illegal access.
         $editoroptions = array(
+            'timeclose' => $diary->timeclose,
+            'editall' => $diary->editall,
+            'editdates' => $diary->editdates,
             'action' => $action,
             'firstkey' => $firstkey,
             'trusttext' => true,
@@ -523,19 +566,6 @@ class results {
             $editoroptions,
             $attachmentoptions
         );
-    }
-
-    /**
-     * Check to see if this Diary is available for use.
-     *
-     * Used in view.php. 20200718 Not found in view.php now.
-     *
-     * @param array $diary
-     */
-    public static function is_available($diary) {
-        $timeopen = $diary->timeopen;
-        $timeclose = $diary->timeclose;
-        return (($timeopen == 0 || time() >= $timeopen) && ($timeclose == 0 || time() < $timeclose));
     }
 
     /**

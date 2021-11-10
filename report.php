@@ -393,16 +393,17 @@ if (! $users) {
     // Start the page area where feedback and grades are added and will need to be saved.
     echo '<form action="report.php" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
+    // 20211027 changed to rounded buttons.
     $saveallbutton = '';
     $saveallbutton = "<p class=\"feedbacksave\">";
     $saveallbutton .= "<input type=\"hidden\" name=\"id\" value=\"$cm->id\" />";
     $saveallbutton .= "<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-    $saveallbutton .= "<input type=\"submit\" class='btn btn-primary' value=\"" . get_string("saveallfeedback", "diary") . "\" />";
-
+    $saveallbutton .= "<input type=\"submit\" class='btn btn-primary' style='border-radius: 8px' value=\"" . get_string("saveallfeedback", "diary") . "\" />";
+//style="border-radius: 8px"
     // 20200421 Added a return button.
     $url = $CFG->wwwroot . '/mod/diary/view.php?id=' . $id;
     $saveallbutton .= ' <a href="'.$url
-                     .'" class="btn btn-secondary" role="button">'
+                     .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
                      .get_string('returnto', 'diary', $diary->name)
                      .'</a>';
 
@@ -411,8 +412,8 @@ if (! $users) {
     // Add save button at the top of the list of users with entries.
     echo $saveallbutton;
 
-    $dcolor3 = get_config('mod_diary', 'entrybgc');
-    $dcolor4 = get_config('mod_diary', 'entrytextbgc');
+    // 20210705 Added new activity color setting. Only the overall background here. Entry text bgc is in results.
+    $dcolor3 = $diary->entrybgc;
 
     // Print a list of users who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup, $sortoption)) {
@@ -420,7 +421,8 @@ if (! $users) {
             echo '<div class="entry" style="background: '.$dcolor3.'">';
 
             // Based on toolbutton and on list of users with at least one entry, print the entries on screen.
-            echo results::diary_print_user_entry($course,
+            echo results::diary_print_user_entry($context,
+                                                 $course,
                                                  $diary,
                                                  $user,
                                                  $entrybyuser[$user->id],
@@ -441,7 +443,8 @@ if (! $users) {
         // 20210511 Changed to class.
         echo '<div class="entry" style="background: '.$dcolor3.'">';
 
-        echo results::diary_print_user_entry($course,
+        echo results::diary_print_user_entry($context,
+                                             $course,
                                              $diary,
                                              $user,
                                              null,
@@ -449,8 +452,12 @@ if (! $users) {
                                              $grades);
         echo '</div><br>';
     }
-    // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
-    echo $saveallbutton;
+    // 20210609 Check for empty list to prevent two sets of buttons at bottom of the report page.
+    if ($users) {
+        // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
+        echo $saveallbutton;
+    }
+
     // End the page area where feedback and grades are added and will need to be saved.
     echo "</form>";
 }
