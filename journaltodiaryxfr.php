@@ -27,7 +27,7 @@ use \mod_diary\event\course_module_viewed;
 require_once('../../config.php');
 require_once(__DIR__ . '/lib.php');
 
-global $DB, $OUTPUT, $PAGE;
+global $DB, $OUTPUT, $PAGE, $USER;
 
 // Fetch URL parameters.
 $id = optional_param('id', 0, PARAM_INT); // Course ID.
@@ -44,6 +44,14 @@ $context = context_module::instance($cm->id);
 
 $diary = $DB->get_record('diary', array('id' => $cm->instance) , '*', MUST_EXIST);
 
+// Setup up debugging array.
+$debug = array();
+print_object('spacer 1');
+print_object('spacer 2');
+print_object('spacer 3');
+print_object('spacer 4');
+print_object('spacer 5');
+
 // 20211109 Check to see if Transfer the entries button is clicked and returning 'Transfer the entries' to trigger insert record.
 $param1 = optional_param('button', '', PARAM_TEXT);
 
@@ -51,56 +59,86 @@ $param1 = optional_param('button', '', PARAM_TEXT);
 if (isset($param1) && get_string('transfer', 'diary') == $param1 ) {
     $journalfromid = optional_param('journalid', '', PARAM_RAW);
     $diarytoid = optional_param('diaryid', '', PARAM_RAW);
-    print_object('This is $param1: '.$param1);
-    print_object('This is $journalfromid: '.$journalfromid);
-    print_object('This is $diarytoid: '.$diarytoid);
+
+    //$debug['This is $param1: '] = $param1;
+    //$debug['This is $journalfromid: '] = $journalfromid;
+    //$debug['This is $diarytoid: '] = $diarytoid;
 
     $sql = 'SELECT *
               FROM {journal_entries} je
              WHERE je.journal = '.$journalfromid.'
           ORDER BY je.id ASC';
 
-    if ($journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST)) {
-    //    echo $journalfromid.' is not a valid Journal ID!';
-    //    die;
-    //} else {
+    // 20211112 Check and make sure journal transferring from and diary transferring too, actually exist.
+
+// Need to see about adding the courseid to the check also.
+
+    if ($journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST)
+        && $DB->get_record('diary', array('id' => $diarytoid), '*', MUST_EXIST)) {
+        // 20211113 Adding transferred from note to the feedback via $feedbacktag, below.
+        $journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST);
+        //print_object($journalck->name);
+
         $journalentries = $DB->get_records_sql($sql);
         foreach ($journalentries as $journalentry) {
-            echo $journalentry->id.'  '.$journalentry->journal.'  '.$journalentry->userid.'  '.$journalentry->modified.' '.$journalentry->text.'<br>';
-
+            $feedbacktag = new stdClass();
+            // Hardcoded text needs to be changed to a string.
+            $feedbacktag = '<br> This entry was transferred from Journal:  '.$journalck->name;
             $newdiaryentry = new stdClass();
             $newdiaryentry->diary = $diarytoid;
-            $newdiaryentry->userid = $diarytoid;
+            $newdiaryentry->userid = $journalentry->userid;
             $newdiaryentry->timecreated = $journalentry->modified;
             $newdiaryentry->timemodified = $journalentry->modified;
             $newdiaryentry->text = $journalentry->text;
             $newdiaryentry->format = $journalentry->format;
-            $newdiaryentry->rating = $journalentry->rating;
-            $newdiaryentry->entrycomment = $journalentry->entrycomment;
-            $newdiaryentry->teacher = $journalentry->teacher;
-            $newdiaryentry->timemarked = $journalentry->timemarked;
-            $newdiaryentry->mailed = $journalentry->mailed;
-            print_object($newdiaryentry);
-            // Check to see if the record already exists.
+            if ($journalentry->rating) {
+                 $newdiaryentry->rating = $journalentry->rating;
+                 $newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag.' Came through the if part of the rating check.';
+                $newdiaryentry->teacher = $journalentry->teacher;
+                $newdiaryentry->timemarked = $journalentry->timemarked;
 
-            $sql = 'SELECT *
+            } else {
+                $now = time();
+
+                $newdiaryentry->entrycomment = $feedbacktag.' Came through the else part of the rating check and added current userid as the teacher and added this timemarked:'.userdate($now);
+                $newdiaryentry->teacher = $USER->id;
+                //$newdiaryentry->timemarked = userdate($now);
+                $newdiaryentry->timemarked = $now;
+
+            }
+            //$newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag;
+            //$newdiaryentry->timemarked = $journalentry->timemarked;
+            $newdiaryentry->mailed = $journalentry->mailed;
+
+            //$debug['This is the $newdiaryentry for user: '.$newdiaryentry->userid.': '] = $newdiaryentry;
+
+            // 20211112 Check to see if the diary entry record already exists.
+            $sql = 'SELECT case when "text" = "$journalentry->text" then "True" else "False" end
                       FROM {diary_entries} de
                      WHERE de.diary = $diarytoid
-                       AND de.userid = $diarytoid
+                       AND de.userid = $journalentry->userid
                        AND de.timemodified = $journalentry->modified
-                       AND de.text = $journalentry->text
                   ORDER BY de.id ASC';
-print_object('the record already exists!');
-            
-            //if (! $DB->record_exists('diary_entries', array ($newdiaryentry=null))) {
-            //    $DB->insert_record('diary_entries', $newdiaryentry, false);
-            //} else {
-            //    echo 'Found existing record!';
-            //}
+            if ($DB->record_exists('diary_entries', ['diary' => $diarytoid,
+                                                     'userid' => $journalentry->userid,
+                                                     'timemodified' => $journalentry->modified])) {
+                // Possibly need to log the event that a journal entry transfer failed here.
+                // Hardcoded text needs to be changed to a string.
+                print_object('The current record already exists in this Diary, so no transfer!');
+            } else {
+                // Hardcoded text needs to be changed to a string.
+                print_object('The current record does not exist, or is not an exact duplicate, so adding it to this Diary.');
+                $DB->insert_record('diary_entries', $newdiaryentry, false);
+                // Possibly need to log the event that a journal entry was transfered to a diary here.
+            }
+           
+            //$DB->insert_record('diary_entries', $newdiaryentry, false);
+            //print_object($debug);
         }
-        //die;
     }
 }
+
+//print_object($debug);
 
 // Print the page header.
 $PAGE->set_url('/mod/diary/journaltodiaryxfr.php', array('id' => $id));
@@ -110,110 +148,6 @@ $PAGE->set_url('/mod/diary/journaltodiaryxfr.php', array('id' => $id));
 $PAGE->set_heading($course->fullname);
 // Output starts here.
 echo $OUTPUT->header();
-
-//echo 'This is an admin only function to transfer Journal entries to Diary entries. This is a test capability only, at the moment.<br><br>';
-//echo 'The course ID for this course is: $cm->course = '.$cm->course.'<br>';
-
-//echo '=================================================================<br>';
-
-//echo 'Second thing to do is list the Journals in this course. Will need SQL to retrieve that.<br>';
-// echo 'Probably need to develop the SQL in Ad-hoc reports.<br><br>.';
-/*
-$sql = 'SELECT *
-            FROM {journal} j
-           WHERE j.course = '.$cm->course.'
-        ORDER BY j.timemodified ASC';
-// echo 'The SQL for this is: <br>'.$sql.'<br><br>';
-
-
-$journals = $DB->get_records_sql($sql);
-
-echo 'This is a list of each Journal activity in this course, '.$cm->course.'.<br>';
-echo '<b>    id course Journal name</b><br>';
-echo '<b>---------------------------</b><br>';
-foreach ($journals as $journal) {
-    echo '    '.$journal->id.'  '.$journal->course.'  '.$journal->name.'<br>';
-}
-echo 'This is where I need to add a selector so I can pick which Journal to copy from.<br>';
-echo '=================================================================<br><br>';
-*/
-// echo 'Third, I need to list each Diary in this course.<br>Will need another SQL to get this data.<br><br>';
-
-/*
-$sql = 'SELECT *
-            FROM {diary} d
-           WHERE d.course = '.$cm->course.'
-        ORDER BY d.timemodified ASC';
-// echo 'The SQL for this is: <br>'.$sql.'<br><br>';
-
-$diarys = $DB->get_records_sql($sql);
-
-
-
-echo 'This is a list of each Diary activity in this course, '.$cm->course.'.<br>';
-echo '<b>    id-course-Diary name</b><br>';
-echo '<b>---------------------------</b><br>';
-
-foreach ($diarys as $diary) {
-    echo '    '.$diary->id.'  '.$diary->course.'  '.$diary->name.'<br>';
-}
-
-echo '=================================================================<br><br>';
-*/
-/*
-echo 'I now have the Journal and Diary activity data and will need to decide which Journal to copy from and which Diary to copy too.<br>';
-//$journalid = 23;
-$journalid = 31;
-// Need an input here for the journalid to use.
-
-echo 'Need a foreach loop here to cycle through all the journals.<br>';
-echo 'It will then need an if to check to see if a Diary with the same name already exists.<br>';
-echo 'If the Diary already exists, then it will need to check and see if the entries have already been copied from the journal to the diary.<br>';
-echo 'The WHERE clause will need to be changed to je.journal > 0 instead of $journalid.<br>';
-
-$sql = 'SELECT *
-            FROM {journal_entries} je
-           WHERE je.journal = '.$journalid.'
-        ORDER BY je.id ASC';
-echo 'The SQL for this is: <br>'.$sql.'<br><br>';
-//$diaryid = 22;
-$diaryid = 164;
-// Need an input here for the diaryid to use.
-echo '=================================================================<br><br>';
-echo '=================================================================<br><br>';
-*/
-/*
-$journalentries = $DB->get_records_sql($sql);
-foreach ($journalentries as $journalentry) {
-    echo $journalentry->id.'  '.$journalentry->journal.'  '.$journalentry->userid.'  '.$journalentry->modified.' '.$journalentry->text.'<br>';
-
-    $newdiaryentry = new stdClass();
-    $newdiaryentry->diary = $diaryid;
-    $newdiaryentry->userid = $journalentry->userid;
-    $newdiaryentry->timecreated = $journalentry->modified;
-    $newdiaryentry->timemodified = $journalentry->modified;
-    $newdiaryentry->text = $journalentry->text;
-    $newdiaryentry->format = $journalentry->format;
-    $newdiaryentry->rating = $journalentry->rating;
-    $newdiaryentry->entrycomment = $journalentry->entrycomment;
-    $newdiaryentry->teacher = $journalentry->teacher;
-    $newdiaryentry->timemarked = $journalentry->timemarked;
-    $newdiaryentry->mailed = $journalentry->mailed;
-//print_object($newdiaryentry);
-    // Check to see if the record already exists.
-    //if (! $DB->record_exists('diary_entries', array ($newdiaryentry=null))) {
-    //    $DB->insert_record('diary_entries', $newdiaryentry, false);
-    //} else {
-    //    echo 'Found existing record!';
-    //}
-}
-
-
-
-echo 'Finally, I want to move a copy of the Journal entries into Diary entries for the selected Diary activity.<br><br>';
-*/
-
-////////////////////////////////////////////////////////////////////////////////////////
 
 // 20211108 Get the a background default Diary text background color for our table background here.
 $color3 = $diary->entrytextbgc;
@@ -235,7 +169,7 @@ $url2 = $CFG->wwwroot . '/mod/diary/journaltodiaryxfr.php?id='.$cm->id;
 echo 'This is an admin only function to transfer Journal entries to Diary entries. This is a test and development capability only, at the moment.<br><br>';
 
 echo 'The name of this course is: '.$course->fullname.', with an ID of: '.$cm->course.'<br>';
-
+echo 'Your user id is: '.$USER->id;
 $jsql = 'SELECT *
             FROM {journal} j
            WHERE j.course = '.$cm->course.'
@@ -245,7 +179,6 @@ $journals = $DB->get_records_sql($jsql);
 
 echo 'This is a list of each Journal activity in the course.<br>';
 echo '<b>    ID</b> | Course | Journal name<br>';
-//echo '<b>---------------------------</b><br>';
 foreach ($journals as $journal) {
     echo '    '.$journal->id.'  '.$journal->course.'  '.$journal->name.'<br>';
 }
@@ -259,7 +192,6 @@ $diarys = $DB->get_records_sql($dsql);
 
 echo '<br>This is a list of each Diary activity in the course.<br>';
 echo '<b>    ID</b> | Course | Diary name<br>';
-//echo '<b>---------------------------</b><br>';
 
 foreach ($diarys as $diary) {
     echo '    '.$diary->id.'  '.$diary->course.'  '.$diary->name.'<br>';

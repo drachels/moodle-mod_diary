@@ -68,8 +68,10 @@ Diary_749 - Multiple errors when, Type of countable items, is None. Added a chec
     to detect and prohibit when trying to autograde with None. 
 Diary_750 - V3.4.1 has three code style errors. Added the missing final blank line
     to files diarystats.php, renderer.php, and settings.php. Pushed to github.
-
-    
+Diary_767 - Need Journal to Diary entries migration tool - admin only! Got a
+version working with some error checking. Does need further refinement.
+Diary_768 - Journal to Diary xfr needs to tag the feedback with info that it is
+    a transfer entry. Created initial code version and it works as expected.
     
 
 
