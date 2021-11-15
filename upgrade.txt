@@ -71,7 +71,9 @@ Diary_750 - V3.4.1 has three code style errors. Added the missing final blank li
 Diary_767 - Need Journal to Diary entries migration tool - admin only! Got a
 version working with some error checking. Does need further refinement.
 Diary_768 - Journal to Diary xfr needs to tag the feedback with info that it is
-    a transfer entry. Created initial code version and it works as expected.
+    a transfer entry. Created initial code version and it works as expected. Updated
+    the code to fix error when the entry has no feedback in the journal as it is
+    going to have some added during the transfer. 
     
 
 

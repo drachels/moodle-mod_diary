@@ -54,9 +54,10 @@ print_object('spacer 5');
 
 // 20211109 Check to see if Transfer the entries button is clicked and returning 'Transfer the entries' to trigger insert record.
 $param1 = optional_param('button', '', PARAM_TEXT);
+$param2 = optional_param('button2', '', PARAM_TEXT);
 
 // DB transfer.
-if (isset($param1) && get_string('transfer', 'diary') == $param1 ) {
+if ((isset($param1) && get_string('transfer', 'diary') == $param1) || (isset($param2) && get_string('transferwoe', 'diary') == $param2)) {
     $journalfromid = optional_param('journalid', '', PARAM_RAW);
     $diarytoid = optional_param('diaryid', '', PARAM_RAW);
 
@@ -100,7 +101,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1 ) {
             } else {
                 $now = time();
 
-                $newdiaryentry->entrycomment = $feedbacktag.' Came through the else part of the rating check and added current userid as the teacher and added this timemarked:'.userdate($now);
+                $newdiaryentry->entrycomment = $feedbacktag.' Came through the else part of the rating check and added current userid as the teacher and added this timemarked: '.userdate($now);
                 $newdiaryentry->teacher = $USER->id;
                 //$newdiaryentry->timemarked = userdate($now);
                 $newdiaryentry->timemarked = $now;
@@ -108,8 +109,13 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1 ) {
             }
             //$newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag;
             //$newdiaryentry->timemarked = $journalentry->timemarked;
-            $newdiaryentry->mailed = $journalentry->mailed;
-
+            if ($param1) {
+                print_object('Entry will be transferred and an email sent to the user.');
+                $newdiaryentry->mailed = $journalentry->mailed;
+            } else if ($param2) {
+                print_object('Entry will be transferred without sending an email to the user.');
+                $newdiaryentry->mailed = 1;
+            }
             //$debug['This is the $newdiaryentry for user: '.$newdiaryentry->userid.': '] = $newdiaryentry;
 
             // 20211112 Check to see if the diary entry record already exists.
@@ -153,8 +159,8 @@ echo $OUTPUT->header();
 $color3 = $diary->entrytextbgc;
 
 // Add colored background with border.
-echo '<div class="w-50 p-3" style="font-size:1em;
-    font-weight:bold;background: '.$color3.';
+echo '<div class="w-75 p-3" style="font-size:1em;
+    background: '.$color3.';
     border:2px solid black;
     -webkit-border-radius:16px;
     -moz-border-radius:16px;border-radius:16px;">'.'<br>';
@@ -166,35 +172,39 @@ echo '<form method="POST">';
 $url1 = $CFG->wwwroot . '/mod/diary/view.php?id='.$id;
 $url2 = $CFG->wwwroot . '/mod/diary/journaltodiaryxfr.php?id='.$cm->id;
 
-echo 'This is an admin only function to transfer Journal entries to Diary entries. This is a test and development capability only, at the moment.<br><br>';
+echo '<h5>'.get_string('journaltodiaryxfr', 'diary').'</h5>';
+echo 'This is an admin user only function to transfer Journal entries to Diary entries. Entries from multiple Journal\'s can be transferred to a single Diary or to multiple separate Diary\'s. This is a new capability and is still under development.<br><br>';
 
-echo 'The name of this course is: '.$course->fullname.', with an ID of: '.$cm->course.'<br>';
-echo 'Your user id is: '.$USER->id;
+echo 'If you use the, <b>Transfer and email</b>, button an email will be sent to each user because the process automatically adds feedback in the new Diary entry, even if the original Journal entry had no feedback included.<br><br>';
+echo 'If you use the, <b>Transfer without email</b>, button an email will NOT be sent to each user even though the process automatically adds feedback in the new Diary entry, even if the original Journal entry had not feedback included.<br><br>';
+
+echo 'The name of this course is: '.$course->fullname.', with an Course ID of: '.$cm->course.'<br>';
+echo 'Your user id is: '.$USER->id.' and will be used in the transfer if there is not any feedback already in the entry because this process will automatically mark the feedback as being a transferred entry and will need something to go in the, $newdiaryentry->teacher, location.<br><br>';
 $jsql = 'SELECT *
-            FROM {journal} j
-           WHERE j.course = '.$cm->course.'
-        ORDER BY j.timemodified ASC';
+           FROM {journal} j
+          WHERE j.course = '.$cm->course.'
+       ORDER BY j.id ASC';
 
 $journals = $DB->get_records_sql($jsql);
 
-echo 'This is a list of each Journal activity in the course.<br>';
+echo 'This is a list of each Journal activity in this course.<br>';
 echo '<b>    ID</b> | Course | Journal name<br>';
 foreach ($journals as $journal) {
-    echo '    '.$journal->id.'  '.$journal->course.'  '.$journal->name.'<br>';
+    echo '<b>    '.$journal->id.'</b>  '.$journal->course.'  '.$journal->name.'<br>';
 }
 
 $dsql = 'SELECT *
-            FROM {diary} d
-           WHERE d.course = '.$cm->course.'
-        ORDER BY d.timemodified ASC';
+           FROM {diary} d
+          WHERE d.course = '.$cm->course.'
+       ORDER BY d.id ASC';
 
 $diarys = $DB->get_records_sql($dsql);
 
-echo '<br>This is a list of each Diary activity in the course.<br>';
+echo '<br>This is a list of each Diary activity in this course.<br>';
 echo '<b>    ID</b> | Course | Diary name<br>';
 
 foreach ($diarys as $diary) {
-    echo '    '.$diary->id.'  '.$diary->course.'  '.$diary->name.'<br>';
+    echo '<b>    '.$diary->id.'</b>  '.$diary->course.'  '.$diary->name.'<br>';
 }
     // Set up place to enter Journal ID to transfer entries from.
     echo '<br><br>'.get_string('journalid', 'diary').': <input type="text" name="journalid" id="journalid">
@@ -204,19 +214,34 @@ foreach ($diarys as $diary) {
     echo '<br><br>'.get_string('diaryid', 'diary').': <input type="text" name="diaryid" id="diaryid">
         <span style="color:red;" id="namemsg"></span>';
 
-// Add a confirm and cancel button.
-echo '<br><br><input class="btn btn-primary" style="border-radius: 8px"
-     name="button" onClick="return clClick()" type="submit" value="'
-    .get_string('transfer', 'diary').'"> <a href="'
-    .$url2.'" class="btn btn-secondary"  style="border-radius: 8px">'
-    .get_string('cancel', 'diary').'</a>'.'</form>';
+// Add a confirm transfer and send an email button.
+// Add a confirm transfer without sending an email button.
+// Add a cancel button that clears the input boxes and reloads the page.
+echo '<br><br><input 
+         class="btn btn-warning" 
+         style="border-radius: 8px"
+         name="button" 
+         onClick="return clClick()" 
+         type="submit" value="'
+         .get_string('transfer', 'diary').'"> <a href="'.$url2.'"</a></input>
 
+         <input 
+         class="btn btn-warning" 
+         style="border-radius: 8px"
+         name="button2" 
+         onClick="return clClick()" 
+         type="submit" value="'
+         .get_string('transferwoe', 'diary').'"> <a href="'.$url2.'"
 
+         class="btn btn-secondary"
+         style="border-radius: 8px">'
+        .get_string('cancel', 'diary').'</a></input>';
+        //.get_string('cancel', 'diary').'</a>'.'</form>';
 
-echo '<br><a href="'.$url1
-    .'" class="btn btn-primary" style="border-radius: 8px">'
+echo '<br><br><a href="'.$url1
+    .'" class="btn btn-success" style="border-radius: 8px">'
     .get_string('returnto', 'diary', $diary->name)
-    .'</a><br><br>';
+    .'</a><br><br></form>';
 
 echo '</div>';
 echo $OUTPUT->footer();
