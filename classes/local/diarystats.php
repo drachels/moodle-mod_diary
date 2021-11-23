@@ -543,7 +543,7 @@ class diarystats {
                     $diary->intro .= get_string('itemtype_desc', 'diary', ['one' => $itemtypes[$diary->itemtype], 'two' => $diary->itemcount]).'<br>';
                 }
 
-                echo '<tr class="table-info"><td colspan="4"> The item selected for automatic rating check is: '.$diary->itemcount.' or more '.$itemtypes[$diary->itemtype].' with a possible '.$diary->itempercent.'% penalty for each of the missing, '.$itemtypes[$diary->itemtype].'.</td></tr>';
+                echo '<tr class="table-info"><td colspan="4"> The item for the auto-rating is: '.$diary->itemcount.' or more '.$itemtypes[$diary->itemtype].' with a possible '.$diary->itempercent.'% penalty for each missing, '.$itemtypes[$diary->itemtype].'.</td></tr>';
 
                 // $debug is an array containing the basic syllable counting steps for the current word.
                 $debug = array();
@@ -567,25 +567,57 @@ class diarystats {
                 //print_object($debug);
             
                 $commonerrorrating = $diarystats->commonpercent;
+
+                // 20211119 Explanation of auto-rating check of what you have and need.
+                //echo '<tr><td colspan="4" class="table-success"> The item being used in the auto-rating is: '.$item.' and you are short '.$diary->itemcount.' - '.$diarystats->$item.' = '.(max($diary->itemcount - $diarystats->$item, 0)).'.</td></tr>';
+
+                // 20211119 Explanation of auto-rating check of what you have and need.
+                echo '<tr><td colspan="4" class="table-success"> The item for the auto-rating is: '.$item.'. You need: '.$diary->itemcount.' You have: '.$diarystats->$item.' So you need to come up with: '.(max($diary->itemcount - $diarystats->$item, 0)).'.</td></tr>';
             
-                echo '<tr><td colspan="4" class="table-success"> The item being used in the auto-rating is: '.$item.' and you are short '.$diary->itemcount.' - '.$diarystats->$item.' = '.($diary->itemcount - $diarystats->$item).'.</td></tr>';
-            
-                echo '<tr><td colspan="4" class="table-success"> The $itemrating is: ('.$diary->itemcount.' - '.$diarystats->$item.') * '.$diary->itempercent.' = '.$itemrating.' .</td></tr>';
+                echo '<tr><td colspan="4" class="table-success"> The $itemrating is: ('.$diary->itemcount.' - '.$diarystats->$item.') * '.$diary->itempercent.' = '.(max($itemrating, 0)).' .</td></tr>';
 
                 // Show auto-rating penalty.
-                echo '<tr><td colspan="4" class="table-danger"> Potential Auto-rating penalty: '.($diary->itemcount - $diarystats->$item).' * '.$diary->itempercent.'% or '.$itemrating.' points off.</td></tr>';
+                echo '<tr><td colspan="4" class="table-danger"> Potential Auto-rating penalty: '.(max($diary->itemcount - $diarystats->$item, 0)).' * '.$diary->itempercent.'% or '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).' points off.</td></tr>';
 
                 // Show possible Glossary of common errors penalty.
                 echo '<tr><td colspan="4" class="table-danger"> Potential Common error penalty: '.$diarystats->commonerrors.' * '.$diary->errorpercent.' = '.$diarystats->commonpercent.'% or '.$commonerrorrating.' points off.</td></tr>';
 
                 // 20211007 Show the possible overall rating.
-                $currentrating = $diary->scale.' - '.$itemrating.' - '.$commonerrorrating. ' = '.($diary->scale - $itemrating -  $commonerrorrating);
+                //$currentrating = $diary->scale.' - '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).' - '.$commonerrorrating. ' = '.(max($diary->scale - $itemrating -  $commonerrorrating, 0));
+
+                // 20211007 Show the possible overall rating. Modified 20211119.
+                $currentrating = $diary->scale.' - '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).' - '.$commonerrorrating. ' = '.($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent) - $commonerrorrating);
+
                 echo '<tr><td colspan="4" class="table-danger"> Your current potential rating is: '.$currentrating.'%</td></tr>';
             }
+
+            // Cannot add buttons here because they will also show to everyone on the view page.
+
+            //echo '<tr><td colspan="4" class="generaltable">
+            //     <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('addtofeedback', 'diary').'</a>'
+            //     .' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">Clear feedback</a>'.'</td></tr>
+            //     <tr><td><form action="self::add_stats($entry)">
+            //     <input type="submit" value="click on me!">
+            //     </form></td><td></td></tr>';
+
 
             echo '</table>';
         }
         return;
+    }
+
+    /**
+     * Add statistics to the feedback for this diary entry.
+     *
+     * @param string $entry The text for this entry.
+     * @ return int The number of characters.
+     */
+    public static function add_stats($entry) {
+        echo 'You made here!';
+        $entry->entrycomment = $currentstats;
+        $entry->entrycomment .= $usercommonerrors;
+        return;
+        //return ($entry);
     }
 
     /**

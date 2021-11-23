@@ -404,8 +404,11 @@ class results {
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to add/delete auto grade stats and rating to feedback.
             echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
-                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">Add to feedback</a>'.
-                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">Clear feedback</a>'.
+                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('addtofeedback', 'diary').'</a>'.
+                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('clearfeedback', 'diary').'</a>'.
+                 '<br>'.get_string('rating', 'diary').':  ';
+
+            //echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
                  '<br>'.get_string('rating', 'diary').':  ';
 
             $attrs = array();

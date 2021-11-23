@@ -56,27 +56,35 @@ Diary_743 - The mod_form.php needs updating for new settings. Added new settings
 Diary_744 - The settings.php needs updating for new settings. Added headings, strings,
     and settings as needed. STILL NEEDS WORK!
 
-Diary_745 - Need to develope additional statistics for each diary entry. Have
+Diary_745 - Need to develop additional statistics for each diary entry. Have
     created 20 stats and now need to thoroughly test them. Still in development!
     20210718 Rewrote count_syllables function and totalsyllables. 20210719 Added
     two new class files: pluralise.php and syllables.php that greatly improve
     the syllable count accuracy.
 Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive, and errorignorebreaks.
-    Added fileds to the xml file. Updated the upgrade.php file. Updated backup files.
+    Added fields to the xml file. Updated the upgrade.php file. Updated backup files.
     Updated the mod_form.php file.
 Diary_749 - Multiple errors when, Type of countable items, is None. Added a check
     to detect and prohibit when trying to autograde with None. 
 Diary_750 - V3.4.1 has three code style errors. Added the missing final blank line
     to files diarystats.php, renderer.php, and settings.php. Pushed to github.
 Diary_767 - Need Journal to Diary entries migration tool - admin only! Got a
-version working with some error checking. Does need further refinement.
+    version working with some error checking. Does need further refinement.
 Diary_768 - Journal to Diary xfr needs to tag the feedback with info that it is
     a transfer entry. Created initial code version and it works as expected. Updated
     the code to fix error when the entry has no feedback in the journal as it is
     going to have some added during the transfer. 
-    
-
-
+Diary_769 - Journal to Diary xfr breaks if there are no Journal activities in the course.
+    This was fixed while working on other recent tickets -767, 768. Added a new string
+    for this: $string['journalmissing'] = 'Currently, there are not any Journal
+    activities in this course.';
+Diary_770 - report.php > results.php has hardcoded text on new buttons. Added new
+    strings for both buttons. 
+Diary_771 - Need a title centered at the top of the xfr new menu item. I added
+    an h3 with a style to center align the new heading. Used an existing string.
+Diary_772 - The item being used in the auto-rating needs to detect when NOT short,
+    or you have more than required. Changed the code and now getting expected
+    results.
 
 
 

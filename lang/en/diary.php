@@ -34,6 +34,7 @@ $string['eventfeedbackupdated'] = 'Diary feedback updated';
 $string['eventinvalidentryattempt'] = 'Diary invalid entry attempt';
 
 $string['accessdenied'] = 'Access denied';
+$string['addtofeedback'] = 'Add to feedback';
 $string['alwaysopen'] = 'Always open';
 $string['alias'] = 'Keyword';
 $string['aliases'] = 'Keyword(s)';
@@ -47,6 +48,7 @@ $string['blankentry'] = 'Blank entry';
 $string['calendarend'] = '{$a} closes';
 $string['calendarstart'] = '{$a} opens';
 $string['cancel'] = 'Cancel transfer';
+$string['clearfeedback'] = 'Clear feedback';
 $string['configdateformat'] = 'This defines how dates are shown in diary reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
 $string['created'] = 'Created {$a->one} days and {$a->two} hours ago.';
 $string['crontask'] = 'Background processing for Diary module';
@@ -119,8 +121,9 @@ $string['invalidtimechangeoriginal'] = 'The original time was: {$a->one}. ';
 $string['invalidtimechangenewtime'] = 'The changed time was: {$a->one}. ';
 $string['invalidtimeresettime'] = 'The time was reset to the original time of: {$a->one}.';
 
-$string['journaltodiaryxfr'] = 'Journal to Diary xfr';
 $string['journalid'] = 'journalid to transfer from';
+$string['journalmissing'] = 'Currently, there are not any Journal activities in this course.';
+$string['journaltodiaryxfr'] = 'Journal to Diary xfr';
 $string['diaryid'] = 'diaryid to transfer to';
 
 $string['lastnameasc'] = 'Last name ascending:';

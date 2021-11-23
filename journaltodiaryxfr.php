@@ -74,8 +74,8 @@ if ((isset($param1) && get_string('transfer', 'diary') == $param1) || (isset($pa
 
 // Need to see about adding the courseid to the check also.
 
-    if ($journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST)
-        && $DB->get_record('diary', array('id' => $diarytoid), '*', MUST_EXIST)) {
+    if (($journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST))
+        && ($DB->get_record('diary', array('id' => $diarytoid), '*', MUST_EXIST))) {
         // 20211113 Adding transferred from note to the feedback via $feedbacktag, below.
         $journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST);
         //print_object($journalck->name);
@@ -163,7 +163,7 @@ echo '<div class="w-75 p-3" style="font-size:1em;
     background: '.$color3.';
     border:2px solid black;
     -webkit-border-radius:16px;
-    -moz-border-radius:16px;border-radius:16px;">'.'<br>';
+    -moz-border-radius:16px;border-radius:16px;">';
 
 // Start page form and add lesson name selector.
 echo '<form method="POST">';
@@ -172,7 +172,7 @@ echo '<form method="POST">';
 $url1 = $CFG->wwwroot . '/mod/diary/view.php?id='.$id;
 $url2 = $CFG->wwwroot . '/mod/diary/journaltodiaryxfr.php?id='.$cm->id;
 
-echo '<h5>'.get_string('journaltodiaryxfr', 'diary').'</h5>';
+echo '<h3 style="text-align:center;">'.get_string('journaltodiaryxfr', 'diary').'</h3>';
 echo 'This is an admin user only function to transfer Journal entries to Diary entries. Entries from multiple Journal\'s can be transferred to a single Diary or to multiple separate Diary\'s. This is a new capability and is still under development.<br><br>';
 
 echo 'If you use the, <b>Transfer and email</b>, button an email will be sent to each user because the process automatically adds feedback in the new Diary entry, even if the original Journal entry had no feedback included.<br><br>';
@@ -189,8 +189,12 @@ $journals = $DB->get_records_sql($jsql);
 
 echo 'This is a list of each Journal activity in this course.<br>';
 echo '<b>    ID</b> | Course | Journal name<br>';
-foreach ($journals as $journal) {
-    echo '<b>    '.$journal->id.'</b>  '.$journal->course.'  '.$journal->name.'<br>';
+if ($journals) {
+    foreach ($journals as $journal) {
+        echo '<b>    '.$journal->id.'</b>  '.$journal->course.'  '.$journal->name.'<br>';
+    }
+} else {
+    echo '<b>'.get_string('journalmissing', 'diary').'</b><br>';
 }
 
 $dsql = 'SELECT *
