@@ -85,9 +85,18 @@ Diary_771 - Need a title centered at the top of the xfr new menu item. I added
 Diary_772 - The item being used in the auto-rating needs to detect when NOT short,
     or you have more than required. Changed the code and now getting expected
     results.
-
-
-
+Diary_773 - Would be nice to include percentage to shortwords, mediumwords, and
+    longwords. Added code to calculate the three percentages to two decimal places.
+Diary_774 - Would be nice to include a statistic for Average Syllables per word.
+    Added code and error prevention for divide by zero for cases where student
+    did not submit any text, only some kind of file.
+Diary_775 - Would be nice to include a statistic for Average word length in
+    characters. Added code and error prevention for divide by zero for cases
+    where student did not submit any text, only some kind of file.
+Diary_776 - Need to check for and prevent divide by zero errors in the stats.
+    Broke up the $currentstats variable build and added an if check for
+    uniquewords before I started adding any stats. Added a string for,
+    No text detected.
 
 
 

@@ -56,10 +56,27 @@ class cron_task extends \core\task\scheduled_task {
             if ($CFG->branch < 311) {
                 // Get an array of the fields used for site user names.
                 $usernamefields = get_all_user_name_fields();
-                $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, '.implode(', ', $usernamefields);
+                $requireduserfields = 'id,
+                                       auth,
+                                       mnethostid,
+                                       email, mailformat,
+                                       maildisplay,
+                                       lang,
+                                       deleted,
+                                       suspended,
+                                      '.implode(', ', $usernamefields);
             } else {
-                $usernamefields =  \core_user\fields::for_name()->get_required_fields();
-                $requireduserfields = 'id, auth, mnethostid, email, mailformat, maildisplay, lang, deleted, suspended, '.implode(', ', $usernamefields);
+                $usernamefields = \core_user\fields::for_name()->get_required_fields();
+                $requireduserfields = 'id,
+                                       auth,
+                                       mnethostid,
+                                       email,
+                                       mailformat,
+                                       maildisplay,
+                                       lang,
+                                       deleted,
+                                       suspended,
+                                      '.implode(', ', $usernamefields);
             }
             // To save some db queries.
             $users = array();
@@ -67,7 +84,6 @@ class cron_task extends \core\task\scheduled_task {
 
             foreach ($entries as $entry) {
                 $this->log_start("Processing diary entry $entry->id\n");
-                // echo "Processing diary entry $entry->id\n";
 
                 if (! empty($users[$entry->userid])) {
                     $user = $users[$entry->userid];
@@ -76,7 +92,6 @@ class cron_task extends \core\task\scheduled_task {
                         "id" => $entry->userid
                     ), $requireduserfields)) {
                         $this->log_finish("Could not find user $entry->userid\n");
-                        // echo "Could not find user $entry->userid\n";
                         continue;
                     }
                     $users[$entry->userid] = $user;
@@ -90,7 +105,6 @@ class cron_task extends \core\task\scheduled_task {
                     if (! $course = $DB->get_record('course', array(
                         'id' => $entry->course), 'id, shortname')) {
                         $this->log_finish("Could not find course $entry->course\n");
-                        // echo "Could not find course $entry->course\n";
                         continue;
                     }
                     $courses[$entry->course] = $course;
@@ -102,7 +116,6 @@ class cron_task extends \core\task\scheduled_task {
                     if (! $teacher = $DB->get_record("user", array(
                         "id" => $entry->teacher), $requireduserfields)) {
                         $this->log_finish("Could not find teacher $entry->teacher\n");
-                        // echo "Could not find teacher $entry->teacher\n";
                         continue;
                     }
                     $users[$entry->teacher] = $teacher;
@@ -112,7 +125,6 @@ class cron_task extends \core\task\scheduled_task {
                 $coursediarys = get_fast_modinfo($course)->get_instances_of('diary');
                 if (empty($coursediarys) || empty($coursediarys[$entry->diary])) {
                     $this->log_finish("Could not find course module for diary id $entry->diary\n");
-                    // echo "Could not find course module for diary id $entry->diary\n";
                     continue;
                 }
                 $mod = $coursediarys[$entry->diary];
@@ -156,13 +168,11 @@ class cron_task extends \core\task\scheduled_task {
 
                 if (! email_to_user($user, $teacher, $postsubject, $posttext, $posthtml)) {
                     $this->log_finish("Error: Diary cron: Could not send out mail for id $entry->id to user $user->id ($user->email)\n");
-                    // echo "Error: Diary cron: Could not send out mail for id $entry->id to user $user->id ($user->email)\n";
                 }
                 if (! $DB->set_field("diary_entries", "mailed", "1", array(
                     "id" => $entry->id
                 ))) {
                     $this->log_finish("Could not update the mailed field for id $entry->id\n");
-                    // echo "Could not update the mailed field for id $entry->id\n";
                 }
             }
         }

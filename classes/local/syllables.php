@@ -433,6 +433,7 @@ print_object('Made it to the totalSyllables function');
     }
 
     /**
+     * Not currently used. Verified by no errors and not using Text:: and Maths::.
      * Returns the percentage of words with more than three syllables.
      * @param   string  $strtext      Text to be measured.
      * @param   bool    $blncountpropernouns      Boolean - should proper nouns be included in words count.

@@ -402,7 +402,7 @@ class diarystats {
             $diarystats->charspersentence = round($diarystats->chars / $diarystats->sentences, $precision);
             $diarystats->wordspersentence = round($diarystats->words / $diarystats->sentences, $precision);
             $diarystats->longwordspersentence = round($diarystats->longwords / $diarystats->sentences, $precision);
-            $diarystats->fkgrade = round(0.39 * ($diarystats->words / $diarystats->sentences) + 11.8 * ($diarystats->totalsyllabels / $diarystats->words) - 15.59, $precision);
+            $diarystats->fkgrade = max(round(0.39 * ($diarystats->words / $diarystats->sentences) + 11.8 * ($diarystats->totalsyllabels / $diarystats->words) - 15.59, $precision), 0);
             $diarystats->freadease = round(206.835 - 1.015 * ($diarystats->words / $diarystats->sentences) - 84.6 * ($diarystats->totalsyllabels / $diarystats->words), $precision);
         }
         if ($diarystats->wordspersentence) {
@@ -458,10 +458,10 @@ class diarystats {
             $currentstats = '<table class="generaltable">'
                 .'<tr><td style="width: 25%">'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
                     .'<td style="width: 25%">'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
-                    /*.'<td style="width: 25%">'.get_string('created', 'diary', ['one' => $diff->days, 'two' => $diff->h]).'</td>'*/
-                    .'<td style="width: 25%">Auto-rating Item percent setting '.$diary->itempercent.'% </td>'
-                    .'<td style="width: 25%">Common Error percent setting '.$diary->errorpercent.'% </td>'
-                .'<tr><td>'.get_string('chars', 'diary').' '.$tempminc.'/'.$diarystats->chars.'/'.$tempmaxc.'</td>'
+                    .'<td style="width: 25%">'.get_string('autoratingitempercentset', 'diary', ($diary->itempercent)).' </td>'
+                    .'<td style="width: 25%">'.get_string('commonerrorpercentset', 'diary', ($diary->errorpercent)).' </td></tr>';
+            if ($diarystats->uniquewords > 0) {
+                $currentstats .= '<tr><td>'.get_string('chars', 'diary').' '.$tempminc.'/'.$diarystats->chars.'/'.$tempmaxc.'</td>'
                     .'<td>'.get_string('words', 'diary').' '.$tempminw.'/'.$diarystats->words.'/'.$tempmaxw.'</td>'
                     .'<td>'.get_string('sentences', 'diary').' '.$tempmins.'/'.$diarystats->sentences.'/'.$tempmaxs.'</td>'
                     .'<td>'.get_string('paragraphs', 'diary').' '.$tempminp.'/'.$diarystats->paragraphs.'/'.$tempmaxp.'</td></tr>'
@@ -470,15 +470,21 @@ class diarystats {
                     .'<td>'.get_string('shortwords', 'diary')
                          .' <a href="#" data-toggle="popover" data-content="'
                          .get_string('shortwords_help', 'diary').'">'.$itemp.'</a> '
-                         .$diarystats->shortwords.'</td>'
+                         .$diarystats->shortwords
+                         .' ('.number_format($diarystats->shortwords / $diarystats->uniquewords * (100), 2, '.', '')
+                         .'%)</td>'
                     .'<td>'.get_string('mediumwords', 'diary')
                          .' <a href="#" data-toggle="popover" data-content="'
                          .get_string('mediumwords_help', 'diary').'">'.$itemp.'</a> '
-                         .$diarystats->mediumwords.'</td>'
+                         .$diarystats->mediumwords
+                         .' ('.number_format($diarystats->mediumwords / $diarystats->uniquewords * (100), 2, '.', '')
+                         .'%)</td>'
                     .'<td>'.get_string('longwords', 'diary')
                          .' <a href="#" data-toggle="popover" data-content="'
                          .get_string('longwords_help', 'diary').'">'.$itemp.'</a> '
-                         .$diarystats->longwords.'</td></tr>'
+                         .$diarystats->longwords
+                         .' ('.number_format($diarystats->longwords / $diarystats->uniquewords * (100), 2, '.', '')
+                         .'%)</td>' 
                     
                 .'<tr><td>'.get_string('charspersentence', 'diary').' '.$diarystats->charspersentence.'</td>'
                     .'<td>'.get_string('sentencesperparagraph', 'diary').' '.$diarystats->sentencesperparagraph.'</td>'
@@ -502,11 +508,13 @@ class diarystats {
                         .get_string('fogindex_help', 'diary').'">'.$itemp.'</a> '
                         .$diarystats->fogindex.'</td>'
 
-                .'<tr><td>'.get_string('totalsyllables', 'diary').' '.$diarystats->totalsyllabels.' </td>'
-                    .'<td> </td>'
-                    .'<td> </td>'
+                .'<tr><td>'.get_string('totalsyllables', 'diary', ($diarystats->totalsyllabels)).' </td>'
+                    .'<td>'.get_string('avgsylperword', 'diary', (number_format($diarystats->totalsyllabels / $diarystats->uniquewords, 2, '.', ''))).'</td>'
+                    .'<td>'.get_string('avgwordlenchar', 'diary', (number_format($diarystats->chars / $diarystats->words, 2, '.', ''))).'</td>'
                     .'<td> </td></tr>';
-
+                } else {
+                    $currentstats .= '<tr><td>'.get_string('notextdetected', 'diary').'</td><td> </td><td> </td><td> </td></tr>';
+                }
             // 20211007 An experiment for the output.
             echo $currentstats;
 
@@ -534,7 +542,7 @@ class diarystats {
             // 20210814 Show rating info only if enabled and item to rate is NOT = None.
             if ($diary->enableautorating && $diary->itemtype <> 0) {
                 // 20210711 Added potential auto rating penalty info.
-                 echo '<tr class="table-primary"><td colspan="4"> The maximum rating for this entry is '.$diary->scale.' points.</td></tr>';
+                 echo '<tr class="table-primary"><td colspan="4"> The maximum possible rating for this entry is '.$diary->scale.' points.</td></tr>';
 
                 // 20210713 Need the item type and how many of them must be used in this diary entry.
                 $itemtypes = array();
@@ -547,7 +555,7 @@ class diarystats {
 
                 // $debug is an array containing the basic syllable counting steps for the current word.
                 $debug = array();
-                
+
                 $item = strtolower($itemtypes[$diary->itemtype]);
                 $debug['Tracking problem with $item for auto-rating cp 1 '] = $item;
 
@@ -558,23 +566,20 @@ class diarystats {
                     $item = strtolower($itemtypes[$diary->itemtype]);
                 }
 
-                //$debug['Tracking problem with $item for auto-rating cp 2 '] = $item;
+                // $debug['Tracking problem with $item for auto-rating cp 2 '] = $item;
 
                 $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
-                //print_object($itemrating);
-                //print_object($diarystats);
-                //print_object($diarystats->$item);
-                //print_object($debug);
-            
+                // print_object($itemrating);
+                // print_object($diarystats);
+                // print_object($diarystats->$item);
+                // print_object($debug);
+
                 $commonerrorrating = $diarystats->commonpercent;
 
                 // 20211119 Explanation of auto-rating check of what you have and need.
-                //echo '<tr><td colspan="4" class="table-success"> The item being used in the auto-rating is: '.$item.' and you are short '.$diary->itemcount.' - '.$diarystats->$item.' = '.(max($diary->itemcount - $diarystats->$item, 0)).'.</td></tr>';
-
-                // 20211119 Explanation of auto-rating check of what you have and need.
                 echo '<tr><td colspan="4" class="table-success"> The item for the auto-rating is: '.$item.'. You need: '.$diary->itemcount.' You have: '.$diarystats->$item.' So you need to come up with: '.(max($diary->itemcount - $diarystats->$item, 0)).'.</td></tr>';
-            
-                echo '<tr><td colspan="4" class="table-success"> The $itemrating is: ('.$diary->itemcount.' - '.$diarystats->$item.') * '.$diary->itempercent.' = '.(max($itemrating, 0)).' .</td></tr>';
+
+                echo '<tr><td colspan="4" class="table-success"> The $itemrating is: (max('.$diary->itemcount.' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '.(max($itemrating, 0)).' .</td></tr>';
 
                 // Show auto-rating penalty.
                 echo '<tr><td colspan="4" class="table-danger"> Potential Auto-rating penalty: '.(max($diary->itemcount - $diarystats->$item, 0)).' * '.$diary->itempercent.'% or '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).' points off.</td></tr>';
@@ -582,11 +587,11 @@ class diarystats {
                 // Show possible Glossary of common errors penalty.
                 echo '<tr><td colspan="4" class="table-danger"> Potential Common error penalty: '.$diarystats->commonerrors.' * '.$diary->errorpercent.' = '.$diarystats->commonpercent.'% or '.$commonerrorrating.' points off.</td></tr>';
 
-                // 20211007 Show the possible overall rating.
-                //$currentrating = $diary->scale.' - '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).' - '.$commonerrorrating. ' = '.(max($diary->scale - $itemrating -  $commonerrorrating, 0));
-
                 // 20211007 Show the possible overall rating. Modified 20211119.
-                $currentrating = $diary->scale.' - '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).' - '.$commonerrorrating. ' = '.($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent) - $commonerrorrating);
+                $currentrating = $diary->scale.' - '.
+                                              ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).
+                                              ' - '.$commonerrorrating. ' = '.
+                                              ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent) - $commonerrorrating);
 
                 echo '<tr><td colspan="4" class="table-danger"> Your current potential rating is: '.$currentrating.'%</td></tr>';
             }
@@ -600,7 +605,6 @@ class diarystats {
             //     <input type="submit" value="click on me!">
             //     </form></td><td></td></tr>';
 
-
             echo '</table>';
         }
         return;
@@ -613,7 +617,7 @@ class diarystats {
      * @ return int The number of characters.
      */
     public static function add_stats($entry) {
-        echo 'You made here!';
+        echo 'You made it here to the add_stats function!';
         $entry->entrycomment = $currentstats;
         $entry->entrycomment .= $usercommonerrors;
         return;
@@ -628,8 +632,6 @@ class diarystats {
      */
     public static function get_stats_chars($entry) {
         return core_text::strlen($entry);
-        // @codingStandardsIgnoreLine
-        // return strlen($entry);
     }
 
     /**
@@ -673,7 +675,7 @@ class diarystats {
      * @param string $entry The text to examine for paragraphs.
      * @return array $processed An array containing the separated pargraphs.
      */
-    public static function multipleexplode($delimiters,$entry) {
+    public static function multipleexplode($delimiters, $entry) {
         $phase = str_replace($delimiters, $delimiters[0], $entry);
         $processed = explode($delimiters[0], $phase);
         return  $processed;
@@ -735,10 +737,10 @@ class diarystats {
         // https://pear.php.net/manual/en/package.text.text-statistics.intro.php
         // https://pear.php.net/package/Text_Statistics/docs/latest/__filesource/fsource_Text_Statistics__Text_Statistics-1.0.1TextWord.php.html
 
-        // $debug is an array containing the basic syllable counting steps for the current word.
+        // Variable $debug is an array containing the basic syllable counting steps for the current word.
         $debug = array();
         $debug['Counting syllables for version 1'] = $word;
-        
+
         $str = strtoupper($word);
         if (strlen($str) < 2) {
             $count = 1;
@@ -747,27 +749,26 @@ class diarystats {
 
             // Detect syllables for double-vowels.
             $vowelcount = 0;
-            $vowels = array('AA','AE','AI','AO','AU','AY',
-                            'EA','EE','EI','EO','EU','EY',
-                            'IA','IE','II','IO','IU','IY',
-                            'OA','OE','OI','OO','OU','OY',
-                            'UA','UE','UI','UO','UU','UY',
-                            'YA','YE','YI','YO','YU','YY');
+            $vowels = array('AA', 'AE', 'AI', 'AO', 'AU', 'AY',
+                            'EA', 'EE', 'EI', 'EO', 'EU', 'EY',
+                            'IA', 'IE', 'II', 'IO', 'IU', 'IY',
+                            'OA', 'OE', 'OI', 'OO', 'OU', 'OY',
+                            'UA', 'UE', 'UI', 'UO', 'UU', 'UY',
+                            'YA', 'YE', 'YI', 'YO', 'YU', 'YY');
             $str = str_replace($vowels, '', $str, $vowelcount);
             $count += $vowelcount;
-            
+
             $debug['Just finished processing double-vowels'] = $str;
-            //$debug['The oldlen is'] = $oldlen;
-            //$debug['The newlen is'] = $newlen;
+            // $debug['The oldlen is'] = $oldlen;
+            // $debug['The newlen is'] = $newlen;
             $debug['After double-vowel the count is'] = $count;
 
-
-            // Cache the final letter, in case it is an "e"
+            // Cache the final letter, in case it is an "e".
             $finalletter = substr($str, -1);
 
-            // detect syllables for single-vowels
+            // Detect syllables for single-vowels.
             $vowelcount = 0;
-            $vowels = array('A','E','I','O','U','Y');
+            $vowels = array('A', 'E', 'I', 'O', 'U', 'Y');
             $str = str_replace($vowels, '', $str, $vowelcount);
             $count += $vowelcount;
 
@@ -778,23 +779,22 @@ class diarystats {
             //$debug['The newlen is'] = $newlen;
             $debug['After single-vowel the count is'] = $count;
 
-
-            // adjust the count for words that end in "e"
-            // and have at least one other vowel
+            // Adjust the count for words that end in "e" and have at least one other vowel.
             if ($count > 1 && $finalletter == 'E') {
                 $count--;
                 $debug['We had a final letter E and the count is now'] = $count;
 
             }
         }
-        $newsyllablecount = syllables::syllable_count($word,  $strEncoding = '');
+        $newsyllablecount = syllables::syllable_count($word,  $strencoding = '');
 
         /*
         if ($count <> $newsyllablecount) {
             print_object('Gordon Bateson syllable counter: '.$word.' '.$count);
+            $debug['Gordon Bateson syllable counter: '] = $$word.' '.$count;
             print_object('Dave Child syllable counter: '.$word.' '.$newsyllablecount);
+            $debug['Dave Child syllable counter: '] = $$word.' '.$newsyllablecount;
             //print_object($debug);
-            //print_object('Done==========================');
         }
         */
         //return $count;
@@ -843,7 +843,7 @@ class diarystats {
      */
     public static function get_rating_options($plugin) {
         $options = array();
-        for ($i=0; $i<=100; $i++) {
+        for ($i = 0; $i <= 100; $i++) {
             $options[$i] = get_string('percentofentryrating', $plugin, $i);
         }
         return $options;
@@ -878,8 +878,8 @@ class diarystats {
                          'lexicaldensity', 'fogindex',
                          'commonerrors', 'files');
         if ($returntext) {
-            $plugin = 'mod_diary'; // $this->plugin_name();
-            // Flip row so the item name becomes the index and the index becomes the item name. 
+            $plugin = 'mod_diary';
+            // Flip row so the item name becomes the index and the index becomes the item name.
             $options = array_flip($options);
             // Now get the actual item names from the language file.
             foreach (array_keys($options) as $option) {
@@ -896,7 +896,9 @@ class diarystats {
      * @return nothing
      */
     public static function get_minmaxes($diary) {
-        // 20210710 Add checks and description additions for mins and maxes. This is temporary and probably needs to be moved to somewhere else so it can be shown on the edit.php page, too. Maybe move to results.php.
+        // 20210710 Add checks and description additions for mins and maxes.
+        // This is temporary and probably needs to be moved to somewhere else so
+        // it can be shown on the edit.php page, too. Maybe move to results.php.
         if ($diary->mincharacterlimit > 0) {
             $diary->intro .= '<br>'.get_string('mincharacterlimit_desc', 'diary', ($diary->mincharacterlimit)).'<br>';
         }
