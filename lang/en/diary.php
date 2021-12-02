@@ -178,7 +178,18 @@ $string['itemtypeparagraphs'] = 'Paragraphs';
 $string['itemtypewords'] = 'Words';
 $string['journalid'] = 'journalid to transfer from';
 $string['journalmissing'] = 'Currently, there are not any Journal activities in this course.';
-$string['journaltodiaryxfr'] = 'Journal to Diary xfr';
+$string['journaltodiaryxfrdid'] = '<br>This is a list of each Diary activity in this course.<br><b>    ID</b> | Course | Journal name<br>';
+$string['journaltodiaryxfrjid'] = 'This is a list of each Journal activity in this course.<br><b>    ID</b> | Course | Journal name<br>';
+$string['journaltodiaryxfrtitle'] = '<h3 style="text-align:center;"><b>Journal to Diary xfr</b></h3>';
+$string['journaltodiaryxfrp1'] = 'This is an admin user only function to transfer Journal entries to Diary entries. Entries from multiple Journal\'s can be transferred to a single Diary or to multiple separate Diary\'s. This is a new capability and is still under development.<br><br>';
+$string['journaltodiaryxfrp2'] = 'If you use the, <b>Transfer and send email</b>, checkbox, any journal entry transferred to a diary activity will mark the new entry as needing an email sent to the user so they know the entry has been transferred to a diary activity.<br><br>';
+$string['journaltodiaryxfrp3'] = 'If you use the, <b>Transfer without email</b>, button an email will NOT be sent to each user even though the process automatically adds feedback in the new Diary entry, even if the original Journal entry had not feedback included.<br><br>';
+
+
+$string['journaltodiaryxfrp4'] = 'The name of this course you are working in is: <b> {$a->one}</b>, with a Course ID of: <b> {$a->two}</b><br><br>';
+
+
+$string['journaltodiaryxfrp5'] = 'If you elect to include feedback regarding the transfer and the journal entry does not already have any feedback, you will automatically be added as the teacher for the entry to prevent an error.<br><br>';
 $string['lastnameasc'] = 'Last name ascending:';
 $string['lastnamedesc'] = 'Last name descending:';
 $string['latestmodifiedentry'] = 'Most recently modified entries:';
@@ -319,8 +330,9 @@ $string['timemodified'] = 'Time modified';
 $string['toolbar'] = 'Toolbar:';
 $string['totalsyllables'] = 'Total Syllables {$a}';
 $string['transfer'] = 'Transfer entry\'s';
-$string['transferwemail'] = 'Transfer and send email. Default: Do not send email';
-$string['transferwfb'] = 'Transfer and include feedback regarding the transfer. Default: Do not include feedback';
+$string['transferwemail'] = 'Transfer and send email. <b>Default: Do not send email</b>';
+$string['transferwfb'] = 'Transfer and include feedback regarding the transfer. <b>Default: Do not include feedback</b>';
+$string['transferwfbmsg'] = '<br> This entry was transferred from the Journal named:  {$a}';
 $string['transferwoe'] = 'Transfer without email';
 $string['uniquewords'] = 'Unique words';
 $string['userid'] = 'User id';

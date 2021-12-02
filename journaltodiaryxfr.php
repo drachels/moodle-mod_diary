@@ -33,11 +33,10 @@ global $DB, $OUTPUT, $PAGE, $USER;
 $id = optional_param('id', 0, PARAM_INT); // Course ID.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
-    print_error("Course Module ID was incorrect");
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
-if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
-    print_error("Course is misconfigured");
-}
+$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
@@ -45,12 +44,14 @@ $context = context_module::instance($cm->id);
 $diary = $DB->get_record('diary', array('id' => $cm->instance) , '*', MUST_EXIST);
 
 // Setup up debugging array.
-$debug = array();
+//$debug = array();
+/*
 print_object('spacer 1');
 print_object('spacer 2');
 print_object('spacer 3');
 print_object('spacer 4');
 print_object('spacer 5');
+*/
 
 // 20211109 Check to see if Transfer the entries button is clicked and returning 'Transfer the entries' to trigger insert record.
 $param1 = optional_param('button1', '', PARAM_TEXT);
@@ -66,10 +67,10 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
     $journalfromid = optional_param('journalid', '', PARAM_RAW);
     $diarytoid = optional_param('diaryid', '', PARAM_RAW);
 
-    $debug['This is $param1: '] = $param1;
-    $debug['This is $param2: '] = $param2;
-    $debug['This is $param3: '] = $param3;
-    $debug['This is $param4: '] = $param4;
+    //$debug['This is $param1: '] = $param1;
+    //$debug['This is $param2: '] = $param2;
+    //$debug['This is $param3: '] = $param3;
+    //$debug['This is $param4: '] = $param4;
     //$debug['This is $journalfromid: '] = $journalfromid;
     //$debug['This is $diarytoid: '] = $diarytoid;
 
@@ -87,38 +88,36 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
 
         // 20211113 Adding transferred from note to the feedback via $feedbacktag, below.
         $journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST);
-        //print_object($journalck->name);
-
         $journalentries = $DB->get_records_sql($sql);
+
         foreach ($journalentries as $journalentry) {
             $feedbacktag = new stdClass();
             //if (($param4 === "checked") && get_string('transferwfb', 'diary') == $param4) {
             if ($param4 === "checked") {
-                // Hardcoded text needs to be changed to a string.
-                $feedbacktag = '<br> This entry was transferred from the Journal:  '.$journalck->name;
-               $debug['This is $param4 and it should be checked to see this entry: '] = $param4;
-
+                // If enabled, transfer message will be added to the feedback.
+                $feedbacktag = get_string('transferwfbmsg', 'diary', ($journalck->name));
+                //$debug['This is $param4 and it should be checked to see this entry: '] = $param4;
             } else {
+               // By default, transfer message is not added to the feedback.
                $feedbacktag = '';
-               $debug['This is $param4 and it should be blank: '] = $param4;
-
+               //$debug['This is $param4 and it should be blank: '] = $param4;
             }
             $newdiaryentry = new stdClass();
             $newdiaryentry->diary = $diarytoid;
             $newdiaryentry->userid = $journalentry->userid;
+            // Journal entries do not have a timecreated so using last modified time.
             $newdiaryentry->timecreated = $journalentry->modified;
             $newdiaryentry->timemodified = $journalentry->modified;
             $newdiaryentry->text = $journalentry->text;
             $newdiaryentry->format = $journalentry->format;
             if ($journalentry->rating) {
-                 $newdiaryentry->rating = $journalentry->rating;
-                 $newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag.' Came through the if part of the rating check.';
+                $newdiaryentry->rating = $journalentry->rating;
+                $newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag;
                 $newdiaryentry->teacher = $journalentry->teacher;
                 $newdiaryentry->timemarked = $journalentry->timemarked;
 
             } else {
                 $now = time();
-
                 $newdiaryentry->entrycomment = $feedbacktag.' Came through the else part of the rating check and added current userid as the teacher and added this timemarked: '.userdate($now);
                 $newdiaryentry->teacher = $USER->id;
                 //$newdiaryentry->timemarked = userdate($now);
@@ -129,13 +128,13 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
             //$newdiaryentry->timemarked = $journalentry->timemarked;
             //if ($param1) {
             if ($param3 === 'checked') {
-                print_object('Entry will be transferred and an email sent to the user.');
+                //print_object('Entry will be transferred and an email sent to the user.');
                 $newdiaryentry->mailed = 0;
-               $debug['This is $param3 and it should be checked to see this entry: '] = $param3;
+                //$debug['This is $param3 and it should be checked to see this entry: '] = $param3;
 
             } else {
                 $newdiaryentry->mailed = $journalentry->mailed;
-               $debug['This is $param3 and it should be blank: '] = $param3;
+                //$debug['This is $param3 and it should be blank: '] = $param3;
 
             //} else if ($param2) {
             //    print_object('Entry will be transferred without sending an email to the user.');
@@ -155,10 +154,10 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
                                                      'timemodified' => $journalentry->modified])) {
                 // Possibly need to log the event that a journal entry transfer failed here.
                 // Hardcoded text needs to be changed to a string.
-                print_object('The current record already exists in this Diary, so no transfer!');
+                //print_object('The current record already exists in this Diary, so no transfer!');
             } else {
                 // Hardcoded text needs to be changed to a string.
-                print_object('The current record does not exist, or is not an exact duplicate, so adding it to this Diary.');
+                //print_object('The current record does not exist, or is not an exact duplicate, so adding it to this Diary.');
                 $DB->insert_record('diary_entries', $newdiaryentry, false);
                 // Possibly need to log the event that a journal entry was transfered to a diary here.
             }
@@ -169,7 +168,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
     }
 }
 
-print_object($debug);
+//print_object($debug);
 
 // Print the page header.
 $PAGE->set_url('/mod/diary/journaltodiaryxfr.php', array('id' => $id));
@@ -194,15 +193,14 @@ echo '<form method="POST">';
 // 20211105 Setup a url that takes you back to the Diary you came from.
 $url1 = $CFG->wwwroot . '/mod/diary/view.php?id='.$id;
 $url2 = $CFG->wwwroot . '/mod/diary/journaltodiaryxfr.php?id='.$cm->id;
+// 20211202 Add some instructions and information to the page.
+echo get_string('journaltodiaryxfrtitle', 'diary');
+echo get_string('journaltodiaryxfrp1', 'diary');
+echo get_string('journaltodiaryxfrp2', 'diary');
+echo get_string('journaltodiaryxfrp3', 'diary');
+echo get_string('journaltodiaryxfrp4', 'diary', ['one' => $course->fullname, 'two' => $cm->course]);
+echo get_string('journaltodiaryxfrp5', 'diary');
 
-echo '<h3 style="text-align:center;">'.get_string('journaltodiaryxfr', 'diary').'</h3>';
-echo 'This is an admin user only function to transfer Journal entries to Diary entries. Entries from multiple Journal\'s can be transferred to a single Diary or to multiple separate Diary\'s. This is a new capability and is still under development.<br><br>';
-
-echo 'If you use the, <b>Transfer and email</b>, button an email will be sent to each user because the process automatically adds feedback in the new Diary entry, even if the original Journal entry had no feedback included.<br><br>';
-echo 'If you use the, <b>Transfer without email</b>, button an email will NOT be sent to each user even though the process automatically adds feedback in the new Diary entry, even if the original Journal entry had not feedback included.<br><br>';
-
-echo 'The name of this course is: '.$course->fullname.', with an Course ID of: '.$cm->course.'<br>';
-echo 'Your user id is: '.$USER->id.' and will be used in the transfer if there is not any feedback already in the entry because this process will automatically mark the feedback as being a transferred entry and will need something to go in the, $newdiaryentry->teacher, location.<br><br>';
 $jsql = 'SELECT *
            FROM {journal} j
           WHERE j.course = '.$cm->course.'
@@ -210,8 +208,8 @@ $jsql = 'SELECT *
 
 $journals = $DB->get_records_sql($jsql);
 
-echo 'This is a list of each Journal activity in this course.<br>';
-echo '<b>    ID</b> | Course | Journal name<br>';
+echo get_string('journaltodiaryxfrjid', 'diary');
+
 if ($journals) {
     foreach ($journals as $journal) {
         echo '<b>    '.$journal->id.'</b>  '.$journal->course.'  '.$journal->name.'<br>';
@@ -227,8 +225,7 @@ $dsql = 'SELECT *
 
 $diarys = $DB->get_records_sql($dsql);
 
-echo '<br>This is a list of each Diary activity in this course.<br>';
-echo '<b>    ID</b> | Course | Diary name<br>';
+echo get_string('journaltodiaryxfrdid', 'diary');
 
 foreach ($diarys as $diary) {
     echo '<b>    '.$diary->id.'</b>  '.$diary->course.'  '.$diary->name.'<br>';

@@ -907,7 +907,7 @@ function diary_extend_settings_navigation(settings_navigation $settingsnav, navi
     // Link to transfer Journal entries to Diary entries. Visible to admin only.
     if (is_siteadmin()) {
         $link = new moodle_url('journaltodiaryxfr.php', array('id' => $cm->id));
-        $linkname = get_string('journaltodiaryxfr', 'diary');
+        $linkname = get_string('journaltodiaryxfrtitle', 'diary');
         $icon = new pix_icon('icon', '', 'diary', array('class' => 'icon'));
         $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
     }
