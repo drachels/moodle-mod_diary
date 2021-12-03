@@ -117,11 +117,11 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
                 $newdiaryentry->timemarked = $journalentry->timemarked;
 
             } else {
-                $now = time();
-                $newdiaryentry->entrycomment = $feedbacktag.' Came through the else part of the rating check and added current userid as the teacher and added this timemarked: '.userdate($now);
-                $newdiaryentry->teacher = $USER->id;
+                //$now = time();
+                //$newdiaryentry->entrycomment = $feedbacktag;
+                //$newdiaryentry->teacher = $USER->id;
                 //$newdiaryentry->timemarked = userdate($now);
-                $newdiaryentry->timemarked = $now;
+                //$newdiaryentry->timemarked = $now;
 
             }
             //$newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag;
@@ -194,7 +194,8 @@ echo '<form method="POST">';
 $url1 = $CFG->wwwroot . '/mod/diary/view.php?id='.$id;
 $url2 = $CFG->wwwroot . '/mod/diary/journaltodiaryxfr.php?id='.$cm->id;
 // 20211202 Add some instructions and information to the page.
-echo get_string('journaltodiaryxfrtitle', 'diary');
+echo '<h3 style="text-align:center;"><b>'.get_string('journaltodiaryxfrtitle', 'diary').'</b></h3>';
+//echo get_string('journaltodiaryxfrtitle', 'diary');
 echo get_string('journaltodiaryxfrp1', 'diary');
 echo get_string('journaltodiaryxfrp2', 'diary');
 echo get_string('journaltodiaryxfrp3', 'diary');
