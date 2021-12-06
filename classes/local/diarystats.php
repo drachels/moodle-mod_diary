@@ -418,9 +418,11 @@ class diarystats {
 
         if ($CFG->branch > 32) {
             // Can try e/help or f/help-32
-            $itemp = $OUTPUT->image_icon('a/help', 'click for info');
+            //$itemp = $OUTPUT->image_icon('a/help', 'click for info');
+            $itemp = $OUTPUT->image_icon('a/help', get_string('popoverhelp', 'diary'));
         } else {
-            $itemp = $OUTPUT->pix_icon('a/help', 'click for info');
+            //$itemp = $OUTPUT->pix_icon('a/help', 'click for info');
+            $itemp = $OUTPUT->pix_icon('a/help', get_string('popoverhelp', 'diary'));
         }
         //if ($diary->enableautorating) {
         // 20210812 Show/hide statistics for each entry.
@@ -541,8 +543,8 @@ class diarystats {
 
             // 20210814 Show rating info only if enabled and item to rate is NOT = None.
             if ($diary->enableautorating && $diary->itemtype <> 0) {
-                // 20210711 Added potential auto rating penalty info.
-                 echo '<tr class="table-primary"><td colspan="4"> The maximum possible rating for this entry is '.$diary->scale.' points.</td></tr>';
+                // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
+                 echo '<tr class="table-primary"><td colspan="4">'.get_string('maxpossratinge', 'diary',($diary->scale)).'</td></tr>';
 
                 // 20210713 Need the item type and how many of them must be used in this diary entry.
                 $itemtypes = array();
@@ -551,13 +553,14 @@ class diarystats {
                     $diary->intro .= get_string('itemtype_desc', 'diary', ['one' => $itemtypes[$diary->itemtype], 'two' => $diary->itemcount]).'<br>';
                 }
 
-                echo '<tr class="table-info"><td colspan="4"> The item for the auto-rating is: '.$diary->itemcount.' or more '.$itemtypes[$diary->itemtype].' with a possible '.$diary->itempercent.'% penalty for each missing, '.$itemtypes[$diary->itemtype].'.</td></tr>';
+                // 20211205 Converted from hardcoded text to string.
+                echo '<tr class="table-info"><td colspan="4">'.get_string('autoratingitemdetails', 'diary', ['one' => $diary->itemcount, 'two' => $itemtypes[$diary->itemtype], 'three' => $diary->itempercent, 'four' => $itemtypes[$diary->itemtype]]).'</td></tr>';
 
-                // $debug is an array containing the basic syllable counting steps for the current word.
+                // Variable, $debug, is an array that can contain debug information on an as needed basis during development.
                 $debug = array();
 
                 $item = strtolower($itemtypes[$diary->itemtype]);
-                $debug['Tracking problem with $item for auto-rating cp 1 '] = $item;
+                // Use as needed $debug['Tracking problem with $item for auto-rating cp 1 '] = $item;
 
                 // Check $item if set to character use chars instead.
                 if ($item == 'characters') {
@@ -566,23 +569,20 @@ class diarystats {
                     $item = strtolower($itemtypes[$diary->itemtype]);
                 }
 
-                // $debug['Tracking problem with $item for auto-rating cp 2 '] = $item;
+                // Use as needed $debug['Tracking problem with $item for auto-rating cp 2 '] = $item;
 
                 $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
-                // print_object($itemrating);
-                // print_object($diarystats);
-                // print_object($diarystats->$item);
-                // print_object($debug);
+
+                // Use as needed print_object($debug);
 
                 $commonerrorrating = $diarystats->commonpercent;
 
-                // 20211119 Explanation of auto-rating check of what you have and need.
-                echo '<tr><td colspan="4" class="table-success"> The item for the auto-rating is: '.$item.'. You need: '.$diary->itemcount.' You have: '.$diarystats->$item.' So you need to come up with: '.(max($diary->itemcount - $diarystats->$item, 0)).'.</td></tr>';
-
-                echo '<tr><td colspan="4" class="table-success"> The $itemrating is: (max('.$diary->itemcount.' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '.(max($itemrating, 0)).' .</td></tr>';
-
-                // Show auto-rating penalty.
-                echo '<tr><td colspan="4" class="table-danger"> Potential Auto-rating penalty: '.(max($diary->itemcount - $diarystats->$item, 0)).' * '.$diary->itempercent.'% or '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).' points off.</td></tr>';
+                // 20211119 Explanation of auto-rating check of what you have and need. 20211205 Converted to string.
+                echo '<tr><td colspan="4" class="table-info">'. get_string('autoratingitemexplained', 'diary', ['one' => $item, 'two' => $diary->itemcount, 'three' => $diarystats->$item, 'four' => (max($diary->itemcount - $diarystats->$item, 0))]).'</td></tr>';
+                // 20211205 Converted to string.
+                echo '<tr><td colspan="4" class="table-info">'.get_string('autoratingitempenaltymath', 'diary', ('(max('.$diary->itemcount.' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '.(max($itemrating, 0)))).'</td></tr>';
+                // Show auto-rating penalty. 20211205 Converted to string.
+                echo '<tr><td colspan="4" class="table-danger">'.get_string('autoratingpotentialpentaly', 'diary', (max($diary->itemcount - $diarystats->$item, 0)).' * '.$diary->itempercent.'% or '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent)).' points off.</td></tr>';
 
                 // Show possible Glossary of common errors penalty.
                 echo '<tr><td colspan="4" class="table-danger"> Potential Common error penalty: '.$diarystats->commonerrors.' * '.$diary->errorpercent.' = '.$diarystats->commonpercent.'% or '.$commonerrorrating.' points off.</td></tr>';

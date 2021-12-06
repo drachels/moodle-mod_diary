@@ -80,8 +80,14 @@ Diary_769 - Journal to Diary xfr breaks if there are no Journal activities in th
     This was fixed while working on other recent tickets -767, 768. Added a new string
     for this: $string['journalmissing'] = 'Currently, there are not any Journal
     activities in this course.';
-Diary_770 - report.php > results.php has hardcoded text on new buttons. Added new
-    strings for both buttons. 
+
+
+Diary_770 - Add autorating buttons Note: report.php > results.php has hardcoded
+    text on new buttons. Added code to create the two new buttons and also
+    added new strings for both buttons. STILL NEEDS WORK! CODE IS IN results.php
+    DOWN AROUND LINE NUMBER 407.
+
+
 Diary_771 - Need a title centered at the top of the xfr new menu item. I added
     an h3 with a style to center align the new heading. Used an existing string.
 Diary_772 - The item being used in the auto-rating needs to detect when NOT short,
@@ -103,7 +109,17 @@ Diary_777 - FK Grade formula needs to include max. Changed formula to use
     max so that the FK Grade cannot go below zero.
 Diary_778 - Need to remove hard coded text and change to strings in diarystats.php.
     Made changes as needed and converted some to use {$a} to help simplify the
-    code. 
+    code.
+
+
+Diary_779 - Need to work on the help pop up windows for stats. Currently
+    set this ticket status to waiting.
+
+
+Diary_780 - Need results displayed after doing a transfer. Added code in
+    journaltodiaryxfr.php file down around line 284 that checks counters added
+    around lines 34, 35, 97 and 161. Also added a string, xfrresults, for the output.
+
 
 
 

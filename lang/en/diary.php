@@ -41,6 +41,17 @@ $string['autorating_help'] = 'These settings define the defaults for autorating 
 $string['autorating_title'] = 'Auto-rating enable';
 $string['autorating'] = 'Auto-rating';
 $string['autoratingitempercentset'] = 'Auto-rating Item percent setting {$a}%';
+
+
+$string['autoratingitemdetails'] = 'The item for the auto-rating is {$a->one} or more {$a->two}  with a possible {$a->three}% penalty for each missing, {$a->four}.';
+
+$string['autoratingitemexplained'] = 'The item for the auto-rating is {$a->one}. You need {$a->two} of them and you have {$a->three}. You need to come up with {$a->four}.';
+
+$string['autoratingitempenaltymath'] = 'The automatic item rating penalty math is {$a}. Note: max prevents negative numbers caused by having more than is required.';
+
+$string['autoratingpotentialpentaly'] = 'Potential Auto-rating penalty is {$a}';
+
+
 $string['availabilityhdr'] = 'Availability';
 $string['avgsylperword'] = 'Average syllables per word {$a}';
 $string['avgwordlenchar'] = 'Average word length {$a} characters';
@@ -211,6 +222,10 @@ $string['maxcharacterlimit'] = 'Maximum character count';
 $string['maxparagraphlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} paragraphs.</strong>';
 $string['maxparagraphlimit_help'] = 'If a number is entered, the user must use less paragraphs than the maximum number listed.';
 $string['maxparagraphlimit'] = 'Maximum paragraph count';
+
+$string['maxpossratinge'] = 'The maximum possible rating for this entry is {$a} points.';
+
+
 $string['maxsentencelimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} sentences.</strong>';
 $string['maxsentencelimit_help'] = 'If a number is entered, the user must use less sentences than the maximum number listed.';
 $string['maxsentencelimit'] = 'Maximum sentence count';
@@ -276,6 +291,10 @@ $string['phraseignorebreaksno'] = 'Recognize line breaks.';
 $string['phraseignorebreaksyes'] = 'Ignore line breaks.';
 $string['pluginadministration'] = 'Diary module administration';
 $string['pluginname'] = 'Diary';
+
+$string['popoverhelp'] = 'click for info';
+
+
 $string['present'] = 'Present';
 $string['previousentry'] = 'Previous entry';
 $string['rate'] = 'Rate';
@@ -342,3 +361,4 @@ $string['viewallentries'] = 'View {$a} diary entries';
 $string['viewentries'] = 'View entries';
 $string['words'] = 'Words';
 $string['wordspersentence'] = 'Words per sentence';
+$string['xfrresults'] = 'There were {$a->one} entry\'s processed, and {$a->two} of them transferred.';

@@ -31,7 +31,8 @@ global $DB, $OUTPUT, $PAGE, $USER;
 
 // Fetch URL parameters.
 $id = optional_param('id', 0, PARAM_INT); // Course ID.
-
+    $xfrcountck = 0;
+    $xfrcountxfrd = 0;
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
@@ -54,16 +55,17 @@ print_object('spacer 5');
 */
 
 // 20211109 Check to see if Transfer the entries button is clicked and returning 'Transfer the entries' to trigger insert record.
-$param1 = optional_param('button1', '', PARAM_TEXT);
-$param2 = optional_param('button2', '', PARAM_TEXT);
-$param3 = optional_param('transferwemail', '', PARAM_TEXT);
-$param4 = optional_param('transferwfb', '', PARAM_TEXT);
+$param1 = optional_param('button1', '', PARAM_TEXT); // Transfer entry.
+$param2 = optional_param('button2', '', PARAM_TEXT); // Not currently used.
+$param3 = optional_param('transferwemail', '', PARAM_TEXT); // Transfer with email.
+$param4 = optional_param('transferwfb', '', PARAM_TEXT); // Transfer with feedback.
 
 // DB transfer.
 //if ((isset($param1) && get_string('transfer', 'diary') == $param1) ||
 //    (isset($param2) && get_string('transferwoe', 'diary') == $param2)) {
 if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
-
+    //$xfrcountck = 0;
+    //$xfrcountxfrd = 0;
     $journalfromid = optional_param('journalid', '', PARAM_RAW);
     $diarytoid = optional_param('diaryid', '', PARAM_RAW);
 
@@ -92,6 +94,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
 
         foreach ($journalentries as $journalentry) {
             $feedbacktag = new stdClass();
+            $xfrcountck++;
             //if (($param4 === "checked") && get_string('transferwfb', 'diary') == $param4) {
             if ($param4 === "checked") {
                 // If enabled, transfer message will be added to the feedback.
@@ -102,6 +105,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
                $feedbacktag = '';
                //$debug['This is $param4 and it should be blank: '] = $param4;
             }
+
             $newdiaryentry = new stdClass();
             $newdiaryentry->diary = $diarytoid;
             $newdiaryentry->userid = $journalentry->userid;
@@ -135,10 +139,6 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
             } else {
                 $newdiaryentry->mailed = $journalentry->mailed;
                 //$debug['This is $param3 and it should be blank: '] = $param3;
-
-            //} else if ($param2) {
-            //    print_object('Entry will be transferred without sending an email to the user.');
-            //    $newdiaryentry->mailed = 1;
             }
             //$debug['This is the $newdiaryentry for user: '.$newdiaryentry->userid.': '] = $newdiaryentry;
 
@@ -158,14 +158,16 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
             } else {
                 // Hardcoded text needs to be changed to a string.
                 //print_object('The current record does not exist, or is not an exact duplicate, so adding it to this Diary.');
+                $xfrcountxfrd++;
+
                 $DB->insert_record('diary_entries', $newdiaryentry, false);
                 // Possibly need to log the event that a journal entry was transfered to a diary here.
             }
-           
             //$DB->insert_record('diary_entries', $newdiaryentry, false);
             //print_object($debug);
         }
     }
+    //print_object('There were '.$xfrcountck.' entry\'s processed, and '.$xfrcountxfrd.' of them were transferred.');
 }
 
 //print_object($debug);
@@ -279,10 +281,19 @@ echo '<br><br><input
          style="border-radius: 8px">'
         .get_string('cancel', 'diary').'</a></input>';
 
+// 20211206 Added results so the admin knows what has occured.
+if ($xfrcountck > 0) {
+    $xfrresults = get_string('xfrresults', 'diary', ['one' => $xfrcountck , 'two' => $xfrcountxfrd]);
+    // This might be a good place to add the log event.
+} else {
+    $xfrresults = '';
+}
 echo '<br><br><a href="'.$url1
     .'" class="btn btn-success" style="border-radius: 8px">'
     .get_string('returnto', 'diary', $diary->name)
-    .'</a><br><br></form>';
+    .'</a> '.$xfrresults;
+echo '</form>';
 
 echo '</div>';
+
 echo $OUTPUT->footer();

@@ -403,6 +403,7 @@ class results {
             echo '</td>';
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to add/delete auto grade stats and rating to feedback.
+            // 20211127 THE BUTTONS DO NOT WORK YET!
             echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
                  ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('addtofeedback', 'diary').'</a>'.
                  ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('clearfeedback', 'diary').'</a>'.

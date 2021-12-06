@@ -279,6 +279,7 @@ class syllables {
 
     /**
      * Returns the number of syllables in the word.
+     * Called from dairystats.php about line 789.
      * Based in part on Greg Fast's Perl module Lingua::EN::Syllables.
      * @param   string  $strword      Word to be measured.
      * @param   string  $strencoding  Encoding of text.
@@ -299,7 +300,7 @@ class syllables {
         // $debug is an array containing the basic syllable counting steps for
         // this word.
         $debug = array();
-        $debug['Counting syllables for version 2'] = $strword;
+        $debug['Just entered syllable_count function and checking this word: '] = $strword;
 
         // Should be no non-alpha characters and lower case.
         $strword = preg_replace('`[^A-Za-z]`', '', $strword);
@@ -307,18 +308,23 @@ class syllables {
 
         // Check for problem words.
         if (isset(self::$arrproblemwords[$strword])) {
-            $debug['Found a problem word'] = $strword;
+            //$debug['1a Found a problem word '] = $strword;
+            //$debug['1b It has a defined syllable count of '] = self::$arrproblemwords[$strword];
+            //print_object($debug);
             return self::$arrproblemwords[$strword];
         }
         // Try singular.
         $singularword = pluralise::get_singular($strword);
         if ($singularword != $strword) {
             if (isset(self::$arrproblemwords[$singularword])) {
+                //$debug['2a Found a plural problem word'] = $strword;
+                //$debug['2a It has a defined syllable count of'] = self::$arrproblemwords[$singularword];
+                //print_object($debug);
                 return self::$arrproblemwords[$singularword];
             }
         }
 
-        $debug['After cleaning, lcase'] = $strword;
+        //$debug['After cleaning, lcase'] = $strword;
 
         // Remove prefixes and suffixes and count how many were taken.
         $strword = preg_replace(self::$arraffix, '', $strword, -1, $intaffixcount);
@@ -326,8 +332,8 @@ class syllables {
         $strword = preg_replace(self::$arrtripleaffix, '', $strword, -1, $inttripleaffixcount);
 
         if (($intaffixcount + $intdoubleaffixcount + $inttripleaffixcount) > 0) {
-            $debug['After Prefix and Suffix Removal'] = $strword;
-            $debug['Prefix and suffix counts'] = $intaffixcount . ' * 1 syllable, ' . $intdoubleaffixcount . ' * 2 syllables, ' . $inttripleaffixcount . ' * 3 syllables';
+            //$debug['After Prefix and Suffix Removal'] = $strword;
+            //$debug['Prefix and suffix counts'] = $intaffixcount . ' * 1 syllable, ' . $intdoubleaffixcount . ' * 2 syllables, ' . $inttripleaffixcount . ' * 3 syllables';
         }
 
         // Removed non-word characters from word
@@ -335,7 +341,7 @@ class syllables {
         $intwordpartcount = 0;
         foreach ($arrwordparts as $strwordpart) {
             if ($strwordpart <> '') {
-                $debug['Counting (' . $intwordpartcount . ')'] = $strwordpart;
+                //$debug['Counting (' . $intwordpartcount . ')'] = $strwordpart;
                 $intwordpartcount++;
             }
         }
@@ -343,26 +349,26 @@ class syllables {
         // Some syllables do not follow normal rules - check for them
         // Thanks to Joe Kovar for correcting a bug in the following lines
         $intsyllablecount = $intwordpartcount + $intaffixcount + (2 * $intdoubleaffixcount) + (3 * $inttripleaffixcount);
-        $debug['Syllables by Vowel Count'] = $intsyllablecount;
+        //$debug['Syllables by Vowel Count'] = $intsyllablecount;
 
         foreach (self::$arrsubsyllables as $strsyllable) {
             $_intsyllablecount = $intsyllablecount;
             $intsyllablecount -= preg_match('`' . $strsyllable . '`', $strword);
             if ($_intsyllablecount != $intsyllablecount) {
-                $debug['Subtracting (' . $strsyllable . ')'] = $strsyllable;
+                //$debug['Subtracting (' . $strsyllable . ')'] = $strsyllable;
             }
         }
         foreach (self::$arraddsyllables as $strsyllable) {
             $_intsyllablecount = $intsyllablecount;
             $intsyllablecount += preg_match('`' . $strsyllable . '`', $strword);
             if ($_intsyllablecount != $intsyllablecount) {
-                $debug['Adding (' . $strsyllable . ')'] = $strsyllable;
+                //$debug['Adding (' . $strsyllable . ')'] = $strsyllable;
             }
         }
         $intsyllablecount = ($intsyllablecount == 0) ? 1 : $intsyllablecount;
 
-        $debug['Result'] = $intsyllablecount;
-        // print_object($debug);
+        //$debug['Result'] = $intsyllablecount;
+        //print_object($debug);
 
         return $intsyllablecount;
     }
