@@ -168,6 +168,16 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
         }
     }
     //print_object('There were '.$xfrcountck.' entry\'s processed, and '.$xfrcountxfrd.' of them were transferred.');
+
+    // Trigger transferred journal entries to diary entries event.
+    $event = \mod_diary\event\journal_to_diary_entries_transfer::create(array(
+        'objectid' => $diary->id,
+        'context' => $context
+    ));
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->add_record_snapshot('course', $course);
+    $event->add_record_snapshot('diary', $diary);
+    $event->trigger();
 }
 
 //print_object($debug);
@@ -195,9 +205,9 @@ echo '<form method="POST">';
 // 20211105 Setup a url that takes you back to the Diary you came from.
 $url1 = $CFG->wwwroot . '/mod/diary/view.php?id='.$id;
 $url2 = $CFG->wwwroot . '/mod/diary/journaltodiaryxfr.php?id='.$cm->id;
+
 // 20211202 Add some instructions and information to the page.
 echo '<h3 style="text-align:center;"><b>'.get_string('journaltodiaryxfrtitle', 'diary').'</b></h3>';
-//echo get_string('journaltodiaryxfrtitle', 'diary');
 echo get_string('journaltodiaryxfrp1', 'diary');
 echo get_string('journaltodiaryxfrp2', 'diary');
 echo get_string('journaltodiaryxfrp3', 'diary');
@@ -293,7 +303,6 @@ echo '<br><br><a href="'.$url1
     .get_string('returnto', 'diary', $diary->name)
     .'</a> '.$xfrresults;
 echo '</form>';
-
 echo '</div>';
 
 echo $OUTPUT->footer();

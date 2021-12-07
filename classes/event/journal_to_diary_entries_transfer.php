@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_diary course module viewed event.
+ * The mod_diary download diary entries event.
  *
  * @package   mod_diary
- * @copyright 2014 drachels@drachels.com
+ * @copyright 2016 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_diary\event;
@@ -26,50 +26,65 @@ namespace mod_diary\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_diary course module viewed event class.
+ * The mod_diary download diary entries class.
  *
  * @package   mod_diary
- * @since     Moodle 2.7
- * @copyright 2014 drachels@drachels.com
+ * @copyright 2019 drachels@drachels.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_module_viewed extends \core\event\course_module_viewed {
+class journal_to_diary_entries_transfer extends \core\event\base {
 
     /**
      * Init method.
-     *
-     * @return void
      */
     protected function init() {
-        $this->data['crud'] = 'r';
+        $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
         $this->data['objecttable'] = 'diary';
     }
 
     /**
-     * Get URL related to the action.
+     * Returns localised general event name.
+     *
+     * @return string
+     */
+    public static function get_name() {
+        return get_string('eventxfrentries', 'mod_diary');
+    }
+
+    /**
+     * Returns description of what happened.
+     *
+     * @return string
+     */
+    public function get_description() {
+        return "The user with id '$this->userid' in course '$this->courseid', has transferred journal entries to diary entries for diary id '$this->objectid' with the course module context instance id '$this->contextinstanceid'.";
+    }
+
+    /**
+     * Returns relevant URL.
      *
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/diary/view.php', array(
-            'id' => $this->objectid
+        return new \moodle_url('/mod/diary/journaltodiaryxfr.php', array(
+            'id' => $this->contextinstanceid
         ));
     }
 
     /**
-     * Return the legacy event log data.
+     * Replace add_to_log() statement.
      *
-     * @return array|null
+     * @return array of parameters to be passed to legacy add_to_log() function.
      */
     protected function get_legacy_logdata() {
-        $url = new \moodle_url('view.php', array(
+        $url = new \moodle_url('journaltodiaryxfr.php', array(
             'id' => $this->contextinstanceid
         ));
         return array(
             $this->courseid,
             'diary',
-            'view',
+            'transfer',
             $url->out(),
             $this->objectid,
             $this->contextinstanceid

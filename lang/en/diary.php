@@ -140,6 +140,7 @@ $string['evententrycreated'] = 'Diary entry created';
 $string['evententryupdated'] = 'Diary entry updated';
 $string['eventfeedbackupdated'] = 'Diary feedback updated';
 $string['eventinvalidentryattempt'] = 'Diary invalid entry attempt';
+$string['eventxfrentries'] = 'Journal to Diary entry transfer';
 $string['exportfilename'] = 'entries.csv';
 $string['exportfilenamep1'] = 'All_Site';
 $string['exportfilenamep2'] = '_Diary_Entries_Exported_On_';

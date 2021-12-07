@@ -59,5 +59,11 @@ $logs = array(
         'action' => 'update feedback',
         'mtable' => 'diary',
         'field' => 'name'
+    ),
+    array(
+        'module' => 'diary',
+        'action' => 'transfer',
+        'mtable' => 'diary',
+        'field' => 'name'
     )
 );
