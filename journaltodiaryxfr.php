@@ -172,7 +172,12 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
     // Trigger transferred journal entries to diary entries event.
     $event = \mod_diary\event\journal_to_diary_entries_transfer::create(array(
         'objectid' => $diary->id,
-        'context' => $context
+        'context' => $context,
+        'other' => array(
+            'journalname' => $param1,
+            'diaryname' => $diary->name,
+            'jeprocessed'=> $xfrcountck,
+            'jexfrd' => $xfrcountxfrd)
     ));
     $event->add_record_snapshot('course_modules', $cm);
     $event->add_record_snapshot('course', $course);
