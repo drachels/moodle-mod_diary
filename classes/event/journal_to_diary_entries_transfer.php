@@ -58,7 +58,10 @@ class journal_to_diary_entries_transfer extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "In course '$this->courseid', with activity module context instance id '$this->contextinstanceid', the user with id '$this->userid' has transferred '{$this->other['jexfrd']}' of '{$this->other['jeprocessed']}' entries from journal, '{$this->other['journalname']}', and made them entries of diary, '{$this->other['diaryname']}'. (id$this->objectid)";
+        return "In course '$this->courseid', with activity module context instance id '$this->contextinstanceid',
+            the user with id '$this->userid' has transferred '{$this->other['jexfrd']}' of '{$this->other['jeprocessed']}'
+            entries from journal, '{$this->other['journalname']}', and made them entries of diary,
+            '{$this->other['diaryname']}'. (id{$this->other['diaryto']})";
     }
 
     /**

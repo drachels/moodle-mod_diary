@@ -167,11 +167,11 @@ class cron_task extends \core\task\scheduled_task {
                 }
 
                 if (! email_to_user($user, $teacher, $postsubject, $posttext, $posthtml)) {
-                    $this->log_finish("Error: Diary cron: Could not send out mail for id $entry->id to user $user->id ($user->email)\n");
+                    $this->log_finish("Error: Diary cron: Could not send out mail for id
+                                          $entry->id to user $user->id ($user->email)\n"
+                                     );
                 }
-                if (! $DB->set_field("diary_entries", "mailed", "1", array(
-                    "id" => $entry->id
-                ))) {
+                if (! $DB->set_field("diary_entries", "mailed", "1", array("id" => $entry->id))) {
                     $this->log_finish("Could not update the mailed field for id $entry->id\n");
                 }
             }

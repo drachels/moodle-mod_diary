@@ -86,7 +86,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
     // Need to see about adding the courseid to the check also.
     // Verify journal and diary exists.
     if (($journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST))
-        && ($DB->get_record('diary', array('id' => $diarytoid), '*', MUST_EXIST))) {
+        && ($diaryto = $DB->get_record('diary', array('id' => $diarytoid), '*', MUST_EXIST))) {
 
         // 20211113 Adding transferred from note to the feedback via $feedbacktag, below.
         $journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST);
@@ -175,7 +175,8 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
         'context' => $context,
         'other' => array(
             'journalname' => $param1,
-            'diaryname' => $diary->name,
+            'diaryname' => $diaryto->name,
+            'diaryto' => $diaryto->id,
             'jeprocessed'=> $xfrcountck,
             'jexfrd' => $xfrcountxfrd)
     ));

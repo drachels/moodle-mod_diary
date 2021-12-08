@@ -29,11 +29,8 @@ Diary_734 - Need to convert from lib.php cron function to /classes/task/cron_tas
     some more work.
 Diary_736 - Need a way to slectively turn off autosave. It is not needed when
     starting a totally new entry.
-
 Diary_737 - Config settings are not all named the same. Added mod_ to the four
     items that were missing it.
-
-
 Diary_738 - Need activity color setting for entry's. Added new fields for the
     two colors in mdl_diary table. Made changes to the install.xml and upgrade.php
     to add two new fields, entrybgc and entrytextbgc. Updated the mod_form.php
@@ -71,7 +68,9 @@ Diary_750 - V3.4.1 has three code style errors. Added the missing final blank li
     to files diarystats.php, renderer.php, and settings.php. Pushed to github.
 Diary_767 - Need Journal to Diary entries migration tool - admin only! Got a
     version working with some error checking. 20211207 Added code, event string,
-    and journal_to_diary_entries_transfer.php file to log transfer events.
+    and journal_to_diary_entries_transfer.php file to log transfer events. 20211208
+    Made change to the diary id shown to reflect that of the destination diary
+    instead of the diary the admin is in.
 Diary_768 - Journal to Diary xfr needs to tag the feedback with info that it is
     a transfer entry. Created initial code version and it works as expected. Updated
     the code to fix error when the entry has no feedback in the journal as it is
@@ -112,15 +111,17 @@ Diary_778 - Need to remove hard coded text and change to strings in diarystats.p
     Made changes as needed and converted some to use {$a} to help simplify the
     code.
 
-
 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
-
 
 Diary_780 - Need results displayed after doing a transfer. Added code in
     journaltodiaryxfr.php file down around line 284 that checks counters added
     around lines 34, 35, 97 and 161. Also added a string, xfrresults, for the output.
-
+Diary_781 - Would be nice to fill the remaining statistics cell with Average words
+    per paragraph. 20211208 Moved the last row, averages, of the statistics general
+    table up one row so that Lexical density, FK Grade, Flesch reading ease and Fog
+    index are in the last row of the table. I also added a new, Average words per
+    paragraph, statistic in the last cell of the, averages, row.
 
 
 

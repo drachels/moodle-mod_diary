@@ -55,6 +55,7 @@ $string['autoratingpotentialpentaly'] = 'Potential Auto-rating penalty is {$a}';
 $string['availabilityhdr'] = 'Availability';
 $string['avgsylperword'] = 'Average syllables per word {$a}';
 $string['avgwordlenchar'] = 'Average word length {$a} characters';
+$string['avgwordpara'] = 'Average words per paragraph {$a}';
 
 $string['blankentry'] = 'Blank entry';
 $string['calendarend'] = '{$a} closes';
@@ -98,6 +99,8 @@ You can see it appended to your <a href="{$a->url}">diary entry</a>.';
 $string['diaryname'] = 'Diary name';
 $string['diaryopentime_help'] = 'If enabled, you can set a date for the diary to be opened for use.';
 $string['diaryopentime'] = 'Open time';
+$string['detectcommonerror'] = 'Detected at least {$a->one}, {$a->two} They are: {$a->three}
+<br>If allowed, you should fix and re-submit.';
 $string['editall_help'] = 'When enabled, users can edit any entry.';
 $string['editall'] = 'Edit all entries';
 $string['editdates_help'] = 'When enabled, users can edit the date of any entry.';
@@ -294,6 +297,7 @@ $string['pluginadministration'] = 'Diary module administration';
 $string['pluginname'] = 'Diary';
 
 $string['popoverhelp'] = 'click for info';
+$string['potcommerrpen'] = 'Potential Common error penalty: {$a->one} * {$a->two} = {$a->three}% or {$a->four} points off.';
 
 
 $string['present'] = 'Present';

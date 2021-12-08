@@ -360,17 +360,11 @@ class results {
             echo '</div></td><td style="width:55px;"></td></tr>';
 
         }
-        // 20210701 Commented out due to new stats required copies  in the if just above here.
-        //echo '</div></td><td style="width:55px;"></td></tr>';
-
-//////////////////////////////////////////////////////////////////////////////////
 
         echo '</table>';
 
-
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
- 
-//////////////////////////////////////////////////////////////////////////////////
+
         // If there is a user entry, add a teacher feedback area for grade
         // and comments. Add previous grades and comments, if available.
         if ($entry) {
@@ -405,11 +399,11 @@ class results {
             // 20211027 Added button to add/delete auto grade stats and rating to feedback.
             // 20211127 THE BUTTONS DO NOT WORK YET!
             echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
-                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('addtofeedback', 'diary').'</a>'.
-                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('clearfeedback', 'diary').'</a>'.
+                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'
+                     .get_string('addtofeedback', 'diary').'</a>'.
+                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'
+                    .get_string('clearfeedback', 'diary').'</a>'.
                  '<br>'.get_string('rating', 'diary').':  ';
-
-            //echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
                  '<br>'.get_string('rating', 'diary').':  ';
 
             $attrs = array();
@@ -463,7 +457,6 @@ class results {
 
             // 20200816 Added overall rating type and rating.
             echo '<br>'.$aggregatestr.' '.$currentuserrating;
-            //echo '<br>'.$aggregatestr.' '.$currentuserrating.' test 3-0';
 
             // Feedback text.
             echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true, array(
@@ -473,30 +466,27 @@ class results {
             echo p($feedbacktext);
             echo '</textarea></p>';
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-// The context that I deleted, probably really needs to be used. The autosave table is now
-// showing a contextid of 1 instead of the expected 331.
-// I added $context to the other 6 variables  coming into this function.
-// Down below the autosave = false does NOT seem to be working as I am getting LOTS of new entries
-// in which the drafttext is the feedback comment! Refer to about line 225 of edit.php. I think
-// my problem is probably due to not issuing the file_postupdate_standard_editor call.
-// This makes me really think I need to delete all my work from today, and try doing it
-// as a results_form or report_form.
-
+            /*
+            The context that I deleted, probably really needs to be used. The autosave table is now
+            showing a contextid of 1 instead of the expected 331.
+            I added $context to the other 6 variables  coming into this function.
+            Down below the autosave = false does NOT seem to be working as I am getting LOTS of new entries
+            in which the drafttext is the feedback comment! Refer to about line 225 of edit.php. I think
+            my problem is probably due to not issuing the file_postupdate_standard_editor call.
+            This makes me really think I need to delete all my work from today, and try doing it
+            as a results_form or report_form.
+            */
             // 20210630 Switched from plain textarea to an editor.
             $editor = editors_get_preferred_editor(FORMAT_HTML);
-            //echo '<p>'.$editor->use_editor('c'.$entry->id).'</p>';
-            echo $editor->use_editor('c'.$entry->id, ['context' => $context, 'autosave' => false], ['return_types' => FILE_EXTERNAL]);
-/////////////////////////////////////////////////////////////////////////////////////////////////
+            echo $editor->use_editor('c'.$entry->id,
+                                    ['context' => $context, 'autosave' => false],
+                                    ['return_types' => FILE_EXTERNAL]);
 
             if ($feedbackdisabledstr != '') {
                 echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
             }
             echo '</td></tr>';
         }
-        //echo '<tr><td class="userpix"> test 1</td><td>';
-
-        //echo 'Will try to add a text editor for a form.</td></tr>';
         echo '</table>';
     }
 

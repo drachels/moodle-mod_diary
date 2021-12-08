@@ -270,8 +270,9 @@ if ($form->is_cancelled()) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($diary->name));
 
+// Can use something like this, $intro .= 'this is a test';, to add to the into text.
 $intro = format_module_intro('diary', $diary, $cm->id);
-//$intro .= 'this is a test';
+
 echo $OUTPUT->box($intro);
 
 // Otherwise fill and print the form.

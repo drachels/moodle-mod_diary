@@ -22,7 +22,7 @@
  * @package   mod_diary
  * @copyright AL Rachels (drachels@drachels.com)
  * @copyright based on work by 2018 Gordon Bateson (gordon.bateson@gmail.com)
- * @copyright based on work by 2014 Dave Child 
+ * @copyright based on work by 2014 Dave Child
  * @copyright based on work by 2009 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -68,8 +68,7 @@ class diarystats {
 
         $errors = array();
         $matches = array();
-        //$debug = array();
-                
+
         if (empty($diary->errorcmid)) {
             $cm = null;
 
@@ -77,33 +76,21 @@ class diarystats {
             $cm = get_coursemodule_from_id('', $diary->errorcmid);
         }
 
-         if (empty($diary->errorpercent)) {
+        if (empty($diary->errorpercent)) {
             $percent = 0;
         } else {
             $percent = $diary->errorpercent;
         }
-        //$debug['Tracking get_common_errors problem cp 1 showing percent '] = $percent.'%';
 
         if ($cm) {
             $entryids = array();
             if ($entries = $DB->get_records('glossary_entries', array('glossaryid' => $cm->instance), 'concept')) {
-                //$tempcounter = 0;
-
                 foreach ($entries as $entry) {
                     if ($match = self::glossary_diaryentry_search_text($entry, $entry->concept, $text)) {
-                        //$tempcounter++;
-
-                        //$debug['Tracking get_common_errors problem cp 2 showing match '.$tempcounter] = $match;
-
                         // These two new lines break my code.
                         list($pos, $length, $match) = $match;
-                        //$debug['Tracking get_common_errors problem cp 3 showing $pos, $length, and $match '.$tempcounter] = $pos.' '.$length.' '.$match;
-
                         $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
                         $matches[$pos] = (object)array('pos' => $pos, 'length' => $length, 'match' => $match);
-                        //$debug['Tracking get_common_errors problem cp 4 showing $matches[$pos] '.$tempcounter] = $matches[$pos];
-                        //$debug['Tracking get_common_errors problem cp 5 showing $errors[$match] '.$tempcounter] = $errors[$match];
-
                     } else {
                         $entryids[] = $entry->id;
                     }
@@ -126,11 +113,8 @@ class diarystats {
 
         }
 
-
         $errortext = $text;
         if (count($matches)) {
-            //$debug['Tracking get_common_errors problem cp 7 showing count($matches): '] = count($matches);
-
             // Sort error $matches from last position to first position.
             krsort($matches);
             foreach ($matches as $match) {
@@ -138,16 +122,12 @@ class diarystats {
                 $length = $match->length;
                 $match = $errors[$match->match]; // A link to the glossary.
                 $errortext = substr_replace($errortext, $match, $pos, $length);
-                //$debug['Tracking get_common_errors problem cp 7 showing $errortext: '] = $errortext;
-
             }
         }
 
         if (count($errors)) {
-            //$debug['Tracking get_common_errors problem cp 8 showing count($errors): '] = count($errors);
-
             // Sort the matching errors by length (longest to shortest).
-            // https://stackoverflow.com/questions/3955536/php-sort-hash-array-by-key-length
+            // From https://stackoverflow.com/questions/3955536/php-sort-hash-array-by-key-length.
             $matches = array_keys($errors);
             $lengths = array_map('core_text::strlen', $matches);
             array_multisort($lengths, SORT_DESC, $matches);
@@ -155,25 +135,15 @@ class diarystats {
             // Remove matches that are substrings of longer matches.
             $keys = array();
             foreach ($matches as $match) {
-                //$debug['Tracking get_common_errors problem cp 9 showing $search first match: '] = $match;
-
                 $search = '/^'.preg_quote($match, '/').'.+/iu';
-                //$debug['Tracking get_common_errors problem cp 9 showing $search first time: '] = $search;
-
                 $search = preg_grep($search, $matches);
-                //$debug['Tracking get_common_errors problem cp 9 showing $search second time: '] = $search;
-
                 if (count($search)) {
                     unset($errors[$match]);
                 } else {
                     $keys[] = $match;
                 }
-                //$debug['Tracking get_common_errors problem cp 9 showing $match: '] = $match;
-                //$debug['Tracking get_common_errors problem cp 9 showing $errors: '] = $errors;
-
             }
         }
-        //print_object($debug);
         return array($errors, $errortext, count($errors) * $percent);
     }
 
@@ -186,30 +156,20 @@ class diarystats {
      * @return string the matching substring in $text or ""
      */
     public static function glossary_diaryentry_search_text($entry, $search, $text) {
-        //print_object('In the function glossary_diaryentry_search_text and printing $entry, $search, $text.');
-        //print_object($entry);
-        //print_object($search);
-        //print_object($text);
         return self::search_text($search, $text, $entry->fullmatch, $entry->casesensitive);
     }
 
- 
     /**
      * Store information about latest response to this entry.
      *
      * @param  string $name
      * @param  string $value
-     * @return void, but will update currentresponse property of this object
+     * @return void, but will update currentresponse property of this object.
      */
     public static function glossary_entry_link($glossaryname, $entry, $text) {
-        //print_object('In the function glossary_entry_link and printing $glossaryname, $entry, $text.');
-        //print_object($glossaryname);
-        //print_object($entry);
-        //print_object($text);
         $params = array('eid' => $entry->id,
                         'displayformat' => 'dictionary');
         $url = new moodle_url('/mod/glossary/showentry.php', $params);
-
         $params = array('target' => '_blank',
                         'title' => $glossaryname.': '.$entry->concept,
                         'class' => 'glossary autolink concept glossaryid'.$entry->glossaryid);
@@ -227,10 +187,6 @@ class diarystats {
         if (empty($text)) {
             return '';
         }
-        //$plaintext = question_utils::to_plain_text($text, $format, array('para' => false));
-        //$plaintext = self::standardize_white_space($plaintext);
-
-
         // The following call to html_to_text uses the option that strips out
         // all URLs, but format_text complains if it finds @@PLUGINFILE@@ tokens.
         // So, we need to replace @@PLUGINFILE@@ with a real URL, but it doesn't
@@ -246,11 +202,11 @@ class diarystats {
      *
      * @param Stext string The text of the current diary entry.
      */
-        public static function standardize_white_space($text) {
+    public static function standardize_white_space($text) {
         // Standardize white space in $text.
         // Html-entity for non-breaking space, $nbsp;,
         // is converted to a unicode character, "\xc2\xa0",
-        // that can be simulated by two ascii chars (194,160)
+        // that can be simulated by two ascii chars (194,160).
         $text = str_replace(chr(194).chr(160), ' ', $text);
         $text = preg_replace('/[ \t]+/', ' ', trim($text));
         $text = preg_replace('/( *[\x0A-\x0D]+ *)+/s', "\n", $text);
@@ -268,15 +224,15 @@ class diarystats {
     public static function search_text($search, $text, $fullmatch=false, $casesensitive=false, $ignorebreaks=true) {
 
         $text = trim($text);
-        if ($text=='') {
-            return false; // Unexpected?!
+        if ($text == '') {
+            return false; // Unexpected?
         }
         $search = trim($search);
-        if ($search=='') {
+        if ($search == '') {
             return false; // Should not happen!
         }
 
-        if (self::$aliases===null) {
+        if (self::$aliases === null) {
             // Human readable aliases for regexp strings.
             self::$aliases = array(' OR '  => '|',
                                    ' OR'   => '|',
@@ -341,7 +297,7 @@ class diarystats {
             }
             return array($offset, $length, $match);
         } else {
-            return ''; // no matches
+            return ''; // No matches.
         }
     }
 
@@ -351,7 +307,6 @@ class diarystats {
      * @param string $entry The text for this entry.
      * @return bool
      */
-    //public static function get_diary_stats($entry, $format) {
     public static function get_diary_stats($entry, $diary) {
         global $CFG, $OUTPUT;
         $precision = 1;
@@ -380,7 +335,6 @@ class diarystats {
                                     'wordspersentence' => 0,
                                     'longwordspersentence' => 0,
                                     'sentencesperparagraph' => 0,
-                                    /*'totalsyllabels' => self::get_stats_totalsyllables($text),*/
                                     'totalsyllabels' => 0,
                                     'newtotalsyllabels' => 0,
                                     'fkgrade' => 0,
@@ -388,22 +342,23 @@ class diarystats {
 
         if ($diarystats->words) {
             $diarystats->lexicaldensity = round(($diarystats->uniquewords / $diarystats->words) * 100, 0).'%';
-            //$diarystats->mediumwords = ($diarystats->shortwords - self::get_stats_mediumwords($text));
-            list($diarystats->shortwords, $diarystats->mediumwords, $diarystats->longwords, $diarystats->totalsyllabels) = self::get_stats_longwords($text);
+            list($diarystats->shortwords,
+                 $diarystats->mediumwords,
+                 $diarystats->longwords,
+                 $diarystats->totalsyllabels)
+                 = self::get_stats_longwords($text);
 
-
-            /*
-            print_object('Printing shortwords: '.$diarystats->shortwords);
-            print_object('Printing mediumwords: '.$diarystats->mediumwords);
-            print_object('Printing longwords: '.$diarystats->longwords);
-            */
         }
         if ($diarystats->sentences) {
             $diarystats->charspersentence = round($diarystats->chars / $diarystats->sentences, $precision);
             $diarystats->wordspersentence = round($diarystats->words / $diarystats->sentences, $precision);
             $diarystats->longwordspersentence = round($diarystats->longwords / $diarystats->sentences, $precision);
-            $diarystats->fkgrade = max(round(0.39 * ($diarystats->words / $diarystats->sentences) + 11.8 * ($diarystats->totalsyllabels / $diarystats->words) - 15.59, $precision), 0);
-            $diarystats->freadease = round(206.835 - 1.015 * ($diarystats->words / $diarystats->sentences) - 84.6 * ($diarystats->totalsyllabels / $diarystats->words), $precision);
+            $diarystats->fkgrade = max(round(0.39 *
+                                  ($diarystats->words / $diarystats->sentences) + 11.8 *
+                                  ($diarystats->totalsyllabels / $diarystats->words) - 15.59, $precision), 0);
+            $diarystats->freadease = round(206.835 - 1.015 *
+                                    ($diarystats->words / $diarystats->sentences) - 84.6 *
+                                    ($diarystats->totalsyllabels / $diarystats->words), $precision);
         }
         if ($diarystats->wordspersentence) {
             $diarystats->fogindex = ($diarystats->wordspersentence + $diarystats->longwordspersentence);
@@ -417,14 +372,12 @@ class diarystats {
         }
 
         if ($CFG->branch > 32) {
-            // Can try e/help or f/help-32
-            //$itemp = $OUTPUT->image_icon('a/help', 'click for info');
+            // Can try e/help or f/help-32.
             $itemp = $OUTPUT->image_icon('a/help', get_string('popoverhelp', 'diary'));
         } else {
-            //$itemp = $OUTPUT->pix_icon('a/help', 'click for info');
             $itemp = $OUTPUT->pix_icon('a/help', get_string('popoverhelp', 'diary'));
         }
-        //if ($diary->enableautorating) {
+
         // 20210812 Show/hide statistics for each entry.
         if ($diary->enablestats) {
             // 20210815 Temporary code for developing calculation w/regard min/max character limits.
@@ -444,18 +397,8 @@ class diarystats {
 
             // Auto entry into the feedback entry comment field CANNOT be done here as
             // you will get multiple duplicate entries as soon as the teacher saves one.
-            
-            // I THINK I WANT TO DO THE CALCULATIONS AND PLACE THEM INTO $diarystats!
-            // 20211028 These work but are not actually in the form needed in the feedback, I don't think.
-            // I think I will need to calculate whether there is less, or more, acutally in use.
-            // $entry->entrycomment .= 'The current minimum word limit is: '.$tempminw.'.<br>';
-            // $entry->entrycomment .= 'The current maximum word limit is: '.$tempmaxw.'.<br>';
-            
-            //print_object($diarystats);
-            
-            // 20210703 Consolidated the table here so using one instance instead of two.
-            //echo '<table class="generaltable">'
 
+            // 20210703 Consolidated the table here so using one instance instead of two.
             // 20211007 An output experiment.
             $currentstats = '<table class="generaltable">'
                 .'<tr><td style="width: 25%">'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
@@ -467,7 +410,7 @@ class diarystats {
                     .'<td>'.get_string('words', 'diary').' '.$tempminw.'/'.$diarystats->words.'/'.$tempmaxw.'</td>'
                     .'<td>'.get_string('sentences', 'diary').' '.$tempmins.'/'.$diarystats->sentences.'/'.$tempmaxs.'</td>'
                     .'<td>'.get_string('paragraphs', 'diary').' '.$tempminp.'/'.$diarystats->paragraphs.'/'.$tempmaxp.'</td></tr>'
-                    
+
                 .'<tr><td>'.get_string('uniquewords', 'diary').' '.$diarystats->uniquewords.'</td>'
                     .'<td>'.get_string('shortwords', 'diary')
                          .' <a href="#" data-toggle="popover" data-content="'
@@ -486,12 +429,20 @@ class diarystats {
                          .get_string('longwords_help', 'diary').'">'.$itemp.'</a> '
                          .$diarystats->longwords
                          .' ('.number_format($diarystats->longwords / $diarystats->uniquewords * (100), 2, '.', '')
-                         .'%)</td>' 
-                    
+                         .'%)</td>'
+
                 .'<tr><td>'.get_string('charspersentence', 'diary').' '.$diarystats->charspersentence.'</td>'
                     .'<td>'.get_string('sentencesperparagraph', 'diary').' '.$diarystats->sentencesperparagraph.'</td>'
                     .'<td>'.get_string('wordspersentence', 'diary').' '.$diarystats->wordspersentence.'</td>'
                     .'<td>'.get_string('longwordspersentence', 'diary').' '.$diarystats->longwordspersentence.'</td></tr>'
+
+                .'<tr><td>'.get_string('totalsyllables', 'diary', ($diarystats->totalsyllabels)).' </td>'
+                    .'<td>'.get_string('avgsylperword', 'diary',
+                           (number_format($diarystats->totalsyllabels / $diarystats->uniquewords, 2, '.', ''))).'</td>'
+                    .'<td>'.get_string('avgwordlenchar', 'diary',
+                           (number_format($diarystats->chars / $diarystats->words, 2, '.', ''))).'</td>'
+                    .'<td>'.get_string('avgwordpara', 'diary',
+                           (number_format($diarystats->words / $diarystats->paragraphs, 1, '.', ''))).' </td></tr>'
 
                 .'<tr><td>'.get_string('lexicaldensity', 'diary')
                     .' <a href="#" data-toggle="popover" data-content="'
@@ -508,35 +459,32 @@ class diarystats {
                     .'<td>'.get_string('fogindex', 'diary')
                         .' <a href="#" data-toggle="popover" data-content="'
                         .get_string('fogindex_help', 'diary').'">'.$itemp.'</a> '
-                        .$diarystats->fogindex.'</td>'
-
-                .'<tr><td>'.get_string('totalsyllables', 'diary', ($diarystats->totalsyllabels)).' </td>'
-                    .'<td>'.get_string('avgsylperword', 'diary', (number_format($diarystats->totalsyllabels / $diarystats->uniquewords, 2, '.', ''))).'</td>'
-                    .'<td>'.get_string('avgwordlenchar', 'diary', (number_format($diarystats->chars / $diarystats->words, 2, '.', ''))).'</td>'
-                    .'<td> </td></tr>';
-                } else {
-                    $currentstats .= '<tr><td>'.get_string('notextdetected', 'diary').'</td><td> </td><td> </td><td> </td></tr>';
-                }
+                        .$diarystats->fogindex.'</td></tr>';
+            } else {
+                $currentstats .= '<tr><td>'.get_string('notextdetected', 'diary').'</td><td> </td><td> </td><td> </td></tr>';
+            }
             // 20211007 An experiment for the output.
             echo $currentstats;
 
-            //20210704 If common errors from the glossary are detected, list them here.
+            // 20210704 If common errors from the glossary are detected, list them here.
             if ($errors) {
                 $x = 1;
-                $temp ='';
+                $temp = '';
                 foreach ($errors as $error) {
                     $temp .= $x.'. '.$error.' ';
                     ++$x;
                 }
-                // Original code to be deleted.
-                // echo '<tr class="table-warning"><td colspan="4">Detected at least '.$diarystats->commonerrors.', '.get_string('commonerrors', 'diary').'. They are: '.$temp.'<br> If allowed, you should fix and re-submit.</td></tr>';
 
-                // 20211028 Put the info in a variable for later use.
-                $usercommonerrors = '<tr class="table-warning"><td colspan="4">Detected at least '.$diarystats->commonerrors.', '.get_string('commonerrors', 'diary').'. They are: '.$temp.'<br> If allowed, you should fix and re-submit.</td></tr>';
+                // 20211028 Put the info in a variable for later use. 20211208 Converted from hardcoded text to string.
+                $usercommonerrors = '<tr class="table-warning"><td colspan="4">'
+                                    .get_string('detectcommonerror', 'diary',
+                                    ['one' => $diarystats->commonerrors,
+                                    'two' => get_string('commonerrors', 'diary'),
+                                    'three' => $temp]).'</td></tr>';
 
                 echo $usercommonerrors;
                 // 20211028 This will put the user common errors in the feedback ready to be saved.
-                // Needs to be added/controlled via the new, Add to feedback, button.
+                // Needs to be added/controlled via the, Add to feedback, button.
                 // $entry->entrycomment = $currentstats;
                 // $entry->entrycomment .= $usercommonerrors;
             }
@@ -544,23 +492,26 @@ class diarystats {
             // 20210814 Show rating info only if enabled and item to rate is NOT = None.
             if ($diary->enableautorating && $diary->itemtype <> 0) {
                 // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
-                 echo '<tr class="table-primary"><td colspan="4">'.get_string('maxpossratinge', 'diary',($diary->scale)).'</td></tr>';
+                 echo '<tr class="table-primary"><td colspan="4">'
+                      .get_string('maxpossratinge', 'diary',
+                      ($diary->scale)).'</td></tr>';
 
                 // 20210713 Need the item type and how many of them must be used in this diary entry.
                 $itemtypes = array();
-                $itemtypes = diarystats::get_item_types($itemtypes);
+                $itemtypes = self::get_item_types($itemtypes);
                 if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
-                    $diary->intro .= get_string('itemtype_desc', 'diary', ['one' => $itemtypes[$diary->itemtype], 'two' => $diary->itemcount]).'<br>';
+                    $diary->intro .= get_string('itemtype_desc', 'diary',
+                                               ['one' => $itemtypes[$diary->itemtype],
+                                               'two' => $diary->itemcount]).'<br>';
                 }
 
                 // 20211205 Converted from hardcoded text to string.
-                echo '<tr class="table-info"><td colspan="4">'.get_string('autoratingitemdetails', 'diary', ['one' => $diary->itemcount, 'two' => $itemtypes[$diary->itemtype], 'three' => $diary->itempercent, 'four' => $itemtypes[$diary->itemtype]]).'</td></tr>';
-
-                // Variable, $debug, is an array that can contain debug information on an as needed basis during development.
-                $debug = array();
+                echo '<tr class="table-info"><td colspan="4">'
+                     .get_string('autoratingitemdetails', 'diary',
+                     ['one' => $diary->itemcount, 'two' => $itemtypes[$diary->itemtype],
+                     'three' => $diary->itempercent, 'four' => $itemtypes[$diary->itemtype]]).'</td></tr>';
 
                 $item = strtolower($itemtypes[$diary->itemtype]);
-                // Use as needed $debug['Tracking problem with $item for auto-rating cp 1 '] = $item;
 
                 // Check $item if set to character use chars instead.
                 if ($item == 'characters') {
@@ -569,42 +520,44 @@ class diarystats {
                     $item = strtolower($itemtypes[$diary->itemtype]);
                 }
 
-                // Use as needed $debug['Tracking problem with $item for auto-rating cp 2 '] = $item;
-
                 $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
-
-                // Use as needed print_object($debug);
 
                 $commonerrorrating = $diarystats->commonpercent;
 
                 // 20211119 Explanation of auto-rating check of what you have and need. 20211205 Converted to string.
-                echo '<tr><td colspan="4" class="table-info">'. get_string('autoratingitemexplained', 'diary', ['one' => $item, 'two' => $diary->itemcount, 'three' => $diarystats->$item, 'four' => (max($diary->itemcount - $diarystats->$item, 0))]).'</td></tr>';
+                echo '<tr><td colspan="4" class="table-info">'
+                     .get_string('autoratingitemexplained', 'diary', ['one' => $item,
+                     'two' => $diary->itemcount, 'three' => $diarystats->$item,
+                     'four' => (max($diary->itemcount - $diarystats->$item, 0))]).'</td></tr>';
+
                 // 20211205 Converted to string.
-                echo '<tr><td colspan="4" class="table-info">'.get_string('autoratingitempenaltymath', 'diary', ('(max('.$diary->itemcount.' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '.(max($itemrating, 0)))).'</td></tr>';
-                // Show auto-rating penalty. 20211205 Converted to string.
-                echo '<tr><td colspan="4" class="table-danger">'.get_string('autoratingpotentialpentaly', 'diary', (max($diary->itemcount - $diarystats->$item, 0)).' * '.$diary->itempercent.'% or '.((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent)).' points off.</td></tr>';
+                echo '<tr><td colspan="4" class="table-info">'
+                     .get_string('autoratingitempenaltymath', 'diary', ('(max('.$diary->itemcount
+                     .' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '
+                     .(max($itemrating, 0)))).'</td></tr>';
 
-                // Show possible Glossary of common errors penalty.
-                echo '<tr><td colspan="4" class="table-danger"> Potential Common error penalty: '.$diarystats->commonerrors.' * '.$diary->errorpercent.' = '.$diarystats->commonpercent.'% or '.$commonerrorrating.' points off.</td></tr>';
+                // Show auto-rating penalty. 20211205 Converted hardcoded text to string.
+                echo '<tr><td colspan="4" class="table-danger">'
+                     .get_string('autoratingpotentialpentaly', 'diary', (max($diary->itemcount - $diarystats->$item, 0))
+                     .' * '.$diary->itempercent.'% or '.((max($diary->itemcount - $diarystats->$item, 0))
+                     * $diary->itempercent)).' points off.</td></tr>';
 
-                // 20211007 Show the possible overall rating. Modified 20211119.
+                // Show possible Glossary of common errors penalty. 20211208 Converted hardcoded text to string using {$a}.
+                echo '<tr><td colspan="4" class="table-danger">'
+                     .get_string('potcommerrpen', 'diary', ['one' => $diarystats->commonerrors,
+                     'two' => $diary->errorpercent, 'three' => $diarystats->commonpercent,
+                     'four' => $commonerrorrating]).'</td></tr>';
+
+                // 20211007 Calculate and show the possible overall rating. Modified 20211119.
                 $currentrating = $diary->scale.' - '.
-                                              ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).
-                                              ' - '.$commonerrorrating. ' = '.
-                                              ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent) - $commonerrorrating);
+                                 ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).
+                                 ' - '.$commonerrorrating. ' = '.
+                                 ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0))
+                                 * $diary->itempercent) - $commonerrorrating);
 
                 echo '<tr><td colspan="4" class="table-danger"> Your current potential rating is: '.$currentrating.'%</td></tr>';
             }
-
-            // Cannot add buttons here because they will also show to everyone on the view page.
-
-            //echo '<tr><td colspan="4" class="generaltable">
-            //     <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'.get_string('addtofeedback', 'diary').'</a>'
-            //     .' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">Clear feedback</a>'.'</td></tr>
-            //     <tr><td><form action="self::add_stats($entry)">
-            //     <input type="submit" value="click on me!">
-            //     </form></td><td></td></tr>';
-
+            // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
             echo '</table>';
         }
         return;
@@ -621,7 +574,6 @@ class diarystats {
         $entry->entrycomment = $currentstats;
         $entry->entrycomment .= $usercommonerrors;
         return;
-        //return ($entry);
     }
 
     /**
@@ -662,12 +614,12 @@ class diarystats {
      * @param string $entry The text for this entry.
      * @ return int The number of paragraphs.
      */
-    //public static function get_stats_paragraphs($entry, $format) {
     public static function get_stats_paragraphs($text) {
         $items = self::multipleexplode(array("<p", "<p>", "\n", "\r\n"), $text);
         $items = array_filter($items);
         return count($items);
     }
+
     /**
      * Process the multiple delimiters used for checking paragraphs.
      *
@@ -732,14 +684,10 @@ class diarystats {
      * @return int The number of syllables in the current word.
      */
     public static function count_syllables($word) {
-        // https://github.com/vanderlee/phpSyllable (multilang)
-        // https://github.com/DaveChild/Text-Statistics (English only)
-        // https://pear.php.net/manual/en/package.text.text-statistics.intro.php
-        // https://pear.php.net/package/Text_Statistics/docs/latest/__filesource/fsource_Text_Statistics__Text_Statistics-1.0.1TextWord.php.html
-
-        // Variable $debug is an array containing the basic syllable counting steps for the current word.
-        $debug = array();
-        $debug['Counting syllables for version 1'] = $word;
+        // From https://github.com/vanderlee/phpSyllable (multilang).
+        // From https://github.com/DaveChild/Text-Statistics (English only).
+        // From https://pear.php.net/manual/en/package.text.text-statistics.intro.php.
+        // From https://pear.php.net/package/Text_Statistics/docs/latest/__filesource/fsource_Text_Statistics__Text_Statistics-1.0.1TextWord.php.html.
 
         $str = strtoupper($word);
         if (strlen($str) < 2) {
@@ -758,11 +706,6 @@ class diarystats {
             $str = str_replace($vowels, '', $str, $vowelcount);
             $count += $vowelcount;
 
-            $debug['Just finished processing double-vowels'] = $str;
-            // $debug['The oldlen is'] = $oldlen;
-            // $debug['The newlen is'] = $newlen;
-            $debug['After double-vowel the count is'] = $count;
-
             // Cache the final letter, in case it is an "e".
             $finalletter = substr($str, -1);
 
@@ -772,32 +715,13 @@ class diarystats {
             $str = str_replace($vowels, '', $str, $vowelcount);
             $count += $vowelcount;
 
-            $debug['Just finished processing single-vowels'] = $str;
-            //print_object('print str '.$str);
-            //print_object('print str_replace($vowels, null, $str) '.str_replace($vowels, '', $str));
-            //$debug['The oldlen is'] = $oldlen;
-            //$debug['The newlen is'] = $newlen;
-            $debug['After single-vowel the count is'] = $count;
-
             // Adjust the count for words that end in "e" and have at least one other vowel.
             if ($count > 1 && $finalletter == 'E') {
                 $count--;
-                $debug['We had a final letter E and the count is now'] = $count;
-
             }
         }
         $newsyllablecount = syllables::syllable_count($word,  $strencoding = '');
 
-        /*
-        if ($count <> $newsyllablecount) {
-            print_object('Gordon Bateson syllable counter: '.$word.' '.$count);
-            $debug['Gordon Bateson syllable counter: '] = $$word.' '.$count;
-            print_object('Dave Child syllable counter: '.$word.' '.$newsyllablecount);
-            $debug['Dave Child syllable counter: '] = $$word.' '.$newsyllablecount;
-            //print_object($debug);
-        }
-        */
-        //return $count;
         return $newsyllablecount;
     }
 

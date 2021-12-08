@@ -367,9 +367,6 @@ class syllables {
         }
         $intsyllablecount = ($intsyllablecount == 0) ? 1 : $intsyllablecount;
 
-        //$debug['Result'] = $intsyllablecount;
-        //print_object($debug);
-
         return $intsyllablecount;
     }
 
@@ -379,17 +376,14 @@ class syllables {
      * @param   string  $strencoding  Encoding of text.
      * @return  int
      */
-    public static function totalSyllables($strtext, $strencoding = '') {
-print_object('Made it to the totalSyllables function');
-// Removed the extra code from diarystats line 355 to run this.
-
+    public static function total_syllables($strtext, $strencoding = '') {
+        // Removed the extra code from diarystats line 355 to run this.
         $intsyllablecount = 0;
         $arrwords = explode(' ', $strtext);
         $intwordcount = count($arrwords);
         for ($i = 0; $i < $intwordcount; $i++) {
-            $intsyllablecount += self::syllableCount($arrwords[$i], $strencoding);
+            $intsyllablecount += self::syllable_count($arrwords[$i], $strencoding);
         }
-print_object('Made it to the totalSyllables function');
         return $intsyllablecount;
     }
 
@@ -399,14 +393,14 @@ print_object('Made it to the totalSyllables function');
      * @param   string  $strencoding  Encoding of text.
      * @return  int|float
      */
-    public static function averageSyllablesPerWord($strtext, $strencoding = '') {
+    public static function average_syllables_per_word($strtext, $strencoding = '') {
         $intsyllablecount = 0;
-        $intwordcount = Text::wordCount($strtext, $strencoding);
+        $intwordcount = text::word_count($strtext, $strencoding);
         $arrwords = explode(' ', $strtext);
         for ($i = 0; $i < $intwordcount; $i++) {
-            $intsyllablecount += self::syllableCount($arrwords[$i], $strencoding);
+            $intsyllablecount += self::syllable_count($arrwords[$i], $strencoding);
         }
-        $averagesyllables = (Maths::bcCalc($intsyllablecount, '/', $intwordcount));
+        $averagesyllables = (maths::bc_calc($intsyllablecount, '/', $intwordcount));
         return $averagesyllables;
     }
 
@@ -419,15 +413,15 @@ print_object('Made it to the totalSyllables function');
      */
     public static function words_with_three_syllables($strtext, $blncountpropernouns = true, $strencoding = '') {
         $intlongwordcount = 0;
-        $intwordcount = Text::wordCount($strtext, $strencoding);
+        $intwordcount = text::word_count($strtext, $strencoding);
         $arrwords = explode(' ', $strtext);
         for ($i = 0; $i < $intwordcount; $i++) {
             if (Syllables::syllableCount($arrwords[$i], $strencoding) > 2) {
                 if ($blncountpropernouns) {
                     $intlongwordcount++;
                 } else {
-                    $strfirstletter = Text::substring($arrwords[$i], 0, 1, $strencoding);
-                    if ($strfirstletter !== Text::upperCase($strfirstletter, $strencoding)) {
+                    $strfirstletter = text::substring($arrwords[$i], 0, 1, $strencoding);
+                    if ($strfirstletter !== text::upper_case($strfirstletter, $strencoding)) {
                         // First letter is lower case. Count it.
                         $intlongwordcount++;
                     }
@@ -445,10 +439,10 @@ print_object('Made it to the totalSyllables function');
      * @param   bool    $blncountpropernouns      Boolean - should proper nouns be included in words count.
      * @return  int|float
      */
-    public static function percentageWordsWithThreeSyllables($strtext, $blncountpropernouns = true, $strencoding = '') {
-        $intwordcount = Text::wordCount($strtext, $strencoding);
+    public static function percentage_words_with_three_syllables($strtext, $blncountpropernouns = true, $strencoding = '') {
+        $intwordcount = text::word_count($strtext, $strencoding);
         $intlongwordcount = self::words_with_three_syllables($strtext, $blncountpropernouns, $strencoding);
-        $intpercentage = Maths::bcCalc(Maths::bcCalc($intlongwordcount, '/', $intwordcount), '*', 100);
+        $intpercentage = maths::bcCalc(maths::bc_calc($intlongwordcount, '/', $intwordcount), '*', 100);
 
         return $intpercentage;
     }
