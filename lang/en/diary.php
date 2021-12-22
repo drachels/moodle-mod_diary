@@ -72,6 +72,7 @@ $string['created'] = 'Created {$a->one} days and {$a->two} hours ago.';
 $string['crontask'] = 'Background processing for Diary module';
 $string['csvexport'] = 'Export to .csv';
 $string['currententry'] = 'Current diary entries:';
+$string['currpotrating'] = 'Your current potential rating is: {$a}%';
 $string['dateformat'] = 'Default date format';
 $string['daysavailable_help'] = 'If using Weekly format, you can set how many days the diary is open for use.';
 $string['daysavailable'] = 'Days available';
