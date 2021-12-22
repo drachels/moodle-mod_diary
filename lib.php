@@ -738,57 +738,6 @@ function diary_get_users_done($diary, $currentgroup, $sortoption) {
 }
 
 /**
- * Counts all the diary entries (optionally in a given group).
- *
- * @param array $diary
- * @param int $groupid
- * @return int count($diarys) Count of diary entries.
- */
-function diary_count_entries($diary, $groupid = 0) {
-    global $DB;
-
-    $cm = diary_get_coursemodule($diary->id);
-    $context = context_module::instance($cm->id);
-
-    if ($groupid) { // How many in a particular group?
-
-        $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
-                  JOIN {groups_members} g ON g.userid = d.userid
-                  JOIN {user} u ON u.id = g.userid
-                 WHERE d.diary = ? AND g.groupid = ?";
-        $diarys = $DB->get_records_sql($sql, array(
-            $diary->id,
-            $groupid
-        ));
-    } else { // Count all the entries from the whole course.
-
-        $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
-                  JOIN {user} u ON u.id = d.userid
-                 WHERE d.diary = ?";
-        $diarys = $DB->get_records_sql($sql, array(
-            $diary->id
-        ));
-    }
-
-    if (! $diarys) {
-        return 0;
-    }
-
-    $canadd = get_users_by_capability($context, 'mod/diary:addentries', 'u.id');
-    $entriesmanager = get_users_by_capability($context, 'mod/diary:manageentries', 'u.id');
-
-    // Remove unenrolled participants.
-    foreach ($diarys as $userid => $notused) {
-
-        if (! isset($entriesmanager[$userid]) && ! isset($canadd[$userid])) {
-            unset($diarys[$userid]);
-        }
-    }
-
-    return count($diarys);
-}
-
-/**
  * Return diary log info.
  *
  * @param string $log
