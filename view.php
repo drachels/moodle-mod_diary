@@ -33,9 +33,16 @@ require_once(__DIR__ .'/../../lib/gradelib.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
-$course = $DB->get_record('course', array(
-    'id' => $cm->course
-), '*', MUST_EXIST); // Complete details about this course.
+
+//print_object('spacer 1');
+//print_object('spacer 2');
+//print_object('spacer 3 printing $course and $diarys');
+//print_object($cm);
+
+$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
+
+
+
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
 if (! $cm) {
@@ -58,15 +65,31 @@ if (! $entriesmanager && ! $canadd) {
     throw new moodle_exception(get_string('accessdenied', 'diary'));
 }
 
-if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
-    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
-} else {
+////////////////////
+if (! $diarys = get_all_instances_in_course('diary', $course)) {
+    notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
+    die();
+}
+
+
+foreach ($diarys as $temp) {
+    if ($temp->id = $cm->instance) {
+        $diary = $temp;
+}
+//print_object($course);
+//print_object($diary);
+///////////////////
+
+//if (! $diary = $DB->get_record('diary', array('id' => $cm->instance))) {
+//    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
+//} else {
     // 20210705 Added new activity color setting.
     // Moved here so it is set only once. Old location executed for every entry.
     $color3 = $diary->entrybgc;
     $color4 = $diary->entrytextbgc;
     $errorcmid = $diary->errorcmid;
 }
+//print_object($diary);
 
 if (! $cw = $DB->get_record("course_sections", array(
     "id" => $cm->section
@@ -245,16 +268,21 @@ if ($entriesmanager) {
     $currentgroup = groups_get_activity_group($cm, true);
     $ouput = groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
 
-    $entrycount = diary_count_entries($diary, $currentgroup);
+    //$entrycount = results::diary_count_entries($diary, $currentgroup);
+//print_object($diary);
+    $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
+
 
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
     $temp = '<span  class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
     $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
+
+    //$temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></span>';
     $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></span>';
     echo $temp;
 
 } else {
-    // 20200831 Added to show link to index.php page for students. 20210501 modified to remove div.
+    // 20200831 Added to show link to only index.php page for students. 20210501 modified to remove div.
     echo '<a class="reportlink" href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
 }
 
@@ -440,7 +468,42 @@ if ($timenow > $timestart) {
                 if ($timenow < $timefinish) {
 
                         // 20210704 Go calculate stats and print stats table.
-                        $data = diarystats::get_diary_stats($entry, $diary);
+                        //$statsdata = diarystats::get_diary_stats($entry, $diary);
+                        // 20211212 Need to echo here due to splitting diarystats::get_diary_stats into three functions.
+/////////////////////////Next line breaks the view page, and I think it is missing the table end tag.
+                       // echo $statsdata;
+
+        // 20211217 If there is a user entry, format it and show it.
+        if ($entry) {
+            $temp = $entry;
+            //echo results::diary_format_entry_text($entry, $course);
+            // 20210701 Moved copy 1 of 2 here due to new stats.
+            //echo '</div></td><td style="width:55px;"></td></tr>';
+
+            // 20210703 Moved to here from up above so the table gets rendered in the right spot.
+            $statsdata = diarystats::get_diary_stats($temp, $diary);
+            // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
+            echo $statsdata;
+
+            // 20211212 Added separate function to get the common error data here.
+            $comerrdata = diarystats::get_common_error_stats($temp, $diary);
+            echo $comerrdata;
+            list($autoratingdata,
+                 $currentratingdata)
+                 = diarystats::get_auto_rating_stats($temp, $diary);
+            // 20211212 Added separate function to get the autorating data here.
+            //$autoratingdata = diarystats::get_auto_rating_stats($temp, $diary);
+            echo $autoratingdata;
+            //echo $currentratingdata;
+        } else {
+            print_string("noentry", "diary");
+            // 20210701 Moved copy 2 of 2 here due to new stats.
+            echo '</div></td><td style="width:55px;"></td></tr>';
+        }
+
+        echo '</table>';
+
+
 
 
                     // Added lines to mark entry as needing regrade.
@@ -460,6 +523,7 @@ if ($timenow > $timestart) {
                     echo userdate($timefinish).'</div>';
                 }
 
+
                 // Print feedback from the teacher for the current entry.
                 if (! empty($entry->entrycomment) or ! empty($entry->rating)) {
                     // Get the rating for the current entry.
@@ -467,9 +531,7 @@ if ($timenow > $timestart) {
                     // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
                     // Format output using renderer.php.
-                    
-                    
-                    
+
                     echo $output->diary_print_feedback($course, $entry, $grades);
                     //echo $output->result::diary_format_entry_text($course, $entry, $grades);
                 }
