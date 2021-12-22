@@ -311,13 +311,57 @@ class results {
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
+/*
+        // 20211109 Check to see if, Add to feedback/Clear feedback, button is clicked.
+        $param1 = optional_param('button1'.$entry->id, '', PARAM_TEXT); // Transfer entry.
+        $param2 = optional_param('button2'.$entry->id, '', PARAM_TEXT); // Not currently used.
+        $param3 = optional_param('button3'.$entry->id, '', PARAM_INT); // Not currently used.
+*/
 
+
+/*
+        if (isset($param1) && get_string('addtofeedback', 'diary') == $param1)  {
+            print_object($param1);
+            print_object('Looks like the '.$param1.' button was clicked!');
+            print_object('And this is the current $feedbacktext '.$feedbacktext);
+            //die;
+        }
+        if (isset($param2) && get_string('clearfeedback', 'diary') == $param2)  {
+            print_object($param2);
+            print_object('Looks like the '.$param2.' button was clicked!');
+            print_object('The following is the current entryid:');
+            print_object($entry->id);
+            print_object('The following is the current feedback:');
+            print_object($entry->entrycomment);
+            print_object('The following is the current $feedbacktext:');
+            print_object($feedbacktext);
+            //die;
+        }
+
+        if (isset($param3) && get_string('clearfeedback', 'diary') == $param3)  {
+            print_object($param3);
+            print_object('Looks like the '.$param3.' button was clicked!');
+            print_object('The following is the current entryid:');
+            print_object($entry->id);
+            print_object('The following is the current feedback:');
+            print_object($entry->entrycomment);
+            print_object('The following is the current $feedbacktext:');
+            print_object($feedbacktext);
+            //die;
+        }
+*/
         // 20210705 Added new activity color setting.
         $dcolor4 = $diary->entrytextbgc;
 
         // Create a table for the current users entry with area for teacher feedback.
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
         if ($entry) {
+
+            // 20211109 needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
+            $param1 = optional_param('button1'.$entry->id, '', PARAM_TEXT); // Transfer entry.
+            $param2 = optional_param('button2'.$entry->id, '', PARAM_TEXT); // Not currently used.
+            $param3 = optional_param('button3'.$entry->id, '', PARAM_INT); // Not currently 
+
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
@@ -352,13 +396,26 @@ class results {
             echo self::diary_format_entry_text($entry, $course);
             // 20210701 Moved copy 1 of 2 here due to new stats.
             echo '</div></td><td style="width:55px;"></td></tr>';
+
             // 20210703 Moved to here from up above so the table gets rendered in the right spot.
-            $data = diarystats::get_diary_stats($temp, $diary);
+            $statsdata = diarystats::get_diary_stats($temp, $diary);
+            // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
+            echo $statsdata;
+
+            // 20211212 Added separate function to get the common error data here.
+            $comerrdata = diarystats::get_common_error_stats($temp, $diary);
+            echo $comerrdata;
+            list($autoratingdata,
+                 $currentratingdata)
+                 = diarystats::get_auto_rating_stats($temp, $diary);
+            // 20211212 Added separate function to get the autorating data here.
+            //$autoratingdata = diarystats::get_auto_rating_stats($temp, $diary);
+            echo $autoratingdata;
+            //echo $currentratingdata;
         } else {
             print_string("noentry", "diary");
             // 20210701 Moved copy 2 of 2 here due to new stats.
             echo '</div></td><td style="width:55px;"></td></tr>';
-
         }
 
         echo '</table>';
@@ -397,20 +454,77 @@ class results {
             echo '</td>';
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to add/delete auto grade stats and rating to feedback.
-            // 20211127 THE BUTTONS DO NOT WORK YET!
             echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
-                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'
-                     .get_string('addtofeedback', 'diary').'</a>'.
-                 ' <a href="#" class="btn btn-warning btn-sm" role="button" style="border-radius: 8px">'
-                    .get_string('clearfeedback', 'diary').'</a>'.
-                 '<br>'.get_string('rating', 'diary').':  ';
-                 '<br>'.get_string('rating', 'diary').':  ';
+
+                 ' <input class="btn btn-warning btn-sm"
+                         role="button"
+                         style="border-radius: 8px"
+                         name="button1'.$entry->id.'"
+                         onClick="return clClick()"
+                         type="submit" 
+                         value="'.get_string('addtofeedback', 'diary').'"></input> '.
+
+                 '<input class="btn btn-warning  btn-sm"
+                         style="border-radius: 8px"
+                         name="button2'.$entry->id.'"
+                         onClick="return clClick()"
+                         type="submit"
+                         value="'.get_string('clearfeedback', 'diary').'"> <a href="#"></a></input>';
+/*
+                 '<button type="submit"
+                         name="button3'.$entry->id.'"
+                         class="btn btn-warning btn-sm"
+                         style="border-radius: 8px"
+                         value="'.$entry->id.'">'.get_string('clearfeedback', 'diary').'</button>';
+*/
+
+                 //'<br>'.get_string('rating', 'diary').':  ';
+            echo '<br>'.get_string('rating', 'diary').':  ';
+
+
 
             $attrs = array();
             $hiddengradestr = '';
             $gradebookgradestr = '';
             $feedbackdisabledstr = '';
             $feedbacktext = $entry->entrycomment;
+
+        if (isset($param1) && get_string('addtofeedback', 'diary') == $param1)  {
+            //print_object($param1);
+            //print_object('Looks like the '.$param1.' button was clicked!');
+            //print_object('And this is the current $entry->id: '.$entry->id);
+            //print_object('And this is the current $entry->entrycomment: '.$entry->entrycomment);
+
+            $entry->rating = $currentratingdata;
+            $feedbacktext .= $entry->entrycomment.'<br>'.$statsdata.'<br><br>'.$comerrdata.'<br><br>'.$autoratingdata;
+        }
+        if (isset($param2) && get_string('clearfeedback', 'diary') == $param2)  {
+            //print_object($param2);
+            //print_object('Looks like the '.$param2.' button was clicked!');
+            //print_object('The following is the current entryid:');
+            //print_object($entry->id);
+            //print_object('The following is the current $entry->entrycomment:');
+            //print_object($entry->entrycomment);
+            //print_object('The following is the current $feedbacktext:');
+            //print_object($feedbacktext);
+            //die;
+            $entry->rating = 'None';
+
+            $feedbacktext = '';
+
+        }
+
+        if (isset($param3) && get_string('clearfeedback', 'diary') == $param3)  {
+            print_object($param3);
+            print_object('Looks like the '.$param3.' button was clicked!');
+            print_object('The following is the current entryid:');
+            print_object($entry->id);
+            print_object('The following is the current feedback:');
+            print_object($entry->entrycomment);
+            print_object('The following is the current $feedbacktext:');
+            print_object($feedbacktext);
+            //die;
+        }
 
             // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
             $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array(
@@ -656,5 +770,77 @@ class results {
                 debugging('Incorrect call to get_aggregation_method(), incorrect aggregate method '.$aggregate, DEBUG_DEVELOPER);
         }
         return $aggregatestr;
+    }
+
+    /**
+     * Counts all the diary entries (optionally in a given group).
+     * Called from view.php and index.php.
+     * 20211219 Moved here from lib.php.
+     * @param array $diary
+     * @param int $groupid
+     * @return int count($diarys) Count of diary entries.
+     */
+    public static function diary_count_entries($diary, $groupid = 0) {
+        global $DB, $CFG, $USER;
+//print_object($diary);
+        $cm = diary_get_coursemodule($diary->id);
+        $context = context_module::instance($cm->id);
+
+        // Get the groupmode which should be 0, 1, or 2.
+        $groupmode = ($diary->groupmode);
+
+        // If user is in a group, how many users in each Diary activity?
+        if ($groupid && ($groupmode > '0')) {
+
+            // Extract each group id from $groupid and process based on whether viewer is a member of the group.
+            // Show user and entry counts only if a member of the current group.
+            foreach ($groupid as $gid) {
+                $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
+                          JOIN {groups_members} g ON g.userid = d.userid
+                          JOIN {user} u ON u.id = g.userid
+                         WHERE d.diary = :did AND g.groupid = :gidid";
+
+                $params = array();
+                $params = ['did' => $diary->id] + ['gidid' => $gid->id];
+                $diarys = $DB->get_records_sql($sql, $params);
+            }
+        } else if (!$groupid && ($groupmode > '0')) {
+            // Check all the diary entries from the whole course.
+            // If not currently a group member, but group mode is set for separate groups or visible groups,
+            // see if this user has made entries anyway, made an entry before mode was changed or made an entry before removal from a group.
+            $sql = "SELECT COUNT(DISTINCT de.userid) AS ucount, COUNT(DISTINCT de.text) AS qcount
+                      FROM {diary_entries} de
+                      JOIN {user} u ON u.id = de.userid
+                     WHERE de.diary = :deid
+                       AND de.userid = :userid";
+
+            $params = array();
+            $params = ['deid' => $diary->id] + ['userid' => $USER->id];
+            $diarys = $DB->get_records_sql($sql, $params);
+        } else { // Count all the entries from the whole course.
+
+            $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
+                      JOIN {user} u ON u.id = d.userid
+                     WHERE d.diary = :did";
+                     //  AND d.userid = :userid";
+            $params = array();
+            //$params = ['did' => $diary->id] + ['userid' => $USER->id];
+            $params = ['did' => $diary->id];
+            $diarys = $DB->get_records_sql($sql, $params);
+        }
+
+        if (!$diarys) {
+            return 0;
+        }
+
+        $canadd = get_users_by_capability($context, 'mod/diary:addentries', 'u.id');
+        $entriesmanager = get_users_by_capability($context, 'mod/diary:manageentries', 'u.id');
+
+        // If not enrolled or not an admin, teacher, or manager, then return nothing.
+        if ($canadd || $entriesmanager) {
+            return count($diarys);
+        } else {
+            return 0;
+        }
     }
 }
