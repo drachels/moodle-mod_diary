@@ -71,7 +71,6 @@ class diarystats {
 
         if (empty($diary->errorcmid)) {
             $cm = null;
-
         } else {
             $cm = get_coursemodule_from_id('', $diary->errorcmid);
         }
@@ -87,7 +86,6 @@ class diarystats {
             if ($entries = $DB->get_records('glossary_entries', array('glossaryid' => $cm->instance), 'concept')) {
                 foreach ($entries as $entry) {
                     if ($match = self::glossary_diaryentry_search_text($entry, $entry->concept, $text)) {
-                        // These two new lines break my code.
                         list($pos, $length, $match) = $match;
                         $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
                         $matches[$pos] = (object)array('pos' => $pos, 'length' => $length, 'match' => $match);
@@ -463,9 +461,51 @@ class diarystats {
             } else {
                 $currentstats .= '<tr><td>'.get_string('notextdetected', 'diary').'</td><td> </td><td> </td><td> </td></tr>';
             }
+            // 20211212 Move the echo's to results file so they can be used by the new, Add to feedback, button.
             // 20211007 An experiment for the output.
-            echo $currentstats;
+            //echo $currentstats;
+        }
 
+        return $currentstats;
+    }
+
+    /**
+     * Update the common error statistics, if any, for this diary activity.
+     *
+     * @param string $entry The text for this entry.
+     * @return usercommonerrors
+     */
+    public static function get_common_error_stats($entry, $diary) {
+        global $CFG, $OUTPUT;
+        $precision = 1;
+        // Temporary error fix.
+        $errors = array();
+
+        $temp = array();
+        $text = self::to_plain_text($entry->text, $entry->format);
+        list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
+        $diarystats = (object)array('words' => self::get_stats_words($text),
+                                    'chars' => self::get_stats_chars($text),
+                                    'minmaxpercent' => 0,
+                                    'sentences' => self::get_stats_sentences($text),
+                                    'paragraphs' => self::get_stats_paragraphs($text),
+                                    'uniquewords' => self::get_stats_uniquewords($text),
+                                    'shortwords' => 0,
+                                    'mediumwords' => 0,
+                                    'longwords' => 0,
+                                    'itempercent' => 0,
+                                    'fogindex' => 0,
+                                    'commonerrors' => count($errors),
+                                    'commonpercent' => 0,
+                                    'lexicaldensity' => 0,
+                                    'charspersentence' => 0,
+                                    'wordspersentence' => 0,
+                                    'longwordspersentence' => 0,
+                                    'sentencesperparagraph' => 0,
+                                    'totalsyllabels' => 0,
+                                    'newtotalsyllabels' => 0,
+                                    'fkgrade' => 0,
+                                    'freadease' => 0);
             // 20210704 If common errors from the glossary are detected, list them here.
             if ($errors) {
                 $x = 1;
@@ -481,86 +521,134 @@ class diarystats {
                                     ['one' => $diarystats->commonerrors,
                                     'two' => get_string('commonerrors', 'diary'),
                                     'three' => $temp]).'</td></tr>';
-
-                echo $usercommonerrors;
-                // 20211028 This will put the user common errors in the feedback ready to be saved.
-                // Needs to be added/controlled via the, Add to feedback, button.
-                // $entry->entrycomment = $currentstats;
-                // $entry->entrycomment .= $usercommonerrors;
+            } else {
+                $usercommonerrors = '';
             }
 
-            // 20210814 Show rating info only if enabled and item to rate is NOT = None.
-            if ($diary->enableautorating && $diary->itemtype <> 0) {
-                // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
-                 echo '<tr class="table-primary"><td colspan="4">'
-                      .get_string('maxpossratinge', 'diary',
-                      ($diary->scale)).'</td></tr>';
+        return $usercommonerrors;
+    }
 
-                // 20210713 Need the item type and how many of them must be used in this diary entry.
-                $itemtypes = array();
-                $itemtypes = self::get_item_types($itemtypes);
-                if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
-                    $diary->intro .= get_string('itemtype_desc', 'diary',
-                                               ['one' => $itemtypes[$diary->itemtype],
-                                               'two' => $diary->itemcount]).'<br>';
-                }
+    /**
+     * Update the auto rating info, if any, for this diary activity.
+     *
+     * @param string $entry The text for this entry.
+     * @return autoratingdata
+     */
+    public static function get_auto_rating_stats($entry, $diary) {
+        global $CFG, $OUTPUT;
+        $precision = 1;
+        // Temporary error fix.
+        $errors = array();
 
-                // 20211205 Converted from hardcoded text to string.
-                echo '<tr class="table-info"><td colspan="4">'
-                     .get_string('autoratingitemdetails', 'diary',
-                     ['one' => $diary->itemcount, 'two' => $itemtypes[$diary->itemtype],
-                     'three' => $diary->itempercent, 'four' => $itemtypes[$diary->itemtype]]).'</td></tr>';
+        $temp = array();
+        $text = self::to_plain_text($entry->text, $entry->format);
+        list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
+        $diarystats = (object)array('words' => self::get_stats_words($text),
+                                    'chars' => self::get_stats_chars($text),
+                                    'minmaxpercent' => 0,
+                                    'sentences' => self::get_stats_sentences($text),
+                                    'paragraphs' => self::get_stats_paragraphs($text),
+                                    'uniquewords' => self::get_stats_uniquewords($text),
+                                    'shortwords' => 0,
+                                    'mediumwords' => 0,
+                                    'longwords' => 0,
+                                    'itempercent' => 0,
+                                    'fogindex' => 0,
+                                    'commonerrors' => count($errors),
+                                    'commonpercent' => 0,
+                                    'lexicaldensity' => 0,
+                                    'charspersentence' => 0,
+                                    'wordspersentence' => 0,
+                                    'longwordspersentence' => 0,
+                                    'sentencesperparagraph' => 0,
+                                    'totalsyllabels' => 0,
+                                    'newtotalsyllabels' => 0,
+                                    'fkgrade' => 0,
+                                    'freadease' => 0);
 
+        // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
+        $autoratingdata = '<tr class="table-primary"><td colspan="4">'
+            .get_string('maxpossratinge', 'diary',
+            ($diary->scale)).'</td></tr>';
+        $currentratingdata = '';
+        // 20210814 Show rating info only if enabled and item to rate is NOT = None.
+        if ($diary->enableautorating && $diary->itemtype <> 0) {
+            // 20210713 Need the item type and how many of them must be used in this diary entry.
+            $itemtypes = array();
+            $itemtypes = self::get_item_types($itemtypes);
+            if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
+                $diary->intro .= get_string('itemtype_desc', 'diary',
+                    ['one' => $itemtypes[$diary->itemtype],
+                    'two' => $diary->itemcount]).'<br>';
+            }
+
+            // 20211205 Converted from hardcoded text to string.
+            $autoratingdata .= '<tr class="table-info"><td colspan="4">'
+                .get_string('autoratingitemdetails', 'diary',
+                ['one' => $diary->itemcount, 'two' => $itemtypes[$diary->itemtype],
+                'three' => $diary->itempercent, 'four' => $itemtypes[$diary->itemtype]]).'</td></tr>';
+
+            $item = strtolower($itemtypes[$diary->itemtype]);
+
+            // Check $item if set to character use chars instead.
+            if ($item == 'characters') {
+                $item = 'chars';
+            } else {
                 $item = strtolower($itemtypes[$diary->itemtype]);
-
-                // Check $item if set to character use chars instead.
-                if ($item == 'characters') {
-                    $item = 'chars';
-                } else {
-                    $item = strtolower($itemtypes[$diary->itemtype]);
-                }
-
-                $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
-
-                $commonerrorrating = $diarystats->commonpercent;
-
-                // 20211119 Explanation of auto-rating check of what you have and need. 20211205 Converted to string.
-                echo '<tr><td colspan="4" class="table-info">'
-                     .get_string('autoratingitemexplained', 'diary', ['one' => $item,
-                     'two' => $diary->itemcount, 'three' => $diarystats->$item,
-                     'four' => (max($diary->itemcount - $diarystats->$item, 0))]).'</td></tr>';
-
-                // 20211205 Converted to string.
-                echo '<tr><td colspan="4" class="table-info">'
-                     .get_string('autoratingitempenaltymath', 'diary', ('(max('.$diary->itemcount
-                     .' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '
-                     .(max($itemrating, 0)))).'</td></tr>';
-
-                // Show auto-rating penalty. 20211205 Converted hardcoded text to string.
-                echo '<tr><td colspan="4" class="table-danger">'
-                     .get_string('autoratingpotentialpentaly', 'diary', (max($diary->itemcount - $diarystats->$item, 0))
-                     .' * '.$diary->itempercent.'% or '.((max($diary->itemcount - $diarystats->$item, 0))
-                     * $diary->itempercent)).' points off.</td></tr>';
-
-                // Show possible Glossary of common errors penalty. 20211208 Converted hardcoded text to string using {$a}.
-                echo '<tr><td colspan="4" class="table-danger">'
-                     .get_string('potcommerrpen', 'diary', ['one' => $diarystats->commonerrors,
-                     'two' => $diary->errorpercent, 'three' => $diarystats->commonpercent,
-                     'four' => $commonerrorrating]).'</td></tr>';
-
-                // 20211007 Calculate and show the possible overall rating. Modified 20211119.
-                $currentrating = $diary->scale.' - '.
-                                 ((max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent).
-                                 ' - '.$commonerrorrating. ' = '.
-                                 ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0))
-                                 * $diary->itempercent) - $commonerrorrating);
-
-                echo '<tr><td colspan="4" class="table-danger"> Your current potential rating is: '.$currentrating.'%</td></tr>';
             }
-            // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
-            echo '</table>';
+
+            $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
+
+            $commonerrorrating = $diarystats->commonpercent;
+
+            // 20211119 Explanation of auto-rating check of what you have and need. 20211205 Converted to string.
+            $autoratingdata .= '<tr><td colspan="4" class="table-info">'
+                .get_string('autoratingitemexplained', 'diary', ['one' => $item,
+                'two' => $diary->itemcount, 'three' => $diarystats->$item,
+                'four' => (max($diary->itemcount - $diarystats->$item, 0))]).'</td></tr>';
+
+            // 20211205 Converted to string.
+            $autoratingdata .= '<tr><td colspan="4" class="table-info">'
+                .get_string('autoratingitempenaltymath', 'diary', ('(max('.$diary->itemcount
+                .' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '
+                .(max($itemrating, 0)))).'</td></tr>';
+
+            // 20211217 Show auto-rating penalty with maximum points off limited to the maximum rating for this activity.
+            if ((max($diary->itemcount - $diarystats->$item, 0)) > ($diary->scale)) {
+                // If there are a lot of extra items, limit the rating to the maximum rating.
+                $pointsoff = (min($diary->itemcount - $diarystats->$item, 100));
+            } else {
+                // If there are too few items, limit the rating to zero to prevent a negative rating.
+                $pointsoff = (max($diary->itemcount - $diarystats->$item, 0));
+            }
+                // If possible points off results in a negative rating, limit the points off to 0.
+                $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                    .get_string('autoratingpotentialpentaly', 'diary', (max($diary->itemcount - $diarystats->$item, 0))
+                    .' * '.$diary->itempercent.'% or '.($pointsoff
+                    * $diary->itempercent)).' points off.</td></tr>';
+
+            // Show possible Glossary of common errors penalty. 20211208 Converted hardcoded text to string using {$a}.
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                 .get_string('potcommerrpen', 'diary', ['one' => $diarystats->commonerrors,
+                 'two' => $diary->errorpercent, 'three' => $diarystats->commonpercent,
+                 'four' => $commonerrorrating]).'</td></tr>';
+
+            // 20211007 Calculate and show the possible overall rating. Modified 20211119.
+            $currentratingdisp = $diary->scale.' - '.
+                ($pointsoff * $diary->itempercent).
+                ' - '.$commonerrorrating. ' = '.
+                ($diary->scale - ($pointsoff
+                * $diary->itempercent) - $commonerrorrating);
+
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'.get_string('currpotrating', 'diary',($currentratingdisp)).'</td></tr>';
+            // 20211212 Actual autorating.
+            $currentratingdata = ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0))
+                * $diary->itempercent) - $commonerrorrating);
         }
-        return;
+        // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
+        $autoratingdata .= '</table>';
+        // 20211212 Return list of data to results.
+        return array($autoratingdata, $currentratingdata);
     }
 
     /**
@@ -570,7 +658,6 @@ class diarystats {
      * @ return int The number of characters.
      */
     public static function add_stats($entry) {
-        echo 'You made it here to the add_stats function!';
         $entry->entrycomment = $currentstats;
         $entry->entrycomment .= $usercommonerrors;
         return;
