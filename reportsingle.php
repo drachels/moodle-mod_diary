@@ -76,8 +76,16 @@ if (has_capability('mod/diary:manageentries', $context)) {
 }
 
 // Header.
+/*
 $PAGE->set_url('/mod/diary/reportsingle.php', array(
     'id' => $id
+));
+*/
+// 20211214 Trying this to see if I can stay on the same page and see updated feedback and rating.
+$PAGE->set_url('/mod/diary/reportsingle.php', array(
+    'id' => $id,
+    'user' => $user,
+    'action' => $action
 ));
 $PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
 $PAGE->set_title($diaryname);
@@ -176,7 +184,9 @@ if ($data = data_submitted()) {
                 $ratingoptions->userid = $entry->userid;
                 $ratingoptions->timecreated = $entry->timecreated;
                 $ratingoptions->timemodified = $entry->timemodified;
-                $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id'.$id;
+                //$ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id'.$id;
+                $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries';
+
                 $ratingoptions->assesstimestart = $diary->assesstimestart;
                 $ratingoptions->assesstimefinish = $diary->assesstimefinish;
                 // 20200813 Check if there is already a rating, and if so, just update it.
@@ -234,18 +244,38 @@ if (! $users) {
     }
     // Start the page area where feedback and grades are added and will need to be saved.
     // Set up to return to report.php upon saving feedback.
-    echo '<form action="report.php" method="post">';
+    // 20211213 NO! Do NOT want to go back to report.php. I want to stay HERE on  reportsingle.php.
+    //echo '<form action="report.php" method="post">';
+    //echo '<form action="reportsingle.php" method="post">';
+    //echo '<form method="post">';
+    echo '<form action="reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
+
+/*
     $saveallbutton = '';
     $saveallbutton = "<p class=\"feedbacksave\">";
     $saveallbutton .= "<input type=\"hidden\" name=\"id\" value=\"$cm->id\" />";
     $saveallbutton .= "<input type=\"hidden\" name=\"sesskey\" value=\"".sesskey()."\" />";
     $saveallbutton .= "<input type=\"submit\" class='btn btn-primary' value=\"".get_string("saveallfeedback", "diary")."\" />";
+*/
+    // 20211210 Cleaned up unnecessary escaped double quotes. 
+    $saveallbutton = '';
+    $saveallbutton = '<p class="feedbacksavereturn">';
+    $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
+    $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
+    $saveallbutton .= '<input type="submit" class="btn btn-primary"  style="border-radius: 8px" value="'.get_string('saveallfeedback', 'diary').'" />';
+
+    $url = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries';
+    // 20211210 Cleaned up unnecessary escaped double quotes. 
+    $saveallbutton .= ' <a href="'.$url.' class="feedbacksavestay">';
+    $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
+    $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
+    $saveallbutton .= '<input type="submit" class="btn btn-primary"  style="border-radius: 8px" value="'.get_string('addtofeedback', 'diary').'"</a>';
 
     // 20201222 Added a return to report.php button if you do not want to save feedback.
-    $url = $CFG->wwwroot.'/mod/diary/report.php?id='.$id;
-    $saveallbutton .= ' <a href="'.$url
-                     .'" class="btn btn-primary" role="button">'
+    $url2 = $CFG->wwwroot.'/mod/diary/report.php?id='.$id;
+    $saveallbutton .= ' <a href="'.$url2
+                     .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
                      .get_string('returntoreport', 'diary', $diary->name)
                      .'</a>';
 
