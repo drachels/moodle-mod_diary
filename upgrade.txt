@@ -123,6 +123,21 @@ Diary_781 - Would be nice to fill the remaining statistics cell with Average wor
     index are in the last row of the table. I also added a new, Average words per
     paragraph, statistic in the last cell of the, averages, row.
 
+Diary_786 - View all course diaries, link is giving a debug warning. Got it fixed
+    but I think I need to revert the sql part of the code as it started causing an
+    undefined variable warning on the view.php page. Got that fixed, but in a way
+    I really don't like as it requires reading the diary record for every diary
+    in the course, whereas the original method only needs to read one file.
+
+Diary_789 - View.php needs modifying due to changes in diarystats.php. Copied
+    the code that generates the stats from results.php to file view.php, and
+    stats table is now working again.
+
+
+Diary_791 - Need to move function diary_count_entries($diary, $groupid = 0)
+    from lib.php to results.php. 20211219 Copied the working function in the
+    lib.php file and moved it to classes/local/result.php, making changes as
+    needed to get it to work.
 
 
 
