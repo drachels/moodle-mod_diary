@@ -296,7 +296,7 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-
+/*
 // Need to finish this setting as it is currently incomplete.
 // 20211005 Got this sort of working now. Got clues from activequiz plugin.
     // 20210712 Added list of statistics items setting that can be enabled/disabled.
@@ -325,7 +325,7 @@ if ($ADMIN->fulltree) {
         get_string('textstatitems_help', 'diary'),
         $defaults,
         $choices));
-
+*/
 
 /*
 /////////////////////
