@@ -309,7 +309,9 @@ if ($course->format == 'weeks' and $diary->days) {
     $timefinish = $timenow + 1;
     $diary->days = 0;
 }
-
+//print_object('Printing variable, $diary->assessed: = '.$diary->assessed);
+//print_object('Printing variable, $diary: = ');
+//print_object($diary);
 // 20200815 Get the current rating for this user, if this diary is assessed.
 if ($diary->assessed != 0) {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
@@ -532,8 +534,10 @@ if ($timenow > $timestart) {
                     echo $OUTPUT->heading(get_string('feedback'));
                     // Format output using renderer.php.
 
-                    echo $output->diary_print_feedback($course, $entry, $grades);
-                    //echo $output->result::diary_format_entry_text($course, $entry, $grades);
+                    //echo $output->diary_print_feedback($course, $entry, $grades);
+                    //echo $OUTPUT->results::diary_print_feedback($course, $entry, $grades);
+                    echo results::diary_print_feedback($course, $entry, $grades);
+                    //echo $output->results::diary_format_entry_text($course, $entry, $grades);
                 }
                 // This adds blank space between entries.
                 echo '</div></p>';

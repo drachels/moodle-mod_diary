@@ -458,15 +458,24 @@ class diarystats {
                         .' <a href="#" data-toggle="popover" data-content="'
                         .get_string('fogindex_help', 'diary').'">'.$itemp.'</a> '
                         .$diarystats->fogindex.'</td></tr>';
+                // 20211224 Moved return to prevent undefined variable: currentstats warning.
+                return $currentstats;
             } else {
                 $currentstats .= '<tr><td>'.get_string('notextdetected', 'diary').'</td><td> </td><td> </td><td> </td></tr>';
+                return;
+
             }
             // 20211212 Move the echo's to results file so they can be used by the new, Add to feedback, button.
             // 20211007 An experiment for the output.
-            //echo $currentstats;
+            // echo $currentstats;
         }
-
-        return $currentstats;
+        /*
+        if ($currentstats) {
+            return $currentstats;
+        } else {
+            return;
+        }
+        */
     }
 
     /**
@@ -506,24 +515,24 @@ class diarystats {
                                     'newtotalsyllabels' => 0,
                                     'fkgrade' => 0,
                                     'freadease' => 0);
-            // 20210704 If common errors from the glossary are detected, list them here.
-            if ($errors) {
-                $x = 1;
-                $temp = '';
-                foreach ($errors as $error) {
-                    $temp .= $x.'. '.$error.' ';
-                    ++$x;
-                }
-
-                // 20211028 Put the info in a variable for later use. 20211208 Converted from hardcoded text to string.
-                $usercommonerrors = '<tr class="table-warning"><td colspan="4">'
-                                    .get_string('detectcommonerror', 'diary',
-                                    ['one' => $diarystats->commonerrors,
-                                    'two' => get_string('commonerrors', 'diary'),
-                                    'three' => $temp]).'</td></tr>';
-            } else {
-                $usercommonerrors = '';
+        // 20210704 If common errors from the glossary are detected, list them here.
+        if ($errors) {
+            $x = 1;
+            $temp = '';
+            foreach ($errors as $error) {
+                $temp .= $x.'. '.$error.' ';
+                ++$x;
             }
+
+            // 20211028 Put the info in a variable for later use. 20211208 Converted from hardcoded text to string.
+            $usercommonerrors = '<tr class="table-warning"><td colspan="4">'
+                                .get_string('detectcommonerror', 'diary',
+                                ['one' => $diarystats->commonerrors,
+                                'two' => get_string('commonerrors', 'diary'),
+                                'three' => $temp]).'</td></tr>';
+        } else {
+            $usercommonerrors = '';
+        }
 
         return $usercommonerrors;
     }
@@ -634,13 +643,16 @@ class diarystats {
                  'four' => $commonerrorrating]).'</td></tr>';
 
             // 20211007 Calculate and show the possible overall rating. Modified 20211119.
-            $currentratingdisp = $diary->scale.' - '.
-                ($pointsoff * $diary->itempercent).
-                ' - '.$commonerrorrating. ' = '.
-                ($diary->scale - ($pointsoff
-                * $diary->itempercent) - $commonerrorrating);
+            $currentratingdisp = $diary->scale.' - '
+                                 .($pointsoff * $diary->itempercent)
+                                 .' - '.$commonerrorrating. ' = '
+                                 .($diary->scale - ($pointsoff
+                                                   * $diary->itempercent)
+                                                   - $commonerrorrating);
 
-            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'.get_string('currpotrating', 'diary',($currentratingdisp)).'</td></tr>';
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                            .get_string('currpotrating', 'diary', ($currentratingdisp))
+                            .'</td></tr>';
             // 20211212 Actual autorating.
             $currentratingdata = ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0))
                 * $diary->itempercent) - $commonerrorrating);

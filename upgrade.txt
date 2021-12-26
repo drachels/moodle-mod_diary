@@ -138,6 +138,15 @@ Diary_791 - Need to move function diary_count_entries($diary, $groupid = 0)
     from lib.php to results.php. 20211219 Copied the working function in the
     lib.php file and moved it to classes/local/result.php, making changes as
     needed to get it to work.
+Diary_792 - Notice: Undefined variable: currentstats in  
+    /var/www/moodle40/mod/diary/classes/local/diarystats.php on line 469.
+    Moved the return $currentstats; and return, inside the if and else of the,
+    function get_diary_stats($entry, $diary). 
+Diary_793 - When looking at Complete Report you get:- Exception - Call to
+    undefined function diary_format_entry_text(). Function was moved to
+    results.php but the call was not modified to: 
+
+
 
 
 

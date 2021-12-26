@@ -605,6 +605,76 @@ class results {
     }
 
     /**
+     * Print the teacher feedback.
+     * This renders the teacher feedback on the view.php page.
+     *
+     * @param object $course
+     * @param object $entry
+     * @param object $grades
+     */
+    public static function diary_print_feedback($course, $entry, $grades) {
+        global $CFG, $DB, $OUTPUT;
+
+        require_once($CFG->dirroot . '/lib/gradelib.php');
+
+        if (! $teacher = $DB->get_record('user', array(
+            'id' => $entry->teacher
+        ))) {
+            throw new moodle_exception(get_string('generalerror', 'diary'));
+        }
+
+        echo '<table class="feedbackbox">';
+
+        echo '<tr>';
+        echo '<td class="left picture">';
+
+        //echo $this->output->user_picture($teacher, array(
+        echo $OUTPUT->user_picture($teacher, array(
+            'courseid' => $course->id,
+            'alttext' => true
+        ));
+        echo '</td>';
+        echo '<td class="entryheader">';
+        echo '<span class="author">' . fullname($teacher) . '</span>';
+        echo '&nbsp;&nbsp;<span class="time">' . userdate($entry->timemarked) . '</span>';
+        echo '</td>';
+        echo '</tr>';
+
+        echo '<tr>';
+        echo '<td class="left side">&nbsp;</td>';
+        echo '<td class="entrycontent">';
+
+        echo '<div class="grade">';
+
+        // Gradebook preference.
+        $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array(
+            $entry->userid
+        ));
+
+        // 20210609 Added branch check for string compatibility.
+        //if (! empty($grades)) {
+        if (! empty($entry->rating)) {
+            if ($CFG->branch > 310) {
+                echo get_string('gradenoun') . ': ';
+            } else {
+                echo get_string('grade') . ': ';
+            }
+//print_object('Print variable $entry->rating:');
+//print_object($entry->rating);
+            //echo $grades . '/' . number_format($gradinginfo->items[0]->grademax, 2);
+            echo $entry->rating.'/' . number_format($gradinginfo->items[0]->grademax, 2);
+        } else {
+            print_string('nograde');
+        }
+        echo '</div>';
+
+        // Feedback text.
+        // Original code, echo format_text($entry->entrycomment, FORMAT_PLAIN); followed by new code.
+        echo format_text($entry->entrycomment, FORMAT_HTML);
+        echo '</td></tr></table>';
+    }
+
+    /**
      * Return formatted text.
      *
      * @param array $entry
@@ -782,7 +852,6 @@ class results {
      */
     public static function diary_count_entries($diary, $groupid = 0) {
         global $DB, $CFG, $USER;
-//print_object($diary);
         $cm = diary_get_coursemodule($diary->id);
         $context = context_module::instance($cm->id);
 
@@ -791,7 +860,6 @@ class results {
 
         // If user is in a group, how many users in each Diary activity?
         if ($groupid && ($groupmode > '0')) {
-
             // Extract each group id from $groupid and process based on whether viewer is a member of the group.
             // Show user and entry counts only if a member of the current group.
             foreach ($groupid as $gid) {
