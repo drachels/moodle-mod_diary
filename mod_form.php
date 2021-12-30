@@ -47,10 +47,6 @@ class mod_diary_mod_form extends moodleform_mod {
      * diary is plugin name without leading "mod_"
      */
     public function mod() {
-        //print_object('1 mod function printing substr($this->plugin_name(), 4)): '.substr($this->plugin_name(), 4));
-        //print_object('1 mod function printing substr($this->plugin_name(), 4)): '.substr($this->plugin_name(), 4));
-        //print_object('1 mod function printing substr($this->plugin_name(), 4)): '.substr($this->plugin_name(), 4));
-        //print_object('1 mod function printing substr($this->plugin_name(), 4)): '.substr($this->plugin_name(), 4));
         return substr($this->plugin_name(), 4);
     }
 
@@ -58,8 +54,6 @@ class mod_diary_mod_form extends moodleform_mod {
      * Plugin name is class name without trailing "mod_form"
      */
     public function plugin_name() {
-        //print_object('2 plugin_name function printing substr(get_class($this), 0, -9): '.substr(get_class($this), 0, -9));
-
         return substr(get_class($this), 0, -9);
     }
 
@@ -68,14 +62,6 @@ class mod_diary_mod_form extends moodleform_mod {
      */
     protected function plugin_constant($name) {
         $plugin = $this->plugin_name();
-        print_object('3 plugin_constant function printing $plugin: '.$plugin);
-        print_object('3 plugin_constant function printing $plugin: '.$plugin);
-        print_object('3 plugin_constant function printing $plugin: '.$plugin);
-        //print_object('3 plugin_constant function printing $plugin: '.$plugin);
-        //print_object('3 plugin_constant function printing $plugin: '.$plugin);
-
-        //print_object('4 plugin_constant function printing $name: '.$name);
-        //print_object('5 plugin_constant function printing $plugin::$name and here it is: '.$plugin.'::'.$name);
         return constant($plugin.'::'.$name);
     }
 
@@ -87,13 +73,8 @@ class mod_diary_mod_form extends moodleform_mod {
     public function definition() {
         global $COURSE, $PAGE;
         // Cache the plugin name.
-        $plugin = 'mod_diary'; // $this->plugin_name();
-        //$plugin = 'diary'; // $this->plugin_name();
+        $plugin = 'mod_diary';
         $diaryconfig = get_config('mod_diary');
-print_object('spacer 1');
-print_object('spacer 1');
-print_object('spacer 1');
-print_object('spacer 1');
         $debug = array();
         $debug['Tracking mod form errors problem cp 0 showing $diaryconfig '] = $diaryconfig;
 
@@ -102,17 +83,15 @@ print_object('spacer 1');
         $PAGE->requires->js_call_amd("$plugin/form", 'init', $params);
 
         // 20210706 Cache options for form elements to input text.
-        $short_text_options  = array('size' => 3,  'style' => 'width: auto');
-        $medium_text_options = array('size' => 5,  'style' => 'width: auto');
-        $long_text_options   = array('size' => 10, 'style' => 'width: auto');
+        $shorttextoptions  = array('size' => 3,  'style' => 'width: auto');
+        $mediumtextoptions = array('size' => 5,  'style' => 'width: auto');
+        $longtextoptions   = array('size' => 10, 'style' => 'width: auto');
 
         // 20210706 Cache options for show/hide elements. NOT sure if this is needed.
-        $showhide_options = diarystats::get_showhide_options($plugin);
+        $showhideoptions = diarystats::get_showhide_options($plugin);
 
         // 20210706 Cache options for form elements to select a rating.
-        //$grade_options = $this->get_grade_options($plugin);
-        //$rating_options = $this->get_rating_options($plugin);
-        $rating_options = diarystats::get_rating_options($plugin);
+        $ratingoptions = diarystats::get_rating_options($plugin);
 
         $mform = &$this->_form;
 
@@ -126,8 +105,7 @@ print_object('spacer 1');
 
         $this->standard_intro_elements(get_string('diarydescription', 'diary'));
 
-        // Add the availability header.
-        //$mform->addElement('header', 'availibilityhdr', get_string('availability'));
+        // 20210706 Add the availability header.
         $name = 'availibilityhdr';
         $label = get_string('availability');
         $mform->addElement('header', $name, $label);
@@ -221,7 +199,7 @@ print_object('spacer 1');
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->autorating);
-        $mform->disabledIf($name, 'enablestats', 'eq', 0);
+        //$mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added setting for what type of item to count.
         $name = 'itemtype';
@@ -237,7 +215,7 @@ print_object('spacer 1');
         // 20210709 Added item count setting.
         $name = 'itemcount';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->itemcount);
@@ -248,7 +226,7 @@ print_object('spacer 1');
         // 20210711 Added a selector to set error percent of each penalty in auto-rating section.
         $name = 'itempercent';
         $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $rating_options);
+        $mform->addElement('select', $name, $label, $ratingoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setDefault($name, $diaryconfig->itempercent);
         $mform->setType($name, PARAM_INT);
@@ -265,31 +243,29 @@ print_object('spacer 1');
         // 20210709 Added minimum character count setting.
         $name = 'mincharacterlimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->mincharacterlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 1);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added maximum character count setting.
         $name = 'maxcharacterlimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxcharacterlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 1);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum character penalty.
         $name = 'minmaxcharpercent';
         $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $rating_options);
+        $mform->addElement('select', $name, $label, $ratingoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setDefault($name, $diaryconfig->minmaxcharpercent);
         $mform->setType($name, PARAM_INT);
@@ -300,32 +276,29 @@ print_object('spacer 1');
         // 20210709 Added minimum word count setting.
         $name = 'minwordlimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->minwordlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', $this->plugin_constant('ITEM_TYPE_NONE'));
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added maximum word count setting.
         $name = 'maxwordlimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxwordlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum word penalty.
         $name = 'minmaxwordpercent';
         $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $rating_options);
+        $mform->addElement('select', $name, $label, $ratingoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setDefault($name, $diaryconfig->minmaxwordpercent);
         $mform->setType($name, PARAM_INT);
@@ -336,32 +309,29 @@ print_object('spacer 1');
         // 20211006 Added minimum sentence count setting.
         $name = 'minsentencelimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->minsentencelimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', $this->plugin_constant('ITEM_TYPE_NONE'));
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added maximum sentence count setting.
         $name = 'maxsentencelimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxsentencelimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum sentence penalty.
         $name = 'minmaxsentpercent';
         $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $rating_options);
+        $mform->addElement('select', $name, $label, $ratingoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setDefault($name, $diaryconfig->minmaxsentpercent);
         $mform->setType($name, PARAM_INT);
@@ -372,39 +342,37 @@ print_object('spacer 1');
         // 20211006 Added minimum paragraph count setting.
         $name = 'minparagraphlimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->minparagraphlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', $this->plugin_constant('ITEM_TYPE_NONE'));
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added maximum paragraph count setting.
         $name = 'maxparagraphlimit';
         $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $medium_text_options);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxparagraphlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum paragraph penalty.
         $name = 'minmaxparapercent';
         $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $rating_options);
+        $mform->addElement('select', $name, $label, $ratingoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setDefault($name, $diaryconfig->minmaxparapercent);
         $mform->setType($name, PARAM_INT);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
-/*
+
+        /*
         // 20210711 Added heading for Text statistics options section.
         $name = 'statshdr';
         $label = get_string($name, $plugin);
@@ -414,15 +382,15 @@ print_object('spacer 1');
         // 20210709 Added enable/disable show statistics setting.
         $name = 'showtextstats';
         $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $showhide_options);
+        $mform->addElement('select', $name, $label, $showhideoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, diarystats::get_showhide_options($plugin, 0));
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
-*/
-//////======================This setting is NOT currently working.===================================
-/*
+        */
+        // This setting is NOT currently working.
+        /*
         $debug = array();
         //$debug['Tracking mod form errors problem cp 1-1 showing $options '] = $options;
         //$diaryconfig->textstatitems
@@ -437,8 +405,6 @@ print_object('spacer 1');
             //$debug['Tracking mod form errors problem cp 3-2 showing $tempcounter '] = $tempcounter;
         //$debug['Tracking textstatitems problem cp 5 showing $name '] = $name;
         //print_object($debug);
-
-
 
         // 20210709 Added list of statistics items setting that can be enabled/disabled.
         $name = 'textstatitems';
@@ -458,7 +424,7 @@ print_object('spacer 1');
         // only use defaults on new record
         //$defaults = 'chars,words,sentences,paragraphs,uniquewords,wordspersentence,longwords';
         //$defaults = $this->get_my_default_value($name, $defaults);
-//print_object($defaults);
+        //print_object($defaults);
         //$defaults = explode(',', $defaults);
         //$defaults = array_filter($defaults);
 
@@ -466,9 +432,8 @@ print_object('spacer 1');
             $mform->setType($name."[$value]", PARAM_INT);
             //$mform->setDefault($name."[$value]", in_array($value, $defaults));
         }
-*/
+        */
 
-///////////////////////////////////////////////////////////////////////////////////////////////
         // 20210703 Added the common errors header.
         $name = 'commonerrors';
         $label = get_string($name, $plugin);
@@ -482,23 +447,17 @@ print_object('spacer 1');
         $mform->addElement('select', $name, $label, $options);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType('errorcmid', PARAM_INT);
-        //$mform->disabledIf('errorcmid', 'enableautorating', 'eq', 0);
-        //$mform->disabledIf('errorcmid', 'itemtype', 'eq', $this->plugin_constant('ITEM_TYPE_FILES'));
-        //$mform->disabledIf('errorcmid', 'itemtype', 'eq', self::plugin_constant('ITEM_TYPE_FILES'));
         $mform->disabledIf('errorcmid', 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210703 Added a selector to set error percent of each penalty.
         $name = 'errorpercent';
         $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $rating_options);
+        $mform->addElement('select', $name, $label, $ratingoptions);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setDefault($name, $this->get_my_default_value($name, 5));
         $mform->setType($name, PARAM_INT);
         $mform->disabledIf($name, 'errorcmid', 'eq', 0);
-        //$mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        //$mform->disabledIf($name, 'itemtype', 'eq', $this->plugin_constant('ITEM_TYPE_FILES'));
-        //$mform->disabledIf($name, 'itemtype', 'eq', self::plugin_constant('Files'));
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
@@ -522,7 +481,6 @@ print_object('spacer 1');
         $mform->setDefault($name, $this->get_my_default_value($name, 0));
         $mform->setType($name, PARAM_INT);
 
-
         $name = 'errorbehavior';
         $label = get_string($name, $plugin);
         $mform->addGroup($elements, $name, $label, ' ', false);
@@ -544,7 +502,7 @@ print_object('spacer 1');
         $options = array('0' => '');
         $modinfo = get_fast_modinfo($courseid);
         foreach ($modinfo->cms as $cmid => $cm) {
-            if ($cm->modname=='glossary' && $cm->uservisible) {
+            if ($cm->modname == 'glossary' && $cm->uservisible) {
                 $options[$cm->id] = format_text($cm->name);
             }
         }
@@ -562,42 +520,16 @@ print_object('spacer 1');
         $debug['Tracking textstatitems problem in, function get_my_default_value, cp 1 showing $name '] = $name;
 
         if (method_exists($this, 'get_default_value')) {
-        $debug['Tracking textstatitems problem in, function get_my_default_value, cp 2 showing $name '] = $name;
-
-            // Moodle >= 3.10
-            // print_object('In the function get_my_defaults using get_default_value with Moodle >= 3.10 and printing $this, $name and $default');
-            // print_object($this);
-            // print_object($name);
-            // print_object($default);
+            $debug['Tracking textstatitems problem in, function get_my_default_value, cp 2 showing $name '] = $name;
+            // Moodle >= 3.10.
             return $this->get_default_value($name, $default);
         } else {
             $debug['Tracking textstatitems problem in, function get_my_default_value, cp 3 showing $name '] = $name;
-
-            // Moodle <= 3.9
-            // print_object('In the function get_my_defaults using get_user_preferences with Moodle <= 3.9 and printing $this, $name and $default');
-            // print_object($this);
-            // print_object($name);
-            // print_object($default);
+            // Moodle <= 3.9.
             return get_user_preferences($this->plugin_name().'_'.$name, $default);
         }
     }
 
-    /**
-     * Get array of rating options.
-     *
-     * @param string $plugin name
-     * @return array(rating => description)
-     */
-    // moved to diarystats.php
-/*
-    protected function get_rating_options($plugin) {
-        $options = array();
-        for ($i=0; $i<=100; $i++) {
-            $options[$i] = get_string('percentofentryrating', $plugin, $i);
-        }
-        return $options;
-    }
-*/
     /**
      * Get array of countable item types.
      *

@@ -87,7 +87,7 @@ $table->align[] = 'left';
 
 $currentsection = '';
 $i = 0;
-//print_object($diarys);
+
 foreach ($diarys as $diary) {
 
     $context = context_module::instance($diary->coursemodule);
@@ -141,7 +141,6 @@ foreach ($diarys as $diary) {
                 }
             }
         }
-//print_object($diary);
 
         $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
 
@@ -154,17 +153,7 @@ foreach ($diarys as $diary) {
 
     $i ++;
 }
-// Print a blank line before the table starts.
-//echo "<br />";
 
 echo html_writer::table($table);
-/*
-// Trigger course module instance list event.
-$params = array(
-    'context' => context_course::instance($course->id)
-);
-$event = \mod_diary\event\course_module_instance_list_viewed::create($params);
-$event->add_record_snapshot('course', $course);
-$event->trigger();
-*/
+
 echo $OUTPUT->footer();

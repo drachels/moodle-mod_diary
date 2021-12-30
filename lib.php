@@ -244,49 +244,6 @@ function diary_user_outline($course, $user, $mod, $diary) {
 }
 
 /**
- * Prints all the records uploaded by this user.
- *
- * @param object $course
- * @param object $user
- * @param object $mod
- * @param object $diary
- */
-function diary_user_complete($course, $user, $mod, $diary) {
-    global $DB, $OUTPUT;
-
-    //if ($entry = $DB->get_record("diary_entries", array(
-    if ($entrys = $DB->get_records('diary_entries', array(
-        'userid' => $user->id,
-        'diary' => $diary->id
-    ))) {
-// 20211224 Had to switch from record to records and then process each one.
-foreach ($entrys as $entry) {
-        echo $OUTPUT->box_start();
-
-        if ($entry->timemodified) {
-            echo "<p><font size=\"1\">" . get_string("lastedited") . ": " . userdate($entry->timemodified) . "</font></p>";
-        }
-        if ($entry->text) {
-            echo results::diary_format_entry_text($entry, $course, $mod);
-        }
-        if ($entry->teacher) {
-            // 20211224 Diary does not use grade. Switching to scale.
-            //$grades = make_grades_menu($diary->grade);
-            $grades = make_grades_menu($diary->scale);
-            results::diary_print_feedback($course, $entry, $grades);
-        }
-
-        echo $OUTPUT->box_end();
-}
-    } else {
-        print_string("noentry", "diary");
-    }
-
-}
-
-
-
-/**
  * Given a course and a time, this module should find recent activity
  * that has occurred in diary activities and print it out.
  * Return true if there was output, or false if there was none.

@@ -75,13 +75,7 @@ if (has_capability('mod/diary:manageentries', $context)) {
         ), $sort = 'timecreated DESC');
 }
 
-// Header.
-/*
-$PAGE->set_url('/mod/diary/reportsingle.php', array(
-    'id' => $id
-));
-*/
-// 20211214 Trying this to see if I can stay on the same page and see updated feedback and rating.
+// 20211214 Header with additional info in the url.
 $PAGE->set_url('/mod/diary/reportsingle.php', array(
     'id' => $id,
     'user' => $user,
@@ -184,9 +178,8 @@ if ($data = data_submitted()) {
                 $ratingoptions->userid = $entry->userid;
                 $ratingoptions->timecreated = $entry->timecreated;
                 $ratingoptions->timemodified = $entry->timemodified;
-                //$ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id'.$id;
-                $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries';
-
+                $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='
+                                            .$id.'&user='.$user->id.'&action=allentries';
                 $ratingoptions->assesstimestart = $diary->assesstimestart;
                 $ratingoptions->assesstimefinish = $diary->assesstimefinish;
                 // 20200813 Check if there is already a rating, and if so, just update it.
@@ -242,38 +235,28 @@ if (! $users) {
     if (! $teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
         throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
     }
-    // Start the page area where feedback and grades are added and will need to be saved.
-    // Set up to return to report.php upon saving feedback.
-    // 20211213 NO! Do NOT want to go back to report.php. I want to stay HERE on  reportsingle.php.
-    //echo '<form action="report.php" method="post">';
-    //echo '<form action="reportsingle.php" method="post">';
-    //echo '<form method="post">';
+    // 20211213 Start the page area where feedback and grades are added and will need to be saved.
     echo '<form action="reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
-
-/*
-    $saveallbutton = '';
-    $saveallbutton = "<p class=\"feedbacksave\">";
-    $saveallbutton .= "<input type=\"hidden\" name=\"id\" value=\"$cm->id\" />";
-    $saveallbutton .= "<input type=\"hidden\" name=\"sesskey\" value=\"".sesskey()."\" />";
-    $saveallbutton .= "<input type=\"submit\" class='btn btn-primary' value=\"".get_string("saveallfeedback", "diary")."\" />";
-*/
-    // 20211210 Cleaned up unnecessary escaped double quotes. 
+    // 20211210 Cleaned up unnecessary escaped double quotes.
     $saveallbutton = '';
     $saveallbutton = '<p class="feedbacksavereturn">';
     $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
-    $saveallbutton .= '<input type="submit" class="btn btn-primary"  style="border-radius: 8px" value="'.get_string('saveallfeedback', 'diary').'" />';
+    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
+                      .get_string('saveallfeedback', 'diary').'" />';
 
     $url = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries';
-    // 20211210 Cleaned up unnecessary escaped double quotes. 
+    // 20211210 Cleaned up unnecessary escaped double quotes.
     $saveallbutton .= ' <a href="'.$url.' class="feedbacksavestay">';
     $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
-    $saveallbutton .= '<input type="submit" class="btn btn-primary"  style="border-radius: 8px" value="'.get_string('addtofeedback', 'diary').'"</a>';
+    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
+                      .get_string('addtofeedback', 'diary').'"</a>';
 
+    // 20211230 Tacked on an action for the return URL.
     // 20201222 Added a return to report.php button if you do not want to save feedback.
-    $url2 = $CFG->wwwroot.'/mod/diary/report.php?id='.$id;
+    $url2 = $CFG->wwwroot.'/mod/diary/report.php?id='.$id.'&action=currententry';
     $saveallbutton .= ' <a href="'.$url2
                      .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
                      .get_string('returntoreport', 'diary', $diary->name)
@@ -283,17 +266,11 @@ if (! $users) {
 
     // Add save button at the top of the list of users with entries.
     echo $saveallbutton;
-
-    //$dcolor3 = get_config('mod_diary', 'entrybgc');
-    //$dcolor4 = get_config('mod_diary', 'entrytextbgc');
     // 20210705 Added new activity color setting. Only need to set the overall background color here.
     $dcolor3 = $diary->entrybgc;
-    //$dcolor4 = $diary->entrytextbgc;
-
     foreach ($eee as $ee) {
         // 20210511 Changed to using class.
         echo '<div class="entry" style="background: '.$dcolor3.'">';
-
         // Based on the single selected user, print all their entries on screen.
         echo results::diary_print_user_entry($context,
                                              $course,
@@ -302,7 +279,6 @@ if (! $users) {
                                              $ee,
                                              $teachers,
                                              $grades);
-
         echo '</div>';
         // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
         echo $saveallbutton;

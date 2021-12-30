@@ -28,7 +28,7 @@ require_once("lib.php");
 require_once($CFG->dirroot . '/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
-$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -51,7 +51,10 @@ if (! $diary = $DB->get_record("diary", array(
 ))) {
     throw new moodle_exception(get_string('invalidid', 'diary'));
 }
-
+////////////////////////////////
+$diaryid = optional_param('diary', $diary->id, PARAM_INT);
+$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+/////////////////////////////
 // 20201016 Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, array(
     'context' => $context
@@ -153,12 +156,24 @@ if (! empty($action)) {
             }
     }
 }
-
+//print_object('spacer 1');
+//print_object('spacer 1');
+//print_object('spacer 1');
+//print_object('spacer 1');
+//print_object('spacer 5');
+//////////////////////////////////////
 // Header.
 $PAGE->set_url('/mod/diary/report.php', array(
-    'id' => $id
+    'id' => $id,
+    'diary' => $diaryid,
+    'action' => $action
 ));
-$PAGE->navbar->add((get_string("rate", "diary")) . ' ' . (get_string("entries", "diary")));
+//$PAGE->set_url('/mod/diary/report.php', array(
+//    'id' => $id
+//));
+
+///////////////////////////////
+$PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 
@@ -390,16 +405,19 @@ if (! $users) {
     if (! $teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
         throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
     }
+
+    // 20211230 Changed action so that the sort order (action) is maintained.
     // Start the page area where feedback and grades are added and will need to be saved.
-    echo '<form action="report.php" method="post">';
+    echo '<form action="report.php?id='.$id.'&diaryid='.$diaryid.'&action='.$action.'" method="post">';
+    //echo '<form action="report.php" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
-    // 20211027 changed to rounded buttons.
+    // 20211027 changed to rounded buttons. 20211229 Removed escaped double quotes.
     $saveallbutton = '';
-    $saveallbutton = "<p class=\"feedbacksave\">";
-    $saveallbutton .= "<input type=\"hidden\" name=\"id\" value=\"$cm->id\" />";
-    $saveallbutton .= "<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-    $saveallbutton .= "<input type=\"submit\" class='btn btn-primary' style='border-radius: 8px' value=\"" . get_string("saveallfeedback", "diary") . "\" />";
-//style="border-radius: 8px"
+    $saveallbutton = '<p class="feedbacksave">';
+    $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
+    $saveallbutton .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
+                      .get_string("saveallfeedback", "diary").'" />';
     // 20200421 Added a return button.
     $url = $CFG->wwwroot . '/mod/diary/view.php?id=' . $id;
     $saveallbutton .= ' <a href="'.$url
@@ -407,7 +425,7 @@ if (! $users) {
                      .get_string('returnto', 'diary', $diary->name)
                      .'</a>';
 
-    $saveallbutton .= "</p>";
+    $saveallbutton .= '</p>';
 
     // Add save button at the top of the list of users with entries.
     echo $saveallbutton;

@@ -303,3 +303,15 @@ Diary Support Tracker.
 20210814 Not able to work much over the past few days, but have added another
     field, enablestats. Lets me show stats without autorating.
 20210818 Doing some code cleanup and finally published an ALPHA version.
+
+20211229 I have done a LOT of development work over the past four months
+    but have not been keeping this file up to date due to my wife and
+    the last of four sisters have died. My wife due to pancreatic cancer
+    and my sister due to COVID-19. At the request of Jason Press I have
+    create a new admin capability to import entries from a Journal
+    activity, and place them into a Diary activity. I have also cobbled
+    together a bunch of statistics and a one of many items that can
+    automatically generate an autorating. There is also a button that
+    will add all this info to the feedback and rating of an entry.
+    There is also a new button that will let you clear everything out
+    of the feedback/rating area of an entry.

@@ -34,14 +34,7 @@ require_once(__DIR__ .'/../../lib/gradelib.php');
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 
-//print_object('spacer 1');
-//print_object('spacer 2');
-//print_object('spacer 3 printing $course and $diarys');
-//print_object($cm);
-
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
-
-
 
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
@@ -65,31 +58,20 @@ if (! $entriesmanager && ! $canadd) {
     throw new moodle_exception(get_string('accessdenied', 'diary'));
 }
 
-////////////////////
 if (! $diarys = get_all_instances_in_course('diary', $course)) {
     notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
     die();
 }
 
-
 foreach ($diarys as $temp) {
-    if ($temp->id = $cm->instance) {
+    if ($temp->id === $cm->instance) {
         $diary = $temp;
+        // 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
+        $color3 = $diary->entrybgc;
+        $color4 = $diary->entrytextbgc;
+        $errorcmid = $diary->errorcmid;
+    }
 }
-//print_object($course);
-//print_object($diary);
-///////////////////
-
-//if (! $diary = $DB->get_record('diary', array('id' => $cm->instance))) {
-//    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
-//} else {
-    // 20210705 Added new activity color setting.
-    // Moved here so it is set only once. Old location executed for every entry.
-    $color3 = $diary->entrybgc;
-    $color4 = $diary->entrytextbgc;
-    $errorcmid = $diary->errorcmid;
-}
-//print_object($diary);
 
 if (! $cw = $DB->get_record("course_sections", array(
     "id" => $cm->section
@@ -101,26 +83,22 @@ if (! $cw = $DB->get_record("course_sections", array(
 $diaryname = format_string($diary->name, true, array(
     'context' => $context
 ));
-//print_object($diary);
+/*
 // 20210710 Add autorating info into the description only if autorating is enabled.
 if ($diary->enableautorating) {
-
     // 20210711 In the intro (description), add the item type and how many of them must be used in this diary entry.
     $itemtypes = array();
     $itemtypes = diarystats::get_item_types($itemtypes);
     if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
-        $diary->intro .= get_string('itemtype_desc', 'diary', ['one' => $itemtypes[$diary->itemtype], 'two' => $diary->itemcount]).'<br>';
+        $diary->intro .= get_string('itemtype_desc', 'diary',
+                         ['one' => $itemtypes[$diary->itemtype],
+                         'two' => $diary->itemcount]).'<br>';
     }
-
-    // 20210711 In the intro (description), add the minimum and maximum character and word counts that must be used in this diary entry.
-    // 20210712 Moved from here to, function get_minmaxes($diary), in diarystats and simplified the execution.
-    //$minmaxes = array();
-    //$minmaxes = diarystats::get_minmaxes($diary);
+    // 20210711 Add all the minimums and maximums counts that must be used in this diary entry.
+    // 20210712 Moved code from here to, function get_minmaxes($diary), in diarystats and simplified the execution.
     diarystats::get_minmaxes($diary);
-
-
 }
-
+*/
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
 $output->init($cm);
@@ -268,16 +246,11 @@ if ($entriesmanager) {
     $currentgroup = groups_get_activity_group($cm, true);
     $ouput = groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
 
-    //$entrycount = results::diary_count_entries($diary, $currentgroup);
-//print_object($diary);
     $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
-
 
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
     $temp = '<span  class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
     $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
-
-    //$temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></span>';
     $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></span>';
     echo $temp;
 
@@ -309,9 +282,7 @@ if ($course->format == 'weeks' and $diary->days) {
     $timefinish = $timenow + 1;
     $diary->days = 0;
 }
-//print_object('Printing variable, $diary->assessed: = '.$diary->assessed);
-//print_object('Printing variable, $diary: = ');
-//print_object($diary);
+
 // 20200815 Get the current rating for this user, if this diary is assessed.
 if ($diary->assessed != 0) {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
@@ -429,13 +400,6 @@ if ($timenow > $timestart) {
                 echo '<p align="center"><b>'.get_string('blankentry', 'diary').'</b></p>';
             } else if ($thispage <= $perpage) {
                 $thispage ++;
-                //$color3 = get_config('mod_diary', 'entrybgc'); 20210704 Switched to a setting.
-                //$color4 = get_config('mod_diary', 'entrytextbgc'); 20210704 Switched to a setting.
-
-                // 20210705 Added new activity color setting. 20210704 Switched to a setting.
-                //$color3 = $diary->entrybgc; 20210704 Switched to a setting.
-                //$color4 = $diary->entrytextbgc; 20210704 Switched to a setting.
-
                 // 20210501 Changed to class, start a division to contain the overall entry.
                 echo '<div class="entry" style="background: '.$color3.';">';
 
@@ -461,6 +425,7 @@ if ($timenow > $timestart) {
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
 
                 // 20210511 Start an inner division for the user's text entry container.
+                // 20210705 Added new activity color setting. 20210704 Switched to a setting.
                 echo '<div class="entry" style="background: '.$color4.';">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
@@ -468,45 +433,30 @@ if ($timenow > $timestart) {
 
                 // Info regarding entry details with simple word count, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
-
+                    // 20211217 If there is a user entry, format it and show it.
+                    if ($entry) {
+                        $temp = $entry;
                         // 20210704 Go calculate stats and print stats table.
-                        //$statsdata = diarystats::get_diary_stats($entry, $diary);
-                        // 20211212 Need to echo here due to splitting diarystats::get_diary_stats into three functions.
-/////////////////////////Next line breaks the view page, and I think it is missing the table end tag.
-                       // echo $statsdata;
+                        // 20210703 Moved to here from up above so the table gets rendered in the right spot.
+                        $statsdata = diarystats::get_diary_stats($temp, $diary);
+                        // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
+                        echo $statsdata;
 
-        // 20211217 If there is a user entry, format it and show it.
-        if ($entry) {
-            $temp = $entry;
-            //echo results::diary_format_entry_text($entry, $course);
-            // 20210701 Moved copy 1 of 2 here due to new stats.
-            //echo '</div></td><td style="width:55px;"></td></tr>';
+                        // 20211212 Added separate function to get the glossary common error data here.
+                        $comerrdata = diarystats::get_common_error_stats($temp, $diary);
+                        echo $comerrdata;
+                        // 20211212 Added separate function to get the autorating data here.
+                        list($autoratingdata,
+                            $currentratingdata)
+                            = diarystats::get_auto_rating_stats($temp, $diary);
+                        echo $autoratingdata;
+                    } else {
+                        print_string("noentry", "diary");
+                        // 20210701 Moved copy 2 of 2 here due to new stats.
+                        echo '</div></td><td style="width:55px;"></td></tr>';
+                    }
 
-            // 20210703 Moved to here from up above so the table gets rendered in the right spot.
-            $statsdata = diarystats::get_diary_stats($temp, $diary);
-            // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
-            echo $statsdata;
-
-            // 20211212 Added separate function to get the common error data here.
-            $comerrdata = diarystats::get_common_error_stats($temp, $diary);
-            echo $comerrdata;
-            list($autoratingdata,
-                 $currentratingdata)
-                 = diarystats::get_auto_rating_stats($temp, $diary);
-            // 20211212 Added separate function to get the autorating data here.
-            //$autoratingdata = diarystats::get_auto_rating_stats($temp, $diary);
-            echo $autoratingdata;
-            //echo $currentratingdata;
-        } else {
-            print_string("noentry", "diary");
-            // 20210701 Moved copy 2 of 2 here due to new stats.
-            echo '</div></td><td style="width:55px;"></td></tr>';
-        }
-
-        echo '</table>';
-
-
-
+                    echo '</table>';
 
                     // Added lines to mark entry as needing regrade.
                     if (! empty($entry->timecreated) and ! empty($entry->timemodified) and empty($entry->timemarked)) {
@@ -525,19 +475,14 @@ if ($timenow > $timestart) {
                     echo userdate($timefinish).'</div>';
                 }
 
-
                 // Print feedback from the teacher for the current entry.
                 if (! empty($entry->entrycomment) or ! empty($entry->rating)) {
                     // Get the rating for the current entry.
                     $grades = $entry->rating;
                     // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
-                    // Format output using renderer.php.
-
-                    //echo $output->diary_print_feedback($course, $entry, $grades);
-                    //echo $OUTPUT->results::diary_print_feedback($course, $entry, $grades);
+                    // Add the teachers feedback.
                     echo results::diary_print_feedback($course, $entry, $grades);
-                    //echo $output->results::diary_format_entry_text($course, $entry, $grades);
                 }
                 // This adds blank space between entries.
                 echo '</div></p>';

@@ -123,6 +123,17 @@ Diary_781 - Would be nice to fill the remaining statistics cell with Average wor
     index are in the last row of the table. I also added a new, Average words per
     paragraph, statistic in the last cell of the, averages, row.
 
+
+Diary_782 - Reportsingle user page needs Save and stay here button. 
+
+
+Diary_784 - Down about line 446 breaks the view.php page. 20211229 Over the past few
+    days, I have worked on this and other related "undefined" variable errors and
+    everything seems to be working now.
+Diary_785 - Autorating calculations are incorrect. 20211229 Over the past few weeks
+    I have worked on making sure the calculations are correct. Looks like they are
+    now, no matter which Item I select for the autorating.
+
 Diary_786 - View all course diaries, link is giving a debug warning. Got it fixed
     but I think I need to revert the sql part of the code as it started causing an
     undefined variable warning on the view.php page. Got that fixed, but in a way
@@ -145,6 +156,11 @@ Diary_792 - Notice: Undefined variable: currentstats in
 Diary_793 - When looking at Complete Report you get:- Exception - Call to
     undefined function diary_format_entry_text(). Function was moved to
     results.php but the call was not modified to: 
+Diary_796 - enableautorating is not working correctly. This was actually
+    being caused by two problems, one in the mod_form.php file and one
+    in the diarystats.php file. See the ticket for details. 
+
+
 
 
 

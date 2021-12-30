@@ -88,8 +88,6 @@ if ($ADMIN->fulltree) {
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
-///////////////////// New stuff.
-
     // 20210812 Diary show/hide statistics setting.
     $name = 'mod_diary/enablestats';
     $title = get_string('enablestats_title', 'diary');
@@ -109,7 +107,7 @@ if ($ADMIN->fulltree) {
     $label = get_string('autorating', 'mod_diary');
     $description = get_string('autorating_help', 'mod_diary');
     $settings->add(new admin_setting_heading($name, $label, $description));
-    
+
     // 20210708 Diary enable autorating setting.
     $name = 'mod_diary/autorating';
     $title = get_string('autorating_title', 'diary');
@@ -158,13 +156,12 @@ if ($ADMIN->fulltree) {
         $default,
         $options, 10));
 
-/////////////////////
     // 20210712 Added heading for min/max options section.
     $name = 'minmaxhdr';
     $label = get_string('minmaxhdr', 'mod_diary');
     $description = get_string('minmaxhdr_help', 'mod_diary');
     $settings->add(new admin_setting_heading($name, $label, $description));
-    
+
     // 20210708 Diary minimum characters setting.
     $settings->add(new admin_setting_configtext('mod_diary/mincharacterlimit',
         get_string('mincharacterlimit', 'diary'),
@@ -212,7 +209,7 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-///////////////////////////////////////////
+
     // 20211006 Diary minimum sentence setting.
     $settings->add(new admin_setting_configtext('mod_diary/minsentencelimit',
         get_string('minsentencelimit', 'diary'),
@@ -236,7 +233,7 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-///////////////////////////////////////
+
     // 20211006 Diary minimum paragraph setting.
     $settings->add(new admin_setting_configtext('mod_diary/minparagraphlimit',
         get_string('minparagraphlimit', 'diary'),
@@ -260,8 +257,8 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-////////////////////////////////////////
-/*
+
+    /*
     // 20210712 Diary expected min/max error percentage setting.
     $name = 'mod_diary/minmaxpercent';
     $plugin = 'mod_diary';
@@ -275,8 +272,8 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-*/
-/////////////////////
+    */
+
     // 20210712 Added heading for text stats options section.
     $name = 'statshdr';
     $label = get_string('statshdr', 'mod_diary');
@@ -296,9 +293,9 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-/*
-// Need to finish this setting as it is currently incomplete.
-// 20211005 Got this sort of working now. Got clues from activequiz plugin.
+    /*
+    // Need to finish this setting as it is currently incomplete.
+    // 20211005 Got this sort of working now. Got clues from activequiz plugin.
     // 20210712 Added list of statistics items setting that can be enabled/disabled.
     $name = 'mod_diary/textstatitems';
     $plugin = 'mod_diary';
@@ -325,17 +322,16 @@ if ($ADMIN->fulltree) {
         get_string('textstatitems_help', 'diary'),
         $defaults,
         $choices));
-*/
+    */
 
-/*
-/////////////////////
+    /*
     // 20210712 Added heading for common errors options section.
     $name = 'commonerrors';
     $label = get_string('commonerrors', 'mod_diary');
     $description = get_string('commonerrors_help', 'mod_diary');
     $settings->add(new admin_setting_heading($name, $label, $description));
-*/
-/*
+    */
+    /*
     // NOT SURE THAT I CAN ADD A SETTING FOR THE GLOSSARY NAME
     // 20210712 Added selector to pick a glossary of common errors.
     $name = 'mod_diary/errorcmid';
@@ -359,8 +355,8 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-*/
-/*
+    */
+    /*
     // 20210712 Diary expected common error percentage setting.
     $name = 'mod_diary/errorpercent';
     $plugin = 'mod_diary';
@@ -374,6 +370,5 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-*/
-
+    */
 }

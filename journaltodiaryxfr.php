@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Lists Journals that can be transfer entries to a Diary.
+ * Lists Journals and Diary's in a course where an admin can
+ * transfer Journal entries and make them Diary entries.
  *
  * @package    mod_diary
  * @copyright  2021 AL Rachels (drachels@drachels.com)
@@ -31,8 +32,8 @@ global $DB, $OUTPUT, $PAGE, $USER;
 
 // Fetch URL parameters.
 $id = optional_param('id', 0, PARAM_INT); // Course ID.
-    $xfrcountck = 0;
-    $xfrcountxfrd = 0;
+$xfrcountck = 0;
+$xfrcountxfrd = 0;
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
@@ -44,15 +45,8 @@ $context = context_module::instance($cm->id);
 
 $diary = $DB->get_record('diary', array('id' => $cm->instance) , '*', MUST_EXIST);
 
-// Setup up debugging array.
-//$debug = array();
-/*
-print_object('spacer 1');
-print_object('spacer 2');
-print_object('spacer 3');
-print_object('spacer 4');
-print_object('spacer 5');
-*/
+// Setup up array for debugging code.
+$debug = array();
 
 // 20211109 Check to see if Transfer the entries button is clicked and returning 'Transfer the entries' to trigger insert record.
 $param1 = optional_param('button1', '', PARAM_TEXT); // Transfer entry.
@@ -61,20 +55,17 @@ $param3 = optional_param('transferwemail', '', PARAM_TEXT); // Transfer with ema
 $param4 = optional_param('transferwfb', '', PARAM_TEXT); // Transfer with feedback.
 
 // DB transfer.
-//if ((isset($param1) && get_string('transfer', 'diary') == $param1) ||
-//    (isset($param2) && get_string('transferwoe', 'diary') == $param2)) {
-if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
-    //$xfrcountck = 0;
-    //$xfrcountxfrd = 0;
+if (isset($param1) && get_string('transfer', 'diary') == $param1) {
     $journalfromid = optional_param('journalid', '', PARAM_RAW);
     $diarytoid = optional_param('diaryid', '', PARAM_RAW);
 
-    //$debug['This is $param1: '] = $param1;
-    //$debug['This is $param2: '] = $param2;
-    //$debug['This is $param3: '] = $param3;
-    //$debug['This is $param4: '] = $param4;
-    //$debug['This is $journalfromid: '] = $journalfromid;
-    //$debug['This is $diarytoid: '] = $diarytoid;
+    // 20211109 Track parameters for debugging.
+    $debug['This is $param1: '] = $param1;
+    $debug['This is $param2: '] = $param2;
+    $debug['This is $param3: '] = $param3;
+    $debug['This is $param4: '] = $param4;
+    $debug['This is $journalfromid: '] = $journalfromid;
+    $debug['This is $diarytoid: '] = $diarytoid;
 
     $sql = 'SELECT *
               FROM {journal_entries} je
@@ -82,8 +73,6 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
           ORDER BY je.id ASC';
 
     // 20211112 Check and make sure journal transferring from and diary transferring too, actually exist.
-
-    // Need to see about adding the courseid to the check also.
     // Verify journal and diary exists.
     if (($journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST))
         && ($diaryto = $DB->get_record('diary', array('id' => $diarytoid), '*', MUST_EXIST))) {
@@ -95,15 +84,14 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
         foreach ($journalentries as $journalentry) {
             $feedbacktag = new stdClass();
             $xfrcountck++;
-            //if (($param4 === "checked") && get_string('transferwfb', 'diary') == $param4) {
             if ($param4 === "checked") {
                 // If enabled, transfer message will be added to the feedback.
                 $feedbacktag = get_string('transferwfbmsg', 'diary', ($journalck->name));
-                //$debug['This is $param4 and it should be checked to see this entry: '] = $param4;
+                $debug['This is $param4 and it should be checked to see this entry: '] = $param4;
             } else {
-               // By default, transfer message is not added to the feedback.
-               $feedbacktag = '';
-               //$debug['This is $param4 and it should be blank: '] = $param4;
+                // By default, transfer message is not added to the feedback.
+                $feedbacktag = '';
+                $debug['This is $param4 and it should be blank: '] = $param4;
             }
 
             $newdiaryentry = new stdClass();
@@ -119,28 +107,17 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
                 $newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag;
                 $newdiaryentry->teacher = $journalentry->teacher;
                 $newdiaryentry->timemarked = $journalentry->timemarked;
-
-            } else {
-                //$now = time();
-                //$newdiaryentry->entrycomment = $feedbacktag;
-                //$newdiaryentry->teacher = $USER->id;
-                //$newdiaryentry->timemarked = userdate($now);
-                //$newdiaryentry->timemarked = $now;
-
             }
-            //$newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag;
-            //$newdiaryentry->timemarked = $journalentry->timemarked;
-            //if ($param1) {
+
             if ($param3 === 'checked') {
-                //print_object('Entry will be transferred and an email sent to the user.');
                 $newdiaryentry->mailed = 0;
-                //$debug['This is $param3 and it should be checked to see this entry: '] = $param3;
+                $debug['This is $param3 and it should be checked to see this entry: '] = $param3;
 
             } else {
                 $newdiaryentry->mailed = $journalentry->mailed;
-                //$debug['This is $param3 and it should be blank: '] = $param3;
+                $debug['This is $param3 and it should be blank: '] = $param3;
             }
-            //$debug['This is the $newdiaryentry for user: '.$newdiaryentry->userid.': '] = $newdiaryentry;
+            $debug['This is the $newdiaryentry for user: '.$newdiaryentry->userid.': '] = $newdiaryentry;
 
             // 20211112 Check to see if the diary entry record already exists.
             $sql = 'SELECT case when "text" = "$journalentry->text" then "True" else "False" end
@@ -152,22 +129,19 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
             if ($DB->record_exists('diary_entries', ['diary' => $diarytoid,
                                                      'userid' => $journalentry->userid,
                                                      'timemodified' => $journalentry->modified])) {
-                // Possibly need to log the event that a journal entry transfer failed here.
-                // Hardcoded text needs to be changed to a string.
-                //print_object('The current record already exists in this Diary, so no transfer!');
+                // Need to log the event that a journal entry transfer failed here.
+                $debug['The current record already exists in this Diary, so no transfer!: $diarytoid '] = $diarytoid;
             } else {
-                // Hardcoded text needs to be changed to a string.
-                //print_object('The current record does not exist, or is not an exact duplicate, so adding it to this Diary.');
+                $debug['This record does not exist, or is not a duplicate, so adding it to this Diary: $diarytoid '] = $diarytoid;
+                // 20211228 Bump count of transfers.
                 $xfrcountxfrd++;
-
+                // 20211228 Create and insert a new Diary entry from the old Journal entry.
                 $DB->insert_record('diary_entries', $newdiaryentry, false);
                 // Possibly need to log the event that a journal entry was transfered to a diary here.
             }
-            //$DB->insert_record('diary_entries', $newdiaryentry, false);
-            //print_object($debug);
+            // This is a possible place to print out the debug data via, print_object($debug);.
         }
     }
-    //print_object('There were '.$xfrcountck.' entry\'s processed, and '.$xfrcountxfrd.' of them were transferred.');
 
     // Trigger transferred journal entries to diary entries event.
     $event = \mod_diary\event\journal_to_diary_entries_transfer::create(array(
@@ -177,7 +151,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
             'journalname' => $param1,
             'diaryname' => $diaryto->name,
             'diaryto' => $diaryto->id,
-            'jeprocessed'=> $xfrcountck,
+            'jeprocessed' => $xfrcountck,
             'jexfrd' => $xfrcountxfrd)
     ));
     $event->add_record_snapshot('course_modules', $cm);
@@ -186,7 +160,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1)  {
     $event->trigger();
 }
 
-//print_object($debug);
+// Another possible place to print out the debug data via, print_object($debug);.
 
 // Print the page header.
 $PAGE->set_url('/mod/diary/journaltodiaryxfr.php', array('id' => $id));
@@ -250,57 +224,46 @@ foreach ($diarys as $diary) {
     echo '<b>    '.$diary->id.'</b>  '.$diary->course.'  '.$diary->name.'<br>';
 }
     // Set up place to enter Journal ID to transfer entries from.
-    echo '<br><br>'.get_string('journalid', 'diary').': <input type="text" name="journalid" id="journalid">';
+    echo '<br><br>'.get_string('journalid', 'diary').': <input type="text"
+                                                               name="journalid"
+                                                               id="journalid">';
 
     // Set up place to enter Diary ID to transfer entries to.
-    echo '<br><br>'.get_string('diaryid', 'diary').': <input type="text" name="diaryid" id="diaryid">';
+    echo '<br><br>'.get_string('diaryid', 'diary').': <input type="text"
+                                                             name="diaryid"
+                                                             id="diaryid">';
 
 
     // Set up option to send email showing the entry is transfered.
-    echo '<br><br><input type="checkbox" name="transferwemail" id="transferwemail" value="checked">'.get_string('transferwemail', 'diary');
+    echo '<br><br><input type="checkbox"
+                         name="transferwemail"
+                         id="transferwemail"
+                         value="checked">'
+                         .get_string('transferwemail', 'diary');
 
     // Set up option to include feedback that the entry was transferred.
-    echo '<br><input type="checkbox" name="transferwfb" id="transferwfb" value="checked">'.get_string('transferwfb', 'diary');
+    echo '<br><input type="checkbox"
+                     name="transferwfb"
+                     id="transferwfb"
+                     value="checked">'
+                     .get_string('transferwfb', 'diary');
 
-// Add a confirm transfer and send an email button.
-// Add a confirm transfer without sending an email button.
+// Add a transfer button.
 // Add a cancel button that clears the input boxes and reloads the page.
-/*echo '<br><br><input
-         class="btn btn-warning"
-         style="border-radius: 8px"
-         name="button"
-         onClick="return clClick()"
-         type="submit" value="'
-         .get_string('transfer', 'diary').'"> <a href="'.$url2.'"</a></input>
+echo '<br><br><input class="btn btn-warning"
+                     style="border-radius: 8px"
+                     name="button1"
+                     onClick="return clClick()"
+                     type="submit" value="'
+                     .get_string('transfer', 'diary').'"> <a href="'.$url2.'"
 
-         <input
-         class="btn btn-warning"
-         style="border-radius: 8px"
-         name="button2"
-         onClick="return clClick()"
-         type="submit" value="'
-         .get_string('transferwoe', 'diary').'"> <a href="'.$url2.'"
-
-         class="btn btn-secondary"
-         style="border-radius: 8px">'
-        .get_string('cancel', 'diary').'</a></input>';
-*/
-echo '<br><br><input
-         class="btn btn-warning"
-         style="border-radius: 8px"
-         name="button1"
-         onClick="return clClick()"
-         type="submit" value="'
-         .get_string('transfer', 'diary').'"> <a href="'.$url2.'"
-
-         class="btn btn-secondary"
-         style="border-radius: 8px">'
-        .get_string('cancel', 'diary').'</a></input>';
+                     class="btn btn-secondary"
+                     style="border-radius: 8px">'
+                     .get_string('cancel', 'diary').'</a></input>';
 
 // 20211206 Added results so the admin knows what has occured.
 if ($xfrcountck > 0) {
     $xfrresults = get_string('xfrresults', 'diary', ['one' => $xfrcountck , 'two' => $xfrcountxfrd]);
-    // This might be a good place to add the log event.
 } else {
     $xfrresults = '';
 }

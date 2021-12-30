@@ -468,14 +468,11 @@ class diarystats {
             // 20211212 Move the echo's to results file so they can be used by the new, Add to feedback, button.
             // 20211007 An experiment for the output.
             // echo $currentstats;
-        }
-        /*
-        if ($currentstats) {
-            return $currentstats;
         } else {
-            return;
+            // 20211230 If enablestats is off but autorating is on, we still need to define the start of the table.
+            $currentstats = '<table class="generaltable">';
+            return $currentstats;
         }
-        */
     }
 
     /**
@@ -659,8 +656,13 @@ class diarystats {
         }
         // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
         $autoratingdata .= '</table>';
-        // 20211212 Return list of data to results.
-        return array($autoratingdata, $currentratingdata);
+        // 20211230 Return autoratingdata only if autorating is enabled.
+        if ($diary->enableautorating) {
+            // 20211212 Return list of data to results.
+            return array($autoratingdata, $currentratingdata);
+        } else {
+            return;
+        }
     }
 
     /**
