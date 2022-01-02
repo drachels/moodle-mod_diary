@@ -220,7 +220,6 @@ class diarystats {
      * @return boolean TRUE if $text matches the $match; otherwise FALSE;
      */
     public static function search_text($search, $text, $fullmatch=false, $casesensitive=false, $ignorebreaks=true) {
-
         $text = trim($text);
         if ($text == '') {
             return false; // Unexpected?
@@ -274,7 +273,6 @@ class diarystats {
         $regexp = strtr($regexp, self::$metachars);
         $regexp = preg_quote($regexp, '/');
         $regexp = strtr($regexp, self::$flipmetachars);
-
         if ($fullmatch) {
             $regexp = "\\b$regexp\\b";
         }
@@ -285,7 +283,6 @@ class diarystats {
         if ($ignorebreaks) {
             $regexp .= 's';
         }
-
         // I think this is a problem with common errors as it only counts ONE error although there may be many.
         if (preg_match($regexp, $text, $match, PREG_OFFSET_CAPTURE)) {
             list($match, $offset) = $match[0];
@@ -397,12 +394,12 @@ class diarystats {
             // you will get multiple duplicate entries as soon as the teacher saves one.
 
             // 20210703 Consolidated the table here so using one instance instead of two.
-            // 20211007 An output experiment.
             $currentstats = '<table class="generaltable">'
                 .'<tr><td style="width: 25%">'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
                     .'<td style="width: 25%">'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
                     .'<td style="width: 25%">'.get_string('autoratingitempercentset', 'diary', ($diary->itempercent)).' </td>'
                     .'<td style="width: 25%">'.get_string('commonerrorpercentset', 'diary', ($diary->errorpercent)).' </td></tr>';
+            // 20211007 An output experiment check to see if there is any text.
             if ($diarystats->uniquewords > 0) {
                 $currentstats .= '<tr><td>'.get_string('chars', 'diary').' '.$tempminc.'/'.$diarystats->chars.'/'.$tempmaxc.'</td>'
                     .'<td>'.get_string('words', 'diary').' '.$tempminw.'/'.$diarystats->words.'/'.$tempmaxw.'</td>'
@@ -461,8 +458,9 @@ class diarystats {
                 // 20211224 Moved return to prevent undefined variable: currentstats warning.
                 return $currentstats;
             } else {
+                $currentstats = '<table class="generaltable">';
                 $currentstats .= '<tr><td>'.get_string('notextdetected', 'diary').'</td><td> </td><td> </td><td> </td></tr>';
-                return;
+                return $currentstats;
 
             }
             // 20211212 Move the echo's to results file so they can be used by the new, Add to feedback, button.

@@ -115,10 +115,10 @@ foreach ($diarys as $diary) {
     ));
     if (! $diary->visible) {
         // Show dimmed if the mod is hidden.
-        $table->data[$i][] = "<a class=\"dimmed\" href=\"view.php?id=$diary->coursemodule\">" . $diaryname . "</a>";
+        $table->data[$i][] = '<a class="dimmed" href="view.php?id='.$diary->coursemodule.'">'.$diaryname.'</a>';
     } else {
         // Show normal if the mod is visible.
-        $table->data[$i][] = "<a href=\"view.php?id=$diary->coursemodule\">" . $diaryname . "</a>";
+        $table->data[$i][] = '<a href="view.php?id='.$diary->coursemodule.'">'.$diaryname. '</a>';
     }
 
     // Description.
@@ -143,8 +143,8 @@ foreach ($diarys as $diary) {
         }
 
         $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
-
-        $table->data[$i][] = '<a href="report.php?id='.$diary->coursemodule.'">'
+        // 20220102 Added action to the href.
+        $table->data[$i][] = '<a href="report.php?id='.$diary->coursemodule.'&action=currententry">'
             .get_string('viewallentries', 'diary', $entrycount).'</a>';
 
     } else if (! empty($managersomewhere)) {

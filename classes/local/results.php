@@ -308,17 +308,8 @@ class results {
     public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
         global $USER, $OUTPUT, $DB, $CFG;
         $id = required_param('id', PARAM_INT); // Course module.
-        //$diaryid = required_param('diary', PARAM_INT); // Diaryid.
         $diaryid = optional_param('diary', $diary->id, PARAM_INT); // Diaryid.
         $action = required_param('action', PARAM_RAW); // Current sort Action.
-//print_object('spacer 1');
-//print_object('spacer 2');
-//print_object('spacer 3');
-//print_object('spacer 4');
-//print_object('spacer 5');
-//print_object('id: '.$id);
-//print_object('diaryid: '.$diaryid);
-//print_object('action: '.$action);
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
@@ -443,7 +434,7 @@ class results {
                          value="'.get_string('clearfeedback', 'diary').'"></input>';
 
             // 20211228 Create a test anchor link.
-            echo '<a href="#'.$entry->id.'">xxxxx</a>';
+            // echo '<a href="#'.$entry->id.'">xxxxx</a>';
 
             // 20211228 Create an anchor right after Add/Clear buttons.
             echo  '<a id="'.$entry->id.'"></a>';

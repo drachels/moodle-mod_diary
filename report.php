@@ -51,10 +51,8 @@ if (! $diary = $DB->get_record("diary", array(
 ))) {
     throw new moodle_exception(get_string('invalidid', 'diary'));
 }
-////////////////////////////////
 $diaryid = optional_param('diary', $diary->id, PARAM_INT);
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
-/////////////////////////////
 // 20201016 Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, array(
     'context' => $context
@@ -156,23 +154,14 @@ if (! empty($action)) {
             }
     }
 }
-//print_object('spacer 1');
-//print_object('spacer 1');
-//print_object('spacer 1');
-//print_object('spacer 1');
-//print_object('spacer 5');
-//////////////////////////////////////
+
 // Header.
 $PAGE->set_url('/mod/diary/report.php', array(
     'id' => $id,
     'diary' => $diaryid,
     'action' => $action
 ));
-//$PAGE->set_url('/mod/diary/report.php', array(
-//    'id' => $id
-//));
 
-///////////////////////////////
 $PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
@@ -394,8 +383,8 @@ if (! $users) {
             'class' => 'toolbutton'
         ));
 
-        // 20210511 Reorganized group and toolbar output.
-        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/report.php?id=$cm->id")
+        // 20210511 Reorganized group and toolbar output. 20220102 Added action.
+        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/report.php?id=$cm->id&action=currententry")
             .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
     }
 
@@ -409,7 +398,6 @@ if (! $users) {
     // 20211230 Changed action so that the sort order (action) is maintained.
     // Start the page area where feedback and grades are added and will need to be saved.
     echo '<form action="report.php?id='.$id.'&diaryid='.$diaryid.'&action='.$action.'" method="post">';
-    //echo '<form action="report.php" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
     // 20211027 changed to rounded buttons. 20211229 Removed escaped double quotes.
     $saveallbutton = '';

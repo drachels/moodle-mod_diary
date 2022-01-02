@@ -83,22 +83,7 @@ if (! $cw = $DB->get_record("course_sections", array(
 $diaryname = format_string($diary->name, true, array(
     'context' => $context
 ));
-/*
-// 20210710 Add autorating info into the description only if autorating is enabled.
-if ($diary->enableautorating) {
-    // 20210711 In the intro (description), add the item type and how many of them must be used in this diary entry.
-    $itemtypes = array();
-    $itemtypes = diarystats::get_item_types($itemtypes);
-    if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
-        $diary->intro .= get_string('itemtype_desc', 'diary',
-                         ['one' => $itemtypes[$diary->itemtype],
-                         'two' => $diary->itemcount]).'<br>';
-    }
-    // 20210711 Add all the minimums and maximums counts that must be used in this diary entry.
-    // 20210712 Moved code from here to, function get_minmaxes($diary), in diarystats and simplified the execution.
-    diarystats::get_minmaxes($diary);
-}
-*/
+
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
 $output->init($cm);

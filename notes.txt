@@ -315,3 +315,5 @@ Diary Support Tracker.
     will add all this info to the feedback and rating of an entry.
     There is also a new button that will let you clear everything out
     of the feedback/rating area of an entry.
+20210102 Fixed a bunch of minor bugs. See tickets for 350.17. Also did
+    a lot of code cleanup. Bumped to stable version and pushed to git hub.

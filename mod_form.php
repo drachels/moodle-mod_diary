@@ -199,7 +199,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->autorating);
-        //$mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added setting for what type of item to count.
         $name = 'itemtype';
@@ -461,6 +460,7 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
+        /*
         // Add group of error matching behaviors.
         $elements = array();
 
@@ -486,6 +486,7 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->addGroup($elements, $name, $label, ' ', false);
         $mform->disabledIf($name, 'enableautograde', 'eq', 0);
         $mform->addHelpButton($name, $name, $plugin);
+        */
 
         // Add the rest of the common settings.
         $this->standard_grading_coursemodule_elements();

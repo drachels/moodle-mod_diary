@@ -138,7 +138,8 @@ Diary_786 - View all course diaries, link is giving a debug warning. Got it fixe
     but I think I need to revert the sql part of the code as it started causing an
     undefined variable warning on the view.php page. Got that fixed, but in a way
     I really don't like as it requires reading the diary record for every diary
-    in the course, whereas the original method only needs to read one file.
+    in the course, whereas the original method only needs to read one file. I have
+    added the action in report.php line 397, and index.php line 146.
 
 Diary_789 - View.php needs modifying due to changes in diarystats.php. Copied
     the code that generates the stats from results.php to file view.php, and
@@ -160,6 +161,9 @@ Diary_796 - enableautorating is not working correctly. This was actually
     being caused by two problems, one in the mod_form.php file and one
     in the diarystats.php file. See the ticket for details. 
 
+Diary_803 - Error message, No text detected, quit working correctly. Modified
+    code to add table definition and return $currentstats in diarystats.php
+    file down around line 460. 
 
 
 
