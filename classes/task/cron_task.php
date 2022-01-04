@@ -18,6 +18,8 @@ namespace mod_diary\task;
 defined('MOODLE_INTERNAL') || die();
 use context_module;
 use stdClass;
+// Use the logging trait to get some nice, juicy, logging.
+use \core\task\logging_trait;
 
 /**
  * A schedule task for diary cron.
@@ -27,9 +29,6 @@ use stdClass;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cron_task extends \core\task\scheduled_task {
-
-    // Use the logging trait to get some nice, juicy, logging.
-    use \core\task\logging_trait;
 
     /**
      * Get a descriptive name for this task (shown to admins).
@@ -47,7 +46,9 @@ class cron_task extends \core\task\scheduled_task {
         global $CFG, $USER, $DB;
 
         $cutofftime = time() - $CFG->maxeditingtime;
-        $this->log_start("Processing Diary information.");
+        if ($CFG > 36) {
+            $this->log_start("Processing Diary information.");
+        }
 
         if ($entries = self::diary_get_unmailed_graded($cutofftime)) {
             $timenow = time();
@@ -83,15 +84,18 @@ class cron_task extends \core\task\scheduled_task {
             $courses = array();
 
             foreach ($entries as $entry) {
-                $this->log_start("Processing diary entry $entry->id\n");
-
+                if ($CFG > 36) {
+                    $this->log_start("Processing diary entry $entry->id\n");
+                }
                 if (! empty($users[$entry->userid])) {
                     $user = $users[$entry->userid];
                 } else {
                     if (! $user = $DB->get_record("user", array(
                         "id" => $entry->userid
                     ), $requireduserfields)) {
-                        $this->log_finish("Could not find user $entry->userid\n");
+                        if ($CFG > 36) {
+                            $this->log_finish("Could not find user $entry->userid\n");
+                        }
                         continue;
                     }
                     $users[$entry->userid] = $user;
@@ -104,7 +108,9 @@ class cron_task extends \core\task\scheduled_task {
                 } else {
                     if (! $course = $DB->get_record('course', array(
                         'id' => $entry->course), 'id, shortname')) {
-                        $this->log_finish("Could not find course $entry->course\n");
+                        if ($CFG > 36) {
+                            $this->log_finish("Could not find course $entry->course\n");
+                        }
                         continue;
                     }
                     $courses[$entry->course] = $course;
@@ -115,7 +121,9 @@ class cron_task extends \core\task\scheduled_task {
                 } else {
                     if (! $teacher = $DB->get_record("user", array(
                         "id" => $entry->teacher), $requireduserfields)) {
-                        $this->log_finish("Could not find teacher $entry->teacher\n");
+                        if ($CFG > 36) {
+                            $this->log_finish("Could not find teacher $entry->teacher\n");
+                        }
                         continue;
                     }
                     $users[$entry->teacher] = $teacher;
@@ -124,7 +132,9 @@ class cron_task extends \core\task\scheduled_task {
                 // All cached.
                 $coursediarys = get_fast_modinfo($course)->get_instances_of('diary');
                 if (empty($coursediarys) || empty($coursediarys[$entry->diary])) {
-                    $this->log_finish("Could not find course module for diary id $entry->diary\n");
+                    if ($CFG > 36) {
+                        $this->log_finish("Could not find course module for diary id $entry->diary\n");
+                        }
                     continue;
                 }
                 $mod = $coursediarys[$entry->diary];
@@ -167,16 +177,21 @@ class cron_task extends \core\task\scheduled_task {
                 }
 
                 if (! email_to_user($user, $teacher, $postsubject, $posttext, $posthtml)) {
-                    $this->log_finish("Error: Diary cron: Could not send out mail for id
-                                          $entry->id to user $user->id ($user->email)\n"
-                                     );
+                    if ($CFG > 36) {
+                        $this->log_finish("Error: Diary cron: Could not send out mail for id
+                            $entry->id to user $user->id ($user->email)\n");
+                    }
                 }
                 if (! $DB->set_field("diary_entries", "mailed", "1", array("id" => $entry->id))) {
-                    $this->log_finish("Could not update the mailed field for id $entry->id\n");
+                    if ($CFG > 36) {
+                        $this->log_finish("Could not update the mailed field for id $entry->id\n");
+                    }
                 }
             }
         }
-        $this->log_finish("Processing Diary cron is completed.");
+        if ($CFG > 36) {
+            $this->log_finish("Processing Diary cron is completed.");
+        }
         return true;
     }
 
