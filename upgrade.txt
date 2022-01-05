@@ -83,9 +83,10 @@ Diary_769 - Journal to Diary xfr breaks if there are no Journal activities in th
 
 
 Diary_770 - Add autorating buttons Note: report.php > results.php has hardcoded
-    text on new buttons. Added code to create the two new buttons and also
-    added new strings for both buttons. STILL NEEDS WORK! CODE IS IN results.php
-    DOWN AROUND LINE NUMBER 407.
+    text on new buttons. - Fixed. Added code to create the two new buttons and they
+    both reliably work on report.php page. STILL NEEDS WORK on the reportsingle.php
+    page for the, Save all feedback and Add to feedback buttons!
+    CODE IS IN results.php DOWN AROUND LINE NUMBER 420.
 
 
 Diary_771 - Need a title centered at the top of the xfr new menu item. I added
@@ -123,7 +124,6 @@ Diary_781 - Would be nice to fill the remaining statistics cell with Average wor
     index are in the last row of the table. I also added a new, Average words per
     paragraph, statistic in the last cell of the, averages, row.
 
-
 Diary_782 - Reportsingle user page needs Save and stay here button. 
 
 
@@ -133,7 +133,6 @@ Diary_784 - Down about line 446 breaks the view.php page. 20211229 Over the past
 Diary_785 - Autorating calculations are incorrect. 20211229 Over the past few weeks
     I have worked on making sure the calculations are correct. Looks like they are
     now, no matter which Item I select for the autorating.
-
 Diary_786 - View all course diaries, link is giving a debug warning. Got it fixed
     but I think I need to revert the sql part of the code as it started causing an
     undefined variable warning on the view.php page. Got that fixed, but in a way
@@ -164,6 +163,9 @@ Diary_796 - enableautorating is not working correctly. This was actually
 Diary_803 - Error message, No text detected, quit working correctly. Modified
     code to add table definition and return $currentstats in diarystats.php
     file down around line 460. 
+Diary_804 - the cron_task.php file line 32 needs to be changed, removed,
+    or commented out. Wound up moving it so it became line 22.
+
 
 
 

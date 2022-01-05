@@ -101,8 +101,12 @@ $users = $user;
 $user = $DB->get_record("user", array("id" => $user));
 
 if ($eee) {
+    //print_object('trying to print $eee');
+    //print_object($eee);
     // Now, filter down to get entry by any user who has made at least one entry.
     foreach ($eee as $ee) {
+        //print_object('trying to print $ee');
+        //print_object($ee);
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id] = $ee;
         $entrybyuserentry[$ee->userid][$ee->id] = $ee;
@@ -114,6 +118,10 @@ if ($eee) {
 
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
+    results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
+    print_object('this is from reportsingle.php right after using the new function');
+
+/*
     confirm_sesskey();
     $feedback = array();
     $data = (array) $data;
@@ -199,7 +207,7 @@ if ($data = data_submitted()) {
             diary_update_grades($diary, $entry->userid);
         }
     }
-
+*/
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(array(
         'objectid' => $diary->id,
@@ -211,7 +219,7 @@ if ($data = data_submitted()) {
     $event->trigger();
 
     // Report how many entries were updated when the, Save all my feedback button was pressed.
-    echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
+    //echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
 } else {
 
     // Trigger module viewed event.

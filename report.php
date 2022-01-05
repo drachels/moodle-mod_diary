@@ -200,9 +200,14 @@ if ($eee) {
     $entrybyuser = array();
     $entrybyentry = array();
 }
-
+print_object('this is from report.php');
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
+    print_object('this is from report.php right after checking for incoming data');
+    results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
+    print_object('this is from report.php right after using the new function');
+
+/*
     confirm_sesskey();
     $feedback = array();
     $data = (array) $data;
@@ -288,7 +293,7 @@ if ($data = data_submitted()) {
             diary_update_grades($diary, $entry->userid);
         }
     }
-
+*/
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(array(
         'objectid' => $diary->id,
@@ -300,7 +305,7 @@ if ($data = data_submitted()) {
     $event->trigger();
 
     // Report how many entries were updated when the, Save all my feedback button was pressed.
-    echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
+    //echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
 } else {
 
     // Trigger module viewed event.
