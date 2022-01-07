@@ -271,6 +271,9 @@ if ($course->format == 'weeks' and $diary->days) {
 // 20200815 Get the current rating for this user, if this diary is assessed.
 if ($diary->assessed != 0) {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
+
+//print_object($gradinginfo);
+
     $gradeitemgrademax = $gradinginfo->items[0]->grademax;
     $userfinalgrade = $gradinginfo->items[0]->grades[$USER->id];
     $currentuserrating = $userfinalgrade->str_long_grade;
@@ -416,7 +419,7 @@ if ($timenow > $timestart) {
                 // This adds the actual entry text division close tag for each entry listed on the page.
                 echo results::diary_format_entry_text($entry, $course, $cm).'</div>';
 
-                // Info regarding entry details with simple word count, date when created, and date of last edit.
+                // Info regarding entry details with stats, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
                     // 20211217 If there is a user entry, format it and show it.
                     if ($entry) {

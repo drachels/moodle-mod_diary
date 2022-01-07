@@ -119,7 +119,7 @@ if ($eee) {
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
     results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
-    print_object('this is from reportsingle.php right after using the new function');
+    //print_object('this is from reportsingle.php right after using the new function');
 
 /*
     confirm_sesskey();

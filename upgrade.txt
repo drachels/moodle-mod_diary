@@ -165,7 +165,9 @@ Diary_803 - Error message, No text detected, quit working correctly. Modified
     file down around line 460. 
 Diary_804 - the cron_task.php file line 32 needs to be changed, removed,
     or commented out. Wound up moving it so it became line 22.
-
+Diary_895 - The Grade shown in various places is not being updated when the,
+    Clear feedback, button is clicked. Added code to delete the correct
+    rating table entry, then update the grade for the user.
 
 
 

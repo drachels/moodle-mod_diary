@@ -313,7 +313,7 @@ class results {
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
-
+        require_once($CFG->dirroot.'/rating/lib.php');
         // 20210705 Added new activity color setting.
         $dcolor4 = $diary->entrytextbgc;
 
@@ -400,19 +400,13 @@ class results {
             // 20200816 Get the current rating for this user!
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
                 $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
-//print_object($gradinginfo);
                 $gradeitemgrademax = $gradinginfo->items[0]->grademax;
-//print_object($gradeitemgrademax);
-
                 $userfinalgrade = $gradinginfo->items[0]->grades[$user->id];
-//print_object($userfinalgrade);
-
                 $currentuserrating = $userfinalgrade->str_long_grade;
-//print_object($currentuserrating);
-
             } else {
                 $currentuserrating = '';
             }
+            // Get the type of rating so we can use it as a label.
             $aggregatestr = self::get_diary_aggregation($diary->assessed);
 
             // Add picture of the last teacher to rate this entry.
@@ -451,91 +445,35 @@ class results {
             $hiddengradestr = '';
             $gradebookgradestr = '';
             $feedbackdisabledstr = '';
-            // Keep a copy of the entrycomment so we can add to it without losing it.
             $feedbacktext = $entry->entrycomment;
-//print_object($entry);
+            // 20220107 If the, Add to feedback, button is clicked process it here.
             if (isset($param1) && get_string('addtofeedback', 'diary') == $param1) {
+                // 20220105 Do an immediate update here.
                 $entry->rating = $currentratingdata;
                 $feedbacktext .= $statsdata.$comerrdata.$autoratingdata;
-                // 20210105 Try a immediate update here.
                 $entry->entrycomment = $statsdata.$comerrdata.$autoratingdata;
                 $DB->update_record('diary_entries', $entry, $bulk=false);
-
             }
-
-//print_object('trying to print $diary');
-//print_object($diary);
+            // 20220107 If the, Clear feedback, button is clicked process it here.
             if (isset($param2) && get_string('clearfeedback', 'diary') == $param2) {
-                print_object('In results.php right after the clear button was clicked and we are going to check $data');
-
-                if ($data = data_submitted()) {
-                    print_object('In results.php right after the clear button was clicked and trying to see if we have all the variables we need for an update.');
-
-                    if ($entry) {
-                        print_object('trying to print $entry');
-                        print_object($entry);
-                        // Now, filter down to get entry by any user who has made at least one entry.
-                        //foreach ($entry as $ee) {
-                        //print_object('trying to print $ee');
-                        //print_object($ee);
-                        $entrybyuser[$entry->userid] = $entry;
-                        $entrybyentry[$entry->id] = $entry;
-                        $entrybyuserentry[$entry->userid][$entry->id] = $entry;
-                        //}
-                    } else {
-                        $entrybyuser = array();
-                        $entrybyentry = array();
-                    }
-
-                // 20220105 PROBLEM - the grade is not being updated to account for this removed rating!
-                $entry->rating = "0";
-                $feedbacktext = 'CLEARED!';
-                // 20210105 Try a immediate update here.
-                $entry->entrycomment = 'CLEARED!';
-
-                    //self::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
-                    self::diary_entries_feedback_update($id, $context, $diary, $data, $entrybyuser, $entrybyentry);
-
-                    //self::diary_entries_feedback_update($id, $context, $diary, $data, $entry, $entry);
-
-                    //self::diary_entries_feedback_update($id, $context, $diary, $data, $entry, $entry);
-
-                    //print_object('printing $id instead of $cm');
-                    //print_object($id);
-                    //print_object($context->instanceid);
-
-                    //print_object('printing $context');
-                    //print_object($context);
-
-                    //print_object('printing $diary');
-                    //print_object($diary);
-
-                    //print_object('printing $data');
-                    //print_object($data);
-
-                    //print_object('printing $entry instead of $entrybyuser');
-                    //print_object($entry);
-//$entrybyentry = $entrybyuser;
-                    //print_object('printing $entrybyentry');
-                    //print_object($entrybyentry);
+                // 20220105 Reset the entry rating and entry comment to null.
+                $entry->rating = null;
+                $feedbacktext = null;
+                $entry->entrycomment = null;
+                // 20220105 Update the actual diary entry.
+                $DB->update_record('diary_entries', $entry, $bulk=false);
+                // 20220107 Verify there is a rating for this entry then delete it.
+                if ($rec = $DB->get_record('rating',  array('itemid' => $entry->id))) {
+                    $DB->delete_records('rating', array('itemid' => $entry->id));
+                    // 20220107 Recalculate the rating for this user for this diary activity.
+                    diary_update_grades($diary, $entry->userid);
                 }
-
-                // 20220105 PROBLEM - the grade is not being updated to account for this removed rating!
-                //$entry->rating = "0";
-                //$feedbacktext = 'CLEARED!';
-                // 20210105 Try a immediate update here.
-                //$entry->entrycomment = 'CLEARED!';
-
-                //diary_update_grades($diary, $entry->userid);
-
-                //$DB->update_record('diary_entries', $entry, $bulk=false);
             }
 
             // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
             $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array(
                 $user->id
             ));
-//print_object($gradinginfo);
 
             if (! empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
                 if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
@@ -902,6 +840,7 @@ class results {
         }
     }
 
+
     /**
      * Update diary entries feedback(optionally in a given group).
      * Called from report.php and reportsingle.php.
@@ -913,7 +852,7 @@ class results {
     public static function diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry) {
         global $DB, $CFG, $OUTPUT, $USER;
 
-        print_object('this is from new public static function diary_entries_feedback_update($diary, $groupid = 0)');
+        //print_object('this is from new public static function diary_entries_feedback_update($diary, $groupid = 0)');
 //print_object($cm);
 //print_object($context);
 //print_object($diary);
