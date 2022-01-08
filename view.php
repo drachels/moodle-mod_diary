@@ -272,8 +272,6 @@ if ($course->format == 'weeks' and $diary->days) {
 if ($diary->assessed != 0) {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
 
-//print_object($gradinginfo);
-
     $gradeitemgrademax = $gradinginfo->items[0]->grademax;
     $userfinalgrade = $gradinginfo->items[0]->grades[$USER->id];
     $currentuserrating = $userfinalgrade->str_long_grade;

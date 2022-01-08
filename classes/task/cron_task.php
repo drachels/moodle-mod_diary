@@ -134,7 +134,7 @@ class cron_task extends \core\task\scheduled_task {
                 if (empty($coursediarys) || empty($coursediarys[$entry->diary])) {
                     if ($CFG > 36) {
                         $this->log_finish("Could not find course module for diary id $entry->diary\n");
-                        }
+                    }
                     continue;
                 }
                 $mod = $coursediarys[$entry->diary];

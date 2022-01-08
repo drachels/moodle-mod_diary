@@ -317,3 +317,8 @@ Diary Support Tracker.
     of the feedback/rating area of an entry.
 20210102 Fixed a bunch of minor bugs. See tickets for 350.17. Also did
     a lot of code cleanup. Bumped to stable version and pushed to git hub.
+20220107 Over the past few days, I have fixed a bunch of minor bugs,
+    consolidated some more duplicate code in report.php and reportsingle.php,
+    and fixed a grade bug caused by the, Clear feedback, button. Pushed
+    current changes to MOODLE_350.02_STABLE then started cleanup based
+    on codechecker reports.

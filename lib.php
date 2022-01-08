@@ -587,18 +587,13 @@ function diary_update_grades($diary, $userid = 0, $nullifnone = true) {
     if (! $diary->assessed) {
         diary_grade_item_update($diary);
     } else if ($grades = diary_get_user_grades($diary, $userid)) {
-        //print_object('At lib diary_update_grades cp 3 and printing $grades.');
-        //print_object($grades);
-
         diary_grade_item_update($diary, $grades);
     } else if ($userid and $nullifnone) {
-        //print_object('At lib diary_update_grades cp 4.');
         $grade = new stdClass();
         $grade->userid = $userid;
         $grade->rawgrade = null;
         diary_grade_item_update($diary, $grade);
     } else {
-        //print_object('At lib diary_update_grades cp 5.');
         diary_grade_item_update($diary);
     }
 }
@@ -618,28 +613,22 @@ function diary_grade_item_update($diary, $grades = null) {
         'itemname' => $diary->name,
         'idnumber' => $diary->cmidnumber
     );
-    //print_object('At lib diary_grade_item_update cp 1.');
 
     if (! $diary->assessed or $diary->scale == 0) {
-        //print_object('At lib diary_grade_item_update cp 2.');
         $params['gradetype'] = GRADE_TYPE_NONE;
     } else if ($diary->scale > 0) {
-        //print_object('At lib diary_grade_item_update cp 3.');
         $params['gradetype'] = GRADE_TYPE_VALUE;
         $params['grademax'] = $diary->scale;
         $params['grademin'] = 0;
     } else if ($diary->scale < 0) {
-        //print_object('At lib diary_grade_item_update cp 4.');
         $params['gradetype'] = GRADE_TYPE_SCALE;
         $params['scaleid'] = - $diary->scale;
     }
     if ($grades === 'reset') {
-        //print_object('At lib diary_grade_item_update cp 5.');
         $params['reset'] = true;
         $grades = null;
 
     }
-    //print_object('At lib diary_grade_item_update cp 6.');
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, $grades, $params);
 }
 
@@ -657,38 +646,6 @@ function diary_grade_item_delete($diary) {
     return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, null, array(
         'deleted' => 1
     ));
-}
-
-/**
- * Delete rating item for given diary entry.
- *
- * @param object $entry
- */
-function diary_rating_item_delete($delopt) {
-// NOT IN USE YET.
-/*
-        global $USER, $DB, $CFG;
-        $params = array();
-        $params['contextid'] = $delopt->contextid;
-        $params['component'] = $delopt->component;
-        $params['ratingarea'] = $delopt->ratingarea;
-        $params['itemid'] = $delopt->itemid;
-        $params['userid'] = $delopt->userid;
-        $params['timecreated'] = $delopt->timecreated;
-
-        $sql = 'SELECT * FROM '.$CFG->prefix.'rating'
-                      .' WHERE contextid =  ?'
-                        .' AND component =  ?'
-                        .' AND ratingarea =  ?'
-                        .' AND itemid =  ?'
-                        .' AND userid =  ?'
-                        .' AND timecreated = ?';
-        if ($rec = $DB->record_exists_sql($sql, $delopt)) {
-            print_object('This is the rating that needs to be deleted.');
-            print_object($rec = $DB->get_record_sql($sql, $delopt));
-            //$DB->delete_record_sql($sql, $delopt);
-        }
-*/
 }
 
 /**

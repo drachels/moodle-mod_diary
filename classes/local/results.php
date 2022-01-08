@@ -452,7 +452,7 @@ class results {
                 $entry->rating = $currentratingdata;
                 $feedbacktext .= $statsdata.$comerrdata.$autoratingdata;
                 $entry->entrycomment = $statsdata.$comerrdata.$autoratingdata;
-                $DB->update_record('diary_entries', $entry, $bulk=false);
+                $DB->update_record('diary_entries', $entry, $bulk = false);
             }
             // 20220107 If the, Clear feedback, button is clicked process it here.
             if (isset($param2) && get_string('clearfeedback', 'diary') == $param2) {
@@ -461,7 +461,7 @@ class results {
                 $feedbacktext = null;
                 $entry->entrycomment = null;
                 // 20220105 Update the actual diary entry.
-                $DB->update_record('diary_entries', $entry, $bulk=false);
+                $DB->update_record('diary_entries', $entry, $bulk = false);
                 // 20220107 Verify there is a rating for this entry then delete it.
                 if ($rec = $DB->get_record('rating',  array('itemid' => $entry->id))) {
                     $DB->delete_records('rating', array('itemid' => $entry->id));
@@ -852,16 +852,6 @@ class results {
     public static function diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry) {
         global $DB, $CFG, $OUTPUT, $USER;
 
-        //print_object('this is from new public static function diary_entries_feedback_update($diary, $groupid = 0)');
-//print_object($cm);
-//print_object($context);
-//print_object($diary);
-//print_object($data);
-//print_object('in function diary_entries_feedback_update and printing $entrybyuser');
-//print_object($entrybyuser);
-//print_object('in function diary_entries_feedback_update and printing $entrybyentry');
-//print_object($entrybyentry);
-
         confirm_sesskey();
         $feedback = array();
         $data = (array) $data;
@@ -927,11 +917,10 @@ class results {
                     $ratingoptions->timecreated = $entry->timecreated;
                     $ratingoptions->timemodified = $entry->timemodified;
                     $ratingoptions->returnurl = $CFG->wwwroot . '/mod/diary/report.php?id' . $cm->id;
-
                     $ratingoptions->assesstimestart = $diary->assesstimestart;
                     $ratingoptions->assesstimefinish = $diary->assesstimefinish;
                     // 20200813 Check if there is already a rating, and if so, just update it.
-                    if ($rec = results::check_rating_entry($ratingoptions)) {
+                    if ($rec = self::check_rating_entry($ratingoptions)) {
                         $ratingoptions->id = $rec->id;
                         $DB->update_record('rating', $ratingoptions, false);
                     } else {
@@ -948,7 +937,6 @@ class results {
             }
 
         }
-    echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
-
+        echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
     }
 }

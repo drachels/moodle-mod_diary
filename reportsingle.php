@@ -101,12 +101,8 @@ $users = $user;
 $user = $DB->get_record("user", array("id" => $user));
 
 if ($eee) {
-    //print_object('trying to print $eee');
-    //print_object($eee);
     // Now, filter down to get entry by any user who has made at least one entry.
     foreach ($eee as $ee) {
-        //print_object('trying to print $ee');
-        //print_object($ee);
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id] = $ee;
         $entrybyuserentry[$ee->userid][$ee->id] = $ee;
@@ -119,95 +115,7 @@ if ($eee) {
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
     results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
-    //print_object('this is from reportsingle.php right after using the new function');
 
-/*
-    confirm_sesskey();
-    $feedback = array();
-    $data = (array) $data;
-    // My single data entry contains id, sesskey, and three other items, entry, feedback, and ???
-    // Peel out all the data from variable names.
-    foreach ($data as $key => $val) {
-        if (strpos($key, 'r') === 0 || strpos($key, 'c') === 0) {
-            $type = substr($key, 0, 1);
-            $num = substr($key, 1);
-            $feedback[$num][$type] = $val;
-        }
-    }
-
-    $timenow = time();
-    $count = 0;
-    foreach ($feedback as $num => $vals) {
-        $entry = $entrybyentry[$num];
-        // Only update entries where feedback has actually changed.
-        $ratingchanged = false;
-        if ($diary->assessed != RATING_AGGREGATE_NONE) {
-            $studentrating = clean_param($vals['r'], PARAM_INT);
-        } else {
-            $studentrating = '';
-        }
-        $studentcomment = clean_text($vals['c'], FORMAT_PLAIN);
-
-        if ($studentrating != $entry->rating && ! ($studentrating == '' && $entry->rating == "0")) {
-            $ratingchanged = true;
-        }
-
-        if ($ratingchanged || $studentcomment != $entry->entrycomment) {
-            $newentry = new StdClass();
-            $newentry->rating = $studentrating;
-            $newentry->entrycomment = $studentcomment;
-            $newentry->teacher = $USER->id;
-            $newentry->timemarked = $timenow;
-            $newentry->mailed = 0; // Make sure mail goes out (again, even).
-            $newentry->id = $num;
-            if (! $DB->update_record("diary_entries", $newentry)) {
-                notify("Failed to update the diary feedback for user $entry->userid");
-            } else {
-                $count ++;
-            }
-            $entrybyuser[$entry->userid]->rating = $studentrating;
-            $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
-            $entrybyuser[$entry->userid]->teacher = $USER->id;
-            $entrybyuser[$entry->userid]->timemarked = $timenow;
-
-            $records[$entry->id] = $entrybyuser[$entry->userid];
-
-            // Compare to database view.php line 465.
-            if ($diary->assessed != RATING_AGGREGATE_NONE) {
-                // 20200812 Added rating code and got it working.
-                $ratingoptions = new stdClass();
-                $ratingoptions->contextid = $context->id;
-                $ratingoptions->component = 'mod_diary';
-                $ratingoptions->ratingarea = 'entry';
-                $ratingoptions->itemid = $entry->id;
-                $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
-                $ratingoptions->scaleid = $diary->scale;
-                $ratingoptions->rating = $studentrating;
-                $ratingoptions->userid = $entry->userid;
-                $ratingoptions->timecreated = $entry->timecreated;
-                $ratingoptions->timemodified = $entry->timemodified;
-                $ratingoptions->returnurl = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='
-                                            .$id.'&user='.$user->id.'&action=allentries';
-                $ratingoptions->assesstimestart = $diary->assesstimestart;
-                $ratingoptions->assesstimefinish = $diary->assesstimefinish;
-                // 20200813 Check if there is already a rating, and if so, just update it.
-                if ($rec = results::check_rating_entry($ratingoptions)) {
-                    $ratingoptions->id = $rec->id;
-                    $DB->update_record('rating', $ratingoptions, false);
-                } else {
-                    $DB->insert_record('rating', $ratingoptions, false);
-                }
-            }
-
-            $diary = $DB->get_record("diary", array(
-                "id" => $entrybyuser[$entry->userid]->diary
-            ));
-            $diary->cmidnumber = $cm->idnumber;
-
-            diary_update_grades($diary, $entry->userid);
-        }
-    }
-*/
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(array(
         'objectid' => $diary->id,
@@ -218,8 +126,6 @@ if ($data = data_submitted()) {
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
 
-    // Report how many entries were updated when the, Save all my feedback button was pressed.
-    //echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
 } else {
 
     // Trigger module viewed event.
@@ -254,6 +160,8 @@ if (! $users) {
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
                       .get_string('saveallfeedback', 'diary').'" />';
 
+    // @codingStandardsIgnoreLine
+    /*
     $url = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries';
     // 20211210 Cleaned up unnecessary escaped double quotes.
     $saveallbutton .= ' <a href="'.$url.' class="feedbacksavestay">';
@@ -261,6 +169,7 @@ if (! $users) {
     $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
                       .get_string('addtofeedback', 'diary').'"</a>';
+    */
 
     // 20211230 Tacked on an action for the return URL.
     // 20201222 Added a return to report.php button if you do not want to save feedback.

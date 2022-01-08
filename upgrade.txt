@@ -52,7 +52,8 @@ Diary_743 - The mod_form.php needs updating for new settings. Added new settings
     needs work. It is not saving and restoring, yet.
 
 Diary_744 - The settings.php needs updating for new settings. Added headings, strings,
-    and settings as needed. STILL NEEDS WORK!
+    and settings as needed. STILL NEEDS WORK! Some future use code is there, but
+    commented out.
 
 Diary_745 - Need to develop additional statistics for each diary entry. Have
     created 20 stats and now need to thoroughly test them. Still in development!
@@ -80,15 +81,13 @@ Diary_769 - Journal to Diary xfr breaks if there are no Journal activities in th
     This was fixed while working on other recent tickets -767, 768. Added a new string
     for this: $string['journalmissing'] = 'Currently, there are not any Journal
     activities in this course.';
-
-
 Diary_770 - Add autorating buttons Note: report.php > results.php has hardcoded
     text on new buttons. - Fixed. Added code to create the two new buttons and they
     both reliably work on report.php page. STILL NEEDS WORK on the reportsingle.php
     page for the, Save all feedback and Add to feedback buttons!
-    CODE IS IN results.php DOWN AROUND LINE NUMBER 420.
-
-
+    CODE IS IN results.php DOWN AROUND LINE NUMBER 420. 20220108 Fixed and only
+    using the one, Save all feedback, button. Code for the, Add feedback, is there
+    but commented out for later possible use.
 Diary_771 - Need a title centered at the top of the xfr new menu item. I added
     an h3 with a style to center align the new heading. Used an existing string.
 Diary_772 - The item being used in the auto-rating needs to detect when NOT short,
@@ -123,10 +122,12 @@ Diary_781 - Would be nice to fill the remaining statistics cell with Average wor
     table up one row so that Lexical density, FK Grade, Flesch reading ease and Fog
     index are in the last row of the table. I also added a new, Average words per
     paragraph, statistic in the last cell of the, averages, row.
-
-Diary_782 - Reportsingle user page needs Save and stay here button. 
-
-
+Diary_782 - Reportsingle user page needs Save and stay here button. Changed the code
+    for the, Add to feedback and Clear feedback buttons along with a few other items
+    and now the Save all feedback button seems to work the way I want it to. 
+Diary_783 - Code for, Save all my feedback, button in report.php and reportsingle.php
+    needs cleanup. Eliminated all the escaped double quotes and changed them as
+    needed to singles. Also moved duplicate code to a single function in results.php.
 Diary_784 - Down about line 446 breaks the view.php page. 20211229 Over the past few
     days, I have worked on this and other related "undefined" variable errors and
     everything seems to be working now.
@@ -139,7 +140,10 @@ Diary_786 - View all course diaries, link is giving a debug warning. Got it fixe
     I really don't like as it requires reading the diary record for every diary
     in the course, whereas the original method only needs to read one file. I have
     added the action in report.php line 397, and index.php line 146.
-
+Diary_787 - The, Save all my feedback, button on reportsingle.php page needs to
+    stay on the page. The button now stays on reportsingle.php page. Changed
+    form action from report.php to reportsingle.php.
+ 
 Diary_789 - View.php needs modifying due to changes in diarystats.php. Copied
     the code that generates the stats from results.php to file view.php, and
     stats table is now working again.

@@ -258,6 +258,7 @@ if ($ADMIN->fulltree) {
         $default,
         $options, 10));
 
+    // @codingStandardsIgnoreLine
     /*
     // 20210712 Diary expected min/max error percentage setting.
     $name = 'mod_diary/minmaxpercent';
@@ -293,6 +294,8 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
+
+    // @codingStandardsIgnoreLine
     /*
     // Need to finish this setting as it is currently incomplete.
     // 20211005 Got this sort of working now. Got clues from activequiz plugin.
@@ -324,6 +327,7 @@ if ($ADMIN->fulltree) {
         $choices));
     */
 
+    // @codingStandardsIgnoreLine
     /*
     // 20210712 Added heading for common errors options section.
     $name = 'commonerrors';
@@ -331,6 +335,8 @@ if ($ADMIN->fulltree) {
     $description = get_string('commonerrors_help', 'mod_diary');
     $settings->add(new admin_setting_heading($name, $label, $description));
     */
+
+    // @codingStandardsIgnoreLine
     /*
     // NOT SURE THAT I CAN ADD A SETTING FOR THE GLOSSARY NAME
     // 20210712 Added selector to pick a glossary of common errors.
@@ -356,6 +362,8 @@ if ($ADMIN->fulltree) {
         $default,
         $options, 10));
     */
+
+    // @codingStandardsIgnoreLine
     /*
     // 20210712 Diary expected common error percentage setting.
     $name = 'mod_diary/errorpercent';

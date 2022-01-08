@@ -371,6 +371,7 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
+        // @codingStandardsIgnoreLine
         /*
         // 20210711 Added heading for Text statistics options section.
         $name = 'statshdr';
@@ -388,7 +389,9 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
         */
+
         // This setting is NOT currently working.
+        // @codingStandardsIgnoreLine
         /*
         $debug = array();
         //$debug['Tracking mod form errors problem cp 1-1 showing $options '] = $options;
@@ -460,6 +463,7 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
+        // @codingStandardsIgnoreLine
         /*
         // Add group of error matching behaviors.
         $elements = array();
