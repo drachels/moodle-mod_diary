@@ -322,3 +322,5 @@ Diary Support Tracker.
     and fixed a grade bug caused by the, Clear feedback, button. Pushed
     current changes to MOODLE_350.02_STABLE then started cleanup based
     on codechecker reports.
+20220110 Spent the past couple of days working on cron_task.php and finally
+    seem to have it working for M3.11. Need to check other versions.

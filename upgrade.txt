@@ -143,12 +143,9 @@ Diary_786 - View all course diaries, link is giving a debug warning. Got it fixe
 Diary_787 - The, Save all my feedback, button on reportsingle.php page needs to
     stay on the page. The button now stays on reportsingle.php page. Changed
     form action from report.php to reportsingle.php.
- 
 Diary_789 - View.php needs modifying due to changes in diarystats.php. Copied
     the code that generates the stats from results.php to file view.php, and
     stats table is now working again.
-
-
 Diary_791 - Need to move function diary_count_entries($diary, $groupid = 0)
     from lib.php to results.php. 20211219 Copied the working function in the
     lib.php file and moved it to classes/local/result.php, making changes as
@@ -163,17 +160,21 @@ Diary_793 - When looking at Complete Report you get:- Exception - Call to
 Diary_796 - enableautorating is not working correctly. This was actually
     being caused by two problems, one in the mod_form.php file and one
     in the diarystats.php file. See the ticket for details. 
-
 Diary_803 - Error message, No text detected, quit working correctly. Modified
     code to add table definition and return $currentstats in diarystats.php
     file down around line 460. 
+
 Diary_804 - the cron_task.php file line 32 needs to be changed, removed,
-    or commented out. Wound up moving it so it became line 22.
-Diary_895 - The Grade shown in various places is not being updated when the,
+    or commented out. Leaving it at line 32. Had a mistake in the branch
+    check. Added more log message details.
+Diary_805 - The Grade shown in various places is not being updated when the,
     Clear feedback, button is clicked. Added code to delete the correct
     rating table entry, then update the grade for the user.
-
-
+Diary_806 - The code in cron_task.php, public function execute(), does not
+    work correctly. Turned out that I only needed to add username to the
+    requireduserfields list at about line 70. I also moved the list so I
+    only had to create it once. I also tidied up the log messages, and added
+    ones for older versions of Moodle.
 
 
 
