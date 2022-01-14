@@ -197,7 +197,7 @@ class cron_task extends \core\task\scheduled_task {
                         echo "Could not update the mailed field for id $entry->id.\n";
                     }
                 } else {
-                   // 20220110 Added additional log entry.
+                    // 20220110 Added additional log entry.
                     if ($CFG->branch > 36) {
                         $this->log("Emailed user id $user->id regarding diary entry id $entry->id.\n");
                     } else {

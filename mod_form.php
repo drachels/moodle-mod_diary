@@ -209,7 +209,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->itemtype);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added item count setting.
         $name = 'itemcount';

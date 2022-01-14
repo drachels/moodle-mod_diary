@@ -30,8 +30,7 @@ require_once($CFG->dirroot.'/mod/diary/backup/moodle2/backup_diary_stepslib.php'
 /**
  * Provides the steps to perform one complete backup of the Diary instance.
  */
-class backup_diary_activity_task extends backup_activity_task
-{
+class backup_diary_activity_task extends backup_activity_task {
 
     /**
      * No specific settings for this activity.

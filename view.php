@@ -38,11 +38,11 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
-if (! $cm) {
+if (!$cm) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
-if (! $course) {
+if (!$course) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -54,11 +54,11 @@ require_login($course, true, $cm);
 $entriesmanager = has_capability('mod/diary:manageentries', $context);
 $canadd = has_capability('mod/diary:addentries', $context);
 
-if (! $entriesmanager && ! $canadd) {
+if (!$entriesmanager && !$canadd) {
     throw new moodle_exception(get_string('accessdenied', 'diary'));
 }
 
-if (! $diarys = get_all_instances_in_course('diary', $course)) {
+if (!$diarys = get_all_instances_in_course('diary', $course)) {
     notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
     die();
 }
@@ -73,7 +73,7 @@ foreach ($diarys as $temp) {
     }
 }
 
-if (! $cw = $DB->get_record("course_sections", array(
+if (!$cw = $DB->get_record("course_sections", array(
     "id" => $cm->section
 ))) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -89,7 +89,7 @@ $output = $PAGE->get_renderer('mod_diary');
 $output->init($cm);
 
 // Handle toolbar capabilities.
-if (! empty($action)) {
+if (!empty($action)) {
     switch ($action) {
         case 'download':
             if (has_capability('mod/diary:addentries', $context)) {
@@ -256,7 +256,7 @@ if ($course->format == 'weeks' and $diary->days) {
     } else {
         $timefinish = $course->enddate;
     }
-} else if (! (results::diary_available($diary))) {
+} else if (!(results::diary_available($diary))) {
     // 20200904 If used, set calendar availability time limits on the diarys.
     $timestart = $diary->timeopen;
     $timefinish = $diary->timeclose;
@@ -444,15 +444,15 @@ if ($timenow > $timestart) {
 
                     echo '</table>';
 
-                    // Added lines to mark entry as needing regrade.
-                    if (! empty($entry->timecreated) and ! empty($entry->timemodified) and empty($entry->timemarked)) {
+                    // Added lines to mark entry as needing to be rated or rated again after the entry was updated.
+                    if (!empty($entry->timecreated) && !empty($entry->timemodified) && empty($entry->timemarked)) {
                         echo '<div class="needsedit">'.get_string('needsgrading', 'diary').'</div>';
-                    } else if (! empty($entry->timemodified) and ! empty($entry->timemarked)
-                              and $entry->timemodified > $entry->timemarked) {
+                    } else if (!empty($entry->timemodified) && !empty($entry->timemarked)
+                        && $entry->timemodified > $entry->timemarked) {
                         echo '<div class="needsedit">'.get_string('needsregrade', 'diary').'</div>';
                     }
 
-                    if (! empty($diary->days)) {
+                    if (!empty($diary->days)) {
                         echo '<div class="editend"><strong>'.get_string('editingends', 'diary').': </strong> ';
                         echo userdate($timefinish).'</div>';
                     }
@@ -462,7 +462,7 @@ if ($timenow > $timestart) {
                 }
 
                 // Print feedback from the teacher for the current entry.
-                if (! empty($entry->entrycomment) or ! empty($entry->rating)) {
+                if (!empty($entry->entrycomment) || !empty($entry->rating)) {
                     // Get the rating for the current entry.
                     $grades = $entry->rating;
                     // Add a heading for each feedback on the page.
