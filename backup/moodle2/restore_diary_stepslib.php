@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_diary\local\results;
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * Define the complete diary structure for restore, with file and id annotations.

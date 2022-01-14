@@ -28,7 +28,7 @@
  */
 namespace mod_diary\local;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 use mod_diary\local\diarystats;
 use mod_diary\local\pluralise;

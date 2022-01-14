@@ -25,7 +25,7 @@
  */
 namespace mod_diary\local;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 define('DIARY_EVENT_TYPE_OPEN', 'open');
 define('DIARY_EVENT_TYPE_CLOSE', 'close');
 use mod_diary\local\results;

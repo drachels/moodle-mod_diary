@@ -25,7 +25,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_diary\local;
-defined('MOODLE_INTERNAL') || die();
+
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * Syllables class for Diary stats.
@@ -224,67 +225,67 @@ class syllables {
 
     // Single syllable prefixes and suffixes.
     static public $arraffix = array(
-        '`^un`',
-        '`^fore`',
-        '`^ware`',
-        '`^none?`',
-        '`^out`',
-        '`^post`',
-        '`^sub`',
-        '`^pre`',
-        '`^pro`',
-        '`^dis`',
-        '`^side`',
-        '`ly$`',
-        '`less$`',
-        '`some$`',
-        '`ful$`',
-        '`ers?$`',
-        '`ness$`',
-        '`cians?$`',
-        '`ments?$`',
-        '`ettes?$`',
-        '`villes?$`',
-        '`ships?$`',
-        '`sides?$`',
-        '`ports?$`',
-        '`shires?$`',
-        '`tion(ed)?$`'
+        '`^un`',        // @codingStandardsIgnoreLine
+        '`^fore`',      // @codingStandardsIgnoreLine
+        '`^ware`',      // @codingStandardsIgnoreLine
+        '`^none?`',     // @codingStandardsIgnoreLine
+        '`^out`',       // @codingStandardsIgnoreLine
+        '`^post`',      // @codingStandardsIgnoreLine
+        '`^sub`',       // @codingStandardsIgnoreLine
+        '`^pre`',       // @codingStandardsIgnoreLine
+        '`^pro`',       // @codingStandardsIgnoreLine
+        '`^dis`',       // @codingStandardsIgnoreLine
+        '`^side`',      // @codingStandardsIgnoreLine
+        '`ly$`',        // @codingStandardsIgnoreLine
+        '`less$`',      // @codingStandardsIgnoreLine
+        '`some$`',      // @codingStandardsIgnoreLine
+        '`ful$`',       // @codingStandardsIgnoreLine
+        '`ers?$`',      // @codingStandardsIgnoreLine
+        '`ness$`',      // @codingStandardsIgnoreLine
+        '`cians?$`',    // @codingStandardsIgnoreLine
+        '`ments?$`',    // @codingStandardsIgnoreLine
+        '`ettes?$`',    // @codingStandardsIgnoreLine
+        '`villes?$`',   // @codingStandardsIgnoreLine
+        '`ships?$`',    // @codingStandardsIgnoreLine
+        '`sides?$`',    // @codingStandardsIgnoreLine
+        '`ports?$`',    // @codingStandardsIgnoreLine
+        '`shires?$`',   // @codingStandardsIgnoreLine
+        '`tion(ed)?$`'  // @codingStandardsIgnoreLine
     );
 
     // Double syllable prefixes and suffixes.
     static public $arrdoubleaffix = array(
-        '`^above`',
-        '`^ant[ie]`',
-        '`^counter`',
-        '`^hyper`',
-        '`^afore`',
-        '`^agri`',
-        '`^in[ft]ra`',
-        '`^inter`',
-        '`^over`',
-        '`^semi`',
-        '`^ultra`',
-        '`^under`',
-        '`^extra`',
-        '`^dia`',
-        '`^micro`',
-        '`^mega`',
-        '`^kilo`',
-        '`^pico`',
-        '`^nano`',
-        '`^macro`',
-        '`berry$`',
-        '`woman$`',
-        '`women$`'
+        '`^above`',     // @codingStandardsIgnoreLine
+        '`^ant[ie]`',   // @codingStandardsIgnoreLine
+        '`^counter`',   // @codingStandardsIgnoreLine
+        '`^hyper`',     // @codingStandardsIgnoreLine
+        '`^afore`',     // @codingStandardsIgnoreLine
+        '`^agri`',      // @codingStandardsIgnoreLine
+        '`^in[ft]ra`',  // @codingStandardsIgnoreLine
+        '`^inter`',     // @codingStandardsIgnoreLine
+        '`^over`',      // @codingStandardsIgnoreLine
+        '`^semi`',      // @codingStandardsIgnoreLine
+        '`^ultra`',     // @codingStandardsIgnoreLine
+        '`^under`',     // @codingStandardsIgnoreLine
+        '`^extra`',     // @codingStandardsIgnoreLine
+        '`^dia`',       // @codingStandardsIgnoreLine
+        '`^micro`',     // @codingStandardsIgnoreLine
+        '`^mega`',      // @codingStandardsIgnoreLine
+        '`^kilo`',      // @codingStandardsIgnoreLine
+        '`^pico`',      // @codingStandardsIgnoreLine
+        '`^nano`',      // @codingStandardsIgnoreLine
+        '`^macro`',     // @codingStandardsIgnoreLine
+        '`berry$`',     // @codingStandardsIgnoreLine
+        '`woman$`',     // @codingStandardsIgnoreLine
+        '`women$`'      // @codingStandardsIgnoreLine
     );
 
     // Triple syllable prefixes and suffixes.
     static public $arrtripleaffix = array(
-         '`ology$`'
-        , '`ologist$`'
-        , '`onomy$`'
-        , '`onomist$`'
+         '`ology$`',    // @codingStandardsIgnoreLine
+         '`ologist$`',  // @codingStandardsIgnoreLine
+         '`onomy$`',    // @codingStandardsIgnoreLine
+         '`onomist$`'   // @codingStandardsIgnoreLine
     );
 
     /**
@@ -308,17 +309,17 @@ class syllables {
         */
 
         // The variable $debug is an array containing the basic syllable counting steps for this word.
-       // $debug = array();
-       // $debug['CP1-0 Just entered syllable_count function and checking this word: '] = $strword;
+        // $debug = array();
+        // $debug['CP1-0 Just entered syllable_count function and checking this word: '] = $strword;
 
         // Should be no non-alpha characters and lower case.
-        $strword = preg_replace('`[^A-Za-z]`', '', $strword);
+        $strword = preg_replace('`[^A-Za-z]`', '', $strword);  // @codingStandardsIgnoreLine
         $strword = strtolower($strword);
 
         // Check for problem words.
         if (isset(self::$arrproblemwords[$strword])) {
-           // $debug['CP1-1a Found a problem word '] = $strword;
-           // $debug['CP1-1b It has a defined syllable count of '] = self::$arrproblemwords[$strword];
+            // $debug['CP1-1a Found a problem word '] = $strword;
+            // $debug['CP1-1b It has a defined syllable count of '] = self::$arrproblemwords[$strword];
             // print_object($debug);
             return self::$arrproblemwords[$strword];
         }
@@ -326,14 +327,14 @@ class syllables {
         $singularword = pluralise::get_singular($strword);
         if ($singularword != $strword) {
             if (isset(self::$arrproblemwords[$singularword])) {
-               // $debug['CP1-2a Found a plural problem word'] = $strword;
-               // $debug['CP1-2a It has a defined syllable count of'] = self::$arrproblemwords[$singularword];
+                // $debug['CP1-2a Found a plural problem word'] = $strword;
+                // $debug['CP1-2a It has a defined syllable count of'] = self::$arrproblemwords[$singularword];
                 // print_object($debug);
                 return self::$arrproblemwords[$singularword];
             }
         }
 
-       // $debug['CP1-3 After cleaning, lcase'] = $strword;
+        // $debug['CP1-3 After cleaning, lcase'] = $strword;
 
         // Remove prefixes and suffixes and count how many were taken.
         $strword = preg_replace(self::$arraffix, '', $strword, -1, $intaffixcount);
@@ -341,8 +342,8 @@ class syllables {
         $strword = preg_replace(self::$arrtripleaffix, '', $strword, -1, $inttripleaffixcount);
 
         if (($intaffixcount + $intdoubleaffixcount + $inttripleaffixcount) > 0) {
-           // $debug['CP1-4a After Prefix and Suffix Removal'] = $strword;
-           // $debug['CP1-4b Prefix and suffix counts'] = $intaffixcount.' * 1 syllable, '.$intdoubleaffixcount.' * 2 syllables, '.$inttripleaffixcount.' * 3 syllables';
+            // $debug['CP1-4a After Prefix and Suffix Removal'] = $strword;
+            // $debug['CP1-4b Prefix and suffix counts'] = $intaffixcount.' * 1 syllable, '.$intdoubleaffixcount.' * 2 syllables, '.$inttripleaffixcount.' * 3 syllables';
         }
 
         // Removed non-word characters from word
@@ -350,28 +351,28 @@ class syllables {
         $intwordpartcount = 0;
         foreach ($arrwordparts as $strwordpart) {
             if ($strwordpart <> '') {
-               // $debug['CP1-5 Counting (' . $intwordpartcount . ')'] = $strwordpart;
+                // $debug['CP1-5 Counting (' . $intwordpartcount . ')'] = $strwordpart;
                 $intwordpartcount++;
             }
         }
 
-        // Some syllables do not follow normal rules - check for them
-        // Thanks to Joe Kovar for correcting a bug in the following lines
+        // Some syllables do not follow normal rules - check for them.
+        // Thanks to Joe Kovar for correcting a bug in the following lines.
         $intsyllablecount = $intwordpartcount + $intaffixcount + (2 * $intdoubleaffixcount) + (3 * $inttripleaffixcount);
-       // $debug['CP1-6 Syllables by Vowel Count'] = $intsyllablecount;
+        // $debug['CP1-6 Syllables by Vowel Count'] = $intsyllablecount;
 
         foreach (self::$arrsubsyllables as $strsyllable) {
             $_intsyllablecount = $intsyllablecount;
-            $intsyllablecount -= preg_match('`' . $strsyllable . '`', $strword);
+            $intsyllablecount -= preg_match('`' . $strsyllable . '`', $strword); // @codingStandardsIgnoreLine
             if ($_intsyllablecount != $intsyllablecount) {
-               // $debug['CP1-7 Subtracting (' . $strsyllable . ')'] = $strsyllable;
+                // $debug['CP1-7 Subtracting (' . $strsyllable . ')'] = $strsyllable;
             }
         }
         foreach (self::$arraddsyllables as $strsyllable) {
             $_intsyllablecount = $intsyllablecount;
-            $intsyllablecount += preg_match('`' . $strsyllable . '`', $strword);
+            $intsyllablecount += preg_match('`' . $strsyllable . '`', $strword); // @codingStandardsIgnoreLine
             if ($_intsyllablecount != $intsyllablecount) {
-               // $debug['CP1-8 Adding (' . $strsyllable . ')'] = $strsyllable;
+                // $debug['CP1-8 Adding (' . $strsyllable . ')'] = $strsyllable;
             }
         }
         $intsyllablecount = ($intsyllablecount == 0) ? 1 : $intsyllablecount;
@@ -389,8 +390,8 @@ class syllables {
      */
     public static function total_syllables($strtext, $strencoding = '') {
         // The variable $debug is an array containing the basic syllable counting steps for this word.
-       // $debug = array();
-       // $debug['CP2-0 Just entered total_syllables function and checking $strtext: '] = $strtext;
+        // $debug = array();
+        // $debug['CP2-0 Just entered total_syllables function and checking $strtext: '] = $strtext;
 
         // Removed the extra code from diarystats line 355 to run this.
         $intsyllablecount = 0;
@@ -411,8 +412,8 @@ class syllables {
      * @return  int|float
      */
     public static function average_syllables_per_word($strtext, $strencoding = '') {
-       // $debug = array();
-       // $debug['CP3-0 Just entered average_syllables_per_word function and checking $strtext: '] = $strtext;
+        // $debug = array();
+        // $debug['CP3-0 Just entered average_syllables_per_word function and checking $strtext: '] = $strtext;
 
         $intsyllablecount = 0;
         $intwordcount = text::word_count($strtext, $strencoding);
@@ -434,8 +435,8 @@ class syllables {
      * @return  int
      */
     public static function words_with_three_syllables($strtext, $blncountpropernouns = true, $strencoding = '') {
-       // $debug = array();
-       // $debug['CP4-0 Just entered words_with_three_syllables function and checking $strtext: '] = $strtext;
+        // $debug = array();
+        // $debug['CP4-0 Just entered words_with_three_syllables function and checking $strtext: '] = $strtext;
 
         $intlongwordcount = 0;
         $intwordcount = text::word_count($strtext, $strencoding);
@@ -465,8 +466,8 @@ class syllables {
      * @return  int|float
      */
     public static function percentage_words_with_three_syllables($strtext, $blncountpropernouns = true, $strencoding = '') {
-       // $debug = array();
-       // $debug['CP4-0 Just entered percentage_words_with_three_syllables function and checking $strtext: '] = $strtext;
+        // $debug = array();
+        // $debug['CP4-0 Just entered percentage_words_with_three_syllables function and checking $strtext: '] = $strtext;
 
         $intwordcount = text::word_count($strtext, $strencoding);
         $intlongwordcount = self::words_with_three_syllables($strtext, $blncountpropernouns, $strencoding);

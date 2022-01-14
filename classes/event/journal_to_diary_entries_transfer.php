@@ -23,7 +23,7 @@
  */
 namespace mod_diary\event;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * The mod_diary download diary entries class.
