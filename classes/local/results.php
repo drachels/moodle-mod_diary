@@ -434,7 +434,7 @@ class results {
                          type="submit"
                          value="'.get_string('clearfeedback', 'diary').'"></input>';
 
-            // 20211228 Create a test anchor link.
+            // 20211228 Create a test anchor link for testing.
             // echo '<a href="#'.$entry->id.'">xxxxx</a>';
 
             // 20211228 Create an anchor right after Add/Clear buttons.

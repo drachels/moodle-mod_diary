@@ -579,7 +579,15 @@ class diarystats {
         if ($diary->enableautorating && $diary->itemtype <> 0) {
             // 20210713 Need the item type and how many of them must be used in this diary entry.
             $itemtypes = array();
+            // The variable $debug is an array containing the basic syllable counting steps for this word.
+            $debug = array();
+            $debug['CP1-1 Just entered autorating check and setup $itemtypes array: '] = $itemtypes;
+
             $itemtypes = self::get_item_types($itemtypes);
+            $debug['CP2-1 Just got $itemtypes array: '] = $itemtypes;
+            $debug['CP2-2 Listing diary setting $diary->itemtype: '] = $diary->itemtype;
+            $debug['CP2-3 Listing diary setting $diary->itemcount: '] = $diary->itemcount;
+
             if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
                 $diary->intro .= get_string('itemtype_desc', 'diary',
                     ['one' => $itemtypes[$diary->itemtype],
@@ -602,6 +610,9 @@ class diarystats {
             }
 
             $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
+            $debug['CP3-1 Calculating $itemrating showing 1 of 3, $diary->itemcount: '] = $diary->itemcount;
+            $debug['CP3-2 Calculating $itemrating showing 2 of 3, $diarystats->$item: '] = $diarystats->$item;
+            $debug['CP3-3 Calculating $itemrating showing 3 of 3, $diary->itempercent: '] = $diary->itempercent;
 
             $commonerrorrating = $diarystats->commonpercent;
 
@@ -648,12 +659,17 @@ class diarystats {
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
                             .get_string('currpotrating', 'diary', ($currentratingdisp))
                             .'</td></tr>';
+
             // 20211212 Actual autorating.
             $currentratingdata = ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0))
                 * $diary->itempercent) - $commonerrorrating);
+
+            // print_object($debug); // @codingStandardsIgnoreLine
+
         }
         // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
         $autoratingdata .= '</table>';
+
         // 20211230 Return autoratingdata only if autorating is enabled.
         if ($diary->enableautorating) {
             // 20211212 Return list of data to results.
@@ -761,7 +777,8 @@ class diarystats {
         $items = array_unique($items);
         // Get the unicode word count for one, two, and three or more syllables.
         foreach ($items as $item) {
-            $syllable = self::count_syllables($item);
+            $syllable = syllables::syllable_count($item, $strencoding = '');
+
             // Keep track of the total number of syllables used.
             $totalsyllables += $syllable;
             if ($syllable > 2) {
@@ -776,55 +793,6 @@ class diarystats {
     }
 
     /**
-     * Update the number of syllables per word statistics for this diary activity.
-     *
-     * based on: https://github.com/e-rasvet/sassessment/blob/master/lib.php
-     * @param string $word The word to check for number of syllables.
-     * @return int The number of syllables in the current word.
-     */
-    public static function count_syllables($word) {
-        // From https://github.com/vanderlee/phpSyllable (multilang).
-        // From https://github.com/DaveChild/Text-Statistics (English only).
-        // From https://pear.php.net/manual/en/package.text.text-statistics.intro.php.
-        // From https://pear.php.net/package/Text_Statistics/docs/latest/__filesource/fsource_Text_Statistics__Text_Statistics-1.0.1TextWord.php.html.
-
-        $str = strtoupper($word);
-        if (strlen($str) < 2) {
-            $count = 1;
-        } else {
-            $count = 0;
-
-            // Detect syllables for double-vowels.
-            $vowelcount = 0;
-            $vowels = array('AA', 'AE', 'AI', 'AO', 'AU', 'AY',
-                            'EA', 'EE', 'EI', 'EO', 'EU', 'EY',
-                            'IA', 'IE', 'II', 'IO', 'IU', 'IY',
-                            'OA', 'OE', 'OI', 'OO', 'OU', 'OY',
-                            'UA', 'UE', 'UI', 'UO', 'UU', 'UY',
-                            'YA', 'YE', 'YI', 'YO', 'YU', 'YY');
-            $str = str_replace($vowels, '', $str, $vowelcount);
-            $count += $vowelcount;
-
-            // Cache the final letter, in case it is an "e".
-            $finalletter = substr($str, -1);
-
-            // Detect syllables for single-vowels.
-            $vowelcount = 0;
-            $vowels = array('A', 'E', 'I', 'O', 'U', 'Y');
-            $str = str_replace($vowels, '', $str, $vowelcount);
-            $count += $vowelcount;
-
-            // Adjust the count for words that end in "e" and have at least one other vowel.
-            if ($count > 1 && $finalletter == 'E') {
-                $count--;
-            }
-        }
-        $newsyllablecount = syllables::syllable_count($word,  $strencoding = '');
-
-        return $newsyllablecount;
-    }
-
-    /**
      * Update the total number of syllables statistics for this diary activity.
      *
      * @param string $entry The text to check for number of syllables.
@@ -836,7 +804,7 @@ class diarystats {
         $items = core_text::strtolower($entry);
         $items = str_word_count($items, 1);
         foreach ($items as $item) {
-            $totalsyllabels += self::count_syllables($item);
+            $totalsyllabels += syllables::syllable_count($item, $strencoding = '');
         }
         return $totalsyllabels;
     }
@@ -854,7 +822,7 @@ class diarystats {
         $itemtypes['2'] = get_string('words', 'diary');
         $itemtypes['3'] = get_string('sentences', 'diary');
         $itemtypes['4'] = get_string('paragraphs', 'diary');
-        $itemtypes['5'] = get_string('files', 'diary');
+        // $itemtypes['5'] = get_string('files', 'diary'); // @codingStandardsIgnoreLine
         return $itemtypes;
     }
 
@@ -874,6 +842,7 @@ class diarystats {
 
     /**
      * Get array of show/hide options
+     * Called from mod_form.php.
      *
      * @param string $plugin name
      * @return array(type => description)
@@ -883,32 +852,6 @@ class diarystats {
         $options['1'] = get_string('showstudentsonly', $plugin);
         $options['2'] = get_string('showteachersonly', $plugin);
         $options['3'] = get_string('showteacherandstudents', $plugin);
-        return $options;
-    }
-
-    /**
-     * Get array of countable item types.
-     *
-     * @return array(type => description)
-     */
-    public static function get_textstatitems_options($returntext=true) {
-        // Create indexed array of text statistics items.
-        $options = array('chars', 'words',
-                         'sentences', 'paragraphs',
-                         'uniquewords', 'longwords',
-                         'charspersentence', 'wordspersentence',
-                         'longwordspersentence', 'sentencesperparagraph',
-                         'lexicaldensity', 'fogindex',
-                         'commonerrors', 'files');
-        if ($returntext) {
-            $plugin = 'mod_diary';
-            // Flip row so the item name becomes the index and the index becomes the item name.
-            $options = array_flip($options);
-            // Now get the actual item names from the language file.
-            foreach (array_keys($options) as $option) {
-                $options[$option] = get_string($option, $plugin);
-            }
-        }
         return $options;
     }
 

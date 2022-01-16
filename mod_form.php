@@ -87,7 +87,8 @@ class mod_diary_mod_form extends moodleform_mod {
         $mediumtextoptions = array('size' => 5,  'style' => 'width: auto');
         $longtextoptions   = array('size' => 10, 'style' => 'width: auto');
 
-        // 20210706 Cache options for show/hide elements. NOT sure if this is needed.
+        // 20210706 Cache options for show/hide elements.
+        // 20220115 NOT in use yet.
         $showhideoptions = diarystats::get_showhide_options($plugin);
 
         // 20210706 Cache options for form elements to select a rating.
@@ -546,7 +547,7 @@ class mod_diary_mod_form extends moodleform_mod {
         $options['2'] = get_string('words', $plugin);
         $options['3'] = get_string('sentences', $plugin);
         $options['4'] = get_string('paragraphs', $plugin);
-        $options['5'] = get_string('files', $plugin);
+        // $options['5'] = get_string('files', $plugin); // @codingStandardsIgnoreLine
         return $options;
     }
 

@@ -22,6 +22,7 @@
  * @package   mod_diary
  * @copyright AL Rachels (drachels@drachels.com)
  * @copyright based on work by 2014 Dave Child
+ * From https://github.com/DaveChild/Text-Statistics (English only).
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_diary\local;
@@ -301,16 +302,9 @@ class syllables {
         // Trim whitespace.
         $strword = trim($strword);
 
-        // Check we have some letters.
-        /*
-        if (Text::letterCount(trim($strword), $strencoding) == 0) {
-            return 0;
-        }
-        */
-
         // The variable $debug is an array containing the basic syllable counting steps for this word.
-        // $debug = array();
-        // $debug['CP1-0 Just entered syllable_count function and checking this word: '] = $strword;
+        $debug = array();
+        $debug['CP1-0 Just entered syllable_count function and checking this word: '] = $strword;
 
         // Should be no non-alpha characters and lower case.
         $strword = preg_replace('`[^A-Za-z]`', '', $strword);  // @codingStandardsIgnoreLine
@@ -318,23 +312,23 @@ class syllables {
 
         // Check for problem words.
         if (isset(self::$arrproblemwords[$strword])) {
-            // $debug['CP1-1a Found a problem word '] = $strword;
-            // $debug['CP1-1b It has a defined syllable count of '] = self::$arrproblemwords[$strword];
-            // print_object($debug);
+            $debug['CP1-1a Found a problem word '] = $strword;
+            $debug['CP1-1b It has a defined syllable count of '] = self::$arrproblemwords[$strword];
+            // print_object($debug); // @codingStandardsIgnoreLine
             return self::$arrproblemwords[$strword];
         }
         // Try singular.
         $singularword = pluralise::get_singular($strword);
         if ($singularword != $strword) {
             if (isset(self::$arrproblemwords[$singularword])) {
-                // $debug['CP1-2a Found a plural problem word'] = $strword;
-                // $debug['CP1-2a It has a defined syllable count of'] = self::$arrproblemwords[$singularword];
-                // print_object($debug);
+                $debug['CP1-2a Found a plural problem word'] = $strword;
+                $debug['CP1-2a It has a defined syllable count of'] = self::$arrproblemwords[$singularword];
+                // print_object($debug); // @codingStandardsIgnoreLine
                 return self::$arrproblemwords[$singularword];
             }
         }
 
-        // $debug['CP1-3 After cleaning, lcase'] = $strword;
+        $debug['CP1-3 After cleaning, lcase'] = $strword;
 
         // Remove prefixes and suffixes and count how many were taken.
         $strword = preg_replace(self::$arraffix, '', $strword, -1, $intaffixcount);
@@ -342,16 +336,18 @@ class syllables {
         $strword = preg_replace(self::$arrtripleaffix, '', $strword, -1, $inttripleaffixcount);
 
         if (($intaffixcount + $intdoubleaffixcount + $inttripleaffixcount) > 0) {
-            // $debug['CP1-4a After Prefix and Suffix Removal'] = $strword;
-            // $debug['CP1-4b Prefix and suffix counts'] = $intaffixcount.' * 1 syllable, '.$intdoubleaffixcount.' * 2 syllables, '.$inttripleaffixcount.' * 3 syllables';
+            $debug['CP1-4a After Prefix and Suffix Removal'] = $strword;
+            $debug['CP1-4b Prefix and suffix counts'] = $intaffixcount.' * 1 syllable, '.
+                                                        $intdoubleaffixcount.' * 2 syllables, '.
+                                                        $inttripleaffixcount.' * 3 syllables';
         }
 
-        // Removed non-word characters from word
-        $arrwordparts = preg_split('`[^aeiouy]+`', $strword);
+        // Removed non-word characters from word.
+        $arrwordparts = preg_split('`[^aeiouy]+`', $strword); // @codingStandardsIgnoreLine
         $intwordpartcount = 0;
         foreach ($arrwordparts as $strwordpart) {
             if ($strwordpart <> '') {
-                // $debug['CP1-5 Counting (' . $intwordpartcount . ')'] = $strwordpart;
+                $debug['CP1-5 Counting ('.$intwordpartcount.')'] = $strwordpart;
                 $intwordpartcount++;
             }
         }
@@ -359,121 +355,27 @@ class syllables {
         // Some syllables do not follow normal rules - check for them.
         // Thanks to Joe Kovar for correcting a bug in the following lines.
         $intsyllablecount = $intwordpartcount + $intaffixcount + (2 * $intdoubleaffixcount) + (3 * $inttripleaffixcount);
-        // $debug['CP1-6 Syllables by Vowel Count'] = $intsyllablecount;
+        $debug['CP1-6 Syllables by Vowel Count'] = $intsyllablecount;
 
         foreach (self::$arrsubsyllables as $strsyllable) {
-            $_intsyllablecount = $intsyllablecount;
-            $intsyllablecount -= preg_match('`' . $strsyllable . '`', $strword); // @codingStandardsIgnoreLine
-            if ($_intsyllablecount != $intsyllablecount) {
-                // $debug['CP1-7 Subtracting (' . $strsyllable . ')'] = $strsyllable;
+            $intsyllablecounttemp = $intsyllablecount;
+            $intsyllablecount -= preg_match('`'.$strsyllable.'`', $strword); // @codingStandardsIgnoreLine
+            if ($intsyllablecounttemp != $intsyllablecount) {
+                $debug['CP1-7 Subtracting ('.$strsyllable.')'] = $strsyllable;
             }
         }
         foreach (self::$arraddsyllables as $strsyllable) {
-            $_intsyllablecount = $intsyllablecount;
+            $intsyllablecounttemp = $intsyllablecount;
             $intsyllablecount += preg_match('`' . $strsyllable . '`', $strword); // @codingStandardsIgnoreLine
-            if ($_intsyllablecount != $intsyllablecount) {
-                // $debug['CP1-8 Adding (' . $strsyllable . ')'] = $strsyllable;
+            if ($intsyllablecounttemp != $intsyllablecount) {
+                $debug['CP1-8 Adding (' . $strsyllable . ')'] = $strsyllable;
             }
         }
         $intsyllablecount = ($intsyllablecount == 0) ? 1 : $intsyllablecount;
 
-        // print_object($debug);
+        $debug['CP1-9 Syllables by Vowel Count after processing'] = $intsyllablecount;
+        // print_object($debug); // @codingStandardsIgnoreLine
 
         return $intsyllablecount;
-    }
-
-    /**
-     * Returns total syllable count for text.
-     * @param   string  $strtext      Text to be measured.
-     * @param   string  $strencoding  Encoding of text.
-     * @return  int
-     */
-    public static function total_syllables($strtext, $strencoding = '') {
-        // The variable $debug is an array containing the basic syllable counting steps for this word.
-        // $debug = array();
-        // $debug['CP2-0 Just entered total_syllables function and checking $strtext: '] = $strtext;
-
-        // Removed the extra code from diarystats line 355 to run this.
-        $intsyllablecount = 0;
-        $arrwords = explode(' ', $strtext);
-        $intwordcount = count($arrwords);
-        for ($i = 0; $i < $intwordcount; $i++) {
-            $intsyllablecount += self::syllable_count($arrwords[$i], $strencoding);
-        }
-        // print_object($debug);
-
-        return $intsyllablecount;
-    }
-
-    /**
-     * Returns average syllables per word for text.
-     * @param   string  $strtext      Text to be measured.
-     * @param   string  $strencoding  Encoding of text.
-     * @return  int|float
-     */
-    public static function average_syllables_per_word($strtext, $strencoding = '') {
-        // $debug = array();
-        // $debug['CP3-0 Just entered average_syllables_per_word function and checking $strtext: '] = $strtext;
-
-        $intsyllablecount = 0;
-        $intwordcount = text::word_count($strtext, $strencoding);
-        $arrwords = explode(' ', $strtext);
-        for ($i = 0; $i < $intwordcount; $i++) {
-            $intsyllablecount += self::syllable_count($arrwords[$i], $strencoding);
-        }
-        $averagesyllables = (maths::bc_calc($intsyllablecount, '/', $intwordcount));
-        // print_object($debug);
-
-        return $averagesyllables;
-    }
-
-    /**
-     * Returns the number of words with more than three syllables.
-     * @param   string  $strtext                  Text to be measured.
-     * @param   bool    $blncountpropernouns      Boolean - should proper nouns be included in words count.
-     * @param   string  $strencoding  Encoding of text.
-     * @return  int
-     */
-    public static function words_with_three_syllables($strtext, $blncountpropernouns = true, $strencoding = '') {
-        // $debug = array();
-        // $debug['CP4-0 Just entered words_with_three_syllables function and checking $strtext: '] = $strtext;
-
-        $intlongwordcount = 0;
-        $intwordcount = text::word_count($strtext, $strencoding);
-        $arrwords = explode(' ', $strtext);
-        for ($i = 0; $i < $intwordcount; $i++) {
-            if (Syllables::syllableCount($arrwords[$i], $strencoding) > 2) {
-                if ($blncountpropernouns) {
-                    $intlongwordcount++;
-                } else {
-                    $strfirstletter = text::substring($arrwords[$i], 0, 1, $strencoding);
-                    if ($strfirstletter !== text::upper_case($strfirstletter, $strencoding)) {
-                        // First letter is lower case. Count it.
-                        $intlongwordcount++;
-                    }
-                }
-            }
-        }
-        // print_object($debug);
-        return $intlongwordcount;
-    }
-
-    /**
-     * Not currently used. Verified by no errors and not using Text:: and Maths::.
-     * Returns the percentage of words with more than three syllables.
-     * @param   string  $strtext      Text to be measured.
-     * @param   bool    $blncountpropernouns      Boolean - should proper nouns be included in words count.
-     * @return  int|float
-     */
-    public static function percentage_words_with_three_syllables($strtext, $blncountpropernouns = true, $strencoding = '') {
-        // $debug = array();
-        // $debug['CP4-0 Just entered percentage_words_with_three_syllables function and checking $strtext: '] = $strtext;
-
-        $intwordcount = text::word_count($strtext, $strencoding);
-        $intlongwordcount = self::words_with_three_syllables($strtext, $blncountpropernouns, $strencoding);
-        $intpercentage = maths::bcCalc(maths::bc_calc($intlongwordcount, '/', $intwordcount), '*', 100);
-        // print_object($debug);
-
-        return $intpercentage;
     }
 }

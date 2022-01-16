@@ -324,3 +324,7 @@ Diary Support Tracker.
     on codechecker reports.
 20220110 Spent the past couple of days working on cron_task.php and finally
     seem to have it working for M3.11. Need to check other versions.
+20220115 Finally got a link to the new changes documentation for Moodle 4.0.
+    It has instructions for the new icons and due to the way it is
+    implemented, I will have to make a Diary release that will be for
+    Moodle 4.0 only.
