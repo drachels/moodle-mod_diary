@@ -43,6 +43,7 @@ class syllables {
     // Common reasons we need to override some words:
     // - Trailing 'e' is pronounced.
     // - Portmanteaus.
+    /** @var array */
     static public $arrproblemwords = array(
         'abalone'     => 4,
         'abare'       => 3,
@@ -100,6 +101,7 @@ class syllables {
         );
 
     // These syllables would be counted as two but should be one.
+    /** @var array */
     static public $arrsubsyllables = array(
             'cia(l|$)', // Use in words such as glacial, acacia.
             'tia',
@@ -191,6 +193,7 @@ class syllables {
         );
 
     // These syllables would be counted as one but should be two.
+    /** @var array */
     static public $arraddsyllables = array(
         '([^s]|^)ia',
         'riet',
@@ -225,6 +228,7 @@ class syllables {
     );
 
     // Single syllable prefixes and suffixes.
+    /** @var array */
     static public $arraffix = array(
         '`^un`',        // @codingStandardsIgnoreLine
         '`^fore`',      // @codingStandardsIgnoreLine
@@ -255,6 +259,7 @@ class syllables {
     );
 
     // Double syllable prefixes and suffixes.
+    /** @var array */
     static public $arrdoubleaffix = array(
         '`^above`',     // @codingStandardsIgnoreLine
         '`^ant[ie]`',   // @codingStandardsIgnoreLine
@@ -282,6 +287,7 @@ class syllables {
     );
 
     // Triple syllable prefixes and suffixes.
+    /** @var array */
     static public $arrtripleaffix = array(
          '`ology$`',    // @codingStandardsIgnoreLine
          '`ologist$`',  // @codingStandardsIgnoreLine
@@ -302,52 +308,32 @@ class syllables {
         // Trim whitespace.
         $strword = trim($strword);
 
-        // The variable $debug is an array containing the basic syllable counting steps for this word.
-        $debug = array();
-        $debug['CP1-0 Just entered syllable_count function and checking this word: '] = $strword;
-
         // Should be no non-alpha characters and lower case.
         $strword = preg_replace('`[^A-Za-z]`', '', $strword);  // @codingStandardsIgnoreLine
         $strword = strtolower($strword);
 
         // Check for problem words.
         if (isset(self::$arrproblemwords[$strword])) {
-            $debug['CP1-1a Found a problem word '] = $strword;
-            $debug['CP1-1b It has a defined syllable count of '] = self::$arrproblemwords[$strword];
-            // print_object($debug); // @codingStandardsIgnoreLine
             return self::$arrproblemwords[$strword];
         }
         // Try singular.
         $singularword = pluralise::get_singular($strword);
         if ($singularword != $strword) {
             if (isset(self::$arrproblemwords[$singularword])) {
-                $debug['CP1-2a Found a plural problem word'] = $strword;
-                $debug['CP1-2a It has a defined syllable count of'] = self::$arrproblemwords[$singularword];
-                // print_object($debug); // @codingStandardsIgnoreLine
                 return self::$arrproblemwords[$singularword];
             }
         }
-
-        $debug['CP1-3 After cleaning, lcase'] = $strword;
 
         // Remove prefixes and suffixes and count how many were taken.
         $strword = preg_replace(self::$arraffix, '', $strword, -1, $intaffixcount);
         $strword = preg_replace(self::$arrdoubleaffix, '', $strword, -1, $intdoubleaffixcount);
         $strword = preg_replace(self::$arrtripleaffix, '', $strword, -1, $inttripleaffixcount);
 
-        if (($intaffixcount + $intdoubleaffixcount + $inttripleaffixcount) > 0) {
-            $debug['CP1-4a After Prefix and Suffix Removal'] = $strword;
-            $debug['CP1-4b Prefix and suffix counts'] = $intaffixcount.' * 1 syllable, '.
-                                                        $intdoubleaffixcount.' * 2 syllables, '.
-                                                        $inttripleaffixcount.' * 3 syllables';
-        }
-
         // Removed non-word characters from word.
         $arrwordparts = preg_split('`[^aeiouy]+`', $strword); // @codingStandardsIgnoreLine
         $intwordpartcount = 0;
         foreach ($arrwordparts as $strwordpart) {
             if ($strwordpart <> '') {
-                $debug['CP1-5 Counting ('.$intwordpartcount.')'] = $strwordpart;
                 $intwordpartcount++;
             }
         }
@@ -355,27 +341,15 @@ class syllables {
         // Some syllables do not follow normal rules - check for them.
         // Thanks to Joe Kovar for correcting a bug in the following lines.
         $intsyllablecount = $intwordpartcount + $intaffixcount + (2 * $intdoubleaffixcount) + (3 * $inttripleaffixcount);
-        $debug['CP1-6 Syllables by Vowel Count'] = $intsyllablecount;
-
         foreach (self::$arrsubsyllables as $strsyllable) {
             $intsyllablecounttemp = $intsyllablecount;
             $intsyllablecount -= preg_match('`'.$strsyllable.'`', $strword); // @codingStandardsIgnoreLine
-            if ($intsyllablecounttemp != $intsyllablecount) {
-                $debug['CP1-7 Subtracting ('.$strsyllable.')'] = $strsyllable;
-            }
         }
         foreach (self::$arraddsyllables as $strsyllable) {
             $intsyllablecounttemp = $intsyllablecount;
             $intsyllablecount += preg_match('`' . $strsyllable . '`', $strword); // @codingStandardsIgnoreLine
-            if ($intsyllablecounttemp != $intsyllablecount) {
-                $debug['CP1-8 Adding (' . $strsyllable . ')'] = $strsyllable;
-            }
         }
         $intsyllablecount = ($intsyllablecount == 0) ? 1 : $intsyllablecount;
-
-        $debug['CP1-9 Syllables by Vowel Count after processing'] = $intsyllablecount;
-        // print_object($debug); // @codingStandardsIgnoreLine
-
         return $intsyllablecount;
     }
 }

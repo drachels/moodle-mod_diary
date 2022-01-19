@@ -794,8 +794,8 @@ function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownlo
  * This function is called when the context for the page is a diary module. This is not called by AJAX
  * so it is safe to rely on the $PAGE.
  *
- * @param settings_navigation $settingsnav {@link settings_navigation}
- * @param navigation_node $navref {@link navigation_node}
+ * @param settings_navigation $settingsnav
+ * @param navigation_node $navref
  */
 function diary_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $navref) {
     global $PAGE, $DB, $USER;

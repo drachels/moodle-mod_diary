@@ -35,16 +35,20 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
  */
 class mod_diary_mod_form extends moodleform_mod {
 
-    /** Settings for adding repeated form elements */
+    /** Settings for adding repeated form elements. */
+    /** @var int */
     const NUM_ITEMS_DEFAULT = 0;
+    /** @var int */
     const NUM_ITEMS_MIN     = 0;
+    /** @var int */
     const NUM_ITEMS_ADD     = 1;
 
-    /** Number of rows in TEXTAREA elements */
+    /** Number of rows in TEXTAREA elements. */
+    /** @var int */
     const TEXTAREA_ROWS = 3;
 
     /**
-     * diary is plugin name without leading "mod_"
+     * diary is plugin name without leading "mod_".
      */
     public function mod() {
         return substr($this->plugin_name(), 4);
@@ -59,6 +63,8 @@ class mod_diary_mod_form extends moodleform_mod {
 
     /**
      * Fetch a constant from the plugin class.
+     *
+     * @param string $name
      */
     protected function plugin_constant($name) {
         $plugin = $this->plugin_name();
@@ -75,8 +81,6 @@ class mod_diary_mod_form extends moodleform_mod {
         // Cache the plugin name.
         $plugin = 'mod_diary';
         $diaryconfig = get_config('mod_diary');
-        $debug = array();
-        $debug['Tracking mod form errors problem cp 0 showing $diaryconfig '] = $diaryconfig;
 
         // 20210706 Add Javascript to expand/contract text input fields. NOT sure if this is needed.
         $params = array();
@@ -371,71 +375,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
-        // @codingStandardsIgnoreLine
-        /*
-        // 20210711 Added heading for Text statistics options section.
-        $name = 'statshdr';
-        $label = get_string($name, $plugin);
-        $mform->addElement('header', $name, $label);
-        $mform->setExpanded($name, true);
-
-        // 20210709 Added enable/disable show statistics setting.
-        $name = 'showtextstats';
-        $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $showhideoptions);
-        $mform->addHelpButton($name, $name, $plugin);
-        $mform->setType($name, PARAM_INT);
-        $mform->setDefault($name, diarystats::get_showhide_options($plugin, 0));
-        $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'enablestats', 'eq', 0);
-        */
-
-        // This setting is NOT currently working.
-        // @codingStandardsIgnoreLine
-        /*
-        $debug = array();
-        //$debug['Tracking mod form errors problem cp 1-1 showing $options '] = $options;
-        //$diaryconfig->textstatitems
-        //$debug['Tracking mod form errors problem cp 2-1 showing $diaryconfig->textstatitems '] = $diaryconfig->textstatitems;
-        //$debug['Tracking mod form errors problem cp 2-1 showing $name '] = $name;
-        //$debug['Tracking mod form errors problem cp 2-2 showing $defaults '] = $defaults;
-        //$debug['Tracking mod form errors problem cp 2-3 showing $options '] = $options;
-        //$tempcounter = 0;
-        //$debug['Tracking mod form errors problem cp 2-4 showing $tempcounter '] = $tempcounter;
-            //$tempcounter++;
-            //$debug['Tracking mod form errors problem cp 3-1 showing $tempcounter '] = $tempcounter;
-            //$debug['Tracking mod form errors problem cp 3-2 showing $tempcounter '] = $tempcounter;
-        //$debug['Tracking textstatitems problem cp 5 showing $name '] = $name;
-        //print_object($debug);
-
-        // 20210709 Added list of statistics items setting that can be enabled/disabled.
-        $name = 'textstatitems';
-        $label = get_string($name, $plugin);
-        $options = diarystats::get_textstatitems_options(true);
-        $elements = array();
-        foreach ($options as $value => $text) {
-            $elements[] = $mform->createElement('checkbox', $name."[$value]",  '', $text);
-        }
-        $mform->addGroup($elements, $name, $label, html_writer::empty_tag('br'), false);
-        $mform->addHelpButton($name, $name, $plugin);
-        $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'showtextstats', 'eq', 0);
-        $mform->disabledIf($name.'[commonerrors]', 'errorcmid', 'eq', 0);
-        $mform->disabledIf($name, 'enablestats', 'eq', 0);
-
-        // only use defaults on new record
-        //$defaults = 'chars,words,sentences,paragraphs,uniquewords,wordspersentence,longwords';
-        //$defaults = $this->get_my_default_value($name, $defaults);
-        //print_object($defaults);
-        //$defaults = explode(',', $defaults);
-        //$defaults = array_filter($defaults);
-
-        foreach ($options as $value => $text) {
-            $mform->setType($name."[$value]", PARAM_INT);
-            //$mform->setDefault($name."[$value]", in_array($value, $defaults));
-        }
-        */
-
         // 20210703 Added the common errors header.
         $name = 'commonerrors';
         $label = get_string($name, $plugin);
@@ -463,35 +402,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
-        // @codingStandardsIgnoreLine
-        /*
-        // Add group of error matching behaviors.
-        $elements = array();
-
-        $name = 'errorfullmatch';
-        $default = (empty($CFG->glossary_fullmatch) ? 0 : 1);
-        $elements[] = $mform->createElement('select', $name, '', $this->get_fullmatch_options($plugin));
-        $mform->setDefault($name, $this->get_my_default_value($name, $default));
-        $mform->setType($name, PARAM_INT);
-
-        $name = 'errorcasesensitive';
-        $default = (empty($CFG->glossary_casesensitive) ? 0 : 1);
-        $elements[] = $mform->createElement('select', $name, '', $this->get_casesensitive_options($plugin));
-        $mform->setDefault($name, $this->get_my_default_value($name, $default));
-        $mform->setType($name, PARAM_INT);
-
-        $name = 'errorignorebreaks';
-        $elements[] = $mform->createElement('select', $name, '', $this->get_ignorebreaks_options($plugin));
-        $mform->setDefault($name, $this->get_my_default_value($name, 0));
-        $mform->setType($name, PARAM_INT);
-
-        $name = 'errorbehavior';
-        $label = get_string($name, $plugin);
-        $mform->addGroup($elements, $name, $label, ' ', false);
-        $mform->disabledIf($name, 'enableautograde', 'eq', 0);
-        $mform->addHelpButton($name, $name, $plugin);
-        */
-
         // Add the rest of the common settings.
         $this->standard_grading_coursemodule_elements();
         $this->standard_coursemodule_elements();
@@ -501,7 +411,8 @@ class mod_diary_mod_form extends moodleform_mod {
     /**
      * Get array of glossary options
      *
-     * @return array(glossaryid => name)
+     * @param array $courseid
+     * @return array $options
      */
     protected function get_errorcmid_options($courseid=0) {
         $options = array('0' => '');
@@ -522,14 +433,10 @@ class mod_diary_mod_form extends moodleform_mod {
      * @return string|mixed|null Default value for field with this $name
      */
     protected function get_my_default_value($name, $default) {
-        $debug['Tracking textstatitems problem in, function get_my_default_value, cp 1 showing $name '] = $name;
-
         if (method_exists($this, 'get_default_value')) {
-            $debug['Tracking textstatitems problem in, function get_my_default_value, cp 2 showing $name '] = $name;
             // Moodle >= 3.10.
             return $this->get_default_value($name, $default);
         } else {
-            $debug['Tracking textstatitems problem in, function get_my_default_value, cp 3 showing $name '] = $name;
             // Moodle <= 3.9.
             return get_user_preferences($this->plugin_name().'_'.$name, $default);
         }

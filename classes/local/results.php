@@ -159,7 +159,7 @@ class results {
      * Returns availability status.
      * Added 20200903.
      *
-     * @param var $diary
+     * @param array $diary
      */
     public static function diary_available($diary) {
         $timeopen = $diary->timeopen;
@@ -298,12 +298,13 @@ class results {
     /**
      * Prints the currently selected diary entry of student identified as $user, on the report page.
      *
-     * @param integer $course
-     * @param integer $diary
-     * @param integer $user
-     * @param integer $entry
-     * @param integer $teachers
-     * @param integer $grades
+     * @param array $context
+     * @param array $course
+     * @param array $diary
+     * @param array $user
+     * @param array $entry
+     * @param array $teachers
+     * @param array $grades
      */
     public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
         global $USER, $OUTPUT, $DB, $CFG;
@@ -542,9 +543,9 @@ class results {
      * Print the teacher feedback.
      * This renders the teacher feedback on the view.php page.
      *
-     * @param object $course
-     * @param object $entry
-     * @param object $grades
+     * @param array $course
+     * @param array $entry
+     * @param array $grades
      */
     public static function diary_print_feedback($course, $entry, $grades) {
         global $CFG, $DB, $OUTPUT;
@@ -637,12 +638,12 @@ class results {
     /**
      * Return the editor and attachment options when editing a diary entry.
      *
-     * @param stdClass $course Course object.
-     * @param stdClass $context Context object.
-     * @param stdClass $diary Diary object.
-     * @param stdClass $entry Entry object.
-     * @param stdClass $action Action object.
-     * @param stdClass $firstkey Firstkey object.
+     * @param array $course Course object.
+     * @param array $context Context object.
+     * @param array $diary Diary object.
+     * @param array $entry Entry object.
+     * @param string $action Action object.
+     * @param string $firstkey Firstkey object.
      * @return array $editoroptions Array containing the editor and attachment options.
      * @return array $attachmentoptions Array containing the editor and attachment options.
      */
@@ -845,8 +846,12 @@ class results {
      * Update diary entries feedback(optionally in a given group).
      * Called from report.php and reportsingle.php.
      * 20220105 Moved here from report.php and reportsingle.php.
+     * @param array $cm
+     * @param array $context
      * @param array $diary
-     * @param int $groupid
+     * @param array $data
+     * @param array $entrybyuser
+     * @param array $entrybyentry
      * @return int count($diarys) Count of diary entries.
      */
     public static function diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry) {

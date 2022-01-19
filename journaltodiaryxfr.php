@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Transfer Journal entries to Diary entries.
+ *
  * Lists Journals and Diary's in a course where an admin can
  * transfer Journal entries and make them Diary entries.
  *
@@ -45,9 +47,6 @@ $context = context_module::instance($cm->id);
 
 $diary = $DB->get_record('diary', array('id' => $cm->instance) , '*', MUST_EXIST);
 
-// Setup up array for debugging code.
-$debug = array();
-
 // 20211109 Check to see if Transfer the entries button is clicked and returning 'Transfer the entries' to trigger insert record.
 $param1 = optional_param('button1', '', PARAM_TEXT); // Transfer entry.
 $param2 = optional_param('button2', '', PARAM_TEXT); // Not currently used.
@@ -58,14 +57,6 @@ $param4 = optional_param('transferwfb', '', PARAM_TEXT); // Transfer with feedba
 if (isset($param1) && get_string('transfer', 'diary') == $param1) {
     $journalfromid = optional_param('journalid', '', PARAM_RAW);
     $diarytoid = optional_param('diaryid', '', PARAM_RAW);
-
-    // 20211109 Track parameters for debugging.
-    $debug['This is $param1: '] = $param1;
-    $debug['This is $param2: '] = $param2;
-    $debug['This is $param3: '] = $param3;
-    $debug['This is $param4: '] = $param4;
-    $debug['This is $journalfromid: '] = $journalfromid;
-    $debug['This is $diarytoid: '] = $diarytoid;
 
     $sql = 'SELECT *
               FROM {journal_entries} je
@@ -87,11 +78,9 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
             if ($param4 === "checked") {
                 // If enabled, transfer message will be added to the feedback.
                 $feedbacktag = get_string('transferwfbmsg', 'diary', ($journalck->name));
-                $debug['This is $param4 and it should be checked to see this entry: '] = $param4;
             } else {
                 // By default, transfer message is not added to the feedback.
                 $feedbacktag = '';
-                $debug['This is $param4 and it should be blank: '] = $param4;
             }
 
             $newdiaryentry = new stdClass();
@@ -111,13 +100,9 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
 
             if ($param3 === 'checked') {
                 $newdiaryentry->mailed = 0;
-                $debug['This is $param3 and it should be checked to see this entry: '] = $param3;
-
             } else {
                 $newdiaryentry->mailed = $journalentry->mailed;
-                $debug['This is $param3 and it should be blank: '] = $param3;
             }
-            $debug['This is the $newdiaryentry for user: '.$newdiaryentry->userid.': '] = $newdiaryentry;
 
             // 20211112 Check to see if the diary entry record already exists.
             $sql = 'SELECT case when "text" = "$journalentry->text" then "True" else "False" end
@@ -126,20 +111,15 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
                        AND de.userid = $journalentry->userid
                        AND de.timemodified = $journalentry->modified
                   ORDER BY de.id ASC';
-            if ($DB->record_exists('diary_entries', ['diary' => $diarytoid,
+            if (!$DB->record_exists('diary_entries', ['diary' => $diarytoid,
                                                      'userid' => $journalentry->userid,
                                                      'timemodified' => $journalentry->modified])) {
-                // Need to log the event that a journal entry transfer failed here.
-                $debug['The current record already exists in this Diary, so no transfer!: $diarytoid '] = $diarytoid;
-            } else {
-                $debug['This record does not exist, or is not a duplicate, so adding it to this Diary: $diarytoid '] = $diarytoid;
                 // 20211228 Bump count of transfers.
                 $xfrcountxfrd++;
                 // 20211228 Create and insert a new Diary entry from the old Journal entry.
                 $DB->insert_record('diary_entries', $newdiaryentry, false);
                 // Possibly need to log the event that a journal entry was transfered to a diary here.
             }
-            // This is a possible place to print out the debug data via, print_object($debug);.
         }
     }
 
@@ -159,8 +139,6 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
 }
-
-// Another possible place to print out the debug data via, print_object($debug);.
 
 // Print the page header.
 $PAGE->set_url('/mod/diary/journaltodiaryxfr.php', array('id' => $id));

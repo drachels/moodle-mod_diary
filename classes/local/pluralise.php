@@ -40,6 +40,7 @@ class pluralise {
      * under an MIT license and used with thanks:
      * http://kuwamoto.org/2007/12/17/improved-pluralizing-in-php-actionscript-and-ror/
      */
+    /** @var array null */
     private static $plural = array(
         '/(quiz)$/i'                     => "$1zes",
         '/^(ox)$/i'                      => "$1en",
@@ -60,7 +61,7 @@ class pluralise {
         '/(us)$/i'                       => "$1es",
         '/s$/i'                          => "s"
     );
-
+    /** @var array null */
     private static $singular = array(
         '/(quiz)zes$/i'              => "$1",
         '/(matr)ices$/i'             => "$1ix",
@@ -91,7 +92,7 @@ class pluralise {
         '/(us)es$/i'                 => "$1",
         '/s$/i'                      => ""
     );
-
+    /** @var array null */
     private static $irregular = array(
         'child'  => 'children',
         'foot'   => 'feet',
@@ -107,6 +108,7 @@ class pluralise {
     // Some words are only uncountable sometimes. For example, "blues" can be
     // uncountable when referring to music, but countable when referring to
     // multiple colours.
+    /** @var array null */
     private static $uncountable = array(
         'beef',
         'bison',

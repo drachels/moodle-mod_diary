@@ -46,20 +46,23 @@ use html_writer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class diarystats {
-    /** Information about the latest response */
+    /** @var Information about the latest response */
     protected $currentresponse = null;
     /**
      * These variables are only used if needed
-     * to detect patterns in a student response
+     * to detect patterns in a student response.
      */
+    /** @var array null */
     private static $aliases = null;
+    /** @var array null */
     private static $metachars = null;
+    /** @var array null */
     private static $flipmetachars = null;
 
     /**
      * Update the list of Common errors.
      *
-     * @param $text The cleaned plain text to search for errors.
+     * @param string $text The cleaned plain text to search for errors.
      * @param array $diary The settings for this diary activity.
      * @return array($errors, count($errors) * $percent) An array of the common errors and percentage.
      */
@@ -149,7 +152,7 @@ class diarystats {
      * glossary_diaryentry_search_text
      *
      * @param object $entry
-     * @param string $match
+     * @param string $search
      * @param string $text
      * @return string the matching substring in $text or ""
      */
@@ -160,8 +163,9 @@ class diarystats {
     /**
      * Store information about latest response to this entry.
      *
-     * @param  string $name
-     * @param  string $value
+     * @param  string $glossaryname
+     * @param  string $entry
+     * @param  string $text
      * @return void, but will update currentresponse property of this object.
      */
     public static function glossary_entry_link($glossaryname, $entry, $text) {
@@ -177,9 +181,9 @@ class diarystats {
     /**
      * Convert current entry to_plain_text.
      *
-     * @param $text The current text of this Diary entry.
-     * @param $format
-     * @param $options
+     * @param string $text The current text of this Diary entry.
+     * @param string $format
+     * @param array $options
      */
     public static function to_plain_text($text, $format, $options = array('noclean' => 'true')) {
         if (empty($text)) {
@@ -198,7 +202,8 @@ class diarystats {
     /**
      * Convert non-breaking spaces to standardize_white_space($text).
      *
-     * @param Stext string The text of the current diary entry.
+     * @param string $text string The text of the current diary entry.
+     * @return string $text
      */
     public static function standardize_white_space($text) {
         // Standardize white space in $text.
@@ -214,9 +219,11 @@ class diarystats {
     /**
      * Execute search_text once for each glossary entry.
      *
-     * @param string $match
-     * @param string $text Complete text of the current entry.
      * @param string $search Glossary entry to search for in $text.
+     * @param string $text Complete text of the current entry.
+     * @param int $fullmatch
+     * @param int $casesensitive
+     * @param int $ignorebreaks
      * @return boolean TRUE if $text matches the $match; otherwise FALSE;
      */
     public static function search_text($search, $text, $fullmatch=false, $casesensitive=false, $ignorebreaks=true) {
@@ -300,7 +307,8 @@ class diarystats {
      * Update the diary statistics for this diary activity.
      *
      * @param string $entry The text for this entry.
-     * @return bool
+     * @param array $diary The diary info for this entry.
+     * @return string $currentstats String with table of current statistics.
      */
     public static function get_diary_stats($entry, $diary) {
         global $CFG, $OUTPUT;
@@ -477,7 +485,8 @@ class diarystats {
      * Update the common error statistics, if any, for this diary activity.
      *
      * @param string $entry The text for this entry.
-     * @return usercommonerrors
+     * @param array $diary The diary info for this entry.
+     * @return string $usercommonerrors
      */
     public static function get_common_error_stats($entry, $diary) {
         global $CFG, $OUTPUT;
@@ -536,7 +545,8 @@ class diarystats {
      * Update the auto rating info, if any, for this diary activity.
      *
      * @param string $entry The text for this entry.
-     * @return autoratingdata
+     * @param array $diary The diary info for this entry.
+     * @return string $autoratingdata String with table of current autorating data.
      */
     public static function get_auto_rating_stats($entry, $diary) {
         global $CFG, $OUTPUT;
@@ -579,15 +589,7 @@ class diarystats {
         if ($diary->enableautorating && $diary->itemtype <> 0) {
             // 20210713 Need the item type and how many of them must be used in this diary entry.
             $itemtypes = array();
-            // The variable $debug is an array containing the basic syllable counting steps for this word.
-            $debug = array();
-            $debug['CP1-1 Just entered autorating check and setup $itemtypes array: '] = $itemtypes;
-
             $itemtypes = self::get_item_types($itemtypes);
-            $debug['CP2-1 Just got $itemtypes array: '] = $itemtypes;
-            $debug['CP2-2 Listing diary setting $diary->itemtype: '] = $diary->itemtype;
-            $debug['CP2-3 Listing diary setting $diary->itemcount: '] = $diary->itemcount;
-
             if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
                 $diary->intro .= get_string('itemtype_desc', 'diary',
                     ['one' => $itemtypes[$diary->itemtype],
@@ -610,9 +612,6 @@ class diarystats {
             }
 
             $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
-            $debug['CP3-1 Calculating $itemrating showing 1 of 3, $diary->itemcount: '] = $diary->itemcount;
-            $debug['CP3-2 Calculating $itemrating showing 2 of 3, $diarystats->$item: '] = $diarystats->$item;
-            $debug['CP3-3 Calculating $itemrating showing 3 of 3, $diary->itempercent: '] = $diary->itempercent;
 
             $commonerrorrating = $diarystats->commonpercent;
 
@@ -663,9 +662,6 @@ class diarystats {
             // 20211212 Actual autorating.
             $currentratingdata = ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0))
                 * $diary->itempercent) - $commonerrorrating);
-
-            // print_object($debug); // @codingStandardsIgnoreLine
-
         }
         // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
         $autoratingdata .= '</table>';
@@ -726,8 +722,8 @@ class diarystats {
     /**
      * Update the diary paragraph count statistics for this diary activity.
      *
-     * @param string $entry The text for this entry.
-     * @ return int The number of paragraphs.
+     * @param string $text The text for this entry.
+     * @ return int $items The number of paragraphs.
      */
     public static function get_stats_paragraphs($text) {
         $items = self::multipleexplode(array("<p", "<p>", "\n", "\r\n"), $text);
