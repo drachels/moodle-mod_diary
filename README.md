@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/drachels/moodle-mod_diary.svg?branch=master)](https://travis-ci.org/drachels/moodle-mod_diary)
 
 # Moodle Diary module
-Diary is based off the Journal plugin. The Diary module allows a teacher to collect online text, audio, and video from a user. Depending on the Diary setup options, a user can create a new entry each calendar day or even each minute. Each entry can be individually reviewed, provided with feedback, and graded, with overall rating results being shown based on the selected aggregate type of rating. Currently, the user can edit any entry, and can even create a new entry for a skipped day. The data submitted by student is visible only to the teacher, course manager, or site admin, and not to the other users in the course. 
+Diary is based off the Journal plugin. The Diary module allows a teacher to collect online text, audio, and video from a user. Depending on the Diary setup options, a user can create a new entry each calendar day or even each minute. Each entry can be individually reviewed, provided with feedback, and graded, with overall rating results being shown based on the selected aggregate type of rating. Currently, the user can edit any entry, and can even create a new entry for a skipped day. The data submitted by a student is visible only to the teacher, course manager, or site admin, and not to the other users in the course. 
 
 Inside or outside the classroom, students post entry's into a Diary
 activity from notebook, netbook, android, iPhone, iPod or any other device

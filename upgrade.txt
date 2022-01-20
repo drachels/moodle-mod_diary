@@ -1,5 +1,10 @@
 This files describes API changes and other work in the diary code.
-=== 3.5.0.0 BETA ===
+=== Deferred to next version. ===
+Diary_779 - Need to work on the help pop up windows for stats. Currently
+    set this ticket status to waiting.
+
+
+=== 3.5.0 ===
 Diary_514 - Sort order label needs css setting. Removed all the hard coded h5's.
     There were about 21 of them, 19 in view.php and two in the language file. 
     Added classes, one for the whole table and one for some table cells.
@@ -110,9 +115,6 @@ Diary_777 - FK Grade formula needs to include max. Changed formula to use
 Diary_778 - Need to remove hard coded text and change to strings in diarystats.php.
     Made changes as needed and converted some to use {$a} to help simplify the
     code.
-
-Diary_779 - Need to work on the help pop up windows for stats. Currently
-    set this ticket status to waiting.
 
 Diary_780 - Need results displayed after doing a transfer. Added code in
     journaltodiaryxfr.php file down around line 284 that checks counters added
