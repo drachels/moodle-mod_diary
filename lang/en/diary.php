@@ -23,8 +23,6 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-
-
 $string['accessdenied'] = 'Access denied';
 $string['addtofeedback'] = 'Add to feedback';
 $string['alias'] = 'Keyword';
@@ -32,6 +30,8 @@ $string['aliases_help'] = 'Each diary entry can have an associated list of keywo
 
 Enter each keyword on a new line (not separated by commas).';
 $string['aliases'] = 'Keyword(s)';
+$string['alwaysshowdescription'] = 'Always show description';
+$string['alwaysshowdescription_help'] = 'If disabled, the diary description above will only become visible to students on the "Open time" date.';
 $string['alwaysopen'] = 'Always open';
 $string['and'] = ' and ';
 $string['attachment'] = 'Attachment';
@@ -41,22 +41,14 @@ $string['autorating_help'] = 'These settings define the defaults for autorating 
 $string['autorating_title'] = 'Auto-rating enable';
 $string['autorating'] = 'Auto-rating';
 $string['autoratingitempercentset'] = 'Auto-rating Item percent setting {$a}%';
-
-
 $string['autoratingitemdetails'] = 'The item for the auto-rating is {$a->one} or more {$a->two}  with a possible {$a->three}% penalty for each missing, {$a->four}.';
-
 $string['autoratingitemexplained'] = 'The item for the auto-rating is {$a->one}. You need {$a->two} of them and you have {$a->three}. You need to come up with {$a->four}.';
-
 $string['autoratingitempenaltymath'] = 'The automatic item rating penalty math is {$a}. Note: max prevents negative numbers caused by having more than is required.';
-
 $string['autoratingpotentialpentaly'] = 'Potential Auto-rating penalty is {$a}';
-
-
 $string['availabilityhdr'] = 'Availability';
 $string['avgsylperword'] = 'Average syllables per word {$a}';
 $string['avgwordlenchar'] = 'Average word length {$a} characters';
 $string['avgwordpara'] = 'Average words per paragraph {$a}';
-
 $string['blankentry'] = 'Blank entry';
 $string['calendarend'] = '{$a} closes';
 $string['calendarstart'] = '{$a} opens';
@@ -200,11 +192,7 @@ $string['journaltodiaryxfrtitle'] = 'Journal to Diary xfr';
 $string['journaltodiaryxfrp1'] = 'This is an admin user only function to transfer Journal entries to Diary entries. Entries from multiple Journal\'s can be transferred to a single Diary or to multiple separate Diary\'s. This is a new capability and is still under development.<br><br>';
 $string['journaltodiaryxfrp2'] = 'If you use the, <b>Transfer and send email</b>, checkbox, any journal entry transferred to a diary activity will mark the new entry as needing an email sent to the user so they know the entry has been transferred to a diary activity.<br><br>';
 $string['journaltodiaryxfrp3'] = 'If you use the, <b>Transfer without email</b>, button an email will NOT be sent to each user even though the process automatically adds feedback in the new Diary entry, even if the original Journal entry had not feedback included.<br><br>';
-
-
 $string['journaltodiaryxfrp4'] = 'The name of this course you are working in is: <b> {$a->one}</b>, with a Course ID of: <b> {$a->two}</b><br><br>';
-
-
 $string['journaltodiaryxfrp5'] = 'If you elect to include feedback regarding the transfer and the journal entry does not already have any feedback, you will automatically be added as the teacher for the entry to prevent an error.<br><br>';
 $string['lastnameasc'] = 'Last name ascending:';
 $string['lastnamedesc'] = 'Last name descending:';
@@ -223,46 +211,43 @@ $string['mailed'] = 'Mailed';
 $string['mailsubject'] = 'Diary feedback';
 $string['maxcharacterlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} characters.</strong>';
 $string['maxcharacterlimit_help'] = 'If a number is entered, the user must use less characters than the maximum number listed.';
-$string['maxcharacterlimit'] = 'Maximum character count';
+$string['maxcharacterlimit'] = 'Character count maximum';
 $string['maxparagraphlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} paragraphs.</strong>';
 $string['maxparagraphlimit_help'] = 'If a number is entered, the user must use less paragraphs than the maximum number listed.';
-$string['maxparagraphlimit'] = 'Maximum paragraph count';
-
+$string['maxparagraphlimit'] = 'Paragraph count maximum';
 $string['maxpossratinge'] = 'The maximum possible rating for this entry is {$a} points.';
-
-
 $string['maxsentencelimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} sentences.</strong>';
 $string['maxsentencelimit_help'] = 'If a number is entered, the user must use less sentences than the maximum number listed.';
-$string['maxsentencelimit'] = 'Maximum sentence count';
+$string['maxsentencelimit'] = 'Sentence count maximum';
 $string['maxwordlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$a} words.</strong>';
 $string['maxwordlimit_help'] = 'If a number is entered, the user must use less words than the maximum number listed.';
-$string['maxwordlimit'] = 'Maximum word count';
+$string['maxwordlimit'] = 'Word count maximum';
 $string['mediumwords_help'] = 'Medium words are words that have two syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
 $string['mediumwords'] = 'Unique medium words';
 $string['mincharacterlimit_desc'] = 'Note: This entry must use a <strong>minimum of {$a} characters.</strong>';
 $string['mincharacterlimit_help'] = 'If a number is entered, the user must use more characters than the minimum number listed.';
-$string['mincharacterlimit'] = 'Minimum character count';
+$string['mincharacterlimit'] = 'Character count minimum';
 $string['minmaxcharpercent_help'] = 'Select the percentage of total rating that should be deducted for each Min/Max character count error.';
-$string['minmaxcharpercent'] = 'Penalty per Min/Max character count error';
+$string['minmaxcharpercent'] = 'Character penalty per Min/Max count error';
 $string['minmaxhdr_help'] = 'These settings define the defaults for minimum and maximum character and word counts in all new diarys.';
 $string['minmaxhdr'] = 'Min/Max counts';
 $string['minmaxparapercent_help'] = 'Select the percentage of total rating that should be deducted for each Min/Max paragraph count error.';
-$string['minmaxparapercent'] = 'Penalty per Min/Max paragraph count error';
+$string['minmaxparapercent'] = 'Paragraph penalty per Min/Max count error';
 $string['minmaxpercent_help'] = 'Select the percentage of total rating that should be deducted for each Min/Max count error.';
 $string['minmaxpercent'] = 'Penalty per Min/Max count error';
 $string['minmaxsentpercent_help'] = 'Select the percentage of total rating that should be deducted for each Min/Max sentence count error.';
-$string['minmaxsentpercent'] = 'Penalty per Min/Max sentence count error';
+$string['minmaxsentpercent'] = 'Sentence penalty per Min/Max count error';
 $string['minmaxwordpercent_help'] = 'Select the percentage of total rating that should be deducted for each Min/Max word count error.';
-$string['minmaxwordpercent'] = 'Penalty per Min/Max word count error';
+$string['minmaxwordpercent'] = 'Word penalty per Min/Max count error';
 $string['minparagraphlimit_desc'] = 'Note: This entry must use a <strong>minimum of {$a} paragraphs.</strong>';
 $string['minparagraphlimit_help'] = 'If a number is entered, the user must use more paragraphs than the minimum number listed.';
-$string['minparagraphlimit'] = 'Minimum paragraph count';
+$string['minparagraphlimit'] = 'Paragraph count minimum';
 $string['minsentencelimit_desc'] = 'Note: This entry must use a <strong>minimum of {$a} sentences.</strong>';
 $string['minsentencelimit_help'] = 'If a number is entered, the user must use more sentences than the minimum number listed.';
-$string['minsentencelimit'] = 'Minimum sentence count';
+$string['minsentencelimit'] = 'Sentence count minimum';
 $string['minwordlimit_desc'] = 'Note: This entry must use a <strong>minimum of {$a} words.</strong>';
 $string['minwordlimit_help'] = 'If a number is entered, the user must use more words than the minimum number listed.';
-$string['minwordlimit'] = 'Minimum word count';
+$string['minwordlimit'] = 'Word count minimum';
 $string['missing'] = 'Missing';
 $string['modulename_help'] = 'The diary activity enables teachers to obtain students feedback
  over a period of time.';
@@ -296,11 +281,8 @@ $string['phraseignorebreaksno'] = 'Recognize line breaks.';
 $string['phraseignorebreaksyes'] = 'Ignore line breaks.';
 $string['pluginadministration'] = 'Diary module administration';
 $string['pluginname'] = 'Diary';
-
 $string['popoverhelp'] = 'click for info';
 $string['potcommerrpen'] = 'Potential Common error penalty: {$a->one} * {$a->two} = {$a->three}% or {$a->four} points off.';
-
-
 $string['present'] = 'Present';
 $string['previousentry'] = 'Previous entry';
 $string['rate'] = 'Rate';

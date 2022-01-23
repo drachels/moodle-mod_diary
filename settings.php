@@ -26,10 +26,18 @@ use mod_diary\local\diarystats;
 
 if ($ADMIN->fulltree) {
 
-
-
     // Availability settings.
     $settings->add(new admin_setting_heading('mod_diary/availibility', get_string('availability'), ''));
+
+    $name = new lang_string('alwaysshowdescription', 'mod_diary');
+    $description = new lang_string('alwaysshowdescription_help', 'mod_diary');
+    $setting = new admin_setting_configcheckbox('mod_diary/alwaysshowdescription',
+                                                    $name,
+                                                    $description,
+                                                    1);
+    $setting->set_advanced_flag_options(admin_setting_flag::ENABLED, false);
+    $setting->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+    $settings->add($setting);
 
     $settings->add(new admin_setting_configselect('mod_diary/showrecentactivity',
         get_string('showrecentactivity', 'diary'),
@@ -258,23 +266,6 @@ if ($ADMIN->fulltree) {
         $default,
         $options, 10));
 
-    // @codingStandardsIgnoreLine
-    /*
-    // 20210712 Diary expected min/max error percentage setting.
-    $name = 'mod_diary/minmaxpercent';
-    $plugin = 'mod_diary';
-    $title = get_string('minmaxpercent', 'diary');
-    $description = get_string('minmaxpercent_help', 'diary');
-    $default = 0;
-    $options = array();
-    $options = diarystats::get_rating_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
-    */
-
     // 20210712 Added heading for text stats options section.
     $name = 'statshdr';
     $label = get_string('statshdr', 'mod_diary');
@@ -294,89 +285,4 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
-
-    // @codingStandardsIgnoreLine
-    /*
-    // Need to finish this setting as it is currently incomplete.
-    // 20211005 Got this sort of working now. Got clues from activequiz plugin.
-    // 20210712 Added list of statistics items setting that can be enabled/disabled.
-    $name = 'mod_diary/textstatitems';
-    $plugin = 'mod_diary';
-    $title = get_string('textstatitems', 'diary');
-    $description = get_string('textstatitems_help', 'diary');
-    $default = 0;
-    $options = array();
-    $options = diarystats::get_textstatitems_options(true);
-    //$elements = array();
-    $choices = array();
-    $defaults = array();
-
-    foreach ($options as $value => $text) {
-        //$elements[] = $mform->createElement('checkbox', $name."[$value]",  '', $text);
-        //$choices[] = $name."[$value]";
-        $choices[] = $text;
-        $defaults[] = 1;
-        //$choices[$qtypepluginname] = $qtype->menu_name();
-        //$defaults[$qtypepluginname] = 1;
-    }
-    $settings->add(new admin_setting_configmulticheckbox(
-        'mod_diary/textstatitems',
-        get_string('textstatitems', 'diary'),
-        get_string('textstatitems_help', 'diary'),
-        $defaults,
-        $choices));
-    */
-
-    // @codingStandardsIgnoreLine
-    /*
-    // 20210712 Added heading for common errors options section.
-    $name = 'commonerrors';
-    $label = get_string('commonerrors', 'mod_diary');
-    $description = get_string('commonerrors_help', 'mod_diary');
-    $settings->add(new admin_setting_heading($name, $label, $description));
-    */
-
-    // @codingStandardsIgnoreLine
-    /*
-    // NOT SURE THAT I CAN ADD A SETTING FOR THE GLOSSARY NAME
-    // 20210712 Added selector to pick a glossary of common errors.
-    $name = 'mod_diary/errorcmid';
-    $plugin = 'mod_diary';
-    $title = get_string('errorcmid', 'diary');
-    $description = get_string('errorcmid_help', 'diary');
-    $default = 0;
-    //$options = array();
-    //$options = diarystats::get_rating_options($plugin);
-
-    $options = array('0' => '');
-        $modinfo = get_fast_modinfo($courseid);
-        foreach ($modinfo->cms as $cmid => $cm) {
-            if ($cm->modname=='glossary' && $cm->uservisible) {
-                $options[$cm->id] = format_text($cm->name);
-            }
-        }
-
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
-    */
-
-    // @codingStandardsIgnoreLine
-    /*
-    // 20210712 Diary expected common error percentage setting.
-    $name = 'mod_diary/errorpercent';
-    $plugin = 'mod_diary';
-    $title = get_string('errorpercent', 'diary');
-    $description = get_string('errorpercent_help', 'diary');
-    $default = 0;
-    $options = array();
-    $options = diarystats::get_rating_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
-    */
 }

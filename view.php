@@ -222,7 +222,10 @@ if ($CFG->branch > 31) {
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
-echo $output->introduction($diary, $cm); // Ouput introduction in renderer.php.
+// 20220123 Added if check. Also need to check Moodle 4.0 code. Was showing twice on last update.
+if ($diary->intro) {
+    echo $output->introduction($diary, $cm); // Output introduction in renderer.php.
+}
 
 // If viewer is a manager, create a link to report.php showing diary entries made by users.
 if ($entriesmanager) {
@@ -234,7 +237,7 @@ if ($entriesmanager) {
     $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
 
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
-    $temp = '<span  class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
+    $temp = '<span class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
     $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
     $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></span>';
     echo $temp;

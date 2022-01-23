@@ -57,8 +57,8 @@ Diary_743 - The mod_form.php needs updating for new settings. Added new settings
     needs work. It is not saving and restoring, yet.
 
 Diary_744 - The settings.php needs updating for new settings. Added headings, strings,
-    and settings as needed. STILL NEEDS WORK! Some future use code is there, but
-    commented out.
+    and settings as needed. Some future use code is no longer there, but a copy
+    is in the beta and alpha code versions.
 
 Diary_745 - Need to develop additional statistics for each diary entry. Have
     created 20 stats and now need to thoroughly test them. Still in development!
@@ -115,7 +115,6 @@ Diary_777 - FK Grade formula needs to include max. Changed formula to use
 Diary_778 - Need to remove hard coded text and change to strings in diarystats.php.
     Made changes as needed and converted some to use {$a} to help simplify the
     code.
-
 Diary_780 - Need results displayed after doing a transfer. Added code in
     journaltodiaryxfr.php file down around line 284 that checks counters added
     around lines 34, 35, 97 and 161. Also added a string, xfrresults, for the output.
@@ -165,7 +164,6 @@ Diary_796 - enableautorating is not working correctly. This was actually
 Diary_803 - Error message, No text detected, quit working correctly. Modified
     code to add table definition and return $currentstats in diarystats.php
     file down around line 460. 
-
 Diary_804 - the cron_task.php file line 32 needs to be changed, removed,
     or commented out. Leaving it at line 32. Had a mistake in the branch
     check. Added more log message details.
@@ -177,7 +175,10 @@ Diary_806 - The code in cron_task.php, public function execute(), does not
     requireduserfields list at about line 70. I also moved the list so I
     only had to create it once. I also tidied up the log messages, and added
     ones for older versions of Moodle.
-
+Diary_810 - Need settings for alwaysshowdescription. Added new db field,
+    alwaysshowdescription, added it to settings.php, added it to mod_form.php,
+    added code for branch check on view.php, and added features,
+    FEATURE_MOD_INTRO and FEATURE_SHOW_DESCRIPTION.
 
 
 

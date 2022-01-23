@@ -330,3 +330,5 @@ Diary Support Tracker.
     Moodle 4.0 only.
 20220120 Spent the past two days running new codechecker and phpdoc check
     trying to make sure everything is ready for v3.5.0 release.
+20220122 Spent the past couple of days working on always show description.
+    Finally got it to work for M3.11 and below. Need to check in M4.0.

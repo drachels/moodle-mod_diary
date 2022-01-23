@@ -142,7 +142,10 @@ function diary_delete_instance($id) {
 /**
  * Indicates API features that the diary supports.
  *
+ * @uses FEATURE_SHOW_DESCRIPTION
  * @uses FEATURE_MOD_INTRO
+ * @uses FEATURE_GRADE_HAS_GRADE
+ * @uses FEATURE_GRADE_OUTCOMES
  * @uses FEATURE_RATE
  * @uses FEATURE_GROUPS
  * @uses FEATURE_GROUPINGS
@@ -155,6 +158,8 @@ function diary_delete_instance($id) {
  */
 function diary_supports($feature) {
     switch ($feature) {
+        case FEATURE_SHOW_DESCRIPTION:
+            return true;
         case FEATURE_MOD_INTRO:
             return true;
         case FEATURE_GRADE_HAS_GRADE:
@@ -173,6 +178,7 @@ function diary_supports($feature) {
             return true;
         case FEATURE_BACKUP_MOODLE2:
             return true;
+
         default:
             return null;
     }

@@ -192,7 +192,7 @@ if ($form->is_cancelled()) {
             $newentry->entrycomment .= get_string('invalidtimechangeoriginal', 'diary', ['one' => userdate($entry->timecreated)]);
             $newentry->entrycomment .= get_string('invalidtimechangenewtime', 'diary', ['one' => userdate($newentry->timecreated)]);
             // Probably do not want to just arbitraily set a rating.
-            // Should leave it up to the teacher, otherwise will need to acertain rating settings for the activity.
+            // Should leave it up to the teacher, otherwise will need to ascertain rating settings for the activity.
             // @codingStandardsIgnoreLine
             // $newentry->rating = 1;
             $newentry->teacher = 2;

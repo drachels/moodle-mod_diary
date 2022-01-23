@@ -88,7 +88,15 @@ function xmldb_diary_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2020111900, 'diary');
     }
 
-    if ($oldversion < 2021100600) {
+    if ($oldversion < 2022012200) {
+        // Define field alwaysshowdescription to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('alwaysshowdescription', XMLDB_TYPE_INTEGER, '2', null, null, null, '0', 'introformat');
+
+        // Conditionally launch add field alwaysshowdescription.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
         // Define field entrybgc to be added to diary.
         $table = new xmldb_table('diary');
@@ -395,7 +403,7 @@ function xmldb_diary_upgrade($oldversion = 0) {
         }
 
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2021100600, 'diary');
+        upgrade_mod_savepoint(true, 2022012200, 'diary');
     }
 
     return true;

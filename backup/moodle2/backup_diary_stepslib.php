@@ -48,6 +48,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                                            array('name',
                                                  'intro',
                                                  'introformat',
+                                                 'alwaysshowdescription',
                                                  'days',
                                                  'scale',
                                                  'assessed',
