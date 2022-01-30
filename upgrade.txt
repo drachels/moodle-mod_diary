@@ -3,6 +3,10 @@ This files describes API changes and other work in the diary code.
 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
 
+=== 3.5.0+ ===
+Diary - Issue#16 at github regarding hardcode text. Changed strings as needed
+    and modified the three lines in the stats table regarding autorating item.
+    Modified its strings and converted to just two table lines.
 
 === 3.5.0 ===
 Diary_514 - Sort order label needs css setting. Removed all the hard coded h5's.

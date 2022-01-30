@@ -582,25 +582,20 @@ class diarystats {
 
         // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
         $autoratingdata = '<tr class="table-primary"><td colspan="4">'
-            .get_string('maxpossratinge', 'diary',
+            .get_string('maxpossrating', 'diary',
             ($diary->scale)).'</td></tr>';
         $currentratingdata = '';
+
         // 20210814 Show rating info only if enabled and item to rate is NOT = None.
         if ($diary->enableautorating && $diary->itemtype <> 0) {
             // 20210713 Need the item type and how many of them must be used in this diary entry.
             $itemtypes = array();
             $itemtypes = self::get_item_types($itemtypes);
             if (($diary->itemtype > 0) && ($diary->itemcount > 0)) {
-                $diary->intro .= get_string('itemtype_desc', 'diary',
+                '? '.$diary->intro .= get_string('itemtype_desc', 'diary',
                     ['one' => $itemtypes[$diary->itemtype],
                     'two' => $diary->itemcount]).'<br>';
             }
-
-            // 20211205 Converted from hardcoded text to string.
-            $autoratingdata .= '<tr class="table-info"><td colspan="4">'
-                .get_string('autoratingitemdetails', 'diary',
-                ['one' => $diary->itemcount, 'two' => $itemtypes[$diary->itemtype],
-                'three' => $diary->itempercent, 'four' => $itemtypes[$diary->itemtype]]).'</td></tr>';
 
             $item = strtolower($itemtypes[$diary->itemtype]);
 
@@ -615,17 +610,24 @@ class diarystats {
 
             $commonerrorrating = $diarystats->commonpercent;
 
-            // 20211119 Explanation of auto-rating check of what you have and need. 20211205 Converted to string.
-            $autoratingdata .= '<tr><td colspan="4" class="table-info">'
-                .get_string('autoratingitemexplained', 'diary', ['one' => $item,
-                'two' => $diary->itemcount, 'three' => $diarystats->$item,
-                'four' => (max($diary->itemcount - $diarystats->$item, 0))]).'</td></tr>';
+            // 20211205 Converted from hardcoded text to string. 20220130 Modified and moved here.
+            $autoratingdata .= '<tr class="table-info"><td colspan="4">'
+                .get_string('autoratingitemdetails', 'diary',
+                ['one' => $diary->itemcount,
+                'two' => $item,
+                'three' => $diary->itempercent,
+                'four' => $diarystats->$item,
+                'five' => (max($diary->itemcount - $diarystats->$item, 0))])
+                .'</td></tr>';
 
-            // 20211205 Converted to string.
+            // 20211205 Converted to string. 20220130 Modified string.
             $autoratingdata .= '<tr><td colspan="4" class="table-info">'
-                .get_string('autoratingitempenaltymath', 'diary', ('(max('.$diary->itemcount
-                .' - '.$diarystats->$item.', 0)) * '.$diary->itempercent.' = '
-                .(max($itemrating, 0)))).'</td></tr>';
+                .get_string('autoratingitempenaltymath', 'diary',
+                ['one' => $diary->itemcount,
+                'two' => $diarystats->$item,
+                'three' => $diary->itempercent,
+                'four' => (max($itemrating, 0))])
+                .'</td></tr>';
 
             // 20211217 Show auto-rating penalty with maximum points off limited to the maximum rating for this activity.
             if ((max($diary->itemcount - $diarystats->$item, 0)) > ($diary->scale)) {
@@ -635,16 +637,22 @@ class diarystats {
                 // If there are too few items, limit the rating to zero to prevent a negative rating.
                 $pointsoff = (max($diary->itemcount - $diarystats->$item, 0));
             }
-                // If possible points off results in a negative rating, limit the points off to 0.
-                $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
-                    .get_string('autoratingpotentialpentaly', 'diary', (max($diary->itemcount - $diarystats->$item, 0))
-                    .' * '.$diary->itempercent.'% or '.($pointsoff
-                    * $diary->itempercent)).' points off.</td></tr>';
+
+            // 20220130 Fixed hardcoded text. If possible points off results in a negative rating, limit the points off to 0.
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                .get_string('potautoratingerrpen', 'diary',
+                ['one' => (max($diary->itemcount - $diarystats->$item, 0)),
+                'two' => $diary->itempercent,
+                'three' => (max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent,
+                'four' => (max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent])
+                .'</td></tr>';
 
             // Show possible Glossary of common errors penalty. 20211208 Converted hardcoded text to string using {$a}.
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
-                 .get_string('potcommerrpen', 'diary', ['one' => $diarystats->commonerrors,
-                 'two' => $diary->errorpercent, 'three' => $diarystats->commonpercent,
+                 .get_string('potcommerrpen', 'diary',
+                 ['one' => $diarystats->commonerrors,
+                 'two' => $diary->errorpercent,
+                 'three' => $diarystats->commonpercent,
                  'four' => $commonerrorrating]).'</td></tr>';
 
             // 20211007 Calculate and show the possible overall rating. Modified 20211119.
