@@ -606,6 +606,13 @@ class diarystats {
                 $item = strtolower($itemtypes[$diary->itemtype]);
             }
 
+            /*
+             * Note: At this point $item contains the name of the item we are autorating.
+             * The use of $diarystats->$item, says give me the array item named xxx, which
+             * will then execute one of the function calls to return how many we have.
+             * For example, if $item = sentences, it will execute, self::get_stats_sentences($text).
+             * In return, we will get the number of sentences in the current entry.
+             */
             $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
 
             $commonerrorrating = $diarystats->commonpercent;
