@@ -322,13 +322,14 @@ class diarystats {
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
         $diarystats = (object)array('words' => self::get_stats_words($text),
                                     'chars' => self::get_stats_chars($text),
-                                    'minmaxpercent' => 0,
                                     'sentences' => self::get_stats_sentences($text),
                                     'paragraphs' => self::get_stats_paragraphs($text),
                                     'uniquewords' => self::get_stats_uniquewords($text),
+                                    'minmaxpercent' => 0,
                                     'shortwords' => 0,
                                     'mediumwords' => 0,
                                     'longwords' => 0,
+                                    'item' => 0,
                                     'itempercent' => 0,
                                     'fogindex' => 0,
                                     'commonerrors' => count($errors),
@@ -398,9 +399,6 @@ class diarystats {
             $tempminp = $diary->minparagraphlimit.' min';
             $tempmaxp = $diary->maxparagraphlimit.' max';
 
-            // Auto entry into the feedback entry comment field CANNOT be done here as
-            // you will get multiple duplicate entries as soon as the teacher saves one.
-
             // 20210703 Consolidated the table here so using one instance instead of two.
             $currentstats = '<table class="generaltable">'
                 .'<tr><td style="width: 25%">'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
@@ -448,9 +446,9 @@ class diarystats {
                            (number_format($diarystats->words / $diarystats->paragraphs, 1, '.', ''))).' </td></tr>'
 
                 .'<tr><td>'.get_string('lexicaldensity', 'diary')
-                    .' <a href="#" data-toggle="popover" data-content="'
-                    .get_string('lexicaldensity_help', 'diary').'">'.$itemp.'</a> '
-                    .$diarystats->lexicaldensity.'</td>'
+                        .' <a href="#" data-toggle="popover" data-content="'
+                        .get_string('lexicaldensity_help', 'diary').'">'.$itemp.'</a> '
+                        .$diarystats->lexicaldensity.'</td>'
                     .'<td>'.get_string('fkgrade', 'diary')
                         .' <a href="#" data-toggle="popover" data-content="'
                         .get_string('fkgrade_help', 'diary').'">'.$itemp.'</a> '
@@ -471,9 +469,7 @@ class diarystats {
                 return $currentstats;
 
             }
-            // 20211212 Move the echo's to results file so they can be used by the new, Add to feedback, button.
-            // 20211007 An experiment for the output.
-            // echo $currentstats;
+            // 20211212 Moved the echo's to results file so they can be used by the new, Add to feedback, button.
         } else {
             // 20211230 If enablestats is off but autorating is on, we still need to define the start of the table.
             $currentstats = '<table class="generaltable">';
@@ -499,13 +495,14 @@ class diarystats {
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
         $diarystats = (object)array('words' => self::get_stats_words($text),
                                     'chars' => self::get_stats_chars($text),
-                                    'minmaxpercent' => 0,
                                     'sentences' => self::get_stats_sentences($text),
                                     'paragraphs' => self::get_stats_paragraphs($text),
                                     'uniquewords' => self::get_stats_uniquewords($text),
+                                    'minmaxpercent' => 0,
                                     'shortwords' => 0,
                                     'mediumwords' => 0,
                                     'longwords' => 0,
+                                    'item' => 0,
                                     'itempercent' => 0,
                                     'fogindex' => 0,
                                     'commonerrors' => count($errors),
@@ -559,13 +556,14 @@ class diarystats {
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
         $diarystats = (object)array('words' => self::get_stats_words($text),
                                     'chars' => self::get_stats_chars($text),
-                                    'minmaxpercent' => 0,
                                     'sentences' => self::get_stats_sentences($text),
                                     'paragraphs' => self::get_stats_paragraphs($text),
                                     'uniquewords' => self::get_stats_uniquewords($text),
+                                    'minmaxpercent' => 0,
                                     'shortwords' => 0,
                                     'mediumwords' => 0,
                                     'longwords' => 0,
+                                    'item' => 0,
                                     'itempercent' => 0,
                                     'fogindex' => 0,
                                     'commonerrors' => count($errors),
@@ -579,7 +577,8 @@ class diarystats {
                                     'newtotalsyllabels' => 0,
                                     'fkgrade' => 0,
                                     'freadease' => 0);
-
+        $debug = array();
+        $debug['CP0 entered get_auto_rating_stats($entry, $diary) function and checking item: '] = $diarystats->item;
         // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
         $autoratingdata = '<tr class="table-primary"><td colspan="4">'
             .get_string('maxpossrating', 'diary',
@@ -607,14 +606,32 @@ class diarystats {
             }
 
             /*
-             * Note: At this point $item contains the name of the item we are autorating.
-             * The use of $diarystats->$item, says give me the array item named xxx, which
+             * Note: At this point $item contains the name of the item we are auto-rating.
+             * The use of $diarystats->$item, references the array index named xxx, which
              * will then execute one of the function calls to return how many we have.
              * For example, if $item = sentences, it will execute, self::get_stats_sentences($text).
              * In return, we will get the number of sentences in the current entry.
              */
-            $itemrating = ($diary->itemcount - $diarystats->$item) * $diary->itempercent;
+            // 20220201 Get the number of rated items in the entry for current autorating item.
+            if (!empty($item)) {
+                if ($item === "chars") {
+                    $diarystats->item = $diarystats->chars;
+                }
+                if ($item === "words") {
+                    $diarystats->item = $diarystats->words;
+                }
+                if ($item === "sentences") {
+                    $diarystats->item = $diarystats->sentences;
+                }
+                if ($item === "paragraphs") {
+                    $diarystats->item = $diarystats->paragraphs;
+                }
+            }
 
+            $itemrating = ($diary->itemcount - $diarystats->item) * $diary->itempercent;
+
+            // 20220206 Added these two due to string changes.
+            $diarystats->commonpercent = $diarystats->commonerrors * $diary->errorpercent;
             $commonerrorrating = $diarystats->commonpercent;
 
             // 20211205 Converted from hardcoded text to string. 20220130 Modified and moved here.
@@ -623,35 +640,35 @@ class diarystats {
                 ['one' => $diary->itemcount,
                 'two' => $item,
                 'three' => $diary->itempercent,
-                'four' => $diarystats->$item,
-                'five' => (max($diary->itemcount - $diarystats->$item, 0))])
+                'four' => $diarystats->item,
+                'five' => (max($diary->itemcount - $diarystats->item, 0))])
                 .'</td></tr>';
 
             // 20211205 Converted to string. 20220130 Modified string.
             $autoratingdata .= '<tr><td colspan="4" class="table-info">'
                 .get_string('autoratingitempenaltymath', 'diary',
                 ['one' => $diary->itemcount,
-                'two' => $diarystats->$item,
+                'two' => $diarystats->item,
                 'three' => $diary->itempercent,
                 'four' => (max($itemrating, 0))])
                 .'</td></tr>';
 
             // 20211217 Show auto-rating penalty with maximum points off limited to the maximum rating for this activity.
-            if ((max($diary->itemcount - $diarystats->$item, 0)) > ($diary->scale)) {
+            if ((max($diary->itemcount - $diarystats->item, 0)) > ($diary->scale)) {
                 // If there are a lot of extra items, limit the rating to the maximum rating.
-                $pointsoff = (min($diary->itemcount - $diarystats->$item, 100));
+                $pointsoff = (min($diary->itemcount - $diarystats->item, 100));
             } else {
                 // If there are too few items, limit the rating to zero to prevent a negative rating.
-                $pointsoff = (max($diary->itemcount - $diarystats->$item, 0));
+                $pointsoff = (max($diary->itemcount - $diarystats->item, 0));
             }
 
             // 20220130 Fixed hardcoded text. If possible points off results in a negative rating, limit the points off to 0.
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
                 .get_string('potautoratingerrpen', 'diary',
-                ['one' => (max($diary->itemcount - $diarystats->$item, 0)),
+                ['one' => (max($diary->itemcount - $diarystats->item, 0)),
                 'two' => $diary->itempercent,
-                'three' => (max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent,
-                'four' => (max($diary->itemcount - $diarystats->$item, 0)) * $diary->itempercent])
+                'three' => (max($diary->itemcount - $diarystats->item, 0)) * $diary->itempercent,
+                'four' => (max($diary->itemcount - $diarystats->item, 0)) * $diary->itempercent])
                 .'</td></tr>';
 
             // Show possible Glossary of common errors penalty. 20211208 Converted hardcoded text to string using {$a}.
@@ -675,7 +692,7 @@ class diarystats {
                             .'</td></tr>';
 
             // 20211212 Actual autorating.
-            $currentratingdata = ($diary->scale - ((max($diary->itemcount - $diarystats->$item, 0))
+            $currentratingdata = ($diary->scale - ((max($diary->itemcount - $diarystats->item, 0))
                 * $diary->itempercent) - $commonerrorrating);
         }
         // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
