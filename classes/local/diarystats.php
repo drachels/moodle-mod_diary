@@ -577,8 +577,6 @@ class diarystats {
                                     'newtotalsyllabels' => 0,
                                     'fkgrade' => 0,
                                     'freadease' => 0);
-        $debug = array();
-        $debug['CP0 entered get_auto_rating_stats($entry, $diary) function and checking item: '] = $diarystats->item;
         // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
         $autoratingdata = '<tr class="table-primary"><td colspan="4">'
             .get_string('maxpossrating', 'diary',
@@ -605,25 +603,19 @@ class diarystats {
                 $item = strtolower($itemtypes[$diary->itemtype]);
             }
 
-            /*
-             * Note: At this point $item contains the name of the item we are auto-rating.
-             * The use of $diarystats->$item, references the array index named xxx, which
-             * will then execute one of the function calls to return how many we have.
-             * For example, if $item = sentences, it will execute, self::get_stats_sentences($text).
-             * In return, we will get the number of sentences in the current entry.
-             */
             // 20220201 Get the number of rated items in the entry for current autorating item.
+            // 20220208 Switched to if check using strings.
             if (!empty($item)) {
-                if ($item === "chars") {
+                if ($item === strtolower(get_string('chars', 'diary'))) {
                     $diarystats->item = $diarystats->chars;
                 }
-                if ($item === "words") {
+                if ($item === strtolower(get_string('words', 'diary'))) {
                     $diarystats->item = $diarystats->words;
                 }
-                if ($item === "sentences") {
+                if ($item === strtolower(get_string('sentences', 'diary'))) {
                     $diarystats->item = $diarystats->sentences;
                 }
-                if ($item === "paragraphs") {
+                if ($item === strtolower(get_string('paragraphs', 'diary'))) {
                     $diarystats->item = $diarystats->paragraphs;
                 }
             }

@@ -332,6 +332,9 @@ Diary Support Tracker.
     trying to make sure everything is ready for v3.5.0 release.
 20220122 Spent the past couple of days working on always show description.
     Finally got it to work for M3.11 and below. Need to check in M4.0.
-20220130 Released DIary 3.5.0 a few days ago. Dinis M. notified me of some
+20220130 Released Diary 3.5.0 a few days ago. Dinis M. notified me of some
     string errors and possible code error. I have fixed the strings,
     modified the code a little and am pushing v3.5.0+ to github.
+20220208 Had to change the code again for issue#16. Was checking while
+    using hardcoded text, but have changed to strings.
+

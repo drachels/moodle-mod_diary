@@ -3,11 +3,16 @@ This files describes API changes and other work in the diary code.
 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
 
-=== 3.5.0+ ===
+=== 3.5.1 ===
+Diary_815 - Issue#16 at github regarding hardcoded text.  20220208 Revisited
+    issue#16 as the .01+ version introduced some hard coded text checking that
+    needed to be changed to string checks so it would work with other languages.
+
+=== 3.5.0.01+ ===
 Diary_815 - Issue#16 at github regarding hardcoded text. Changed strings as needed
     and modified the three lines in the stats table regarding autorating item.
     Modified its strings to use multiple {$a}'s and converted to just two lines
-    of text in the table.
+    of text in the table. 20220208 Revisited issue#16
 Diary_817 - Math code missing for Potential Common error penalty. Switch string
     to use multiple {$a}'s in strings and accidentally left off the math code
     for this answer. Added the math calculation back and verified it is working
