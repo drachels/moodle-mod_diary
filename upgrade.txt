@@ -7,6 +7,10 @@ Diary_779 - Need to work on the help pop up windows for stats. Currently
 Diary_815 - Issue#16 at github regarding hardcoded text.  20220208 Revisited
     issue#16 as the .01+ version introduced some hard coded text checking that
     needed to be changed to string checks so it would work with other languages.
+Diary_818 - Moodle reports two warnings for backup. Upon close examination of
+    the backup_diary_stepslib.php file, I found the errors. I changed multiple
+    filed names, in the install.xml file, but I missed changing two field names
+    in the backup_diary_stepslib.php.
 
 === 3.5.0.01+ ===
 Diary_815 - Issue#16 at github regarding hardcoded text. Changed strings as needed
