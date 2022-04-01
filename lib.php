@@ -142,45 +142,76 @@ function diary_delete_instance($id) {
 /**
  * Indicates API features that the diary supports.
  *
- * @uses FEATURE_SHOW_DESCRIPTION
- * @uses FEATURE_MOD_INTRO
+ * @uses FEATURE_MOD_PURPOSE:
+ * @uses FEATURE__BACKUP_MOODLE2
+ * @uses FEATURE_COMPLETION_TRACKS_VIEWS
  * @uses FEATURE_GRADE_HAS_GRADE
  * @uses FEATURE_GRADE_OUTCOMES
- * @uses FEATURE_RATE
  * @uses FEATURE_GROUPS
  * @uses FEATURE_GROUPINGS
  * @uses FEATURE_GROUPMEMBERSONLY
- * @uses FEATURE_COMPLETION_TRACKS_VIEWS
- * @uses FEATURE__BACKUP_MOODLE2
- * @param string $feature
- *            FEATURE_xx constant for requested feature.
+ * @uses FEATURE_MOD_INTRO
+ * @uses FEATURE_RATE
+ * @uses FEATURE_SHOW_DESCRIPTION
+ * @param string $feature FEATURE_xx constant for requested feature.
  * @return mixed True if module supports feature, null if doesn't know.
  */
 function diary_supports($feature) {
-    switch ($feature) {
-        case FEATURE_SHOW_DESCRIPTION:
-            return true;
-        case FEATURE_MOD_INTRO:
-            return true;
-        case FEATURE_GRADE_HAS_GRADE:
-            return true;
-        case FEATURE_GRADE_OUTCOMES:
-            return false;
-        case FEATURE_RATE:
-            return true;
-        case FEATURE_GROUPS:
-            return true;
-        case FEATURE_GROUPINGS:
-            return true;
-        case FEATURE_GROUPMEMBERSONLY:
-            return true;
-        case FEATURE_COMPLETION_TRACKS_VIEWS:
-            return true;
-        case FEATURE_BACKUP_MOODLE2:
-            return true;
+    global $CFG;
+    if ($CFG->branch > 311) {
+        switch ($feature) {
+            case FEATURE_MOD_PURPOSE:
+                return MOD_PURPOSE_COLLABORATION;
+            case FEATURE_BACKUP_MOODLE2:
+                return true;
+            case FEATURE_COMPLETION_TRACKS_VIEWS:
+                return true;
+            case FEATURE_GRADE_HAS_GRADE:
+                return true;
+            case FEATURE_GRADE_OUTCOMES:
+                return false;
+            case FEATURE_GROUPS:
+                return true;
+            case FEATURE_GROUPINGS:
+                return true;
+            case FEATURE_GROUPMEMBERSONLY:
+                return true;
+            case FEATURE_MOD_INTRO:
+                return true;
+            case FEATURE_RATE:
+                return true;
+            case FEATURE_SHOW_DESCRIPTION:
+                return true;
 
-        default:
-            return null;
+            default:
+                return null;
+        }
+    } else {
+        switch ($feature) {
+            case FEATURE_BACKUP_MOODLE2:
+                return true;
+            case FEATURE_COMPLETION_TRACKS_VIEWS:
+                return true;
+            case FEATURE_GRADE_HAS_GRADE:
+                return true;
+            case FEATURE_GRADE_OUTCOMES:
+                return false;
+            case FEATURE_GROUPS:
+                return true;
+            case FEATURE_GROUPINGS:
+                return true;
+            case FEATURE_GROUPMEMBERSONLY:
+                return true;
+            case FEATURE_MOD_INTRO:
+                return true;
+            case FEATURE_RATE:
+                return true;
+            case FEATURE_SHOW_DESCRIPTION:
+                return true;
+
+            default:
+                return null;
+        }
     }
 }
 
