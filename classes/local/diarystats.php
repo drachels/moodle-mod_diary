@@ -461,6 +461,8 @@ class diarystats {
                         .' <a href="#" data-toggle="popover" data-content="'
                         .get_string('fogindex_help', 'diary').'">'.$itemp.'</a> '
                         .$diarystats->fogindex.'</td></tr>';
+                    //.'<tr><td colspan="5">This info is in the diarystats file, down around line 464 testing a location for a new general feedback text block. Probably will need to add some sort of deferred feedback capability on it so it can be restricted on when it can be seen.</td></tr>';
+
                 // 20211224 Moved return to prevent undefined variable: currentstats warning.
                 return $currentstats;
             } else {
