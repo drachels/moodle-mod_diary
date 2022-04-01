@@ -146,9 +146,10 @@ class provider implements \core_privacy\local\metadata\provider,
 
         $user = $contextlist->get_user();
         $userid = $user->id;
-        list ($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
-        $sql = "SELECT den.id,
+        $sql = "SELECT cm.id AS cmid,
+                       den.id,
                        den.userid,
                        den.timecreated,
                        den.timemodified,
@@ -156,47 +157,44 @@ class provider implements \core_privacy\local\metadata\provider,
                        den.rating,
                        den.entrycomment
                   FROM {context} c
-            INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
-            INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-            INNER JOIN {diary} j ON j.id = cm.instance
-             LEFT JOIN {diary_entries} as den ON den.diary = j.id
-                 WHERE den.userid = :userid AND c.id {$contextsql}";
-        $params = [
-            'contextlevel' => CONTEXT_MODULE,
-            'modname' => 'diary',
-            'userid' => $userid
-        ];
-        $params += $contextparams;
+                  JOIN {course_modules} cm ON cm.id = c.instanceid
+                  JOIN {diary} d ON d.id = cm.instance
+                  JOIN {diary_entries} den ON den.diary = d.id
+
+                 WHERE c.id $contextsql
+                   AND den.userid = :userid
+
+              ORDER BY cm.id, ci.position, ci.d
+        ";
+        $params = ['userid1' => $user->id] + $contextparams;
+        $lastcmid = null;
+        $itemdata = [];
 
         // Fetch the individual diarys entries.
         $diarys = $DB->get_recordset_sql($sql, $params);
         foreach ($diarys as $diary) {
-            list ($course, $cm) = get_course_and_cm_from_cmid($diary->cmid, 'diary');
-            $diaryobj = new \entry($diary, $cm, $course);
-            $context = $diaryobj->get_context();
-
-            $diaryentry = \core_privacy\local\request\helper::get_context_data($context, $contextlist->get_user());
-            \core_privacy\local\request\helper::export_context_files($context, $contextlist->get_user());
-
-            if (! empty($diaryentry->timecreated)) {
-                $diaryentry->timecreated = transform::datetime($diary->timecreated);
-            }
-            if (! empty($diaryentry->timemodified)) {
-                $diaryentry->timemodified = transform::datetime($diary->timemodified);
-            }
-            if (! empty($diaryentry->text)) {
-                $diaryentry->text = $diary->text;
-            }
-            if (! empty($diaryentry->rating)) {
-                $diaryentry->rating = $diary->rating;
-            }
-            if (! empty($diaryentry->entrycomment)) {
-                $diaryentry->entrycomment = $diary->entrycomment;
+            if ($lastcmid !== $diary->cmid) {
+                if ($itemdata) {
+                    self::export_diary_data_for_user($itemdata, $lastcmid, $user);
+                }
+                $itemdata = [];
+                $lastcmid = $diary->cmid;
             }
 
-            writer::with_context($context)->export_data([], $diaryentry);
+            $itemdata[] = (object)[
+                'timecreated' => $diary->timecreated ? transform::datetime($diary->timecreated) : '',
+                'timemodified' => $diary->timemodified ? transform::datetime($diary->timemodified) : '',
+                'text' => $diary->text,
+                'rating' => $diary->rating,
+                'entrycomment' => $diary->entrycomment,
+                'teacher' => $diary->teacher,
+                'timemarked' => $diary->timemarked
+            ];
         }
         $diarys->close();
+        if ($itemdata) {
+            self::export_diary_data_for_user($itemdata, $lastcmid, $user);
+        }
     }
 
     /**
