@@ -3,14 +3,26 @@ This files describes API changes and other work in the diary code.
 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
 
+=== 3.5.2 ===
+Diary_823 - Missing completion information on the view.php page. Got
+    it working on course page.
+Diary_797 - Need new Moodle 4.0 icon. Created a branch check and
+    new switch for Moodle version higher than 3.11 that will use
+    the new MOD_PURPOSE_COLLABORATION.
+Diary_812 - Diary v4.0 changes for Moodle 4.0. Made a number of changes. See
+    the ticket for details.
+
 === 3.5.1 ===
 Diary_815 - Issue#16 at github regarding hardcoded text.  20220208 Revisited
     issue#16 as the .01+ version introduced some hard coded text checking that
     needed to be changed to string checks so it would work with other languages.
 Diary_818 - Moodle reports two warnings for backup. Upon close examination of
     the backup_diary_stepslib.php file, I found the errors. I changed multiple
-    filed names, in the install.xml file, but I missed changing two field names
+    fieled names, in the install.xml file, but I missed changing two field names
     in the backup_diary_stepslib.php.
+Diary_822 - When I run php adhoc_task.php --execute I get an Undefined property
+    for $cmid. 20220220 Made changes in the privacy.php file as needed.
+
 
 === 3.5.0.01+ ===
 Diary_815 - Issue#16 at github regarding hardcoded text. Changed strings as needed
@@ -73,11 +85,9 @@ Diary_742 - Need to pass diary->errorcmid to the get common errors function. Ins
 Diary_743 - The mod_form.php needs updating for new settings. Added new settings
     and other bits of code as needed to implement the new settings. The list still
     needs work. It is not saving and restoring, yet.
-
 Diary_744 - The settings.php needs updating for new settings. Added headings, strings,
     and settings as needed. Some future use code is no longer there, but a copy
     is in the beta and alpha code versions.
-
 Diary_745 - Need to develop additional statistics for each diary entry. Have
     created 20 stats and now need to thoroughly test them. Still in development!
     20210718 Rewrote count_syllables function and totalsyllables. 20210719 Added
@@ -176,6 +186,10 @@ Diary_792 - Notice: Undefined variable: currentstats in
 Diary_793 - When looking at Complete Report you get:- Exception - Call to
     undefined function diary_format_entry_text(). Function was moved to
     results.php but the call was not modified to: 
+Diary_795 - Automatically added Notes in the Description should only appear
+    when editing/making new entry. This is now handled as a function call
+    with the, public static function get_minmaxes($diary) { located in
+    diarystats.php.
 Diary_796 - enableautorating is not working correctly. This was actually
     being caused by two problems, one in the mod_form.php file and one
     in the diarystats.php file. See the ticket for details. 
