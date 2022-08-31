@@ -80,7 +80,7 @@ function diary_update_instance($diary) {
         $diary->assessed = 0;
     }
 
-    if (empty($diary->ratingtime) or empty($diary->assessed)) {
+    if (empty($diary->ratingtime) || empty($diary->assessed)) {
         $diary->assesstimestart = 0;
         $diary->assesstimefinish = 0;
     }
@@ -549,7 +549,7 @@ function diary_print_overview($courses, &$htmlarray) {
             ));
         }
 
-        if ($courses[$diary->course]->format == 'weeks' and $diary->days) {
+        if ($courses[$diary->course]->format == 'weeks' && $diary->days) {
 
             $coursestartdate = $courses[$diary->course]->startdate;
 
@@ -625,7 +625,7 @@ function diary_update_grades($diary, $userid = 0, $nullifnone = true) {
         diary_grade_item_update($diary);
     } else if ($grades = diary_get_user_grades($diary, $userid)) {
         diary_grade_item_update($diary, $grades);
-    } else if ($userid and $nullifnone) {
+    } else if ($userid && $nullifnone) {
         $grade = new stdClass();
         $grade->userid = $userid;
         $grade->rawgrade = null;
@@ -651,7 +651,7 @@ function diary_grade_item_update($diary, $grades = null) {
         'idnumber' => $diary->cmidnumber
     );
 
-    if (! $diary->assessed or $diary->scale == 0) {
+    if (! $diary->assessed || $diary->scale == 0) {
         $params['gradetype'] = GRADE_TYPE_NONE;
     } else if ($diary->scale > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
@@ -726,7 +726,7 @@ function diary_get_users_done($diary, $currentgroup, $sortoption) {
         $canadd = has_capability('mod/diary:addentries', $context, $user);
         $entriesmanager = has_capability('mod/diary:manageentries', $context, $user);
 
-        if (! $entriesmanager and ! $canadd) {
+        if (! $entriesmanager && ! $canadd) {
             unset($diarys[$key]);
         }
     }

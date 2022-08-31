@@ -3,220 +3,227 @@ This files describes API changes and other work in the diary code.
 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
 
-=== 3.5.2 ===
+=== 3.5.3 === Pending
+Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive, and errorignorebreaks.
+    Added fields to the xml file. Updated the upgrade.php file. Updated backup files.
+    Updated the mod_form.php file.
+Diary_750 - V3.4.1 has three code style errors. Added the missing final blank line
+    to files diarystats.php, renderer.php, and settings.php. Pushed to github.
+    This ticket seems to be missing from my tracker system.
+Diary_736 - Need a way to slectively turn off autosave. It is not needed when
+    starting a totally new entry.
+Diary_737 - Config settings are not all named the same. Added mod_ to the four
+    items that were missing it. As of 20220828 still have three.
+Diary_812 - Diary v4.0 changes for Moodle 4.0. Made a number of changes. See
+    the ticket for details. Mostly was removing un-needed code.
 Diary_823 - Missing completion information on the view.php page. Got
-    it working on course page.
-Diary_797 - Need new Moodle 4.0 icon. Created a branch check and
+    it working on course page - BUT - the ticket is still open for further
+    development to also require X number of Posts.
+Diary_845 - Invalid get_string() identifier: 'lastedited' or component 'diary'.
+    Changed diary/db/mobile.php lang string from ['lastedited', 'diary'], so
+    that it is now ['lastedited', 'moodle'].
+Diary_912 - When auto-rating is set for characters, it always reports zero. Basically,
+    changed a number of places where it was trying to use 'chars', so that it was
+    now using the full word, 'characters.' Also changed the final line of the
+    auto-rating to show 0%, instead of a negative number.
+
+=== 3.5.2 === Released 2022040100
+Diary_797v - Need new Moodle 4.0 icon. Created a branch check and
     new switch for Moodle version higher than 3.11 that will use
     the new MOD_PURPOSE_COLLABORATION.
-Diary_812 - Diary v4.0 changes for Moodle 4.0. Made a number of changes. See
-    the ticket for details.
 
-=== 3.5.1 ===
-Diary_815 - Issue#16 at github regarding hardcoded text.  20220208 Revisited
+=== 3.5.1 === Released 2022021200
+Diary_815v - Issue#16 at github regarding hardcoded text.  20220208 Revisited
     issue#16 as the .01+ version introduced some hard coded text checking that
     needed to be changed to string checks so it would work with other languages.
-Diary_818 - Moodle reports two warnings for backup. Upon close examination of
+Diary_818v - Moodle reports two warnings for backup. Upon close examination of
     the backup_diary_stepslib.php file, I found the errors. I changed multiple
     fieled names, in the install.xml file, but I missed changing two field names
     in the backup_diary_stepslib.php.
-Diary_822 - When I run php adhoc_task.php --execute I get an Undefined property
+Diary_822v - When I run php adhoc_task.php --execute I get an Undefined property
     for $cmid. 20220220 Made changes in the privacy.php file as needed.
 
 
-=== 3.5.0.01+ ===
-Diary_815 - Issue#16 at github regarding hardcoded text. Changed strings as needed
+=== 3.5.0.01+ === Released 2022012201
+Diary_815v - Issue#16 at github regarding hardcoded text. Changed strings as needed
     and modified the three lines in the stats table regarding autorating item.
     Modified its strings to use multiple {$a}'s and converted to just two lines
     of text in the table. 20220208 Revisited issue#16
-Diary_817 - Math code missing for Potential Common error penalty. Switch string
+Diary_817v - Math code missing for Potential Common error penalty. Switch string
     to use multiple {$a}'s in strings and accidentally left off the math code
     for this answer. Added the math calculation back and verified it is working
     correctly.
 
-=== 3.5.0 ===
-Diary_514 - Sort order label needs css setting. Removed all the hard coded h5's.
+=== 3.5.0 === Released 2022012200
+Diary_514v - Sort order label needs css setting. Removed all the hard coded h5's.
     There were about 21 of them, 19 in view.php and two in the language file. 
     Added classes, one for the whole table and one for some table cells.
-Diary_654 - There is a request for using Atto editor in report.php for feedback.
+Diary_654v - There is a request for using Atto editor in report.php for feedback.
     Have added the Atto editor so it appears on both the report.php and
     reportsingle.php pages. Still need to add file handling.
-Diary_707 - link to index.php page on report.php page should be on the same line
+Diary_707v - link to index.php page on report.php page should be on the same line
     as the toolbar. Made code changes as needed to move the link.
-Diary_711 - File report.php has hard coded tags that should be removed. Removed
+Diary_711v - File report.php has hard coded tags that should be removed. Removed
     them as part of my work in CSS changes. 20211201 Converted more hardcoded
     text to strings some of which were in diarystats.php.
-Diary_722 - Should move toolbar to the right like I did on the report.php page.
+Diary_722v - Should move toolbar to the right like I did on the report.php page.
     Moved toolbar to the right on view.php page.
-Diary_730 - Need an enablestats setting. 20210812 Created the new setting
+Diary_730v - Need an enablestats setting. 20210812 Created the new setting
     along with new fields, selector, strings, and code as needed.
 20210812 Tested and seems to be working.
-Diary_732 - Missing the Diary icon on moodle.org. 20210815 This was Diary_765
+Diary_732v - Missing the Diary icon on moodle.org. 20210815 This was Diary_765
     on moodle311. 20210815 Forget what day I did it, but I changed from svg file
     to gif and the icon now shows on moodle.org.
-Diary_733 - See about moving functions from mod_form to diarystats. Was Diary_764
+Diary_733v - See about moving functions from mod_form to diarystats. Was Diary_764
     which I have abandoned on moodle311. 20210712 Moved function get_item_types($itemtypes).
     20210712 Moved function get_rating_options($plugin). 20210712 Moved 
     get_showhide_options($plugin).
-Diary_734 - Need to convert from lib.php cron function to /classes/task/cron_task.php.
+Diary_734v - Need to convert from lib.php cron function to /classes/task/cron_task.php.
     Added tasks.php file in db folder. Added task folder in classes folder. Added
     cron_task.php file in classes/task/. The file, cron_tasks.php, still needs
     some more work.
-Diary_736 - Need a way to slectively turn off autosave. It is not needed when
-    starting a totally new entry.
-Diary_737 - Config settings are not all named the same. Added mod_ to the four
-    items that were missing it.
-Diary_738 - Need activity color setting for entry's. Added new fields for the
+Diary_738v - Need activity color setting for entry's. Added new fields for the
     two colors in mdl_diary table. Made changes to the install.xml and upgrade.php
     to add two new fields, entrybgc and entrytextbgc. Updated the mod_form.php
     file to now have appearances settings for the two colors. Added code changes
     so the new settings are actually used. Added code changes to backup, which
     was tested and it worked as expected.
-Diary_739 - Teacher's name is missing from reports. Added a new line break which
+Diary_739v - Teacher's name is missing from reports. Added a new line break which
     moved Rating and Average of ratings down one line. Then added code to output
     the name of the last teacher to give feedback/rating. Seems to be working as
     expected.
-Diary_740 - Need new DB fields for new statistics settings. Added nine new fields
+Diary_740v - Need new DB fields for new statistics settings. Added nine new fields
     to the mdl_diary table. Have gone back and added more fields for added ratings.
-Diary_742 - Need to pass diary->errorcmid to the get common errors function. Instead
+Diary_742v - Need to pass diary->errorcmid to the get common errors function. Instead
     of just passing $text(cleaned plain text) and $errorcmid(actually $diary->errorcmid),
     I switched to passing $text and $diary. I found that I needed another item from
     $diary, so it is easiest just to use the whole $diary array.
-Diary_743 - The mod_form.php needs updating for new settings. Added new settings
+Diary_743v - The mod_form.php needs updating for new settings. Added new settings
     and other bits of code as needed to implement the new settings. The list still
     needs work. It is not saving and restoring, yet.
-Diary_744 - The settings.php needs updating for new settings. Added headings, strings,
+Diary_744v - The settings.php needs updating for new settings. Added headings, strings,
     and settings as needed. Some future use code is no longer there, but a copy
     is in the beta and alpha code versions.
-Diary_745 - Need to develop additional statistics for each diary entry. Have
+Diary_745v - Need to develop additional statistics for each diary entry. Have
     created 20 stats and now need to thoroughly test them. Still in development!
     20210718 Rewrote count_syllables function and totalsyllables. 20210719 Added
     two new class files: pluralise.php and syllables.php that greatly improve
     the syllable count accuracy.
-Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive, and errorignorebreaks.
-    Added fields to the xml file. Updated the upgrade.php file. Updated backup files.
-    Updated the mod_form.php file.
-Diary_749 - Multiple errors when, Type of countable items, is None. Added a check
+Diary_749v - Multiple errors when, Type of countable items, is None. Added a check
     to detect and prohibit when trying to autograde with None. 
-Diary_750 - V3.4.1 has three code style errors. Added the missing final blank line
-    to files diarystats.php, renderer.php, and settings.php. Pushed to github.
-Diary_767 - Need Journal to Diary entries migration tool - admin only! Got a
+Diary_767v - Need Journal to Diary entries migration tool - admin only! Got a
     version working with some error checking. 20211207 Added code, event string,
     and journal_to_diary_entries_transfer.php file to log transfer events. 20211208
     Made change to the diary id shown to reflect that of the destination diary
     instead of the diary the admin is in.
-Diary_768 - Journal to Diary xfr needs to tag the feedback with info that it is
+Diary_768v - Journal to Diary xfr needs to tag the feedback with info that it is
     a transfer entry. Created initial code version and it works as expected. Updated
     the code to fix error when the entry has no feedback in the journal as it is
     going to have some added during the transfer. 2021201 Changed code so that the
     inclusion of this is optional.
-Diary_769 - Journal to Diary xfr breaks if there are no Journal activities in the course.
+Diary_769v - Journal to Diary xfr breaks if there are no Journal activities in the course.
     This was fixed while working on other recent tickets -767, 768. Added a new string
     for this: $string['journalmissing'] = 'Currently, there are not any Journal
     activities in this course.';
-Diary_770 - Add autorating buttons Note: report.php > results.php has hardcoded
+Diary_770v - Add autorating buttons Note: report.php > results.php has hardcoded
     text on new buttons. - Fixed. Added code to create the two new buttons and they
     both reliably work on report.php page. STILL NEEDS WORK on the reportsingle.php
     page for the, Save all feedback and Add to feedback buttons!
     CODE IS IN results.php DOWN AROUND LINE NUMBER 420. 20220108 Fixed and only
     using the one, Save all feedback, button. Code for the, Add feedback, is there
     but commented out for later possible use.
-Diary_771 - Need a title centered at the top of the xfr new menu item. I added
+Diary_771v - Need a title centered at the top of the xfr new menu item. I added
     an h3 with a style to center align the new heading. Used an existing string.
-Diary_772 - The item being used in the auto-rating needs to detect when NOT short,
+Diary_772v - The item being used in the auto-rating needs to detect when NOT short,
     or you have more than required. Changed the code and now getting expected
     results.
-Diary_773 - Would be nice to include percentage to shortwords, mediumwords, and
+Diary_773v - Would be nice to include percentage to shortwords, mediumwords, and
     longwords. Added code to calculate the three percentages to two decimal places.
-Diary_774 - Would be nice to include a statistic for Average Syllables per word.
+Diary_774v - Would be nice to include a statistic for Average Syllables per word.
     Added code and error prevention for divide by zero for cases where student
     did not submit any text, only some kind of file.
-Diary_775 - Would be nice to include a statistic for Average word length in
+Diary_775v - Would be nice to include a statistic for Average word length in
     characters. Added code and error prevention for divide by zero for cases
     where student did not submit any text, only some kind of file.
-Diary_776 - Need to check for and prevent divide by zero errors in the stats.
+Diary_776v - Need to check for and prevent divide by zero errors in the stats.
     Broke up the $currentstats variable build and added an if check for
     uniquewords before I started adding any stats. Added a string for,
     No text detected.
 Diary_777 - FK Grade formula needs to include max. Changed formula to use
     max so that the FK Grade cannot go below zero.
-Diary_778 - Need to remove hard coded text and change to strings in diarystats.php.
+Diary_778v - Need to remove hard coded text and change to strings in diarystats.php.
     Made changes as needed and converted some to use {$a} to help simplify the
     code.
-Diary_780 - Need results displayed after doing a transfer. Added code in
+Diary_780v - Need results displayed after doing a transfer. Added code in
     journaltodiaryxfr.php file down around line 284 that checks counters added
     around lines 34, 35, 97 and 161. Also added a string, xfrresults, for the output.
-Diary_781 - Would be nice to fill the remaining statistics cell with Average words
+Diary_781v - Would be nice to fill the remaining statistics cell with Average words
     per paragraph. 20211208 Moved the last row, averages, of the statistics general
     table up one row so that Lexical density, FK Grade, Flesch reading ease and Fog
     index are in the last row of the table. I also added a new, Average words per
     paragraph, statistic in the last cell of the, averages, row.
-Diary_782 - Reportsingle user page needs Save and stay here button. Changed the code
+Diary_782v - Reportsingle user page needs Save and stay here button. Changed the code
     for the, Add to feedback and Clear feedback buttons along with a few other items
     and now the Save all feedback button seems to work the way I want it to. 
-Diary_783 - Code for, Save all my feedback, button in report.php and reportsingle.php
+Diary_783v - Code for, Save all my feedback, button in report.php and reportsingle.php
     needs cleanup. Eliminated all the escaped double quotes and changed them as
     needed to singles. Also moved duplicate code to a single function in results.php.
-Diary_784 - Down about line 446 breaks the view.php page. 20211229 Over the past few
+Diary_784v - Down about line 446 breaks the view.php page. 20211229 Over the past few
     days, I have worked on this and other related "undefined" variable errors and
     everything seems to be working now.
-Diary_785 - Autorating calculations are incorrect. 20211229 Over the past few weeks
+Diary_785v - Autorating calculations are incorrect. 20211229 Over the past few weeks
     I have worked on making sure the calculations are correct. Looks like they are
     now, no matter which Item I select for the autorating.
-Diary_786 - View all course diaries, link is giving a debug warning. Got it fixed
+Diary_786v - View all course diaries, link is giving a debug warning. Got it fixed
     but I think I need to revert the sql part of the code as it started causing an
     undefined variable warning on the view.php page. Got that fixed, but in a way
     I really don't like as it requires reading the diary record for every diary
     in the course, whereas the original method only needs to read one file. I have
     added the action in report.php line 397, and index.php line 146.
-Diary_787 - The, Save all my feedback, button on reportsingle.php page needs to
+Diary_787v - The, Save all my feedback, button on reportsingle.php page needs to
     stay on the page. The button now stays on reportsingle.php page. Changed
     form action from report.php to reportsingle.php.
-Diary_789 - View.php needs modifying due to changes in diarystats.php. Copied
+Diary_789v - View.php needs modifying due to changes in diarystats.php. Copied
     the code that generates the stats from results.php to file view.php, and
     stats table is now working again.
-Diary_791 - Need to move function diary_count_entries($diary, $groupid = 0)
+Diary_791v - Need to move function diary_count_entries($diary, $groupid = 0)
     from lib.php to results.php. 20211219 Copied the working function in the
     lib.php file and moved it to classes/local/result.php, making changes as
     needed to get it to work.
-Diary_792 - Notice: Undefined variable: currentstats in  
+Diary_792v - Notice: Undefined variable: currentstats in  
     /var/www/moodle40/mod/diary/classes/local/diarystats.php on line 469.
     Moved the return $currentstats; and return, inside the if and else of the,
     function get_diary_stats($entry, $diary). 
-Diary_793 - When looking at Complete Report you get:- Exception - Call to
+Diary_793v - When looking at Complete Report you get:- Exception - Call to
     undefined function diary_format_entry_text(). Function was moved to
     results.php but the call was not modified to: 
-Diary_795 - Automatically added Notes in the Description should only appear
+Diary_795v - Automatically added Notes in the Description should only appear
     when editing/making new entry. This is now handled as a function call
     with the, public static function get_minmaxes($diary) { located in
     diarystats.php.
-Diary_796 - enableautorating is not working correctly. This was actually
+Diary_796v - enableautorating is not working correctly. This was actually
     being caused by two problems, one in the mod_form.php file and one
     in the diarystats.php file. See the ticket for details. 
-Diary_803 - Error message, No text detected, quit working correctly. Modified
+Diary_803v - Error message, No text detected, quit working correctly. Modified
     code to add table definition and return $currentstats in diarystats.php
     file down around line 460. 
-Diary_804 - the cron_task.php file line 32 needs to be changed, removed,
+Diary_804v - the cron_task.php file line 32 needs to be changed, removed,
     or commented out. Leaving it at line 32. Had a mistake in the branch
     check. Added more log message details.
-Diary_805 - The Grade shown in various places is not being updated when the,
+Diary_805v - The Grade shown in various places is not being updated when the,
     Clear feedback, button is clicked. Added code to delete the correct
     rating table entry, then update the grade for the user.
-Diary_806 - The code in cron_task.php, public function execute(), does not
+Diary_806v - The code in cron_task.php, public function execute(), does not
     work correctly. Turned out that I only needed to add username to the
     requireduserfields list at about line 70. I also moved the list so I
     only had to create it once. I also tidied up the log messages, and added
     ones for older versions of Moodle.
-Diary_810 - Need settings for alwaysshowdescription. Added new db field,
+Diary_810v - Need settings for alwaysshowdescription. Added new db field,
     alwaysshowdescription, added it to settings.php, added it to mod_form.php,
     added code for branch check on view.php, and added features,
     FEATURE_MOD_INTRO and FEATURE_SHOW_DESCRIPTION.
 
-
-
-
-
-=== 3.4.1 ===
+=== 3.4.1 === Released 2021062100
 Diary_741 - In results.php, function is_available, is duplicate of, function
     diary_available . Removed code for, function is_available.
 Diary_742 - Issue#9 Possible to add entries for past date. Same fix as 743.
@@ -224,7 +231,7 @@ Diary_743 - When editdates is disabled, Save, is broken. Added code that detects
     a changed timecreated, and prevents it while automatically adding info about
     the attempted change in the entry feeback (entrycomment) area.
 
-=== 3.4.0 ===
+=== 3.4.0 === Released 2021061400
 Diary_142 - link to index.php page on report.php page should be on the same line
     as the toolbar. Made code changes to move the link.
 Diary_143 - Backup is broken, see issue #12 and #13 on github. These two issues
@@ -248,7 +255,7 @@ Diary_739 - A user can directly access edit.php via URL change when the diary is
     closed. Added code to check to see if the diary is closed, and if so, log an
     invalid access about it.
 
-=== 3.3.0 ===
+=== 3.3.0 === Released 2021051600
 Diary_707 - link to index.php page on report.php page should be on the same
     line as the toolbar. Moved the Index link down to the same line as the
     group selector and the toolbar.

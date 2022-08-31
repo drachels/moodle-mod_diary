@@ -221,9 +221,9 @@ if ($CFG->branch > 31) {
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($diaryname);
-// 20220123 Added if check. Also need to check Moodle 4.0 code. Was showing twice on last update.
-if ($diary->intro) {
+// 20220123 Added if check for an intro and also checks for Moodle 4.0 code. Was showing twice on last update.
+if (($diary->intro) && ($CFG->branch < 400)) {
+    echo $OUTPUT->heading($diaryname);
     echo $output->introduction($diary, $cm); // Output introduction in renderer.php.
 }
 
@@ -252,7 +252,7 @@ echo '<hr>';
 
 // Check to see if diary is currently available.
 $timenow = time();
-if ($course->format == 'weeks' and $diary->days) {
+if ($course->format == 'weeks' && $diary->days) {
     $timestart = $course->startdate + (($cw->section - 1) * 604800);
     if ($diary->days) {
         $timefinish = $timestart + (3600 * 24 * $diary->days);

@@ -321,7 +321,7 @@ class diarystats {
         $text = self::to_plain_text($entry->text, $entry->format);
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
         $diarystats = (object)array('words' => self::get_stats_words($text),
-                                    'chars' => self::get_stats_chars($text),
+                                    'characters' => self::get_stats_chars($text),
                                     'sentences' => self::get_stats_sentences($text),
                                     'paragraphs' => self::get_stats_paragraphs($text),
                                     'uniquewords' => self::get_stats_uniquewords($text),
@@ -354,7 +354,7 @@ class diarystats {
 
         }
         if ($diarystats->sentences) {
-            $diarystats->charspersentence = round($diarystats->chars / $diarystats->sentences, $precision);
+            $diarystats->charspersentence = round($diarystats->characters / $diarystats->sentences, $precision);
             $diarystats->wordspersentence = round($diarystats->words / $diarystats->sentences, $precision);
             $diarystats->longwordspersentence = round($diarystats->longwords / $diarystats->sentences, $precision);
             $diarystats->fkgrade = max(round(0.39 *
@@ -407,7 +407,8 @@ class diarystats {
                     .'<td style="width: 25%">'.get_string('commonerrorpercentset', 'diary', ($diary->errorpercent)).' </td></tr>';
             // 20211007 An output experiment check to see if there is any text.
             if ($diarystats->uniquewords > 0) {
-                $currentstats .= '<tr><td>'.get_string('chars', 'diary').' '.$tempminc.'/'.$diarystats->chars.'/'.$tempmaxc.'</td>'
+                $currentstats .= '<tr><td>'.get_string('chars', 'diary').' '
+                                 .$tempminc.'/'.$diarystats->characters.'/'.$tempmaxc.'</td>'
                     .'<td>'.get_string('words', 'diary').' '.$tempminw.'/'.$diarystats->words.'/'.$tempmaxw.'</td>'
                     .'<td>'.get_string('sentences', 'diary').' '.$tempmins.'/'.$diarystats->sentences.'/'.$tempmaxs.'</td>'
                     .'<td>'.get_string('paragraphs', 'diary').' '.$tempminp.'/'.$diarystats->paragraphs.'/'.$tempmaxp.'</td></tr>'
@@ -441,7 +442,7 @@ class diarystats {
                     .'<td>'.get_string('avgsylperword', 'diary',
                            (number_format($diarystats->totalsyllabels / $diarystats->uniquewords, 2, '.', ''))).'</td>'
                     .'<td>'.get_string('avgwordlenchar', 'diary',
-                           (number_format($diarystats->chars / $diarystats->words, 2, '.', ''))).'</td>'
+                           (number_format($diarystats->characters / $diarystats->words, 2, '.', ''))).'</td>'
                     .'<td>'.get_string('avgwordpara', 'diary',
                            (number_format($diarystats->words / $diarystats->paragraphs, 1, '.', ''))).' </td></tr>'
 
@@ -461,7 +462,10 @@ class diarystats {
                         .' <a href="#" data-toggle="popover" data-content="'
                         .get_string('fogindex_help', 'diary').'">'.$itemp.'</a> '
                         .$diarystats->fogindex.'</td></tr>';
-                    //.'<tr><td colspan="5">This info is in the diarystats file, down around line 464 testing a location for a new general feedback text block. Probably will need to add some sort of deferred feedback capability on it so it can be restricted on when it can be seen.</td></tr>';
+                    // ...'<tr><td colspan="5">This info is in the diarystats file, down around
+                    // ... line 464 testing a location for a new general feedback text block...
+                    // ... Probably will need to add some sort of deferred feedback capability...
+                    // on it so it can be restricted on when it can be seen.</td></tr>';...
 
                 // 20211224 Moved return to prevent undefined variable: currentstats warning.
                 return $currentstats;
@@ -496,7 +500,7 @@ class diarystats {
         $text = self::to_plain_text($entry->text, $entry->format);
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
         $diarystats = (object)array('words' => self::get_stats_words($text),
-                                    'chars' => self::get_stats_chars($text),
+                                    'characters' => self::get_stats_chars($text),
                                     'sentences' => self::get_stats_sentences($text),
                                     'paragraphs' => self::get_stats_paragraphs($text),
                                     'uniquewords' => self::get_stats_uniquewords($text),
@@ -557,7 +561,7 @@ class diarystats {
         $text = self::to_plain_text($entry->text, $entry->format);
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
         $diarystats = (object)array('words' => self::get_stats_words($text),
-                                    'chars' => self::get_stats_chars($text),
+                                    'characters' => self::get_stats_chars($text),
                                     'sentences' => self::get_stats_sentences($text),
                                     'paragraphs' => self::get_stats_paragraphs($text),
                                     'uniquewords' => self::get_stats_uniquewords($text),
@@ -598,18 +602,11 @@ class diarystats {
 
             $item = strtolower($itemtypes[$diary->itemtype]);
 
-            // Check $item if set to character use chars instead.
-            if ($item == 'characters') {
-                $item = 'chars';
-            } else {
-                $item = strtolower($itemtypes[$diary->itemtype]);
-            }
-
             // 20220201 Get the number of rated items in the entry for current autorating item.
             // 20220208 Switched to if check using strings.
             if (!empty($item)) {
                 if ($item === strtolower(get_string('chars', 'diary'))) {
-                    $diarystats->item = $diarystats->chars;
+                    $diarystats->item = $diarystats->characters;
                 }
                 if ($item === strtolower(get_string('words', 'diary'))) {
                     $diarystats->item = $diarystats->words;
@@ -656,7 +653,7 @@ class diarystats {
                 $pointsoff = (max($diary->itemcount - $diarystats->item, 0));
             }
 
-            // 20220130 Fixed hardcoded text. If possible points off results in a negative rating, limit the points off to 0.
+            // 20220130 Fixed hardcoded text. If, possible points off, results in a negative rating, limit the points off to 0.
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
                 .get_string('potautoratingerrpen', 'diary',
                 ['one' => (max($diary->itemcount - $diarystats->item, 0)),
@@ -677,12 +674,12 @@ class diarystats {
             $currentratingdisp = $diary->scale.' - '
                                  .($pointsoff * $diary->itempercent)
                                  .' - '.$commonerrorrating. ' = '
-                                 .($diary->scale - ($pointsoff
-                                                   * $diary->itempercent)
-                                                   - $commonerrorrating);
+                                 .($diary->scale - ($pointsoff * $diary->itempercent) - $commonerrorrating);
 
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
-                            .get_string('currpotrating', 'diary', ($currentratingdisp))
+                            .get_string('currpotrating', 'diary',
+                            ['one' => $currentratingdisp,
+                            'two' => (max(($diary->scale - ($pointsoff * $diary->itempercent)) - $commonerrorrating, 0))])
                             .'</td></tr>';
 
             // 20211212 Actual autorating.
@@ -720,7 +717,8 @@ class diarystats {
      * @ return int The number of characters.
      */
     public static function get_stats_chars($entry) {
-        return core_text::strlen($entry);
+        // ...return core_text::strlen($entry);...
+        return strlen($entry);
     }
 
     /**

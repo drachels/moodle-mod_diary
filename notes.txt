@@ -338,3 +338,7 @@ Diary Support Tracker.
 20220208 Had to change the code again for issue#16. Was checking while
     using hardcoded text, but have changed to strings.
 20220212 Fixed two moodle.org code prechecks for externalbackup warnings.
+20220825 Housecleaning verifying tickets.
+20220830 Fixed problem, when auto-rating was set to characters, where no
+    matter how much I typed, it was reporting I had zero.
+20220831 Ran and fixed warnings/errors reported by codechecker.
