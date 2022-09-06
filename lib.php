@@ -161,7 +161,7 @@ function diary_supports($feature) {
     if ($CFG->branch > 311) {
         switch ($feature) {
             case FEATURE_MOD_PURPOSE:
-                return MOD_PURPOSE_COLLABORATION;
+                return MOD_PURPOSE_ASSESSMENT;
             case FEATURE_BACKUP_MOODLE2:
                 return true;
             case FEATURE_COMPLETION_TRACKS_VIEWS:

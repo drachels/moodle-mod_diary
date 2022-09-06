@@ -52,9 +52,6 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($strplural));
 
-
-
-
 if (! $diarys = get_all_instances_in_course('diary', $course)) {
     notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
     die();

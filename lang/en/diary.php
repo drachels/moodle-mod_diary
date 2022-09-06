@@ -41,7 +41,11 @@ $string['autorating_help'] = 'These settings define the defaults for autorating 
 $string['autorating_title'] = 'Auto-rating enable';
 $string['autorating'] = 'Auto-rating';
 $string['autoratingitempercentset'] = 'Auto-rating Item percent setting {$a}%';
-$string['autoratingitemdetails'] = 'The item for the auto-rating is {$a->one} or more {$a->two} with a possible {$a->three}% penalty for each missing one.<br>You have {$a->four}. You need to come up with {$a->five}.';
+
+$string['autoratingbelowmaxitemdetails'] = 'Auto-rating requires {$a->one} or more {$a->two} with a possible {$a->three}% penalty for each missing one.<br>You have {$a->four}. You need to come up with {$a->five}. Possible penalty is {$a->six} points.';
+
+$string['autoratingovermaxitemdetails'] = 'Auto-rating limit is a maximum of {$a->one} {$a->two} with a possible {$a->three}% penalty for each extra one.<br>You have {$a->four}, which is {$a->five} too many. Possible penalty is {$a->six} points.';
+
 $string['autoratingitempenaltymath'] = 'The automatic item rating penalty math is (max({$a->one} - {$a->two}, 0)) * {$a->three} =  {$a->four}.<br> Note: max prevents negative numbers caused by having more than is required.';
 $string['availabilityhdr'] = 'Availability';
 $string['avgsylperword'] = 'Average syllables per word {$a}';
@@ -222,6 +226,10 @@ $string['maxwordlimit_help'] = 'If a number is entered, the user must use less w
 $string['maxwordlimit'] = 'Word count maximum';
 $string['mediumwords_help'] = 'Medium words are words that have two syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
 $string['mediumwords'] = 'Unique medium words';
+
+$string['min'] = ' min';
+$string['max'] = ' max';
+
 $string['mincharacterlimit_desc'] = 'Note: This entry must use a <strong>minimum of {$a} characters.</strong>';
 $string['mincharacterlimit_help'] = 'If a number is entered, the user must use more characters than the minimum number listed.';
 $string['mincharacterlimit'] = 'Character count minimum';
@@ -250,7 +258,7 @@ $string['missing'] = 'Missing';
 $string['modulename_help'] = 'The diary activity enables teachers to obtain students feedback
  over a period of time.';
 $string['modulename'] = 'Diary';
-$string['modulenameplural'] = 'Diary\'s';
+$string['modulenameplural'] = 'Diaries';
 $string['needsgrading'] = ' This entry has not been given feedback or rated yet.';
 $string['needsregrade'] = 'This entry has changed since feedback or a rating was given.';
 $string['newdiaryentries'] = 'New diary entries';
@@ -281,7 +289,7 @@ $string['pluginadministration'] = 'Diary module administration';
 $string['pluginname'] = 'Diary';
 $string['popoverhelp'] = 'click for info';
 
-$string['potautoratingerrpen'] = 'Potential Autorating error penalty: {$a->one} * {$a->two} = {$a->three}% or {$a->four} points off.';
+$string['potautoratingerrpen'] = 'Potential Autorating error penalty: {$a->one}% or {$a->two} points off.';
 $string['potcommerrpen'] = 'Potential Common error penalty: {$a->one} * {$a->two} = {$a->three}% or {$a->four} points off.';
 
 $string['present'] = 'Present';

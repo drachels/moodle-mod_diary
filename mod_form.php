@@ -205,38 +205,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->autorating);
 
-        // 20210709 Added setting for what type of item to count.
-        $name = 'itemtype';
-        $label = get_string($name, $plugin);
-        $options = $this->get_itemtype_options($plugin);
-        $mform->addElement('select', $name, $label, $options);
-        $mform->addHelpButton($name, $name, $plugin);
-        $mform->setType($name, PARAM_INT);
-        $mform->setDefault($name, $diaryconfig->itemtype);
-        $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-
-        // 20210709 Added item count setting.
-        $name = 'itemcount';
-        $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $mediumtextoptions);
-        $mform->addHelpButton($name, $name, $plugin);
-        $mform->setType($name, PARAM_INT);
-        $mform->setDefault($name, $diaryconfig->itemcount);
-        $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 0);
-        $mform->disabledIf($name, 'enablestats', 'eq', 0);
-
-        // 20210711 Added a selector to set error percent of each penalty in auto-rating section.
-        $name = 'itempercent';
-        $label = get_string($name, $plugin);
-        $mform->addElement('select', $name, $label, $ratingoptions);
-        $mform->addHelpButton($name, $name, $plugin);
-        $mform->setDefault($name, $diaryconfig->itempercent);
-        $mform->setType($name, PARAM_INT);
-        $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 0);
-        $mform->disabledIf($name, 'enablestats', 'eq', 0);
-
         // 20210711 Added heading for minimum/maximum options section.
         $name = 'minmaxhdr';
         $label = get_string($name, $plugin);
@@ -251,7 +219,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->mincharacterlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 1);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added maximum character count setting.
@@ -262,7 +229,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxcharacterlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 1);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum character penalty.
@@ -273,7 +239,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setDefault($name, $diaryconfig->minmaxcharpercent);
         $mform->setType($name, PARAM_INT);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added minimum word count setting.
@@ -284,7 +249,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->minwordlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210709 Added maximum word count setting.
@@ -295,7 +259,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxwordlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum word penalty.
@@ -306,7 +269,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setDefault($name, $diaryconfig->minmaxwordpercent);
         $mform->setType($name, PARAM_INT);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added minimum sentence count setting.
@@ -317,7 +279,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->minsentencelimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added maximum sentence count setting.
@@ -328,7 +289,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxsentencelimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum sentence penalty.
@@ -339,7 +299,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setDefault($name, $diaryconfig->minmaxsentpercent);
         $mform->setType($name, PARAM_INT);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added minimum paragraph count setting.
@@ -350,7 +309,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->minparagraphlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added maximum paragraph count setting.
@@ -361,7 +319,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->maxparagraphlimit);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 2);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20211006 Added a selector to set error percent of each minimum or maximum paragraph penalty.
@@ -372,7 +329,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setDefault($name, $diaryconfig->minmaxparapercent);
         $mform->setType($name, PARAM_INT);
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
-        $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
         // 20210703 Added the common errors header.

@@ -342,3 +342,9 @@ Diary Support Tracker.
 20220830 Fixed problem, when auto-rating was set to characters, where no
     matter how much I typed, it was reporting I had zero.
 20220831 Ran and fixed warnings/errors reported by codechecker.
+20220904 Over the past four days, I have made a large number of changes
+    and additions, so that a teacher can set up any combination of ratings
+    for any of the four items, character, words, sentences, or prargraphs.
+20220905 Fix misspelled plural string. Changed from Diary's to Diaries.
+20220906 Added the code to upgrade.php that will drop the three not longer
+    need fields, itemtype, itemcount, and itempercent.

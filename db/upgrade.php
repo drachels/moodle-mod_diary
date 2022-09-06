@@ -405,6 +405,33 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2022012200, 'diary');
     }
+    // Three fields dropped for version 3.6.0.
+    if ($oldversion < 2022090400) {
 
+        // Define field itemtype to be dropped from diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('itemtype');
+        // Conditionally launch drop field itemtype.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Define field itemcount to be dropped from diary.
+        $field = new xmldb_field('itemcount');
+        // Conditionally launch drop field itemcount.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Define field itempercent to be dropped from diary.
+        $field = new xmldb_field('itempercent');
+        // Conditionally launch drop field itempercent.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2022090400, 'diary');
+    }
     return true;
 }
