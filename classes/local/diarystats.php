@@ -413,13 +413,14 @@ class diarystats {
             } else if ($diary->enableautorating
                        && $diary->maxcharacterlimit > 0
                        && $diarystats->characters > $diary->maxcharacterlimit) {
-                $autocharacters = get_string('autoratingovermaxitemdetails', 'diary',
+                $autocharacters = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
                     ['one' => $diary->maxcharacterlimit,
                     'two' => $item,
                     'three' => $diary->minmaxcharpercent,
                     'four' => $diarystats->characters,
                     'five' => (max($diarystats->characters - $diary->maxcharacterlimit, 0)),
-                    'six' => ((max($diarystats->characters - $diary->maxcharacterlimit, 0)) * $diary->minmaxcharpercent)]);
+                    'six' => ((max($diarystats->characters - $diary->maxcharacterlimit, 0)) * $diary->minmaxcharpercent)])
+                    .'</span>';
             }
 
             // 20220904 Code for auto-rating calculation w/regard min/max word limits.
@@ -447,13 +448,14 @@ class diarystats {
                         'six' => ((max($diary->minwordlimit - $diarystats->words, 0)) * $diary->minmaxwordpercent)]);
                 }
             } else if ($diary->enableautorating && $diary->maxwordlimit > 0 && $diarystats->words > $diary->maxwordlimit) {
-                $autowords = get_string('autoratingovermaxitemdetails', 'diary',
+                $autowords = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
                     ['one' => $diary->maxwordlimit,
                     'two' => $item,
                     'three' => $diary->minmaxwordpercent,
                     'four' => $diarystats->words,
                     'five' => (max($diarystats->words - $diary->maxwordlimit, 0)),
-                    'six' => ((max($diarystats->words - $diary->maxwordlimit, 0)) * $diary->minmaxwordpercent)]);
+                    'six' => ((max($diarystats->words - $diary->maxwordlimit, 0)) * $diary->minmaxwordpercent)])
+                    .'</span>';
             }
 
             // 20220904 Code for auto-rating calculation w/regard min/max sentence limits.
@@ -523,21 +525,27 @@ class diarystats {
             } else if ($diary->enableautorating
                        && $diary->maxparagraphlimit > 0
                        && $diarystats->paragraphs > $diary->maxparagraphlimit) {
-                $autoparagraphs = get_string('autoratingovermaxitemdetails', 'diary',
+                $autoparagraphs = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
                     ['one' => $diary->maxparagraphlimit,
                     'two' => $item,
                     'three' => $diary->minmaxparapercent,
                     'four' => $diarystats->paragraphs,
                     'five' => (max($diarystats->paragraphs - $diary->maxparagraphlimit, 0)),
-                    'six' => ((max($diarystats->paragraphs - $diary->maxparagraphlimit, 0)) * $diary->minmaxparapercent)]);
+                    'six' => ((max($diarystats->paragraphs - $diary->maxparagraphlimit, 0)) * $diary->minmaxparapercent)])
+                    .'</span>';
             }
 
             // 20210703 Consolidated the table here so using one instance instead of two.
             $currentstats = '<table class="generaltable">'
                 .'<tr><td style="width: 25%">'.get_string('timecreated', 'diary').' '.userdate($entry->timecreated).'</td>'
                     .'<td style="width: 25%">'.get_string('lastedited').' '.userdate($entry->timemodified).'</td>'
-                    .'<td style="width: 25%">'.get_string('autoratingitempercentset', 'diary', ($diary->itempercent)).' </td>'
-                    .'<td style="width: 25%">'.get_string('commonerrorpercentset', 'diary', ($diary->errorpercent)).' </td></tr>';
+                    .'<td style="width: 25%">'.get_string('autoratingitempercentset', 'diary', (
+                        '<br>C '.$diary->minmaxcharpercent
+                        .'%, W '.$diary->minmaxwordpercent
+                        .'%, S '.$diary->minmaxsentpercent
+                        .'%, P '.$diary->minmaxparapercent)).' </td>'
+                    .'<td style="width: 25%">'.get_string('commonerrorpercentset', 'diary', (
+                        '<br> Ce '.$diary->errorpercent)).' </td></tr>';
 
             // 20211007 An output experiment check to see if there is any text.
             if ($diarystats->uniquewords > 0) {
