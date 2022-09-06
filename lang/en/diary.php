@@ -40,7 +40,7 @@ $string['autorating_descr'] = 'If enabled, the rating for an entry will be autom
 $string['autorating_help'] = 'These settings define the defaults for autorating in all new diarys.';
 $string['autorating_title'] = 'Auto-rating enable';
 $string['autorating'] = 'Auto-rating';
-$string['autoratingitempercentset'] = 'Auto-rating Item percent setting {$a}%';
+$string['autoratingitempercentset'] = 'Auto-rating percent settings: {$a}%';
 
 $string['autoratingbelowmaxitemdetails'] = 'Auto-rating requires {$a->one} or more {$a->two} with a possible {$a->three}% penalty for each missing one.<br>You have {$a->four}. You need to come up with {$a->five}. Possible penalty is {$a->six} points.';
 
@@ -169,17 +169,23 @@ $string['invalidtimechange'] = 'An invalid attempt to change this entry\'s, Time
 $string['invalidtimechangenewtime'] = 'The changed time was: {$a->one}. ';
 $string['invalidtimechangeoriginal'] = 'The original time was: {$a->one}. ';
 $string['invalidtimeresettime'] = 'The time was reset to the original time of: {$a->one}.';
+
+
 $string['itemcount_help'] = 'The minimum number of countable items that must be in the essay text in order to achieve the maximum rating for this entry.
 
 Note, that this value may be rendered ineffective by the rating bands, if any, defined below.';
 $string['itemcount'] = 'Expected number of items';
+
 $string['itempercent_help'] = 'Select the percentage of total rating that should be deducted for each missing countable item.';
 $string['itempercent'] = 'Penalty per item';
+
 $string['itemtype_desc'] = 'The type of items in the essay text that will contribute to the auto-rating is, <strong>{$a->one}</strong>, and for full marks you must use, <strong>{$a->two}</strong>, of them.';
 $string['itemtype_descr'] = 'Select the type of items in the essay text that will contribute to the auto-rating.';
 $string['itemtype_help'] = 'Select the type of items in the essay text that will contribute to the auto-rating.';
 $string['itemtype_title'] = 'Type of countable items';
 $string['itemtype'] = 'Type of countable items';
+
+
 $string['itemtypefiles'] = 'Files';
 $string['itemtypenchars'] = 'Characters';
 $string['itemtypenone'] = 'None';
