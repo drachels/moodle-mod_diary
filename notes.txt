@@ -348,3 +348,7 @@ Diary Support Tracker.
 20220905 Fix misspelled plural string. Changed from Diary's to Diaries.
 20220906 Added the code to upgrade.php that will drop the three not longer
     need fields, itemtype, itemcount, and itempercent.
+20220906 Created a Diary 3.6.0 BETA release for testing.
+20220907 Fixed bug where the statistics were not being displayed correctly
+    when only the minimum number of an item was set. Also removed strings
+    and itemtype settings that are no longer needed.

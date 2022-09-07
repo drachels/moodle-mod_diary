@@ -391,7 +391,7 @@ class diarystats {
             $tempmaxc = $diary->maxcharacterlimit.get_string('max', 'diary');
             $autocharacters = '';
             $item = 'characters';
-            if ($diary->enableautorating && $diary->mincharacterlimit > 0 && $diarystats->characters <= $diary->maxcharacterlimit) {
+            if ($diary->enableautorating && $diary->mincharacterlimit > 0 && $diarystats->characters) {
                 if (((max($diary->mincharacterlimit - $diarystats->characters, 0)) * $diary->minmaxcharpercent) <> 0) {
                     $autocharacters = '<span style="background-color:yellow">'.get_string('autoratingbelowmaxitemdetails', 'diary',
                         ['one' => $diary->mincharacterlimit,
@@ -410,9 +410,8 @@ class diarystats {
                         'five' => (max($diary->mincharacterlimit - $diarystats->characters, 0)),
                         'six' => ((max($diary->mincharacterlimit - $diarystats->characters, 0)) * $diary->minmaxcharpercent)]);
                 }
-            } else if ($diary->enableautorating
-                       && $diary->maxcharacterlimit > 0
-                       && $diarystats->characters > $diary->maxcharacterlimit) {
+            }
+            if ($diary->enableautorating && $diary->maxcharacterlimit > 0 && $diarystats->characters > $diary->maxcharacterlimit) {
                 $autocharacters = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
                     ['one' => $diary->maxcharacterlimit,
                     'two' => $item,
@@ -428,7 +427,7 @@ class diarystats {
             $tempmaxw = $diary->maxwordlimit.get_string('max', 'diary');
             $autowords = '';
             $item = 'words';
-            if ($diary->enableautorating && $diary->minwordlimit > 0 && $diarystats->words <= $diary->maxwordlimit) {
+            if ($diary->enableautorating && $diary->minwordlimit > 0 && $diarystats->words) {
                 if (((max($diary->minwordlimit - $diarystats->words, 0)) * $diary->minmaxwordpercent) <> 0) {
                     $autowords = '<span style="background-color:yellow">'.get_string('autoratingbelowmaxitemdetails', 'diary',
                         ['one' => $diary->minwordlimit,
@@ -447,7 +446,8 @@ class diarystats {
                         'five' => (max($diary->minwordlimit - $diarystats->words, 0)),
                         'six' => ((max($diary->minwordlimit - $diarystats->words, 0)) * $diary->minmaxwordpercent)]);
                 }
-            } else if ($diary->enableautorating && $diary->maxwordlimit > 0 && $diarystats->words > $diary->maxwordlimit) {
+            }
+            if ($diary->enableautorating && $diary->maxwordlimit > 0 && $diarystats->words > $diary->maxwordlimit) {
                 $autowords = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
                     ['one' => $diary->maxwordlimit,
                     'two' => $item,
@@ -463,9 +463,7 @@ class diarystats {
             $tempmaxs = $diary->maxsentencelimit.get_string('max', 'diary');
             $autosentences = '';
             $item = 'sentences';
-            if ($diary->enableautorating
-                && $diary->minsentencelimit > 0
-                && $diarystats->sentences <= $diary->maxsentencelimit) {
+            if ($diary->enableautorating && $diary->minsentencelimit > 0 && $diarystats->sentences) {
                 if (((max($diary->minsentencelimit - $diarystats->sentences, 0)) * $diary->minmaxsentpercent) <> 0) {
                     $autosentences = '<span style="background-color:yellow">'.get_string('autoratingbelowmaxitemdetails', 'diary',
                         ['one' => $diary->minsentencelimit,
@@ -484,9 +482,10 @@ class diarystats {
                         'five' => (max($diary->minsentencelimit - $diarystats->sentences, 0)),
                         'six' => ((max($diary->minsentencelimit - $diarystats->sentences, 0)) * $diary->minmaxsentpercent)]);
                 }
-            } else if ($diary->enableautorating
-                       && $diary->maxsentencelimit > 0
-                       && $diarystats->sentences > $diary->maxsentencelimit) {
+            }
+            if ($diary->enableautorating
+                && $diary->maxsentencelimit > 0
+                && $diarystats->sentences > $diary->maxsentencelimit) {
                 $autosentences = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
                     ['one' => $diary->maxsentencelimit,
                     'two' => $item,
@@ -501,9 +500,7 @@ class diarystats {
             $tempmaxp = $diary->maxparagraphlimit.get_string('max', 'diary');
             $autoparagraphs = '';
             $item = 'paragraphs';
-            if ($diary->enableautorating
-                && $diary->minparagraphlimit > 0
-                && $diarystats->paragraphs <= $diary->maxparagraphlimit) {
+            if ($diary->enableautorating && $diary->minparagraphlimit > 0 && $diarystats->paragraphs) {
                 if (((max($diary->minparagraphlimit - $diarystats->paragraphs, 0)) * $diary->minmaxparapercent) <> 0) {
                     $autoparagraphs = '<span style="background-color:yellow">'.get_string('autoratingbelowmaxitemdetails', 'diary',
                         ['one' => $diary->minparagraphlimit,
@@ -522,9 +519,10 @@ class diarystats {
                         'five' => (max($diary->minparagraphlimit - $diarystats->paragraphs, 0)),
                         'six' => ((max($diary->minparagraphlimit - $diarystats->paragraphs, 0)) * $diary->minmaxparapercent)]);
                 }
-            } else if ($diary->enableautorating
-                       && $diary->maxparagraphlimit > 0
-                       && $diarystats->paragraphs > $diary->maxparagraphlimit) {
+            }
+            if ($diary->enableautorating
+                && $diary->maxparagraphlimit > 0
+                && $diarystats->paragraphs > $diary->maxparagraphlimit) {
                 $autoparagraphs = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
                     ['one' => $diary->maxparagraphlimit,
                     'two' => $item,
@@ -743,55 +741,55 @@ class diarystats {
             $commonerrorrating = $diarystats->commonpercent;
 
             // 20220904 Character potential auto-rating.
+            $autoratecharacters = 0;
             if ($diary->enableautorating
                 && $diary->mincharacterlimit > 0
-                && $diarystats->characters < $diary->maxcharacterlimit) {
+                && $diarystats->characters) {
                 $autoratecharacters = ((max($diary->mincharacterlimit - $diarystats->characters, 0)) * $diary->minmaxcharpercent);
-            } else if ($diary->enableautorating
-                       && $diary->maxcharacterlimit > 0
-                       && $diarystats->characters > $diary->maxcharacterlimit) {
+            }
+            if ($diary->enableautorating
+                && $diary->maxcharacterlimit > 0
+                && $diarystats->characters > $diary->maxcharacterlimit) {
                 $autoratecharacters = ((max($diarystats->characters - $diary->maxcharacterlimit, 0)) * $diary->minmaxcharpercent);
-            } else {
-                $autoratecharacters = 0;
             }
 
             // 20220904 Word potential auto-rating.
+            $autoratewords = 0;
             if ($diary->enableautorating
                 && $diary->minwordlimit > 0
-                && $diarystats->words < $diary->maxwordlimit) {
+                && $diarystats->words) {
                 $autoratewords = ((max($diary->minwordlimit - $diarystats->words, 0)) * $diary->minmaxwordpercent);
-            } else if ($diary->enableautorating
-                       && $diary->maxwordlimit > 0
-                       && $diarystats->words > $diary->maxwordlimit) {
+            }
+            if ($diary->enableautorating
+                && $diary->maxwordlimit > 0
+                && $diarystats->words > $diary->maxwordlimit) {
                 $autoratewords = ((max($diarystats->words - $diary->maxwordlimit, 0)) * $diary->minmaxwordpercent);
-            } else {
-                $autoratewords = 0;
             }
 
             // 20220904 Sentence potential auto-rating.
+            $autoratesentences = 0;
             if ($diary->enableautorating
                 && $diary->minsentencelimit > 0
-                && $diarystats->sentences < $diary->maxsentencelimit) {
+                && $diarystats->sentences) {
                 $autoratesentences = ((max($diary->minsentencelimit - $diarystats->sentences, 0)) * $diary->minmaxsentpercent);
-            } else if ($diary->enableautorating
-                       && $diary->maxsentencelimit > 0
-                       && $diarystats->sentences > $diary->maxsentencelimit) {
+            }
+            if ($diary->enableautorating
+                && $diary->maxsentencelimit > 0
+                && $diarystats->sentences > $diary->maxsentencelimit) {
                 $autoratesentences = ((max($diarystats->sentences - $diary->maxsentencelimit, 0)) * $diary->minmaxsentpercent);
-            } else {
-                $autoratesentences = 0;
             }
 
             // 20220904 Paragraph potential auto-rating.
+            $autorateparagraphs = 0;
             if ($diary->enableautorating
                 && $diary->minparagraphlimit > 0
-                && $diarystats->paragraphs < $diary->maxparagraphlimit) {
+                && $diarystats->paragraphs) {
                 $autorateparagraphs = ((max($diary->minparagraphlimit - $diarystats->paragraphs, 0)) * $diary->minmaxparapercent);
-            } else if ($diary->enableautorating
-                       && $diary->maxparagraphlimit > 0
-                       && $diarystats->paragraphs > $diary->maxparagraphlimit) {
+            }
+            if ($diary->enableautorating
+                && $diary->maxparagraphlimit > 0
+                && $diarystats->paragraphs > $diary->maxparagraphlimit) {
                 $autorateparagraphs = ((max($diarystats->paragraphs - $diary->maxparagraphlimit, 0)) * $diary->minmaxparapercent);
-            } else {
-                $autorateparagraphs = 0;
             }
 
             $potentialratingdisp = $autoratecharacters.' - '

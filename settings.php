@@ -130,40 +130,6 @@ if ($ADMIN->fulltree) {
         '1' => get_string('yes')
     )));
 
-    // 20210708 Diary itemtype setting.
-    $name = 'mod_diary/itemtype';
-    $title = get_string('itemtype_title', 'diary');
-    $description = get_string('itemtype_descr', 'diary');
-    $default = 0;
-    $itemtypes = array();
-    $itemtypes = diarystats::get_item_types($itemtypes);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $itemtypes));
-    $setting->set_updatedcallback('theme_reset_all_caches');
-    $settings->add($setting);
-
-    // 20210708 Diary expected number of items setting.
-    $settings->add(new admin_setting_configtext('mod_diary/itemcount',
-        get_string('itemcount', 'diary'),
-        get_string('itemcount_help', 'diary'), '', PARAM_INT, 10));
-
-    // 20210712 Diary expected number of items error percentage setting.
-    $name = 'mod_diary/itempercent';
-    $plugin = 'mod_diary';
-    $title = get_string('itempercent', 'diary');
-    $description = get_string('itempercent_help', 'diary');
-    $default = 0;
-    $options = array();
-    $options = diarystats::get_rating_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
-
     // 20210712 Added heading for min/max options section.
     $name = 'minmaxhdr';
     $label = get_string('minmaxhdr', 'mod_diary');
