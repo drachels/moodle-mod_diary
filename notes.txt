@@ -352,4 +352,6 @@ Diary Support Tracker.
 20220907 Fixed bug where the statistics were not being displayed correctly
     when only the minimum number of an item was set. Also removed strings
     and itemtype settings that are no longer needed.
-20220908 Reworded a couple of the auto-rating related strings.
+20220908 Reworded a couple of the auto-rating related strings. Discovered and
+    fixed bug in the backup code. See ticket Diary_917 - Backup and Restore
+    results in missing data.
