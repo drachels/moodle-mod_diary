@@ -44,7 +44,8 @@ Diary_915 - Need to change auto rating from just one item, to any combination of
 Diary_916 - Need to change min and max to strings in diarystats.php file. Made
     the needed changes in four places for each one and added the two need strings
     to the language file. 
-
+Diary_917 - Backup and Restore results in missing data. Corrected 4 field names in
+    the backup_diary_stepslib.php file.
 
 
 === 3.5.2 === Released 2022040100
