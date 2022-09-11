@@ -1,50 +1,73 @@
 This files describes API changes and other work in the diary code.
 === Deferred to next version. ===
+Diary_627 - Included files are not restored correctly.
+Diary_719 - Media files are NOT there after a restore.
 Diary_736 - Need a way to slectively turn off autosave. It is not needed when
     starting a totally new entry.
+Diary_737 - Config settings are not all named the same. Added mod_ to the four
+    items that were missing it. As of 20220828 still have three.
+
 Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive, and errorignorebreaks.
     Added fields to the xml file. Updated the upgrade.php file. Updated backup files.
     Updated the mod_form.php file.
 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
-
-=== 3.6.0 === Pending
-
-Diary_750 - V3.4.1 has three code style errors. Added the missing final blank line
-    to files diarystats.php, renderer.php, and settings.php. Pushed to github.
-    This ticket seems to be missing from my tracker system.
-
-Diary_737 - Config settings are not all named the same. Added mod_ to the four
-    items that were missing it. As of 20220828 still have three.
-
-Diary_812 - Diary v4.0 changes for Moodle 4.0. Made a number of changes. See
-    the ticket for details. Mostly was removing un-needed code.
 Diary_823 - Missing completion information on the view.php page. Got
     it working on course page - BUT - the ticket is still open for further
     development to also require X number of Posts.
-Diary_845 - Invalid get_string() identifier: 'lastedited' or component 'diary'.
+
+=== 3.x.x === Pending
+Diary_741 - Need to verify communications when rating or when student adds/edits an entry.
+Diary_820 - A user requested adding teacher notification when student makes an entry.
+
+
+Diary_746 - Rating a zero results in student seeing, No Grade. Problem was due to the
+    way I was doing a branch check in results.php down around line 588. Dropped the
+    branch check and changed the way $gradestring was created.
+Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
+    only numbers. Changed lines 364 and 367 to include max of 1, so when words is zero,
+    the 1 is substituted to eliminate the devide by zero error.
+
+
+
+
+=== 3.6.0 === Released 20220909
+Diary_672v - Investigate using authenticated user role for front page access. Moodle
+    has changed so much over the past few releases, so this ticket has been resolved
+    by Moodle code changes. Moodle itself provides the capability to allow users to
+    have access to a front page Diary by just changing permissions for the individual
+    Diary activity and not for the whole front page, like I had to do when I first
+    opened this ticket.
+Diary_623v - Diary Restore is missing two strings. This was an old ticket for a
+    Diary activity on an old server. All needed strings are there, now.
+Diary_750v - V3.4.1 has three code style errors. Added the missing final blank line
+    to files diarystats.php, renderer.php, and settings.php. Pushed to github.
+    This ticket seems to be missing from my tracker system.
+Diary_812v - Diary v4.0 changes for Moodle 4.0. Made a number of changes. See
+    the ticket for details. Mostly was removing un-needed code.
+Diary_845v - Invalid get_string() identifier: 'lastedited' or component 'diary'.
     Changed diary/db/mobile.php lang string from ['lastedited', 'diary'], so
     that it is now ['lastedited', 'moodle'].
-Diary_883 - In Moodle 4.0.x the activity name, description, and completion labels get
+Diary_883v - In Moodle 4.0.x the activity name, description, and completion labels get
     duplicated. In view.php down around line 225, I added an if to check for an intro
     and branch, to decide whether to show the items, or not.
-Diary_912 - When auto-rating is set for characters, it always reports zero. Basically,
+Diary_912v - When auto-rating is set for characters, it always reports zero. Basically,
     changed a number of places where it was trying to use 'chars', so that it was
     now using the full word, 'characters.' Also changed the final line of the
     auto-rating to show 0%, instead of a negative number.
-Diary_913 - Need to change MOD_PURPOSE_COLLABORATION over to MOD_PURPOSE_ASSESSMENT.
+Diary_913v - Need to change MOD_PURPOSE_COLLABORATION over to MOD_PURPOSE_ASSESSMENT.
     Made the needed change from, MOD_PURPOSE_COLLABORATION, over to, MOD_PURPOSE
     _ASSESSMENT. New color and new icon, look good. (See ticket Diary_914) 
-Diary_914 - Need a better icon version to use as the new monologo.svg file. Used
+Diary_914v - Need a better icon version to use as the new monologo.svg file. Used
     Inkscape to modify the icon.svg file then saved as monolog.svg. Works great.
-Diary_915 - Need to change auto rating from just one item, to any combination of
+Diary_915v - Need to change auto rating from just one item, to any combination of
     character, words, sentences or paragraphs. Modified and added a couple of
     strings, and made a LOT of code changes and additions in the diarystat.php
     file.
-Diary_916 - Need to change min and max to strings in diarystats.php file. Made
+Diary_916v - Need to change min and max to strings in diarystats.php file. Made
     the needed changes in four places for each one and added the two need strings
     to the language file. 
-Diary_917 - Backup and Restore results in missing data. Corrected 4 field names in
+Diary_917v - Backup and Restore results in missing data. Corrected 4 field names in
     the backup_diary_stepslib.php file.
 
 
@@ -268,8 +291,11 @@ Diary_729 - two sets of buttons at bottom of report when everyone has at least o
     entry. Added a check for empty $user list and if empty, skip last button set.
 Diary_730 - String [grade,core] is deprecated. Added a branch check for string
     compatibility in renderer.php, diary_print_feedback function, about line 209.
-Diary_731 - In Moodle 3.11 user_picture::fields() is deprecated. Added a branch
-    check and code to fix the deprecated item.
+Diary_731v - In Moodle 3.11 user_picture::fields() is deprecated. Added a branch
+    check and code to fix the deprecated item. NOTE: In changing from one Mooodle
+    to another, some ticket numbers got messed up. This is one of them and is
+    very similar to Diary_721v Recent activity in M3.11 is croaking regarding user
+    pictures, which was fixed a long time ago so I am marking it resolved, too.
 Diary_738 - It is possible to add entries for past dates. Added check in edit_form.php
     that prevents sending the hidden calendar/date selector to the client computer.
 Diary_739 - A user can directly access edit.php via URL change when the diary is
