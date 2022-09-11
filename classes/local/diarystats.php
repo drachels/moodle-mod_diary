@@ -361,10 +361,10 @@ class diarystats {
             $diarystats->longwordspersentence = round($diarystats->longwords / $diarystats->sentences, $precision);
             $diarystats->fkgrade = max(round(0.39 *
                                   ($diarystats->words / $diarystats->sentences) + 11.8 *
-                                  ($diarystats->totalsyllabels / $diarystats->words) - 15.59, $precision), 0);
+                                  ($diarystats->totalsyllabels / max($diarystats->words, 1)) - 15.59, $precision), 0);
             $diarystats->freadease = round(206.835 - 1.015 *
                                     ($diarystats->words / $diarystats->sentences) - 84.6 *
-                                    ($diarystats->totalsyllabels / $diarystats->words), $precision);
+                                    ($diarystats->totalsyllabels / max($diarystats->words, 1)), $precision);
         }
         if ($diarystats->wordspersentence) {
             $diarystats->fogindex = ($diarystats->wordspersentence + $diarystats->longwordspersentence);
