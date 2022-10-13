@@ -88,6 +88,17 @@ $string['diarymailhtml'] = 'Greetings {$a->user},
 {$a->teacher} has posted some feedback on your
 diary entry for \'<i>{$a->diary}</i>\'.<br /><br />
 You can see it appended to your <a href="{$a->url}">diary entry</a>.';
+
+$string['diarymailuser'] = 'has posted a diary entry for \'{$a->diary}\'
+
+You may view the entry here:
+
+    {$a->url}
+
+Note: You may need to provide feedback or update the status of the entry in order for the activity to be set to complete.';
+$string['diarymailhtmluser'] = 'has posted a diary entry for \'<i>{$a->diary}</i>\'<br /><br />
+You may view the <a href="{$a->url}">diary entry here</a>.<br /><br />Note: You may need to provide feedback or update the status of the entry in order for the activity to be set to complete.';
+
 $string['diaryname'] = 'Diary name';
 $string['diaryopentime_help'] = 'If enabled, you can set a date for the diary to be opened for use.';
 $string['diaryopentime'] = 'Open time';
@@ -101,6 +112,7 @@ $string['editingended'] = 'Editing period has ended';
 $string['editingends'] = 'Editing period ends';
 $string['editthisentry'] = 'Edit this entry';
 $string['edittopoflist'] = 'Edit top of the list';
+$string['emailpreference'] = 'Toggle emails {$a}';
 $string['enableautorating_help'] = 'Enable, or disable, automatic ratings';
 $string['enableautorating'] = 'Enable automatic rating';
 $string['enablestats_descr'] = 'If enabled, the statistics for each entry will be shown.';
@@ -115,6 +127,8 @@ $string['entrybgc_help'] = 'This sets the overall background color of each diary
 $string['entrybgc'] = 'Diary entry/feedback background color';
 $string['entrybgc_title'] = 'Diary entry/feedback background color';
 $string['entrycomment'] = 'Entry comment';
+$string['entrysuccess'] = 'Your entry has been saved! It may need to be reviewed or rated before activity is set to complete.';
+
 $string['entrytextbgc_colour'] = '#EEFC84';
 $string['entrytextbgc_descr'] = 'This sets the background color of the text in a diary entry.';
 $string['entrytextbgc_help'] = 'This sets the background color of the text in a diary entry.';
@@ -318,7 +332,10 @@ $string['startnewentry'] = 'Start new entry';
 $string['startoredit'] = 'Start new or edit today\'s entry';
 $string['statshdr_help'] = 'These settings dfine the defaults for the statistics in all new diarys.';
 $string['statshdr'] = 'Text statistics';
+$string['studentemail'] = 'Send email notifications to students';
 $string['teacher'] = 'Teacher';
+$string['teacheremail'] = 'Send email notifications to teachers';
+
 $string['text'] = 'Text';
 $string['textstatitems_help'] = 'Select any items here that you wish to appear in the text statistics that are shown on a view page, report page, and reportsingle page.';
 $string['textstatitems'] = 'Statistical items';
