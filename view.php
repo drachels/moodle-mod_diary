@@ -33,10 +33,18 @@ require_once(__DIR__ .'/../../lib/gradelib.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
-
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
-
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+
+// Set a preference and then retrieve it.
+$emailpreference = optional_param('emailpreference', get_user_preferences('diary_email',
+    get_config('mod_diary', 'teacheremail')), PARAM_INT);
+
+if ($emailpreference == 1 || $emailpreference == 'ON') {
+    set_user_preference('diary_email', 'OFF');
+} else {
+    set_user_preference('diary_email', 'ON');
+}
 
 if (!$cm) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -236,10 +244,12 @@ if ($entriesmanager) {
 
     $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
 
+
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
     $temp = '<span class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
     $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
-    $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></span>';
+    $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
+    $temp .= '<a href="view.php?id='.$cm->id.'">'.get_string('emailpreference', 'diary', $emailpreference).'</a></span>';
     echo $temp;
 
 } else {
@@ -307,14 +317,16 @@ if ($timenow > $timestart) {
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
                     .'&action=currententry', get_string('startnewentry', 'diary'), 'get', array(
-                    "class" => "singlebutton diarystart"
+                    "class" => "singlebutton diarystart",
+                    "style" => "border-radius: 8px"
                 ));
             } else {
                 // Add button for editing current entry or starting a new entry.
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
                     .'&action=currententry', get_string('startoredit', 'diary'), 'get', array(
-                    "class" => "singlebutton diarystart"
+                    "class" => "singlebutton diarystart",
+                    "style" => "border-radius: 8px"
                 ));
             }
             // Print user toolbar icons only if there is at least one entry for this user.
@@ -409,6 +421,9 @@ if ($timenow > $timestart) {
                 } else {
                     $editthisentry = ' ';
                 }
+
+                // 20221013 Possible location for an individual entry, statistics toggle view
+                // on/off, maybe with a preference for each entry.
 
                 // Add, Entry, then date time group heading for each entry on the page.
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
