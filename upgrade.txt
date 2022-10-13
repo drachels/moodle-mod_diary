@@ -16,7 +16,7 @@ Diary_823 - Missing completion information on the view.php page. Got
     it working on course page - BUT - the ticket is still open for further
     development to also require X number of Posts.
 
-=== 3.x.x === Pending
+=== 3.7.0 === Pending
 Diary_741 - Need to verify communications when rating or when student adds/edits an entry.
 Diary_820 - A user requested adding teacher notification when student makes an entry.
 
@@ -27,7 +27,8 @@ Diary_746 - Rating a zero results in student seeing, No Grade. Problem was due t
 Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
     only numbers. Changed lines 364 and 367 to include max of 1, so when words is zero,
     the 1 is substituted to eliminate the devide by zero error.
-
+Diary_936 - Should add a radius to the, Start new entry, button on view.php page. The
+    code is modified to add the border radius to the two locations needed in view.php. 
 
 
 
