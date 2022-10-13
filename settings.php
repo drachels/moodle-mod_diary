@@ -251,4 +251,12 @@ if ($ADMIN->fulltree) {
         $description,
         $default,
         $options, 10));
+
+    $settings->add(new admin_setting_configselect('mod_diary/teacheremail', get_string('teacheremail', 'diary'),
+                                                  get_string('teacheremail', 'diary'), 1,
+                                                  array('0' => get_string('no'), '1' => get_string('yes'))));
+
+    $settings->add(new admin_setting_configselect('mod_diary/studentemail', get_string('studentemail', 'diary'),
+                                                  get_string('studentemail', 'diary'), 1,
+                                                  array('0' => get_string('no'), '1' => get_string('yes'))));
 }
