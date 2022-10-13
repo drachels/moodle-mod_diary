@@ -585,10 +585,14 @@ class results {
             $entry->userid
         ));
 
-        if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
-            $gradestring = get_string_manager()->string_exists('gradenoun', 'moodle') ? get_string('gradenoun') : get_string('grade');
-            echo $gradestring.': ';
-            echo $gradinginfo->items[0]->grades[$entry->userid]->str_long_grade;
+        // 20210609 Added branch check for string compatibility.
+        if (! empty($entry->rating)) {
+            if ($CFG->branch > 310) {
+                echo get_string('gradenoun') . ': ';
+            } else {
+                echo get_string('grade') . ': ';
+            }
+            echo $entry->rating.'/' . number_format($gradinginfo->items[0]->grademax, 2);
         } else {
             print_string('nograde');
         }
