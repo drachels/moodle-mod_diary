@@ -361,3 +361,50 @@ Diary Support Tracker.
     only numbers are NOT counted as words. Also found the error and fixed it
     where when the teacher gives an entry a rating of zero, the zero was being
     replaced by, No Grade.
+20220911 Pushed above changes to github. Doing some work on emailing and prompts.
+
+New table needed - mdl_diary_prompt
+With fields:
+    id - id number of this prompt
+    diaryid - id of the diary activity this prompt goes to 
+    promptdatestart - start date for this prompt
+    promptdatestop - end date for this prompt
+    prompttext - text of this prompt
+
+Need create/edit files
+    diaryprompt.php - maybe in diary/classes/local and it will include the code to
+    create/edit/delete prompts. Admin see all prompts for site or course??? Teachers
+    sees prompts only for current diary.
+    diaryprompt_form.php - To keep from having a separate file, do like I have in Hot
+    Question and just add another class down at the bottom of my current mod_form.php
+    upgrade.php will need the code added to add the new table and fields.
+
+Other items todo:
+    In the function diary_extend_settings_navigation, at the bottom of the lib.php file,
+    will need to add a new link for teacher and admin that takes them to the diaryprompt.php
+    page. The checks for access can be:
+        if (is_siteadmin() || has_capability('mod/diary:addinstance', $context)) {
+        
+    Add language strings as needed.
+        'addprompt'
+        'editprompt'
+        'deleteprompt'
+        'promptdatestart'
+        'promptdatestop'
+        'prompttext'
+
+    Add a button 1 to the view.php, around line 367, that will show/hide all the stats and
+    feedback for all entries except the current entry.
+    Add a button 2 to every entry that will let the user over ride button 1 and show/hide it's
+    stats and feedback. Maybe around line 433 of the view.php page. NOTE: need to check on line
+    431 regarding table row definition as if I hide line 433, the contents of line 442 is
+    buggered up.
+
+Really wild idea - add current min's and max's to a prompt so they can change when the prompt changes!!!!
+
+20220913 Got instant email notifications working so that when a user saves
+    after they create/edit an entry, the teacher is sent an email. Still
+    needs code cleanup and fine tuning.
+20210915 Got teacher email toggle ON/OFF working for instant email notifications.
+    Debug info still needs to be removed and code is still only in my
+    https://www.drachels.com/moodle310/mod/diary site.
