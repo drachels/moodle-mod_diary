@@ -433,8 +433,9 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2022090400, 'diary');
     }
-    // New prompt table for version 3.7.0.
-    if ($oldversion < 2022102100) {
+    // Version 3.7.0 was internal only, release.
+    // New prompt table for version 3.7.1.
+    if ($oldversion < 2022110600) {
 
         // Define table diary_prompts to be created.
         $table = new xmldb_table('diary_prompts');
@@ -478,7 +479,7 @@ function xmldb_diary_upgrade($oldversion = 0) {
         }
 
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2022102100, 'diary');
+        upgrade_mod_savepoint(true, 2022110600, 'diary');
     }
 
     return true;
