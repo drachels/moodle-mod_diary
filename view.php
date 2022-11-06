@@ -21,8 +21,9 @@
  * @copyright 2019 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use mod_diary\local\results;
 use mod_diary\local\diarystats;
+use mod_diary\local\prompts;
+use mod_diary\local\results;
 // @codingStandardsIgnoreLine
 // use core_text;
 
@@ -37,8 +38,8 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
 // Set a preference and then retrieve it.
-$emailpreference = optional_param('emailpreference', get_user_preferences('diary_email',
-    get_config('mod_diary', 'teacheremail')), PARAM_INT);
+$emailpreference = optional_param('emailpreference', get_user_preferences
+                                 ('diary_email', get_config('mod_diary', 'teacheremail')), PARAM_INT);
 
 if ($emailpreference == 1 || $emailpreference == 'ON') {
     set_user_preference('diary_email', 'OFF');
@@ -80,6 +81,9 @@ foreach ($diarys as $temp) {
         $errorcmid = $diary->errorcmid;
     }
 }
+
+// Need to call a prompt function that returns the current promptid, if there is one that is current.
+$promptid = prompts::get_current_promptid($diary);
 
 if (!$cw = $DB->get_record("course_sections", array(
     "id" => $cm->section
@@ -235,15 +239,33 @@ if (($diary->intro) && ($CFG->branch < 400)) {
     echo $output->introduction($diary, $cm); // Output introduction in renderer.php.
 }
 
+// 20221008 Hide the prompts info if the Diary activity is not available.
+// 20221027 Halt and force a fix if too many current prompts.
+if (prompts::diary_available($diary)) {
+    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
+    if ($current > 1) {
+        $url1 = $CFG->wwwroot . '/mod/diary/prompt_edit.php?id='.$cm->id;
+        echo '</a> <a href="'.$url1
+            .'" class="btn btn-success" style="border-radius: 8px">'
+            .get_string('warning', 'diary', $current)
+            .'</a> ';
+        die;
+    } else {
+        $status = prompts::prompts_viewcurrent($diary);
+        // Show the current prompt.
+        echo '<b>'.$diary->intro.'</b>';
+    }
+    echo get_string('tcount', 'diary', $tcount);
+    echo get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
+}
+
 // If viewer is a manager, create a link to report.php showing diary entries made by users.
 if ($entriesmanager) {
     // Check to see if groups are being used here.
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
     $ouput = groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
-
     $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
-
 
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
     $temp = '<span class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
@@ -317,16 +339,14 @@ if ($timenow > $timestart) {
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
                     .'&action=currententry', get_string('startnewentry', 'diary'), 'get', array(
-                    "class" => "singlebutton diarystart",
-                    "style" => "border-radius: 8px"
+                    "class" => "singlebutton diarystart"
                 ));
             } else {
                 // Add button for editing current entry or starting a new entry.
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
                     .'&action=currententry', get_string('startoredit', 'diary'), 'get', array(
-                    "class" => "singlebutton diarystart",
-                    "style" => "border-radius: 8px"
+                    "class" => "singlebutton diarystart"
                 ));
             }
             // Print user toolbar icons only if there is at least one entry for this user.
@@ -412,6 +432,7 @@ if ($timenow > $timestart) {
                 $options['id'] = $cm->id;
                 $options['action'] = 'editentry';
                 $options['firstkey'] = $entry->id;
+                $options['promptid'] = $promptid;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
@@ -421,9 +442,6 @@ if ($timenow > $timestart) {
                 } else {
                     $editthisentry = ' ';
                 }
-
-                // 20221013 Possible location for an individual entry, statistics toggle view
-                // on/off, maybe with a preference for each entry.
 
                 // Add, Entry, then date time group heading for each entry on the page.
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);

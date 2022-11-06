@@ -16,21 +16,59 @@ Diary_823 - Missing completion information on the view.php page. Got
     it working on course page - BUT - the ticket is still open for further
     development to also require X number of Posts.
 
-=== 3.7.0 === Pending
+
+
+=== 3.7.0/1 === Pending
 Diary_741 - Need to verify communications when rating or when student adds/edits an entry.
-Diary_820 - A user requested adding teacher notification when student makes an entry.
+    Added needed code in edit.php down around line 261. Need to verify it works for sending
+    an email as soon as a student saves an entry. - Verified it does as of 20221024.
+Diary_820 - A user requested adding teacher notification when student makes an entry. Added
+    needed code in edit.php down around line 261.
 
 
 Diary_746 - Rating a zero results in student seeing, No Grade. Problem was due to the
     way I was doing a branch check in results.php down around line 588. Dropped the
     branch check and changed the way $gradestring was created.
-Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
+Diary_847 - Would be nice to have automatic weekly writing prompts. Pending
+    20220930 Manual creation at the moment.
+    20220930 Can see them all for a diary via prompts_view.php plus two others
+    20221001 Can now delete a prompt and log the event Diary_924.
+    20221025 All appears to work as needed, including backup and restore.
+    20221027 Discovered restore was NOT correct. Now fixed. Also fixed the case where there
+             are too many current prompts. Only way to proceed is to fix the problem.
+Diary_925 - Need to give an error if any prompt dates overlap. Added needed code in view.php.
+ Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
     only numbers. Changed lines 364 and 367 to include max of 1, so when words is zero,
     the 1 is substituted to eliminate the devide by zero error.
-Diary_936 - Should add a radius to the, Start new entry, button on view.php page. The
-    code is modified to add the border radius to the two locations needed in view.php. 
+Diary_922 - Need to modify Feature switch to detect need for FEATURE_MOD_PURPOSE. Changed
+    code to work the same way as Checklist. Also have same way as Journal, but commented out.
+Diary_924 - Need to be able to remove prompts and log the removal. Have actually worked on
+    this for the past couple of days and have finally got both the actual delete of a prompt
+    record and a log entry of who did it, which course module it was done in, and which
+    prompt ID was deleted. 
+Diary_926 - In prompts_view.php when getting the prompts they need to be sorted in datestart
+    order. Added a sort in line 85 of prompts_view.php, where the prompts are being retrieved
+    via $prompts = $DB->get_records().
+Diary_927 - Need strings for table column headings in prompts_view.php and yyyprompt_edit.php.
+    Created the prompts and prepared both files to use them.
+Diary_928 - Prompt create works but update also creates a new prompt instead of just updating
+    the record.
+Diary_938 - Need to add a promptid field to the mdl_diary_entries table. See the ticket
+    as there is a lot of stuff listed on it.
+Diary_939 - Need to create new icons, monologo.svg and monologo.png. 20221023 Created both
+    icons and they are being used in my Moodle 4.1.0 test site and my normal dev site. 
+Diary_941 - Prompts are not backed up and restored correctly. Had one field missing in the
+    backup_diary_stepslib.php file of the entries table. Added field, promptid, and backup
+    and restore seems to be working correctly.
 
+Diary_942 - Need to add code to delete promts when doing a course reset. Modified the
+    code so prompts are deleted when a diary is deleted. For individual prompts, still in
+    progress for detecting and preventing delete if it is still in use. - DONE
 
+Diary_944 - Language strings need fixing and sorted. Added strings as needed and sorted
+    the file contents so the string names are in alphabetical order.
+Diary_948 - Prompt events need to be implemented/worked on. Implemented prompt_removed.php,
+    prompts_viewed.php, prompt_edited.php, prompt_in_use.php, and prompt_created.php.
 
 === 3.6.0 === Released 20220909
 Diary_672v - Investigate using authenticated user role for front page access. Moodle

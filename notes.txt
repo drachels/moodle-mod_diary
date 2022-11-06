@@ -365,27 +365,45 @@ Diary Support Tracker.
 
 New table needed - mdl_diary_prompt
 With fields:
-    id - id number of this prompt
-    diaryid - id of the diary activity this prompt goes to 
-    promptdatestart - start date for this prompt
-    promptdatestop - end date for this prompt
-    prompttext - text of this prompt
+    id - int(10) not null auto-numbered, id number of this prompt
+    diaryid - int(10) not null default 0, id of the diary activity this prompt goes to 
+    promptdatestart - int(10) default 0, start date for this prompt
+    promptdatestop - int(10) default 0, end date for this prompt
+    prompttext - longtext Yes null, text of this prompt
+    promptminchar - int(10) Minimum required character count.
+    promptmaxchar - int(10) Maximum allowed character count.
+    promptminmaxcharpercent - int(6) not null default 0 Hmm...maybe decimal(6,2) -> xxx.xx
+        or decimal(12.7) Each character error percentage off.
+
+    promptminword - int(10)
+    promptmaxword - int(10)
+    promptminmaxwordpercent - int(6) not null default 0
+
+    promptminsentence - int(10)
+    promptmaxsentence - int(10)
+    promptminmaxsentencepercent - int(6) not null default 0
+
+    promptminparagraph - int(10)
+    promptmaxparagraph - int(10)
+    promptminmaxparagraphpercent - int(6) not null default 0
+
 
 Need create/edit files
     diaryprompt.php - maybe in diary/classes/local and it will include the code to
-    create/edit/delete prompts. Admin see all prompts for site or course??? Teachers
-    sees prompts only for current diary.
+        create/edit/delete prompts. Admin see all prompts for site or course???
+        Teachers sees prompts only for current diary.
     diaryprompt_form.php - To keep from having a separate file, do like I have in Hot
-    Question and just add another class down at the bottom of my current mod_form.php
+        Question and just add another class down at the bottom of my current mod_form.php
     upgrade.php will need the code added to add the new table and fields.
 
 Other items todo:
     In the function diary_extend_settings_navigation, at the bottom of the lib.php file,
-    will need to add a new link for teacher and admin that takes them to the diaryprompt.php
-    page. The checks for access can be:
+        will need to add a new link for teacher and admin that takes them to the diaryprompt.php page. The checks for access can be:
         if (is_siteadmin() || has_capability('mod/diary:addinstance', $context)) {
         
+
     Add language strings as needed.
+        'promptstitle'
         'addprompt'
         'editprompt'
         'deleteprompt'
@@ -394,17 +412,63 @@ Other items todo:
         'prompttext'
 
     Add a button 1 to the view.php, around line 367, that will show/hide all the stats and
-    feedback for all entries except the current entry.
-    Add a button 2 to every entry that will let the user over ride button 1 and show/hide it's
-    stats and feedback. Maybe around line 433 of the view.php page. NOTE: need to check on line
-    431 regarding table row definition as if I hide line 433, the contents of line 442 is
-    buggered up.
+        feedback for all entries except the current entry.
+    Add a button 2 to every entry that will let the user over ride button 1 and show/hide
+        it's stats and feedback. Maybe around line 433 of the view.php page. NOTE: need to
+        check on line 431 regarding table row definition as if I hide line 433, the contents
+        of line 442 is buggered up.
+
+
 
 Really wild idea - add current min's and max's to a prompt so they can change when the prompt changes!!!!
 
 20220913 Got instant email notifications working so that when a user saves
     after they create/edit an entry, the teacher is sent an email. Still
     needs code cleanup and fine tuning.
-20210915 Got teacher email toggle ON/OFF working for instant email notifications.
+20220915 Got teacher email toggle ON/OFF working for instant email notifications.
     Debug info still needs to be removed and code is still only in my
     https://www.drachels.com/moodle310/mod/diary site.
+20220916 Created new mdl_diary_prompts table in xmldb editor, made changes to upgrade.php file. Also fixed
+    edit.php file that was showing intro doubled entries. Created link for teachers and managers that will
+    open prompt_edit.php. Prompt_edit.php and prompt_edit_form.php are available but currently has edit.php
+    and edit_form.php code in them. Started, but both of them will still need a bunch of changes.
+20220917 Changed to simpler version of FEATURE switch. Trying the way new Journal does it and the way
+    the Checklist plugin does it. Currently using Checklist method.
+20220917 Added new class prompts.php file.
+20220918 Worked on the the new class prompts. php file and got first two functions ready, but only one of
+    them tested. Started working on getting some stuff added to the function mod_diary_prompt_form, that
+    is in the mod_form.php file. Also started making lots of mods to the prompt_edit.php file and have
+    actually made five attempts to save a new prompt record. No success yet.
+20220921 Worked on prompts and have a good prompt_view.php page.
+20220925 Spent the past few days on prompts and today made a concerted effort to start cleaning up all
+    the hard coded strings, etc. Changed all the field names in the new prompts table to follow standard
+    Moodle naming conventions.
+20220929 Have continued to work on prompts, and while I have made some progress, I am still having problems
+    getting things to work they way they should. For instance, when I edit and save, it is creating a new
+    prompt record, instead of just updating the original record. When I try to delete, nothing happens.
+20221002 Renamed the remove_prompt.php event file to prompt_removed.php and also added prompts_viewed.php
+    and prompt_created.php. Also, renamed strings as needed. Have not added the code to implement the
+    two new files, yet. Added nine new strings for the table column headings used to view the prompts.
+20221017 Made a boatload of progress today. Over the past few days, I was really getting frustrated
+    due to making silly mistakes that kept changing what I was able to do with regards to view, edit,
+    create, and delete. I finally backed up to code from a few days ago, 20221005, added my case switch
+    code to it, modified the cases along the lines of the ones in the view.php file. I was soon able
+    to do all four of the needed things: view, create, edit, and delete prompts. I also have made a
+    lot of progress setting up a function to show current prompts on the view.php. The way I have
+    done that, should make it very easy to add the data to the page generated by the edit.php page.
+20221020 Making lots of progress. Updated view.php to show prompt status. Created a number of new
+    tickets, one big one, Diary_938, on code, etc., needed to "implement" using a prompt.
+20221025 Latest version of my code seems to be working correctly, for everything I have checked.
+    Just fixed/added a missing field to the the backup code and tried backing up a single diary.
+    I then restored it on my QA Testing Moodle401, and this time it all seems to be there and 
+    working correctly.
+20221027 Discovered restore was NOT working correctly. Modified both the backup and the restore
+    code and now the restore is correct. Also fixed the view.php page so that if someone does
+    create more than one current prompt, a student cannot proceed at all while a teacher is
+    forced to go to the prompt edit page. I also changed things so that if there is a current
+    prompt, it is shown in bold text so that it stands out in what is getting to be a pretty
+    cluttered page.
+20221104 Have started the process of code cleanup since I think I finally have prompts working
+    correctly. Started work on implementing the five new prompt events. Got the remove one
+    working, today. Today would have been the 46th wedding aniversary for my wife and I.
+20221106 Implementing prompt events and code cleanup.

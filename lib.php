@@ -130,6 +130,12 @@ function diary_delete_instance($id) {
         $result = false;
     }
 
+    if (! $DB->delete_records("diary_prompts", array(
+        "diaryid" => $diary->id
+    ))) {
+        $result = false;
+    }
+
     if (! $DB->delete_records("diary", array(
         "id" => $diary->id
     ))) {
@@ -158,60 +164,35 @@ function diary_delete_instance($id) {
  */
 function diary_supports($feature) {
     global $CFG;
-    if ($CFG->branch > 311) {
-        switch ($feature) {
-            case FEATURE_MOD_PURPOSE:
-                return MOD_PURPOSE_ASSESSMENT;
-            case FEATURE_BACKUP_MOODLE2:
-                return true;
-            case FEATURE_COMPLETION_TRACKS_VIEWS:
-                return true;
-            case FEATURE_GRADE_HAS_GRADE:
-                return true;
-            case FEATURE_GRADE_OUTCOMES:
-                return false;
-            case FEATURE_GROUPS:
-                return true;
-            case FEATURE_GROUPINGS:
-                return true;
-            case FEATURE_GROUPMEMBERSONLY:
-                return true;
-            case FEATURE_MOD_INTRO:
-                return true;
-            case FEATURE_RATE:
-                return true;
-            case FEATURE_SHOW_DESCRIPTION:
-                return true;
-
-            default:
-                return null;
+    if ((int)$CFG->branch > 311) {
+        if ($feature === FEATURE_MOD_PURPOSE) {
+            return MOD_PURPOSE_COLLABORATION;
         }
-    } else {
-        switch ($feature) {
-            case FEATURE_BACKUP_MOODLE2:
-                return true;
-            case FEATURE_COMPLETION_TRACKS_VIEWS:
-                return true;
-            case FEATURE_GRADE_HAS_GRADE:
-                return true;
-            case FEATURE_GRADE_OUTCOMES:
-                return false;
-            case FEATURE_GROUPS:
-                return true;
-            case FEATURE_GROUPINGS:
-                return true;
-            case FEATURE_GROUPMEMBERSONLY:
-                return true;
-            case FEATURE_MOD_INTRO:
-                return true;
-            case FEATURE_RATE:
-                return true;
-            case FEATURE_SHOW_DESCRIPTION:
-                return true;
+    }
+    switch ($feature) {
+        case FEATURE_BACKUP_MOODLE2:
+            return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+            return true;
+        case FEATURE_GRADE_HAS_GRADE:
+            return true;
+        case FEATURE_GRADE_OUTCOMES:
+            return false;
+        case FEATURE_GROUPS:
+            return true;
+        case FEATURE_GROUPINGS:
+            return true;
+        case FEATURE_GROUPMEMBERSONLY:
+            return true;
+        case FEATURE_MOD_INTRO:
+            return true;
+        case FEATURE_RATE:
+            return true;
+        case FEATURE_SHOW_DESCRIPTION:
+            return true;
 
-            default:
-                return null;
-        }
+        default:
+        return null;
     }
 }
 
@@ -847,6 +828,14 @@ function diary_extend_settings_navigation(settings_navigation $settingsnav, navi
 
     if (!$course) {
         return;
+    }
+
+    // Link to add automatic time released prompts to Diary activities. Visible to teachers and admin only.
+    if (has_capability('mod/diary:addinstance', $context)) {
+        $link = new moodle_url('prompt_edit.php', array('id' => $cm->id));
+        $linkname = get_string('promptstitle', 'diary');
+        $icon = new pix_icon('icon', '', 'diary', array('class' => 'icon'));
+        $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
     }
 
     // Link to transfer Journal entries to Diary entries. Visible to admin only.

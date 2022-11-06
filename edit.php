@@ -24,6 +24,7 @@
  */
 use mod_diary\local\results;
 use mod_diary\local\diarystats;
+use mod_diary\local\prompts;
 use \mod_diary\event\invalid_access_attempt;
 
 require_once("../../config.php");
@@ -51,6 +52,9 @@ require_capability('mod/diary:addentries', $context);
 if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
+
+// Need to call a prompt function that returns the current promptid, if there is one that is current.
+$promptid = prompts::get_current_promptid($diary);
 
 // 20210613 Added check to prevent direct access to create new entry when activity is closed.
 if (($diary->timeclose) && (time() > $diary->timeclose)) {
@@ -123,7 +127,6 @@ if ($action == 'currententry' && $entry) {
 }
 
 $data->id = $cm->id;
-        $debug['CP2 checking item: $data '] = $data;
 
 list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
                                                                                              $context,
@@ -158,6 +161,7 @@ $form = new mod_diary_entry_form(null, array(
 
 // Set existing data loaded from the database for this entry.
 $form->set_data($data);
+        $debug['CP3 checking item: $form->set_data($data) '] = $form->set_data($data);
 
 if ($form->is_cancelled()) {
     redirect($CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id);
@@ -173,6 +177,7 @@ if ($form->is_cancelled()) {
     $newentry->timemodified = $timenow;
     $newentry->text = $fromform->text_editor['text'];
     $newentry->format = $fromform->text_editor['format'];
+        $debug['CP4 checking item: $newentry '] = $newentry;
 
     if (! $diary->editdates) {
         // If editdates is NOT enabled do attempted cheat testing here.
@@ -204,6 +209,8 @@ if ($form->is_cancelled()) {
             $fromform->timecreated = $entry->timecreated;
             $newentry->entrycomment .= get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
             $DB->update_record("diary_entries", $newentry);
+
+            $debug['CP5 checking item: $newentry '] = $newentry;
 
             // Trigger module entry updated event.
             $event = \mod_diary\event\invalid_entry_attempt::create(array(
@@ -238,11 +245,13 @@ if ($form->is_cancelled()) {
                                                 'mod_diary',
                                                 'entry',
                                                 $newentry->id);
+    $newentry->promptid = $promptid;
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
     $newentry->timecreated = $fromform->timecreated;
 
     $DB->update_record('diary_entries', $newentry);
+        $debug['CP6 checking item: $newentry '] = $newentry;
 
     // Try adding autosave cleanup here.
     // will need to search the mdl_editor_atto_autosave table
@@ -268,8 +277,8 @@ if ($form->is_cancelled()) {
 
     // Add confirmation of record being saved.
     echo $OUTPUT->notification(get_string('entrysuccess', 'diary'), 'notifysuccess');
-    // Start new code to send teachers note when diary is done.
 
+    // Start new code to send teachers note when diary is done.
     $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
     $contextcourse = context_course::instance($course->id);
 
@@ -319,18 +328,22 @@ if ($form->is_cancelled()) {
             }
         }
     }
-
+    // End new code.
     redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
     die();
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($diary->name));
+
+if (($diary->intro) && ($CFG->branch < 400)) {
+    echo $OUTPUT->heading($diaryname);
+    echo $output->introduction($diary, $cm); // Output introduction in renderer.php.
+}
 
 // Can use something like this, $intro .= 'this is a test';, to add to the into text.
-$intro = format_module_intro('diary', $diary, $cm->id);
+// ...$intro = format_module_intro('diary', $diary, $cm->id);.
 
-echo $OUTPUT->box($intro);
+echo $OUTPUT->box($diary->intro);
 
 // Otherwise fill and print the form.
 $form->display();

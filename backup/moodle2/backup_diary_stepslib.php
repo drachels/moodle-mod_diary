@@ -83,9 +83,30 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                                                  'errorcasesensitive',
                                                  'errorignorebreaks'));
 
+        $prompts = new backup_nested_element('prompts');
+        $prompt = new backup_nested_element('prompt', array('id'),
+                                           array('diaryid',
+                                                 'datestart',
+                                                 'datestop',
+                                                 'text',
+                                                 'format',
+                                                 'minchar',
+                                                 'maxchar',
+                                                 'minmaxcharpercent',
+                                                 'minword',
+                                                 'maxword',
+                                                 'minmaxwordpercent',
+                                                 'minsentence',
+                                                 'maxsentence',
+                                                 'minmaxsentencepercent',
+                                                 'minparagraph',
+                                                 'maxparagraph',
+                                                 'minmaxparagraphpercent'));
+
         $entries = new backup_nested_element('entries');
         $entry = new backup_nested_element('entry', array('id'),
-                                           array('userid',
+                                           array('promptid',
+                                                 'userid',
                                                  'timecreated',
                                                  'timemodified',
                                                  'text',
@@ -112,15 +133,21 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                                                   'timemodified'));
 
         // Build the tree.
+        $diary->add_child($prompts);
+        $prompts->add_child($prompt);
+
         $diary->add_child($entries);
         $entries->add_child($entry);
+
         $entry->add_child($ratings);
         $ratings->add_child($rating);
+
         $diary->add_child($tags);
         $tags->add_child($tag);
 
         // Define sources.
         $diary->set_source_table('diary', array('id' => backup::VAR_ACTIVITYID));
+        $prompt->set_source_table('diary_prompts', array('diaryid' => backup::VAR_ACTIVITYID));
 
         // All the rest of elements only happen if we are including user info.
         if ($this->get_setting_value('userinfo')) {
@@ -149,8 +176,13 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
 
         // Define id annotations.
         $diary->annotate_ids('scale', 'scale');
+
         $entry->annotate_ids('user', 'userid');
-        $entry->annotate_ids('user', 'teacher');
+        $entry->annotate_ids('user', 'teacher'); // Not sure if this is needed.
+        $entry->annotate_ids('promptid', 'promptid');
+
+        $prompt->annotate_ids('diaryid', 'diaryid');
+
         $rating->annotate_ids('scale', 'scaleid');
         $rating->annotate_ids('user', 'userid');
 
@@ -158,6 +190,9 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $diary->annotate_files('mod_diary', 'intro', null); // This file areas haven't itemid.
         $entry->annotate_files('mod_diary_entries', 'entry', 'id');
         $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
+
+        $entry->annotate_files('mod_diary_prompts', 'entry', 'id');
+        $entry->annotate_files('mod_diary_prompts', 'attachment', 'id');
 
         return $this->prepare_activity_structure($diary);
     }

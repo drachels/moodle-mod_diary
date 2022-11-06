@@ -433,5 +433,53 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2022090400, 'diary');
     }
+    // New prompt table for version 3.7.0.
+    if ($oldversion < 2022102100) {
+
+        // Define table diary_prompts to be created.
+        $table = new xmldb_table('diary_prompts');
+
+        // Adding fields to table diary_prompts.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('diaryid', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $table->add_field('datestart', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $table->add_field('datestop', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $table->add_field('text', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('format', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('minchar', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('maxchar', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('minmaxcharpercent', XMLDB_TYPE_INTEGER, '6', null, null, null, '0');
+        $table->add_field('minword', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('maxword', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('minmaxwordpercent', XMLDB_TYPE_INTEGER, '6', null, null, null, '0');
+        $table->add_field('minsentence', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('maxsentence', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('minmaxsentencepercent', XMLDB_TYPE_INTEGER, '6', null, null, null, '0');
+        $table->add_field('minparagraph', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('maxparagraph', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('minmaxparagraphpercent', XMLDB_TYPE_INTEGER, '6', null, null, null, '0');
+
+        // Adding keys to table diary_prompts.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('diaryid', XMLDB_KEY_FOREIGN, ['diaryid'], 'diary', ['id']);
+
+        // Conditionally launch create table for diary_prompts.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define field promptid to be added to diary_entries.
+        $table = new xmldb_table('diary_entries');
+        $field = new xmldb_field('promptid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'diary');
+
+        // Conditionally launch add field promptid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2022102100, 'diary');
+    }
+
     return true;
 }

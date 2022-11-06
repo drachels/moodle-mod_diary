@@ -448,3 +448,289 @@ class mod_diary_mod_form extends moodleform_mod {
     }
 
 }
+
+/**
+ * Standard base class for typing and submitting Diary Prompts.
+ *
+ * @package   mod_diary
+ * @copyright 2019 AL Rachels <drachels@drachels.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class mod_diary_prompt_form extends moodleform {
+
+    /**
+     * Define the Diary Prompts input form called from prompt_edit.php.
+     */
+    public function definition() {
+        global $CFG, $DB;
+
+        $mform = $this->_form;
+
+        // 20201119 Get the, Edit entry dates, setting for this Diary activity.
+        $mform->addElement('hidden', 'diaryid');
+        $mform->setType('diaryid', PARAM_INT);
+
+        // 20210613 Retrieve customdata info for use.
+        $promptid = $this->_customdata['editoroptions']['promptid'];
+
+        $mform->addElement('static', 'description', 'Static text testing $diaryid', $promptid);
+
+        $timeclose = $this->_customdata['editoroptions']['timeclose'];
+        $editall = $this->_customdata['editoroptions']['editall'];
+        $editdates = $this->_customdata['editoroptions']['editdates'];
+
+        $plugin = 'mod_diary';
+        $ratingoptions = diarystats::get_rating_options($plugin);
+        // 20220920 Cache options for form elements to input text.
+        $shorttextoptions  = array('size' => 3,  'style' => 'width: auto');
+        $mediumtextoptions = array('size' => 5,  'style' => 'width: auto');
+        $longtextoptions   = array('size' => 10, 'style' => 'width: auto');
+
+        $mform->addElement('date_time_selector', 'datestart', get_string('datestart', 'mod_diary', $promptid));
+        $mform->setType('datestart', PARAM_INT);
+
+        $mform->addElement('date_time_selector', 'datestop', get_string('datestop', 'mod_diary', $promptid));
+        $mform->setType('stopdate', PARAM_INT);
+
+        $mform->addElement('editor',
+                           'text_editor',
+                           format_text(get_string('prompt', 'mod_diary'),
+                           null,
+                           $this->_customdata['editoroptions']),
+                           'wrap="virtual" rows="5"');
+        $mform->setType('text_editor', PARAM_RAW);
+        $mform->addRule('text_editor', null, 'required', null, 'client');
+
+        // 20220923 Added minimum character count setting.
+        $name = 'minchar';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum character count setting.
+        $name = 'maxchar';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum character penalty.
+        $name = 'minmaxcharpercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        // 20220923 Added minimum word count setting.
+        $name = 'minword';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum word count setting.
+        $name = 'maxword';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum word penalty.
+        $name = 'minmaxwordpercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        // 20220923 Added minimum sentence count setting.
+        $name = 'minsentence';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum sentence count setting.
+        $name = 'maxsentence';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum sentence penalty.
+        $name = 'minmaxsentencepercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        // 20220923 Added minimum paragraph count setting.
+        $name = 'minparagraph';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum paragraph count setting.
+        $name = 'maxparagraph';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum paragraph penalty.
+        $name = 'minmaxparagraphpercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->addElement('hidden', 'firstkey');
+        $mform->setType('firstkey', PARAM_INT);
+        $mform->addElement('hidden', 'entryid');
+        $mform->setType('entryid', PARAM_INT);
+
+        $mform->addElement('hidden', 'promptid');
+        $mform->setType('promptid', PARAM_INT);
+
+        $this->add_action_buttons();
+    }
+}
+/**
+ * Standard base class for editing a Diary Prompt.
+ *
+ * @package   mod_diary
+ * @copyright 2019 AL Rachels <drachels@drachels.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class mod_diary_prompt_edit_form extends moodleform {
+
+    /**
+     * Define the Diary Prompts input form called from prompt_edit.php.
+     */
+    public function definition() {
+        global $CFG, $DB;
+
+        $mform = $this->_form;
+
+        // 20220923 Get the, Edit entry dates, setting for this Diary activity.
+        $mform->addElement('hidden', 'diaryid');
+        $mform->setType('diaryid', PARAM_INT);
+
+        $plugin = 'mod_diary';
+        $ratingoptions = diarystats::get_rating_options($plugin);
+        // 20220923 Cache options for form elements to input text.
+        $shorttextoptions  = array('size' => 3,  'style' => 'width: auto');
+        $mediumtextoptions = array('size' => 5,  'style' => 'width: auto');
+        $longtextoptions   = array('size' => 10, 'style' => 'width: auto');
+
+        $name = 'datestart';
+        $label = get_string($name, $plugin);
+        $mform->addElement('date_time_selector', $name, $label);
+        $mform->setType($name, PARAM_INT);
+
+        $name = 'datestop';
+        $label = get_string($name, $plugin);
+        $mform->addElement('date_time_selector', $name, $label);
+        $mform->setType($name, PARAM_INT);
+
+        $name = 'text_editor';
+        $label = get_string($name, $plugin);
+
+        $mform->addElement('editor', $name,
+                           format_text($label,
+                           $promptformat = FORMAT_MOODLE,
+                           $options = null,
+                           $courseiddonotuse = null),
+                           'wrap="virtual" rows="3"');
+        $mform->setType($name, PARAM_RAW);
+        $mform->addRule($name, null, 'required', null, 'client');
+
+        // 20220923 Added minimum character count setting.
+        $name = 'minchar';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum character count setting.
+        $name = 'maxchar';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum character penalty.
+        $name = 'minmaxcharpercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        // 20220923 Added minimum word count setting.
+        $name = 'minword';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum word count setting.
+        $name = 'maxword';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum word penalty.
+        $name = 'minmaxwordpercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        // 20220923 Added minimum sentence count setting.
+        $name = 'minsentence';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum sentence count setting.
+        $name = 'maxsentence';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum sentence penalty.
+        $name = 'minmaxsentencepercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        // 20220923 Added minimum paragraph count setting.
+        $name = 'minparagraph';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $shorttextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added maximum paragraph count setting.
+        $name = 'maxparagraph';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+
+        // 20220923 Added a selector to set error percent of each minimum or maximum paragraph penalty.
+        $name = 'minmaxparagraphpercent';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->addElement('hidden', 'firstkey');
+        $mform->setType('firstkey', PARAM_INT);
+        $mform->addElement('hidden', 'prompt');
+        $mform->setType('prompt', PARAM_INT);
+
+        $this->add_action_buttons();
+    }
+}

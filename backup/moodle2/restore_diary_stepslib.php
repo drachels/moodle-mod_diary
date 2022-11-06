@@ -48,6 +48,8 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
             $paths[] = new restore_path_element('diary_entry', '/activity/diary/entries/entry');
             $paths[] = new restore_path_element('diary_entry_rating', '/activity/diary/entries/entry/ratings/rating');
             $paths[] = new restore_path_element('diary_entry_tag', '/activity/diary/entriestags/tag');
+            $paths[] = new restore_path_element('diary_prompt', '/activity/diary/prompts/prompt');
+
         }
 
         // Return the paths wrapped into standard activity structure.
@@ -89,6 +91,27 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
     }
 
     /**
+     * Process a diary promt restore.
+     *
+     * @param object $diaryprompt
+     *            The diaryprompt in object form.
+     * @return void
+     */
+    protected function process_diary_prompt($diaryprompt) {
+        global $DB;
+
+        $diaryprompt = (object) $diaryprompt;
+
+        $oldid = $diaryprompt->id; // Save the id from the dirary_prompts record.
+        unset($diaryprompt->id);
+
+        $diaryprompt->diaryid = $this->get_new_parentid('diary'); // Get the ID of the diary activity this prompt belongs to.
+
+        $newid = $DB->insert_record('diary_prompts', $diaryprompt); // Create a new prompt record ID.
+        $this->set_mapping('diary_prompt', $oldid, $newid); // Map the new prompt ID to the old prompt ID.
+    }
+
+    /**
      * Process a diaryentry restore.
      *
      * @param object $diaryentry
@@ -100,10 +123,18 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $diaryentry = (object) $diaryentry;
 
-        $oldid = $diaryentry->id;
-        unset($diaryentry->id);
+        $oldid = $diaryentry->id; // Save the old entry ID.
+        $oldpromptid = $diaryentry->promptid; // Save the old prompt ID.
+
+        unset($diaryentry->id); // Remove the old entry ID.
+        unset($diaryentry->promptid); // Remove the old prompt ID.
 
         $diaryentry->diary = $this->get_new_parentid('diary');
+        if ($oldpromptid > 0) {
+            $diaryentry->promptid = $this->get_new_parentid('diary_prompt');
+        } else {
+            $diaryentry->promptid = $oldpromptid;
+        }
         $diaryentry->timemcreated = $this->apply_date_offset($diaryentry->timecreated);
         $diaryentry->timemodified = $this->apply_date_offset($diaryentry->timemodified);
         $diaryentry->timemarked = $this->apply_date_offset($diaryentry->timemarked);
@@ -177,5 +208,6 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         $this->add_related_files('mod_diary', 'intro', null);
         $this->add_related_files('mod_diary_entries', 'text', null);
         $this->add_related_files('mod_diary_entries', 'entrycomment', null);
+        $this->add_related_files('mod_diary_prompts', 'text', null);
     }
 }

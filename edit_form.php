@@ -71,7 +71,12 @@ class mod_diary_entry_form extends moodleform {
             $mform->setType('timecreated', PARAM_INT);
         }
 
-        $mform->addElement('editor', 'text_editor', get_string('entry', 'mod_diary'), null, $this->_customdata['editoroptions']);
+        $mform->addElement('editor',
+                           'text_editor',
+                           get_string('entry', 'mod_diary'),
+                           null,
+                           $this->_customdata['editoroptions']);
+
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 

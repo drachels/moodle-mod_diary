@@ -14,3 +14,10 @@ $string['itemtype_descr'] = 'Select the type of items in the essay text that wil
 $string['itemtype_help'] = 'Select the type of items in the essay text that will contribute to the auto-rating.';
 $string['itemtype_title'] = 'Type of countable items';
 $string['itemtype'] = 'Type of countable items';
+
+$string['itemtypefiles'] = 'Files';
+$string['itemtypechars'] = 'Characters';
+$string['itemtypenone'] = 'None';
+$string['itemtypensentences'] = 'Sentences';
+$string['itemtypeparagraphs'] = 'Paragraphs';
+$string['itemtypewords'] = 'Words';

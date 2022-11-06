@@ -221,7 +221,7 @@ if ($ADMIN->fulltree) {
     // 20211006 Diary expected min/max paragraph error percentage setting.
     $name = 'mod_diary/minmaxparapercent';
     $plugin = 'mod_diary';
-    $title = get_string('minmaxparapercent', 'diary');
+    $title = get_string('minmaxparagraphpercent', 'diary');
     $description = get_string('minmaxparapercent_help', 'diary');
     $default = 0;
     $options = array();

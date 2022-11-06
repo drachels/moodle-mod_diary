@@ -63,6 +63,9 @@ class restore_diary_activity_task extends restore_activity_task {
             'text',
             'entrycomment'
         ), 'diary_entry');
+        $contents[] = new restore_decode_content('diary_prompts', array(
+            'text'
+        ), 'diary_prompt');
 
         return $contents;
     }
