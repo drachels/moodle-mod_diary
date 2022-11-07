@@ -53,6 +53,8 @@ Diary_927 - Need strings for table column headings in prompts_view.php and yyypr
     Created the prompts and prepared both files to use them.
 Diary_928 - Prompt create works but update also creates a new prompt instead of just updating
     the record.
+Diary_937 - The edit.php file line 369/370 is broken on my 3.11 sandbox site on Onos. Fixed
+    the broken intro and made it look as close to the same on both M311 and M404. 
 Diary_938 - Need to add a promptid field to the mdl_diary_entries table. See the ticket
     as there is a lot of stuff listed on it.
 Diary_939 - Need to create new icons, monologo.svg and monologo.png. 20221023 Created both
