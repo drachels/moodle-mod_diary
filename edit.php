@@ -53,6 +53,9 @@ if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
+// 20221107 The $diary->intro gets overwritten by the current prompt and Notes, so keep a copy for later down in this file.
+$temp_intro = $diary->intro;
+
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
 $promptid = prompts::get_current_promptid($diary);
 
@@ -79,6 +82,7 @@ $PAGE->set_url('/mod/diary/edit.php', array('id' => $id));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
+
 
 $data = new stdClass();
 
@@ -334,16 +338,13 @@ if ($form->is_cancelled()) {
 }
 
 echo $OUTPUT->header();
-
 if (($diary->intro) && ($CFG->branch < 400)) {
-    echo $OUTPUT->heading($diaryname);
-    echo $output->introduction($diary, $cm); // Output introduction in renderer.php.
+    echo $OUTPUT->heading(format_string($diary->name));
+    $intro = $temp_intro.'<br>'.format_module_intro('diary', $diary, $cm->id);
+} else {
+    $intro = format_module_intro('diary', $diary, $cm->id);
 }
-
-// Can use something like this, $intro .= 'this is a test';, to add to the into text.
-// ...$intro = format_module_intro('diary', $diary, $cm->id);.
-
-echo $OUTPUT->box($diary->intro);
+echo $OUTPUT->box($intro);
 
 // Otherwise fill and print the form.
 $form->display();
