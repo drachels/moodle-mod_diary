@@ -875,46 +875,46 @@ class diarystats {
             // 20220904 Word potential auto-rating.
             $autoratewords = 0;
             if ($diary->enableautorating
-                && $diary->minwordlimit > 0
+                && $settingsused->minword > 0
                 && $diarystats->words) {
-                $autoratewords = ((max($diary->minwordlimit - $diarystats->words, 0))
-                                 * $diary->minmaxwordpercent);
+                $autoratewords = ((max($settingsused->minword - $diarystats->words, 0))
+                                 * $settingsused->minmaxwordpercent);
             }
             if ($diary->enableautorating
-                && $diary->maxwordlimit > 0
-                && $diarystats->words > $diary->maxwordlimit) {
-                $autoratewords = ((max($diarystats->words - $diary->maxwordlimit, 0))
-                                 * $diary->minmaxwordpercent);
+                && $settingsused->maxword > 0
+                && $diarystats->words > $settingsused->maxword) {
+                $autoratewords = ((max($diarystats->words - $settingsused->maxword, 0))
+                                 * $settingsused->minmaxwordpercent);
             }
 
             // 20220904 Sentence potential auto-rating.
             $autoratesentences = 0;
             if ($diary->enableautorating
-                && $diary->minsentencelimit > 0
+                && $settingsused->minsentence > 0
                 && $diarystats->sentences) {
-                $autoratesentences = ((max($diary->minsentencelimit - $diarystats->sentences, 0))
-                                     * $diary->minmaxsentpercent);
+                $autoratesentences = ((max($settingsused->minsentence - $diarystats->sentences, 0))
+                                     * $settingsused->minmaxsentencepercent);
             }
             if ($diary->enableautorating
-                && $diary->maxsentencelimit > 0
-                && $diarystats->sentences > $diary->maxsentencelimit) {
-                $autoratesentences = ((max($diarystats->sentences - $diary->maxsentencelimit, 0))
-                                     * $diary->minmaxsentpercent);
+                && $settingsused->maxsentence > 0
+                && $diarystats->sentences > $settingsused->maxsentence) {
+                $autoratesentences = ((max($diarystats->sentences - $settingsused->maxsentence, 0))
+                                     * $settingsused->minmaxsentencepercent);
             }
 
             // 20220904 Paragraph potential auto-rating.
             $autorateparagraphs = 0;
             if ($diary->enableautorating
-                && $diary->minparagraphlimit > 0
+                && $settingsused->minparagraph > 0
                 && $diarystats->paragraphs) {
-                $autorateparagraphs = ((max($diary->minparagraphlimit - $diarystats->paragraphs, 0))
-                                      * $diary->minmaxparapercent);
+                $autorateparagraphs = ((max($settingsused->minparagraph - $diarystats->paragraphs, 0))
+                                      * $settingsused->minmaxparagraphpercent);
             }
             if ($diary->enableautorating
-                && $diary->maxparagraphlimit > 0
-                && $diarystats->paragraphs > $diary->maxparagraphlimit) {
-                $autorateparagraphs = ((max($diarystats->paragraphs - $diary->maxparagraphlimit, 0))
-                                      * $diary->minmaxparapercent);
+                && $settingsused->maxparagraph > 0
+                && $diarystats->paragraphs > $settingsused->maxparagraph) {
+                $autorateparagraphs = ((max($diarystats->paragraphs - $settingsused->maxparagraph, 0))
+                                      * $settingsused->minmaxparagraphpercent);
             }
 
             $potentialratingdisp = $autoratecharacters.' - '
@@ -1183,7 +1183,7 @@ class diarystats {
         // 20210710 Add checks and description additions for mins and maxes.
         // This is temporary and probably needs to be moved to somewhere else so
         // it can be shown on the edit.php page, too. Maybe move to results.php.
-        $diary->intro = '';
+        //$diary->intro = '';
 
         // 20221018 Added prompt info and counts above the note entries.
         $diary->intro .= prompts::prompts_viewcurrent($diary);
