@@ -24,8 +24,6 @@ Diary_741 - Need to verify communications when rating or when student adds/edits
     an email as soon as a student saves an entry. - Verified it does as of 20221024.
 Diary_820 - A user requested adding teacher notification when student makes an entry. Added
     needed code in edit.php down around line 261.
-
-
 Diary_746 - Rating a zero results in student seeing, No Grade. Problem was due to the
     way I was doing a branch check in results.php down around line 588. Dropped the
     branch check and changed the way $gradestring was created.
@@ -36,6 +34,7 @@ Diary_847 - Would be nice to have automatic weekly writing prompts. Pending
     20221025 All appears to work as needed, including backup and restore.
     20221027 Discovered restore was NOT correct. Now fixed. Also fixed the case where there
              are too many current prompts. Only way to proceed is to fix the problem.
+    20221113 Rewrote CSV download file to include prompts.
 Diary_925 - Need to give an error if any prompt dates overlap. Added needed code in view.php.
  Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
     only numbers. Changed lines 364 and 367 to include max of 1, so when words is zero,
@@ -53,8 +52,7 @@ Diary_927 - Need strings for table column headings in prompts_view.php and yyypr
     Created the prompts and prepared both files to use them.
 Diary_928 - Prompt create works but update also creates a new prompt instead of just updating
     the record.
-Diary_937 - The edit.php file line 369/370 is broken on my 3.11 sandbox site on Onos. Fixed
-    the broken intro and made it look as close to the same on both M311 and M404. 
+
 Diary_938 - Need to add a promptid field to the mdl_diary_entries table. See the ticket
     as there is a lot of stuff listed on it.
 Diary_939 - Need to create new icons, monologo.svg and monologo.png. 20221023 Created both
@@ -62,15 +60,22 @@ Diary_939 - Need to create new icons, monologo.svg and monologo.png. 20221023 Cr
 Diary_941 - Prompts are not backed up and restored correctly. Had one field missing in the
     backup_diary_stepslib.php file of the entries table. Added field, promptid, and backup
     and restore seems to be working correctly.
-
 Diary_942 - Need to add code to delete promts when doing a course reset. Modified the
     code so prompts are deleted when a diary is deleted. For individual prompts, still in
     progress for detecting and preventing delete if it is still in use. - DONE
-
 Diary_944 - Language strings need fixing and sorted. Added strings as needed and sorted
     the file contents so the string names are in alphabetical order.
 Diary_948 - Prompt events need to be implemented/worked on. Implemented prompt_removed.php,
     prompts_viewed.php, prompt_edited.php, prompt_in_use.php, and prompt_created.php.
+Diary_950 - CSV file download needs re-write and changed to include prompt data. Rewrote
+    the file code in results.php to include the prompt data. 
+Diary_951 - The diary_entries and diary_prompts tables both have a text field and need
+    separate language strings for CSV downloads. 20221108 The mdl_diary_entries table needs
+    $string['entry'] = 'Entry'; and the mdl_diary_prompts table needs $string['text'] =
+    'Enter your writing prompt'; Made the needed changes.
+Diary_952 - The results.php file down around line 364 sometimes can break due to hardcoded
+    index offset. Changed code to do an array_shift(array) first, then hard coded to use
+    an index offset of zero, instead of one. Works great.
 
 === 3.6.0 === Released 20220909
 Diary_672v - Investigate using authenticated user role for front page access. Moodle
