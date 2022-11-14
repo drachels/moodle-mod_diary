@@ -173,6 +173,7 @@ $string['fogindex_help'] = 'The Gunning fog index is a measure of readability. I
 
 Try to aim for a grade level below 10. For more information see: <https://en.wikipedia.org/wiki/Gunning_fog_index>';
 $string['fogindex'] = 'Fog index';
+$string['for'] = ' for site: ';
 $string['format'] = 'Format';
 $string['freadingease_help'] = 'Flesch reading ease: high scores indicate your text is easier to read while lower scores indicate your text is more difficult to read. Try to aim for a reading ease over 60.';
 $string['freadingease'] = 'Flesch reading ease';
@@ -318,11 +319,29 @@ $string['potcommerrpen'] = 'Potential Common error penalty: {$a->one} * {$a->two
 $string['present'] = 'Present';
 $string['previousentry'] = 'Previous entry';
 $string['prompt'] = 'Enter your writing prompt';
+$string['promptid'] = 'Prompt id';
 $string['promptinfo'] = 'There are {$a->past} past prompts, {$a->current} current prompt, and {$a->future} future prompts for this diary activity.<br>';
+$string['promptmaxc'] = 'Char max';
+$string['promptmaxp'] = 'Para max';
+$string['promptmaxs'] = 'Sent max';
+$string['promptmaxw'] = 'Word max';
+$string['promptminc'] = 'Char min';
+$string['promptminp'] = 'Para min';
+$string['promptmins'] = 'Sent min';
+$string['promptminw'] = 'Word min';
+$string['promptminmaxcp'] = 'Char %';
+$string['promptminmaxpp'] = 'Para %';
+$string['promptminmaxsp'] = 'Sent %';
+$string['promptminmaxwp'] = 'Word %';
+
 $string['promptremovefailure'] = 'This prompt, ID {$a}, is in use and cannot be removed.';
 $string['promptremovesuccess'] = 'You have successfully removed prompt, ID {$a}.';
+$string['promptstart'] = 'Prompt start';
 $string['promptstitle'] = 'Diary writing prompts';
+$string['promptstop'] = 'Prompt stop';
 $string['promptsviewtitle'] = 'View writing prompts';
+$string['prompttext'] = 'Prompt text';
+$string['promptzerocount'] = '<td>Currently, there are, {$a} prompts for this Diary activity. </td>';
 $string['rate'] = 'Rate';
 $string['rating'] = 'Rating for this entry';
 $string['reload'] = 'Reload and show from current to oldest diary entry';
