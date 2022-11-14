@@ -1183,7 +1183,6 @@ class diarystats {
         // 20210710 Add checks and description additions for mins and maxes.
         // This is temporary and probably needs to be moved to somewhere else so
         // it can be shown on the edit.php page, too. Maybe move to results.php.
-        //$diary->intro = '';
 
         // 20221018 Added prompt info and counts above the note entries.
         $diary->intro .= prompts::prompts_viewcurrent($diary);
