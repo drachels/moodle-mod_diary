@@ -254,7 +254,7 @@ if ($prompts) {
     $data->entryid = null;
     $data->text = '';
     $data->format = FORMAT_HTML;
-    $prompttext = '<td>'.'Currently, there are, '.$counter.', prompts for this Diary activity. </td>';
+    $prompttext = get_string('promptzerocount', 'diary', $counter);
     $line[] = $prompttext.'';
     $table->data[] = $line;
     $output = html_writer::table($table);
@@ -268,7 +268,7 @@ $maxfiles = 99; // TODO: add some setting.
 $maxbytes = $course->maxbytes; // TODO: add some setting.
 $editoroptions = array(
     'promptid' => $data->entryid,
-    'format' => $prompt->format,
+    'format' => $diary->format,
     'timeopen' => $diary->timeopen,
     'timeclose' => $diary->timeclose,
     'editall' => $diary->editall,
