@@ -59,7 +59,7 @@ class prompts {
     }
 
     /**
-     * Download entries in this diary activity.
+     * Download entries in this diary activity. - THIS IS NOT BEING USED!
      *
      * @param array $context Context for this download.
      * @param array $course Course for this download.
@@ -609,6 +609,7 @@ class prompts {
     /**
      * Remove the selected prompt.
      *
+     * @param array $cm
      * @return object
      */
     public static function prompt_remove($cm) {
@@ -644,9 +645,10 @@ class prompts {
     /**
      * Can this prompt be removed?
      *
-     * @return object
+     * @param array $cm
+     * @param int $promptid The id of the prompt we want to delete.
+     * @return object $promptcount Number of prompts for this diary activity.
      */
-
     public static function prompt_in_use($cm, $promptid) {
         global $CFG, $DB;
         $context = context_module::instance($cm->id);
@@ -673,6 +675,7 @@ class prompts {
     /**
      * Get current prompts for view/use.
      *
+     * @param array $diary The settings for this diary activity.
      * @return object
      */
     public static function prompts_viewcurrent($diary) {
@@ -762,16 +765,16 @@ class prompts {
     /**
      * Is there a current prompt?
      *
-     * @return object
+     * @param array $diary The settings for this diary activity.
+     * @return int $promptid The current promptid or zero if not available.
      */
-
     public static function get_current_promptid($diary) {
         global $CFG, $DB;
-
         $counter = 0;
         $past = 0;
         $current = 0;
         $future = 0;
+        $promptid = 0;
         if (! $promptsall = $DB->get_records('diary_prompts',
                                             array('diaryid' => $diary->id),
                                             $sort = 'datestart ASC, datestop ASC')) {
