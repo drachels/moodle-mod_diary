@@ -73,7 +73,7 @@ Diary_951 - The diary_entries and diary_prompts tables both have a text field an
     separate language strings for CSV downloads. 20221108 The mdl_diary_entries table needs
     $string['entry'] = 'Entry'; and the mdl_diary_prompts table needs $string['text'] =
     'Enter your writing prompt'; Made the needed changes.
-Diary_952 - The results.php file down around line 364 sometimes can break due to hardcoded
+Diary_952v - The results.php file down around line 364 sometimes can break due to hardcoded
     index offset. Changed code to do an array_shift(array) first, then hard coded to use
     an index offset of zero, instead of one. Works great.
 
