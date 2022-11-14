@@ -475,3 +475,6 @@ Really wild idea - add current min's and max's to a prompt so they can change wh
 20221113 Had to rewrite the CSV file download. Ran code checker and PHPdock check.
 20221113 Discovered a problem with a hardcoded index offset and fixed it in results.php down
     around line 364. Details in ticket, Diary_952.
+20221114 Discovered in results.php where not having any prompts at all was creating a bug in
+    line 456, $csv->add_data($pfields2);, of the CSV download. Fixed now. Discovered and fixed
+    in Moodle 3.7, but affected all Moodle's. 
