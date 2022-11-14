@@ -193,27 +193,106 @@ class results {
         $csv = new csv_export_writer();
         $whichuser = ''; // Leave blank for an admin or teacher.
         if (is_siteadmin($USER->id)) {
-            $whichdiary = ('AND d.diary > 0');
+            $whichdiary = ('AND de.diary > 0');
+            $whichprompt = ('AND dp.diaryid > 0');
             $csv->filename = clean_filename(get_string('exportfilenamep1', 'diary'));
         } else if (has_capability('mod/diary:manageentries', $context)) {
-            $whichdiary = ('AND d.diary = ');
+            $whichdiary = ('AND de.diary = ');
             $whichdiary .= ($diary->id);
+            $whichprompt = ('AND dp.diaryid = ');
+            $whichprompt .= ($diary->id);
             $csv->filename = clean_filename(($course->shortname).'_');
             $csv->filename .= clean_filename(($diary->name));
         } else if (has_capability('mod/diary:addentries', $context)) {
-            $whichdiary = ('AND d.diary = ');
+            $whichdiary = ('AND de.diary = ');
             $whichdiary .= ($diary->id);
-            $whichuser = (' AND d.userid = '.$USER->id); // Not an admin or teacher so can only get their OWN entries.
+            $whichprompt = ('AND dp.diaryid = ');
+            $whichprompt .= ($diary->id);
+            $whichuser = (' AND de.userid = '.$USER->id); // Not an admin or teacher so can only get their OWN entries.
             $csv->filename = clean_filename(($course->shortname).'_');
             $csv->filename .= clean_filename(($diary->name));
         }
         $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary').gmdate("Ymd_Hi").'GMT.csv');
 
-        $fields = array();
-        $fields = array(
+        $promptfields = array();
+        $promptfields = array(
+            get_string('promptid', 'diary'),
+            get_string('pluginname', 'diary'),
+            get_string('promptstart', 'diary'),
+            get_string('promptstop', 'diary'),
+            get_string('prompttext', 'diary'),
+            get_string('format', 'diary'),
+            get_string('promptminc', 'diary'),
+            get_string('promptmaxc', 'diary'),
+            get_string('promptminmaxcp', 'diary'),
+            get_string('promptminw', 'diary'),
+            get_string('promptmaxw', 'diary'),
+            get_string('promptminmaxwp', 'diary'),
+            get_string('promptmins', 'diary'),
+            get_string('promptmaxs', 'diary'),
+            get_string('promptminmaxsp', 'diary'),
+            get_string('promptminp', 'diary'),
+            get_string('promptmaxp', 'diary'),
+            get_string('promptminmaxpp', 'diary')
+        );
+
+        // Create SQL for prompts.
+        if ($CFG->dbtype == 'pgsql') {
+            $psql = "SELECT dp.id AS promptid,
+                            dp.diaryid AS diaryid,
+                            to_char(to_timestamp(dp.datestart), 'YYYY-MM-DD HH24:MI:SS') AS promptstart,
+                            to_char(to_timestamp(dp.datestop), 'YYYY-MM-DD HH24:MI:SS') AS promptstop,
+                            dp.text AS text,
+                            dp.format AS format,
+                            dp.minchar AS promptminc,
+                            dp.maxchar AS promptmaxc,
+                            dp.minmaxcharpercent AS promptminmaxcp,
+                            dp.minword AS promptminw,
+                            dp.maxword AS promptmaxw,
+                            dp.minmaxwordpercent AS promptminmaxwp,
+                            dp.minsentence AS promptmins,
+                            dp.maxsentence AS promptmaxs,
+                            dp.minmaxsentencepercent AS promptminmaxsp,
+                            dp.minparagraph AS promptminp,
+                            dp.maxparagraph AS promptmaxp,
+                            dp.minmaxparagraphpercent AS promptminmaxpp
+                      FROM {diary} d
+                      JOIN {diary_prompts} dp ON dp.diaryid = d.id
+                     WHERE dp.id > 0 ";
+        } else {
+            $psql = "SELECT dp.id AS promptid,
+                            dp.diaryid AS diaryid,
+                            FROM_UNIXTIME(dp.datestart) AS promptstart,
+                            FROM_UNIXTIME(dp.datestop) AS promptstop,
+                            dp.text AS text,
+                            dp.format AS format,
+                            dp.minchar AS promptminc,
+                            dp.maxchar AS promptmaxc,
+                            dp.minmaxcharpercent AS promptminmaxcp,
+                            dp.minword AS promptminw,
+                            dp.maxword AS promptmaxw,
+                            dp.minmaxwordpercent AS promptminmaxwp,
+                            dp.minsentence AS promptmins,
+                            dp.maxsentence AS promptmaxs,
+                            dp.minmaxsentencepercent AS promptminmaxsp,
+                            dp.minparagraph AS promptminp,
+                            dp.maxparagraph AS promptmaxp,
+                            dp.minmaxparagraphpercent AS promptminmaxpp
+                      FROM {diary_prompts} dp
+                      JOIN {diary} d ON d.id = dp.diaryid
+                     WHERE dp.id > 0 ";
+        }
+
+        $psql .= ($whichprompt);
+        $psql .= "   GROUP BY dp.id, d.id
+                     ORDER BY d.id ASC, dp.id ASC";
+
+        $entryfields = array();
+        $entryfields = array(
             get_string('firstname'),
             get_string('lastname'),
             get_string('pluginname', 'diary'),
+            get_string('promptid', 'diary'),
             get_string('userid', 'diary'),
             get_string('timecreated', 'diary'),
             get_string('timemodified', 'diary'),
@@ -223,75 +302,180 @@ class results {
             get_string('teacher', 'diary'),
             get_string('timemarked', 'diary'),
             get_string('mailed', 'diary'),
-            get_string('text', 'diary')
+            get_string('entry', 'diary')
         );
-        // Add the headings to our data array.
-        $csv->add_data($fields);
+
+        // Create SQL for diary entries.
         if ($CFG->dbtype == 'pgsql') {
-            $sql = "SELECT d.id AS entry,
+            $esql = "SELECT de.id AS entry,
                            u.firstname AS firstname,
                            u.lastname AS lastname,
-                           d.diary AS diary,
-                           d.userid AS userid,
-                           to_char(to_timestamp(d.timecreated), 'YYYY-MM-DD HH24:MI:SS') AS timecreated,
-                           to_char(to_timestamp(d.timemodified), 'YYYY-MM-DD HH24:MI:SS') AS timemodified,
-                           d.text AS text,
-                           d.format AS format,
-                           d.rating AS rating,
-                           d.entrycomment AS entrycomment,
-                           d.teacher AS teacher,
-                           to_char(to_timestamp(d.timemarked), 'YYYY-MM-DD HH24:MI:SS') AS timemarked,
-                           d.mailed AS mailed
-                      FROM {diary_entries} d
-                      JOIN {user} u ON u.id = d.userid
-                     WHERE d.userid > 0 ";
+                           de.diary AS diary,
+                           de.promptid AS promptid,
+                           de.userid AS userid,
+                           to_char(to_timestamp(de.timecreated), 'YYYY-MM-DD HH24:MI:SS') AS timecreated,
+                           to_char(to_timestamp(de.timemodified), 'YYYY-MM-DD HH24:MI:SS') AS timemodified,
+                           de.text AS text,
+                           de.format AS format,
+                           de.rating AS rating,
+                           de.entrycomment AS entrycomment,
+                           de.teacher AS teacher,
+                           to_char(to_timestamp(de.timemarked), 'YYYY-MM-DD HH24:MI:SS') AS timemarked,
+                           de.mailed AS mailed,
+                           d.id AS did,
+                           d.course AS course
+                      FROM {user} u
+                      JOIN {diary_entries} de ON de.userid = u.id
+                      JOIN {diary} d ON d.id = de.diary
+                     WHERE de.userid > 0 ";
         } else {
-            $sql = "SELECT d.id AS entry,
+            $esql = "SELECT de.id AS entry,
                            u.firstname AS 'firstname',
                            u.lastname AS 'lastname',
-                           d.diary AS diary,
-                           d.userid AS userid,
-                           FROM_UNIXTIME(d.timecreated) AS TIMECREATED,
-                           FROM_UNIXTIME(d.timemodified) AS TIMEMODIFIED,
-                           d.text AS text,
-                           d.format AS format,
-                           d.rating AS rating,
-                           d.entrycomment AS entrycomment,
-                           d.teacher AS teacher,
-                           FROM_UNIXTIME(d.timemarked) AS TIMEMARKED,
-                           d.mailed AS mailed
-                      FROM {diary_entries} d
-                      JOIN {user} u ON u.id = d.userid
-                     WHERE d.userid > 0 ";
+                           de.diary AS diary,
+                           de.promptid AS promptid,
+                           de.userid AS userid,
+                           FROM_UNIXTIME(de.timecreated) AS TIMECREATED,
+                           FROM_UNIXTIME(de.timemodified) AS TIMEMODIFIED,
+                           de.text AS text,
+                           de.format AS format,
+                           de.rating AS rating,
+                           de.entrycomment AS entrycomment,
+                           de.teacher AS teacher,
+                           FROM_UNIXTIME(de.timemarked) AS TIMEMARKED,
+                           de.mailed AS mailed,
+                           d.id AS did,
+                           d.course AS course
+                      FROM {user} u
+                      JOIN {diary_entries} de ON de.userid = u.id
+                      JOIN {diary} d ON d.id = de.diary
+                     WHERE de.userid > 0 ";
         }
 
-        $sql .= ($whichdiary);
-        $sql .= ($whichuser);
-        $sql .= "       GROUP BY u.lastname, u.firstname, d.diary, d.id
-                  ORDER BY u.lastname ASC, u.firstname ASC, d.diary ASC, d.id ASC";
+        $esql .= ($whichdiary);
+        $esql .= ($whichuser);
+        $esql .= " GROUP BY de.id, u.lastname, u.firstname
+                  ORDER BY d.id ASC, d.course ASC, u.lastname ASC, u.firstname ASC, de.timecreated ASC";
 
         // Add the list of users and diaries to our data array.
-        if ($ds = $DB->get_records_sql($sql, $fields)) {
-            foreach ($ds as $d) {
-                $output = array(
+        if ($des = $DB->get_records_sql($esql, $entryfields)) {
+            $firstrowflag = 1;
+            if (is_siteadmin($USER->id)) {
+                // 20221113 Use the array_shift, in case the first diary id is not 1.
+                array_shift($des);
+                $currentdiary = $des[0]->diary;
+            } else {
+                $currentdiary = '';
+            }
+
+            foreach ($des as $d) {
+                $fields2 = array(
                     $d->firstname,
                     $d->lastname,
                     $d->diary,
+                    $d->promptid,
                     $d->userid,
                     $d->timecreated,
                     $d->timemodified,
                     $d->format,
                     $d->rating,
-                    $d->entrycomment,
+                    strip_tags($d->entrycomment),
                     $d->teacher,
                     $d->timemarked,
                     $d->mailed,
-                    $d->text
+                    strip_tags($d->text)
                 );
+
+                // 20221110 Split admins output into sections by Diary activities.
+                if ((($currentdiary <> $d->diary) && (is_siteadmin($USER->id))) || ($firstrowflag)) {
+                    $currentdiary = $d->diary;
+                    // 20220819 Add the course shortname and the Diary activity name to our data array.
+                    $currentcrsname = $DB->get_record('course', ['id' => $d->course], 'shortname');
+                    $currentdiaryname = $DB->get_record('diary', ['id' => $d->diary], 'name');
+                    $blankrow = array(' ', null);
+
+                    // Need to investigate and see if I can create a function to get the promptinfo and
+                    // promptfields here, then add them in the correct part of the if/else below here.
+
+                    // 20221110 Only include filename, date, and URL only on the first row of the export.
+                    // 20221110 Add a blank line before each diary entry output, except for the first Diary activity.
+                    if (!$firstrowflag) {
+                        $csv->add_data($blankrow);
+                        $activityinfo = array(get_string('course').': '.$currentcrsname->shortname,
+                            get_string('activity').': '.$currentdiaryname->name);
+                    } else {
+                        // 20221112 Create filename for first line of CSV file depending on whether admin, teacher, or student.
+                        if (is_siteadmin($USER->id)) {
+                            $tempfilename = get_string('exportfilenamep1', 'diary').
+                                                get_string('exportfilenamep2', 'diary');
+                        } else {
+                            $tempfilename = $currentdiaryname->name.
+                                                get_string('exportfilenamep2', 'diary');
+                        }
+                        $activityinfo = array(null, null, null, null, null, null, null, null, null,
+                                              $tempfilename.
+                                              gmdate("Ymd_Hi").get_string('for', 'diary').
+                                              $CFG->wwwroot);
+                        $csv->add_data($activityinfo);
+                        $activityinfo = array(get_string('course').': '.$currentcrsname->shortname,
+                                              get_string('activity').': '.$currentdiaryname->name);
+                        // Since it is a first row, we need to get any prompts and add them here.
+                        $csv->add_data($activityinfo);
+                        $csv->add_data($promptfields);
+                        // Add the list of prompts for this diary to our data array.
+                        if ($pes = $DB->get_records_sql($psql, $promptfields)) {
+                            $pfields1 = '';
+                            $count = 0;
+                            foreach ($pes as $p) {
+                                $pfields2 = array(
+                                    $p->promptid,
+                                    $p->diaryid,
+                                    $p->promptstart,
+                                    $p->promptstop,
+                                    strip_tags($p->text),
+                                    $p->format,
+                                    $p->promptminc,
+                                    $p->promptmaxc,
+                                    $p->promptminmaxcp,
+                                    $p->promptminw,
+                                    $p->promptmaxw,
+                                    $p->promptminmaxwp,
+                                    $p->promptmins,
+                                    $p->promptmaxs,
+                                    $p->promptminmaxsp,
+                                    $p->promptminp,
+                                    $p->promptmaxp,
+                                    $p->promptminmaxpp
+                                );
+                                $count++;
+                                $csv->add_data($pfields2);
+                            }
+                        } else {
+                            $count = prompts::diary_count_prompts($diary);
+                            $pfields2 = get_string('promptzerocount', 'diary', $count);
+                            $csv->add_data($pfields2);
+                        }
+                    }
+                    $csv->add_data($activityinfo);
+                    $csv->add_data($entryfields);
+                    $csv->add_data($fields2);
+                    $firstrowflag = 0;
+                }
+                $cleanedentry = format_string($d->text,
+                                              $striplinks = true,
+                                              $options = null);
+                $cleanedentrycomment = format_string($d->entrycomment,
+                                              $striplinks = true,
+                                              $options = null);
+
+                $output = array($d->firstname, $d->lastname, $d->diary, $d->promptid, $d->userid,
+                    $d->timecreated, $d->timemodified, $d->format, $d->rating, $cleanedentrycomment,
+                    $d->teacher, $d->timemarked, $d->mailed, $cleanedentry);
+
                 $csv->add_data($output);
             }
         }
-        // Download the completed array.
+        // Download the completed file.
         $csv->download_file();
     }
 
@@ -793,21 +977,21 @@ class results {
             // Extract each group id from $groupid and process based on whether viewer is a member of the group.
             // Show user and entry counts only if a member of the current group.
             foreach ($groupid as $gid) {
-                $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
-                          JOIN {groups_members} g ON g.userid = d.userid
+                $esql = "SELECT DISTINCT u.id FROM {diary_entries} de
+                          JOIN {groups_members} g ON g.userid = de.userid
                           JOIN {user} u ON u.id = g.userid
-                         WHERE d.diary = :did AND g.groupid = :gidid";
+                         WHERE de.diary = :did AND g.groupid = :gidid";
 
                 $params = array();
                 $params = ['did' => $diary->id] + ['gidid' => $gid->id];
-                $diarys = $DB->get_records_sql($sql, $params);
+                $diarys = $DB->get_records_sql($esql, $params);
             }
         } else if (!$groupid && ($groupmode > '0')) {
             // Check all the diary entries from the whole course.
             // If not currently a group member, but group mode is set for separate groups or visible groups,
             // see if this user has made entries anyway, made an entry before mode was changed or made an
             // entry before removal from a group.
-            $sql = "SELECT COUNT(DISTINCT de.userid) AS ucount, COUNT(DISTINCT de.text) AS qcount
+            $esql = "SELECT COUNT(DISTINCT de.userid) AS ucount, COUNT(DISTINCT de.text) AS qcount
                       FROM {diary_entries} de
                       JOIN {user} u ON u.id = de.userid
                      WHERE de.diary = :deid
@@ -815,15 +999,15 @@ class results {
 
             $params = array();
             $params = ['deid' => $diary->id] + ['userid' => $USER->id];
-            $diarys = $DB->get_records_sql($sql, $params);
+            $diarys = $DB->get_records_sql($esql, $params);
         } else { // Count all the entries from the whole course.
 
-            $sql = "SELECT DISTINCT u.id FROM {diary_entries} d
-                      JOIN {user} u ON u.id = d.userid
-                     WHERE d.diary = :did";
+            $esql = "SELECT DISTINCT u.id FROM {diary_entries} de
+                      JOIN {user} u ON u.id = de.userid
+                     WHERE de.diary = :did";
             $params = array();
             $params = ['did' => $diary->id];
-            $diarys = $DB->get_records_sql($sql, $params);
+            $diarys = $DB->get_records_sql($esql, $params);
         }
 
         if (!$diarys) {
