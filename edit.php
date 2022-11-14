@@ -54,7 +54,7 @@ if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
 }
 
 // 20221107 The $diary->intro gets overwritten by the current prompt and Notes, so keep a copy for later down in this file.
-$temp_intro = $diary->intro;
+$tempintro = $diary->intro;
 
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
 $promptid = prompts::get_current_promptid($diary);
@@ -340,7 +340,7 @@ if ($form->is_cancelled()) {
 echo $OUTPUT->header();
 if (($diary->intro) && ($CFG->branch < 400)) {
     echo $OUTPUT->heading(format_string($diary->name));
-    $intro = $temp_intro.'<br>'.format_module_intro('diary', $diary, $cm->id);
+    $intro = $tempintro.'<br>'.format_module_intro('diary', $diary, $cm->id);
 } else {
     $intro = format_module_intro('diary', $diary, $cm->id);
 }
