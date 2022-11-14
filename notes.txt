@@ -471,15 +471,7 @@ Really wild idea - add current min's and max's to a prompt so they can change wh
 20221104 Have started the process of code cleanup since I think I finally have prompts working
     correctly. Started work on implementing the five new prompt events. Got the remove one
     working, today. Today would have been the 46th wedding aniversary for my wife and I.
-20221106 Implementing prompt events and code cleanup. Made a release candidate and installed
-    it on drachls.com/moodle311. Created one Diary activity and when I went to add an entry,
-    I was reminded that there is a problem with edit.php down around line 338. If I comment
-    out the if check, edit works, but has some needed info missing. When I completed an entry,
-    I noticed that the possible rating for sentences did not calculate correctly.
-20221107 Fixed the intro in edit.php so that it works for M4.0.x and M3.11.x. I also fixed
-    the rating calculation errors. The errors were due to not changing over the variable,
-    $settingsused, in the calculations for words, sentences, and pargraphs. I must have 
-    stopped for the day after getting characters to work with the new variable, and then
-    forgot to pick up where I left off when I started work the next day. <sigh> memory!!!
-
-
+20221106 Implementing prompt events and code cleanup.
+20221113 Had to rewrite the CSV file download. Ran code checker and PHPdock check.
+20221113 Discovered a problem with a hardcoded index offset and fixed it in results.php down
+    around line 364. Details in ticket, Diary_952.
