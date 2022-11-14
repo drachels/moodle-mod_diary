@@ -287,6 +287,7 @@ class results {
         $psql .= "   GROUP BY dp.id, d.id
                      ORDER BY d.id ASC, dp.id ASC";
 
+        // Create field list for diary entries.
         $entryfields = array();
         $entryfields = array(
             get_string('firstname'),
@@ -422,10 +423,11 @@ class results {
                         // Since it is a first row, we need to get any prompts and add them here.
                         $csv->add_data($activityinfo);
                         $csv->add_data($promptfields);
+                        // Check to see if there are prompts for this diary.
+                        list($tcount, $past, $current, $future ) = prompts::diary_count_prompts($diary);
                         // Add the list of prompts for this diary to our data array.
-                        if ($pes = $DB->get_records_sql($psql, $promptfields)) {
-                            $pfields1 = '';
-                            $count = 0;
+                        if ($tcount) {
+                            $pes = $DB->get_records_sql($psql, $promptfields);
                             foreach ($pes as $p) {
                                 $pfields2 = array(
                                     $p->promptid,
@@ -447,12 +449,10 @@ class results {
                                     $p->promptmaxp,
                                     $p->promptminmaxpp
                                 );
-                                $count++;
                                 $csv->add_data($pfields2);
                             }
                         } else {
-                            $count = prompts::diary_count_prompts($diary);
-                            $pfields2 = get_string('promptzerocount', 'diary', $count);
+                            $pfields2 = array(strip_tags(get_string('promptzerocount', 'diary', $tcount)), $diary->id);
                             $csv->add_data($pfields2);
                         }
                     }
