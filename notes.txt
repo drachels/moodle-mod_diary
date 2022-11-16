@@ -477,4 +477,8 @@ Really wild idea - add current min's and max's to a prompt so they can change wh
     around line 364. Details in ticket, Diary_952.
 20221114 Discovered in results.php where not having any prompts at all was creating a bug in
     line 456, $csv->add_data($pfields2);, of the CSV download. Fixed now. Discovered and fixed
-    in Moodle 3.7, but affected all Moodle's. 
+    in Moodle 3.7, but affected all Moodle's.
+20221116 Spent the past two days fine tuning the CSV download file layout. It is now working as
+    expected for admin, teacher, and student. Teacher and student can only download data for the
+    current Diary activity that they are in. The admin gets data for every Diary activity a
+    being used on the whole site.
