@@ -395,11 +395,8 @@ class results {
                     $currentdiaryname = $DB->get_record('diary', ['id' => $d->diary], 'name');
                     $blankrow = array(' ', null);
 
-                    // Need to investigate and see if I can create a function to get the promptinfo and
-                    // promptfields here, then add them in the correct part of the if/else below here.
-
-                    // 20221110 Only include filename, date, and URL only on the first row of the export.
-                    // 20221110 Add a blank line before each diary entry output, except for the first Diary activity.
+                    // 20221110 Only include filename, date, and URL on the first row of the export.
+                    // 20221110 Add a blank line before each diary activity output, except for the first Diary activity.
                     if (!$firstrowflag) {
                         $csv->add_data($blankrow);
                         $activityinfo = array(get_string('course').': '.$currentcrsname->shortname,
@@ -413,24 +410,32 @@ class results {
                             $tempfilename = $currentdiaryname->name.
                                                 get_string('exportfilenamep2', 'diary');
                         }
-                        $activityinfo = array(null, null, null, null, null, null, null, null, null,
-                                              $tempfilename.
+
+                        $activityinfo = array($tempfilename.
                                               gmdate("Ymd_Hi").get_string('for', 'diary').
                                               $CFG->wwwroot);
                         $csv->add_data($activityinfo);
                         $activityinfo = array(get_string('course').': '.$currentcrsname->shortname,
                                               get_string('activity').': '.$currentdiaryname->name);
-                        // Since it is a first row, we need to get any prompts and add them here.
-                        $csv->add_data($activityinfo);
-                        $csv->add_data($promptfields);
-                        // Check to see if there are prompts for this diary.
-                        list($tcount, $past, $current, $future ) = prompts::diary_count_prompts($diary);
-                        // Add the list of prompts for this diary to our data array.
-                        if ($tcount) {
-                            $pes = $DB->get_records_sql($psql, $promptfields);
-                            foreach ($pes as $p) {
+                        $csv->add_data($blankrow);
+                    }
+
+                    // Add row heading for showing course and activity the prompts belong to.
+                    $csv->add_data($activityinfo);
+                    $csv->add_data($promptfields);
+
+                    // Need the currentdiary index to use as the diary ID for our prompt total count.
+                    $diary->id = $currentdiary;
+
+                    // Check to see if there are prompts for this diary.
+                    list($tcount, $past, $current, $future ) = prompts::diary_count_prompts($diary);
+                    // Add the list of prompts for this diary to our data array.
+                    if ($tcount > 0) {
+                        $pes = $DB->get_records_sql($psql, $promptfields);
+                        foreach ($pes as $p) {
+                            if ($p->diaryid == $currentdiary) {
                                 $pfields2 = array(
-                                    $p->promptid,
+                                   $p->promptid,
                                     $p->diaryid,
                                     $p->promptstart,
                                     $p->promptstop,
@@ -449,18 +454,22 @@ class results {
                                     $p->promptmaxp,
                                     $p->promptminmaxpp
                                 );
+                                // Add the data for the current prompt.
                                 $csv->add_data($pfields2);
                             }
-                        } else {
-                            $pfields2 = array(strip_tags(get_string('promptzerocount', 'diary', $tcount)), $diary->id);
-                            $csv->add_data($pfields2);
                         }
+                    } else {
+                        // Since there are no prompts for this diary activity, say so.
+                        $pfields2 = array(strip_tags(get_string('promptzerocount', 'diary', $tcount)), $diary->id);
+                        $csv->add_data($pfields2);
                     }
+
                     $csv->add_data($activityinfo);
                     $csv->add_data($entryfields);
                     $csv->add_data($fields2);
                     $firstrowflag = 0;
                 }
+
                 $cleanedentry = format_string($d->text,
                                               $striplinks = true,
                                               $options = null);
