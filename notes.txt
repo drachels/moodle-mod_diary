@@ -482,3 +482,4 @@ Really wild idea - add current min's and max's to a prompt so they can change wh
     expected for admin, teacher, and student. Teacher and student can only download data for the
     current Diary activity that they are in. The admin gets data for every Diary activity a
     being used on the whole site.
+20221121 Just finished rewrite of provider.php file.

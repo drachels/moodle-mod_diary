@@ -35,8 +35,7 @@ Diary_847 - Would be nice to have automatic weekly writing prompts. Pending
     20221027 Discovered restore was NOT correct. Now fixed. Also fixed the case where there
              are too many current prompts. Only way to proceed is to fix the problem.
     20221113 Rewrote CSV download file to include prompts.
-Diary_925 - Need to give an error if any prompt dates overlap. Added needed code in view.php.
- Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
+Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
     only numbers. Changed lines 364 and 367 to include max of 1, so when words is zero,
     the 1 is substituted to eliminate the devide by zero error.
 Diary_922 - Need to modify Feature switch to detect need for FEATURE_MOD_PURPOSE. Changed
@@ -44,15 +43,23 @@ Diary_922 - Need to modify Feature switch to detect need for FEATURE_MOD_PURPOSE
 Diary_924 - Need to be able to remove prompts and log the removal. Have actually worked on
     this for the past couple of days and have finally got both the actual delete of a prompt
     record and a log entry of who did it, which course module it was done in, and which
-    prompt ID was deleted. 
+    prompt ID was deleted.
+Diary_925 - Need to give an error if any prompt dates overlap. Added needed code in view.php.
 Diary_926 - In prompts_view.php when getting the prompts they need to be sorted in datestart
     order. Added a sort in line 85 of prompts_view.php, where the prompts are being retrieved
     via $prompts = $DB->get_records().
 Diary_927 - Need strings for table column headings in prompts_view.php and yyyprompt_edit.php.
     Created the prompts and prepared both files to use them.
 Diary_928 - Prompt create works but update also creates a new prompt instead of just updating
-    the record.
-
+    the record. 20221017 Finally! I now have view, create, edit, and delete working. I dropped
+    back to the 20221005 version and then worked on the cases in the switch in the
+    yyyprompt_edit.php file until I started getting the results I wanted.
+Diary_929 - Fails to show No prompts when there are None available. 20221020 Showing the two
+    strings that report the total prompts, past count, courrent count, and future count.
+    echo get_string('tcount', 'diary', $tcount);
+    echo get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
+   I think this will be sufficient, but may try totally hiding ino if there are not any prompts.
+ 
 Diary_938 - Need to add a promptid field to the mdl_diary_entries table. See the ticket
     as there is a lot of stuff listed on it.
 Diary_939 - Need to create new icons, monologo.svg and monologo.png. 20221023 Created both
@@ -76,6 +83,12 @@ Diary_951 - The diary_entries and diary_prompts tables both have a text field an
 Diary_952v - The results.php file down around line 364 sometimes can break due to hardcoded
     index offset. Changed code to do an array_shift(array) first, then hard coded to use
     an index offset of zero, instead of one. Works great.
+Diary_955 - First diary entry is duplicated in the CSV download file. Completely rewrote
+    the CSV download code. 
+Diary_956 - The provider.php function export_user_data() line 191 appears to be a bug. Comletely
+    rewrote the provider.php file. This is not a problem, now. 
+Diary_960 - Missing the privacy:metadata:diary_entries:xxx strings. Added the missing strings. 
+
 
 === 3.6.0 === Released 20220909
 Diary_672v - Investigate using authenticated user role for front page access. Moodle
