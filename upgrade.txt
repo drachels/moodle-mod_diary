@@ -58,8 +58,28 @@ Diary_929 - Fails to show No prompts when there are None available. 20221020 Sho
     strings that report the total prompts, past count, courrent count, and future count.
     echo get_string('tcount', 'diary', $tcount);
     echo get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
-   I think this will be sufficient, but may try totally hiding ino if there are not any prompts.
- 
+    I think this will be sufficient, but may try totally hiding ino if there are not any prompts.
+Diary_931 - Sentence punctuation without a trailing space is counted as a sentence. 20221011 In
+    diarystats.php down around line 888, I have changed the code for counting sentences. I am
+    experimenting with separating $entry into paragraphs, then reassemble into one text blob,
+    before trying to count sentences. With my change to the $pattern to look at for splitting
+    into sentences, I am able to ignore periods embedded in words. This method seems pretty
+    good at NOT counting something like, edit.php as the ending and starting of a new sentence,
+    but as one word.
+Diary_932 - Filenames with their extension are incorrectly counted as two words. Changed to
+    new code so that I am counting based on character groups (words) separated by at least
+    one space. This eliminates erroneously counting words, such as filenames. with embedded
+    periods, as two words.
+Diary_934 - Character count is wrong when using multibyte characters such as é. 20221012 Went to
+    the php manual page for strlen() where I discovered it counts bytes, so multibyte letters,
+    such as é, was increasing the character count by at least one extra. I discovered that I
+    should have been using, iconv_strlen($entry), or mb_strlen($entry). 20221012 Currently
+    using mb_strlen().
+Diary_936 - Should add a radius to the, Start new entry, button on view.php page. Added,
+     "style" => "border-radius: 8px" in the two places needed for this.
+Diary_937 - The edit.php file line 369/370 is broken on my 3.11 sandbox site on Onos. This
+    was the same problem as Diary_949. While fixing, I discovered another problem that is
+    fixed as part of this ticket caused when Diary ID has been deleted.
 Diary_938 - Need to add a promptid field to the mdl_diary_entries table. See the ticket
     as there is a lot of stuff listed on it.
 Diary_939 - Need to create new icons, monologo.svg and monologo.png. 20221023 Created both
@@ -74,6 +94,8 @@ Diary_944 - Language strings need fixing and sorted. Added strings as needed and
     the file contents so the string names are in alphabetical order.
 Diary_948 - Prompt events need to be implemented/worked on. Implemented prompt_removed.php,
     prompts_viewed.php, prompt_edited.php, prompt_in_use.php, and prompt_created.php.
+Diary_949 - Fatal errors in edit.php in Moodle 3.11.X+. Code for showing the intro is the
+    problem. Rewrote the code so it works for M311 and lower as well as M4 and higher.
 Diary_950 - CSV file download needs re-write and changed to include prompt data. Rewrote
     the file code in results.php to include the prompt data. 
 Diary_951 - The diary_entries and diary_prompts tables both have a text field and need
