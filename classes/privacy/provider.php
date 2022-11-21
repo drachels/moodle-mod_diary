@@ -46,8 +46,8 @@ require_once($CFG->dirroot . '/mod/diary/lib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\provider,
-                          \core_privacy\local\request\core_userlist_provider,
-                          \core_privacy\local\request\plugin\provider {
+                          \core_privacy\local\request\plugin\provider,
+                          \core_privacy\local\request\core_userlist_provider {
 
     /**
      * Provides meta data that is stored about a user with mod_diary.
@@ -56,16 +56,40 @@ class provider implements \core_privacy\local\metadata\provider,
      * @return collection Returns the collection of metadata.
      */
     public static function get_metadata(collection $collection): collection {
-        $collection->add_database_table('diary_entries', [
-            'userid' => 'privacy:metadata:diary_entries:userid',
-            'timecreated' => 'privacy:metadata:diary_entries:timecreated',
-            'timemodified' => 'privacy:metadata:diary_entries:timemodified',
-            'text' => 'privacy:metadata:diary_entries:text',
-            'rating' => 'privacy:metadata:diary_entries:rating',
-            'entrycomment' => 'privacy:metadata:diary_entries:entrycomment'
-        ], 'privacy:metadata:diary_entries');
-
+        $collection->add_database_table(
+            'diary_entries',
+            [
+                'diary' => 'privacy:metadata:diary_entries:diary',
+                'promptid' => 'privacy:metadata:diary_entries:promptid',
+                'userid' => 'privacy:metadata:diary_entries:userid',
+                'timecreated' => 'privacy:metadata:diary_entries:timecreated',
+                'timemodified' => 'privacy:metadata:diary_entries:timemodified',
+                'text' => 'privacy:metadata:diary_entries:text',
+                'rating' => 'privacy:metadata:diary_entries:rating',
+                'entrycomment' => 'privacy:metadata:diary_entries:entrycomment',
+                'teacher' => 'privacy:metadata:diary_entries:teacher',
+                'timemarked' => 'privacy:metadata:diary_entries:timemarked',
+                'mailed' => 'privacy:metadata:diary_entries:mailed'
+            ],
+            'privacy:metadata:diary_entries'
+        );
         return $collection;
+    }
+
+    /** @var int */
+    private static $modid;
+
+    /**
+     * Get the module id for the 'diary' module.
+     * @return false|mixed
+     * @throws \dml_exception
+     */
+    private static function get_modid() {
+        global $DB;
+        if (self::$modid === null) {
+            self::$modid = $DB->get_field('modules', 'id', ['name' => 'diary']);
+        }
+        return self::$modid;
     }
 
     /**
@@ -75,26 +99,34 @@ class provider implements \core_privacy\local\metadata\provider,
      * @return contextlist $contextlist The contextlist containing the list of contexts used in this plugin.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
-        $sql = "
-            SELECT DISTINCT ctx.id
-              FROM {%s} fc
-              JOIN {modules} m
-                ON m.name = :diary
-              JOIN {course_modules} cm
-                ON cm.instance = fc.diary
-               AND cm.module = m.id
-              JOIN {context} ctx
-                ON ctx.instanceid = cm.id
-               AND ctx.contextlevel = :modlevel
-             WHERE fc.userid = :userid";
+        $contextlist = new contextlist();
+        $modid = self::get_modid();
+        if (!$modid) {
+            return $contextlist; // Diary module not installed.
+        }
 
         $params = [
-            'diary' => 'diary',
-            'modlevel' => CONTEXT_MODULE,
+            'modid' => $modid,
+            'contextlevel' => CONTEXT_MODULE,
             'userid' => $userid
         ];
-        $contextlist = new contextlist();
-        $contextlist->add_from_sql(sprintf($sql, 'diary_entries'), $params);
+
+        // User-created diary entries.
+        $sql = '
+            SELECT c.id
+              FROM {context} c
+              JOIN {course_modules} cm
+                ON cm.id = c.instanceid
+               AND c.contextlevel = :contextlevel
+               AND cm.module = :modid
+              JOIN {diary} d ON d.id = cm.instance
+              JOIN {diary_entries} de
+                ON de.diary = d.id
+             WHERE de.userid = :userid
+        ';
+
+        $contextlist->add_from_sql($sql, $params);
+
         return $contextlist;
     }
 
@@ -106,30 +138,36 @@ class provider implements \core_privacy\local\metadata\provider,
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
-        if (! is_a($context, \context_module::class)) {
+        if (!is_a($context, \context_module::class)) {
             return;
         }
 
-        // Find users with diary entries.
-        $sql = "
-            SELECT fc.userid
-              FROM {%s} fc
-              JOIN {modules} m
-                ON m.name = :diary
-              JOIN {course_modules} cm
-                ON cm.instance = fc.diary
-               AND cm.module = m.id
-              JOIN {context} ctx
-                ON ctx.instanceid = cm.id
-               AND ctx.contextlevel = :modlevel
-             WHERE ctx.id = :contextid";
+        $modid = self::get_modid();
+        if (!$modid) {
+            return; // Checklist module not installed.
+        }
+
         $params = [
-            'diary' => 'diary',
-            'modlevel' => CONTEXT_MODULE,
+            'modid' => $modid,
+            'contextlevel' => CONTEXT_MODULE,
             'contextid' => $context->id
         ];
 
-        $userlist->add_from_sql('userid', sprintf($sql, 'diary_entries'), $params);
+        // Find users with diary entries.
+        $sql = '
+            SELECT de.userid
+              FROM {diary_entries} de
+              JOIN {diary} d
+                ON d.id = de.diary
+              JOIN {course_modules} cm
+                ON cm.instance = d.id
+               AND cm.module = :modid
+              JOIN {context} ctx
+                ON ctx.instanceid = cm.id
+               AND ctx.contextlevel = :contextlevel
+             WHERE ctx.id = :contextid
+        ';
+        $userlist->add_from_sql('userid', $sql, $params);
     }
 
     /**
@@ -140,32 +178,29 @@ class provider implements \core_privacy\local\metadata\provider,
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
 
-        if (! count($contextlist)) {
+        if (!$contextlist->count()) {
             return;
         }
 
         $user = $contextlist->get_user();
-        $userid = $user->id;
         list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
-        $sql = "SELECT cm.id AS cmid,
-                       den.id,
-                       den.userid,
-                       den.timecreated,
-                       den.timemodified,
-                       den.text,
-                       den.rating,
-                       den.entrycomment
-                  FROM {context} c
-                  JOIN {course_modules} cm ON cm.id = c.instanceid
-                  JOIN {diary} d ON d.id = cm.instance
-                  JOIN {diary_entries} den ON den.diary = d.id
+        $sql = "
+            SELECT cm.id AS cmid,
+                   de.*
+                 FROM {context} c
+                 JOIN {course_modules} cm
+                   ON cm.id = c.instanceid
+                 JOIN {diary} d
+                   ON d.id = cm.instance
+                 JOIN {diary_entries} de
+                   ON de.diary = d.id
 
-                 WHERE c.id $contextsql
-                   AND den.userid = :userid
-
-              ORDER BY cm.id, ci.position, ci.d
+                WHERE c.id $contextsql
+                  AND (de.userid = 0 OR de.userid = :userid1)
+                ORDER BY cm.id, de.id
         ";
+
         $params = ['userid1' => $user->id] + $contextparams;
         $lastcmid = null;
         $itemdata = [];
@@ -182,19 +217,42 @@ class provider implements \core_privacy\local\metadata\provider,
             }
 
             $itemdata[] = (object)[
+                'diary' => $diary->diary,
+                'promptid' => $diary->promptid,
                 'timecreated' => $diary->timecreated ? transform::datetime($diary->timecreated) : '',
                 'timemodified' => $diary->timemodified ? transform::datetime($diary->timemodified) : '',
                 'text' => $diary->text,
                 'rating' => $diary->rating,
                 'entrycomment' => $diary->entrycomment,
                 'teacher' => $diary->teacher,
-                'timemarked' => $diary->timemarked
+                'timemarked' => $diary->timemarked,
+                'mailed' => $diary->mailed
             ];
         }
         $diarys->close();
         if ($itemdata) {
             self::export_diary_data_for_user($itemdata, $lastcmid, $user);
         }
+    }
+
+    /**
+     * Export the supplied personal data for a single diary activity, along with any generic data or area files.
+     *
+     * @param array $items The data for each of the items in the diary.
+     * @param int $cmid
+     * @param \stdClass $user
+     */
+    protected static function export_diary_data_for_user(array $items, int $cmid, \stdClass $user) {
+        // Fetch the generic module data for the choice.
+        $context = \context_module::instance($cmid);
+        $contextdata = helper::get_context_data($context, $user);
+
+        // Merge with diary data and write it.
+        $contextdata = (object)array_merge((array)$contextdata, ['items' => $items]);
+        writer::with_context($context)->export_data([], $contextdata);
+
+        // Write generic module intro files.
+        helper::export_context_files($context, $user);
     }
 
     /**
@@ -205,32 +263,23 @@ class provider implements \core_privacy\local\metadata\provider,
     public static function delete_data_for_all_users_in_context(\context $context) {
         global $DB;
 
+        if (!$context) {
+            return;
+        }
+
         // This should not happen, but just in case.
         if ($context->contextlevel != CONTEXT_MODULE) {
             return;
         }
 
-        // Prepare SQL to gather all completed IDs.
+        if (!$cm = get_coursemodule_from_id('diary', $context->instanceid)) {
+            return;
+        }
 
-        $completedsql = "
-            SELECT fc.id
-              FROM {%s} fc
-              JOIN {modules} m
-                ON m.name = :diary
-              JOIN {course_modules} cm
-                ON cm.instance = fc.diary
-               AND cm.module = m.id
-             WHERE cm.id = :cmid";
-        $completedparams = [
-            'cmid' => $context->instanceid,
-            'diary' => 'diary'
-        ];
-
-        // Delete diary entries.
-        $completedtmpids = $DB->get_fieldset_sql(sprintf($completedsql, 'diary_entries'), $completedparams);
-        if (! empty($completedtmpids)) {
-            list ($insql, $inparams) = $DB->get_in_or_equal($completedtmpids, SQL_PARAMS_NAMED);
-            $DB->delete_records_select('diary_entries', "id $insql", $inparams);
+        // Delete the diary entries.
+        $itemids = $DB->get_fieldset_select('diary_entries', 'id', 'diary = ?', [$cm->instance]);
+        if ($itemids) {
+            $DB->delete_records_select('diary_entries', 'diary = ? AND userid <> 0', [$cm->instance]);
         }
     }
 
@@ -241,37 +290,26 @@ class provider implements \core_privacy\local\metadata\provider,
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
+        if (!$contextlist->count()) {
+            return;
+        }
+
         $userid = $contextlist->get_user()->id;
 
-        // Ensure that we only act on module contexts.
-        $contextids = array_map(function ($context) {
-            return $context->instanceid;
-        }, array_filter($contextlist->get_contexts(), function ($context) {
-            return $context->contextlevel == CONTEXT_MODULE;
-        }));
-
-        // Prepare SQL to gather all completed IDs.
-        list ($insql, $inparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED);
-        $completedsql = "
-            SELECT fc.id
-              FROM {%s} fc
-              JOIN {modules} m
-                ON m.name = :diary
-              JOIN {course_modules} cm
-                ON cm.instance = fc.diary
-               AND cm.module = m.id
-             WHERE fc.userid = :userid
-               AND cm.id $insql";
-        $completedparams = array_merge($inparams, [
-            'userid' => $userid,
-            'diary' => 'diary'
-        ]);
-
-        // Delete diary entries.
-        $completedtmpids = $DB->get_fieldset_sql(sprintf($completedsql, 'diary_entries'), $completedparams);
-        if (! empty($completedtmpids)) {
-            list ($insql, $inparams) = $DB->get_in_or_equal($completedtmpids, SQL_PARAMS_NAMED);
-            $DB->delete_records_select('diary_entries', "id $insql", $inparams);
+        foreach ($contextlist->get_contexts() as $context) {
+            if ($context->contextlevel != CONTEXT_MODULE) {
+                continue;
+            }
+            if (!$cm = get_coursemodule_from_id('diary', $context->instanceid)) {
+                continue;
+            }
+            $itemids = $DB->get_fieldset_select('diary_entries', 'id', 'diary = ?', [$cm->instance]);
+            if ($itemids) {
+                list($isql, $params) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+                $params['userid'] = $userid;
+                $params = ['instanceid' => $cm->instance, 'userid' => $userid];
+                $DB->delete_records_select('diary_entries', 'diary = :instanceid AND userid = :userid', $params);
+            }
         }
     }
 
@@ -282,32 +320,29 @@ class provider implements \core_privacy\local\metadata\provider,
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
-
         $context = $userlist->get_context();
-        $userids = $userlist->get_userids();
+        if (!is_a($context, \context_module::class)) {
+            return;
+        }
+        $modid = self::get_modid();
+        if (!$modid) {
+            return; // The Diary module is not installed.
+        }
+        if (!$cm = get_coursemodule_from_id('diary', $context->instanceid)) {
+            return;
+        }
 
         // Prepare SQL to gather all completed IDs.
-        list ($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
-        $completedsql = "
-            SELECT fc.id
-              FROM {%s} fc
-              JOIN {modules} m
-                ON m.name = :diary
-              JOIN {course_modules} cm
-                ON cm.instance = fc.diary
-               AND cm.module = m.id
-             WHERE cm.id = :instanceid
-               AND fc.userid $insql";
-        $completedparams = array_merge($inparams, [
-            'instanceid' => $context->instanceid,
-            'diary' => 'diary'
-        ]);
+        $itemids = $DB->get_fieldset_select('diary_entries', 'id', 'diary = ?', [$cm->instance]);
+        list($itsql, $itparams) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+        $userids = $userlist->get_userids();
+        list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
 
-        // Delete all diary entries.
-        $completedtmpids = $DB->get_fieldset_sql(sprintf($completedsql, 'diary_entries'), $completedparams);
-        if (! empty($completedtmpids)) {
-            list ($insql, $inparams) = $DB->get_in_or_equal($completedtmpids, SQL_PARAMS_NAMED);
-            $DB->delete_records_select('diary_entries', "id $insql", $inparams);
-        }
+        // Delete user-created personal diary entries items.
+        $DB->delete_records_select(
+            'diary_entries',
+            "userid $insql AND diary = :diaryid",
+            array_merge($inparams, ['diaryid' => $cm->instance])
+        );
     }
 }
