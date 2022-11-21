@@ -225,7 +225,7 @@ class provider implements \core_privacy\local\metadata\provider,
                 'rating' => $diary->rating,
                 'entrycomment' => $diary->entrycomment,
                 'teacher' => $diary->teacher,
-                'timemarked' => $diary->timemarked,
+                'timemarked' => $diary->timemarked ? transform::datetime($diary->timecreated) : '',
                 'mailed' => $diary->mailed
             ];
         }
