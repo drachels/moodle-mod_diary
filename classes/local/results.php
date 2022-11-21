@@ -466,7 +466,7 @@ class results {
 
                     $csv->add_data($activityinfo);
                     $csv->add_data($entryfields);
-                    $csv->add_data($fields2);
+                    //$csv->add_data($fields2);
                     $firstrowflag = 0;
                 }
 
