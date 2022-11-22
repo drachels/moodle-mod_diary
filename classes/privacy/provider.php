@@ -61,6 +61,9 @@ class provider implements \core_privacy\local\metadata\provider,
             [
                 'diary' => 'privacy:metadata:diary_entries:diary',
                 'promptid' => 'privacy:metadata:diary_entries:promptid',
+                'promptdatestart' => 'privacy:metadata:diary_entries:promptdatestart',
+                'promptdatestop' => 'privacy:metadata:diary_entries:promptdatestop',
+                'prompttext' => 'privacy:metadata:diary_entries:prompttext',
                 'userid' => 'privacy:metadata:diary_entries:userid',
                 'timecreated' => 'privacy:metadata:diary_entries:timecreated',
                 'timemodified' => 'privacy:metadata:diary_entries:timemodified',
@@ -187,7 +190,11 @@ class provider implements \core_privacy\local\metadata\provider,
 
         $sql = "
             SELECT cm.id AS cmid,
-                   de.*
+                   de.*,
+                   dp.id AS promptid,
+                   dp.datestart AS promptdatestart,
+                   dp.datestop AS promptdatestop,
+                   dp.text AS prompttext
                  FROM {context} c
                  JOIN {course_modules} cm
                    ON cm.id = c.instanceid
@@ -195,13 +202,18 @@ class provider implements \core_privacy\local\metadata\provider,
                    ON d.id = cm.instance
                  JOIN {diary_entries} de
                    ON de.diary = d.id
-
+            LEFT JOIN {diary_prompts} dp
+                   ON dp.id = de.promptid
                 WHERE c.id $contextsql
-                  AND (de.userid = 0 OR de.userid = :userid1)
-                ORDER BY cm.id, de.id
+                  AND ((de.userid = 0 OR de.userid = :userid1) AND (de.promptid = 0))
+                   OR ((de.userid = 0 OR de.userid = :userid2)
+                          AND (dp.diaryid = de.diary)
+                          AND (dp.datestart < de.timecreated)
+                          AND (dp.datestop > de.timecreated))
+                ORDER BY cm.id, de.id DESC
         ";
 
-        $params = ['userid1' => $user->id] + $contextparams;
+        $params = ['userid1' => $user->id, 'userid2' => $user->id] + $contextparams;
         $lastcmid = null;
         $itemdata = [];
 
@@ -219,13 +231,16 @@ class provider implements \core_privacy\local\metadata\provider,
             $itemdata[] = (object)[
                 'diary' => $diary->diary,
                 'promptid' => $diary->promptid,
+                'promptdatestart' => $diary->promptdatestart ? transform::datetime($diary->promptdatestart) : '',
+                'promptdatestop' => $diary->promptdatestop ? transform::datetime($diary->promptdatestop) : '',
+                'prompttext' => strip_tags($diary->prompttext),
                 'timecreated' => $diary->timecreated ? transform::datetime($diary->timecreated) : '',
                 'timemodified' => $diary->timemodified ? transform::datetime($diary->timemodified) : '',
                 'text' => strip_tags($diary->text),
                 'rating' => $diary->rating,
                 'entrycomment' => strip_tags($diary->entrycomment),
                 'teacher' => $diary->teacher,
-                'timemarked' => $diary->timemarked ? transform::datetime($diary->timecreated) : '',
+                'timemarked' => $diary->timemarked ? transform::datetime($diary->timemarked) : '',
                 'mailed' => $diary->mailed
             ];
         }
