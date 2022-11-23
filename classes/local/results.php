@@ -256,8 +256,8 @@ class results {
                             dp.minparagraph AS promptminp,
                             dp.maxparagraph AS promptmaxp,
                             dp.minmaxparagraphpercent AS promptminmaxpp
-                      FROM {diary} d
-                      JOIN {diary_prompts} dp ON dp.diaryid = d.id
+                      FROM {diary_prompts} dp
+                      JOIN {diary} d ON d.id = dp.diaryid
                      WHERE dp.id > 0 ";
         } else {
             $psql = "SELECT dp.id AS promptid,
@@ -355,7 +355,7 @@ class results {
 
         $esql .= ($whichdiary);
         $esql .= ($whichuser);
-        $esql .= " GROUP BY de.id, u.lastname, u.firstname
+        $esql .= " GROUP BY d.id, de.id, u.lastname, u.firstname
                   ORDER BY d.id ASC, d.course ASC, u.lastname ASC, u.firstname ASC, de.timecreated ASC";
 
         // Add the list of users and diaries to our data array.
