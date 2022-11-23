@@ -19,15 +19,15 @@ Diary_823 - Missing completion information on the view.php page. Got
 
 
 === 3.7.0/1 === Pending
-Diary_741 - Need to verify communications when rating or when student adds/edits an entry.
+Diary_741v - Need to verify communications when rating or when student adds/edits an entry.
     Added needed code in edit.php down around line 261. Need to verify it works for sending
     an email as soon as a student saves an entry. - Verified it does as of 20221024.
-Diary_820 - A user requested adding teacher notification when student makes an entry. Added
-    needed code in edit.php down around line 261.
-Diary_746 - Rating a zero results in student seeing, No Grade. Problem was due to the
+Diary_746v - Rating a zero results in student seeing, No Grade. Problem was due to the
     way I was doing a branch check in results.php down around line 588. Dropped the
     branch check and changed the way $gradestring was created.
-Diary_847 - Would be nice to have automatic weekly writing prompts. Pending
+Diary_820v - A user requested adding teacher notification when student makes an entry. Added
+    needed code in edit.php down around line 261.
+Diary_847v - Would be nice to have automatic weekly writing prompts. Pending
     20220930 Manual creation at the moment.
     20220930 Can see them all for a diary via prompts_view.php plus two others
     20221001 Can now delete a prompt and log the event Diary_924.
@@ -35,82 +35,82 @@ Diary_847 - Would be nice to have automatic weekly writing prompts. Pending
     20221027 Discovered restore was NOT correct. Now fixed. Also fixed the case where there
              are too many current prompts. Only way to proceed is to fix the problem.
     20221113 Rewrote CSV download file to include prompts.
-Diary_919 - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
+Diary_919v - Warning: Division by zero in line 364 and 367 of diarystats.php if text is
     only numbers. Changed lines 364 and 367 to include max of 1, so when words is zero,
     the 1 is substituted to eliminate the devide by zero error.
-Diary_922 - Need to modify Feature switch to detect need for FEATURE_MOD_PURPOSE. Changed
+Diary_922v - Need to modify Feature switch to detect need for FEATURE_MOD_PURPOSE. Changed
     code to work the same way as Checklist. Also have same way as Journal, but commented out.
-Diary_924 - Need to be able to remove prompts and log the removal. Have actually worked on
+Diary_924v - Need to be able to remove prompts and log the removal. Have actually worked on
     this for the past couple of days and have finally got both the actual delete of a prompt
     record and a log entry of who did it, which course module it was done in, and which
     prompt ID was deleted.
-Diary_925 - Need to give an error if any prompt dates overlap. Added needed code in view.php.
-Diary_926 - In prompts_view.php when getting the prompts they need to be sorted in datestart
+Diary_925v - Need to give an error if any prompt dates overlap. Added needed code in view.php.
+Diary_926v - In prompts_view.php when getting the prompts they need to be sorted in datestart
     order. Added a sort in line 85 of prompts_view.php, where the prompts are being retrieved
     via $prompts = $DB->get_records().
-Diary_927 - Need strings for table column headings in prompts_view.php and yyyprompt_edit.php.
+Diary_927v - Need strings for table column headings in prompts_view.php and yyyprompt_edit.php.
     Created the prompts and prepared both files to use them.
-Diary_928 - Prompt create works but update also creates a new prompt instead of just updating
+Diary_928v - Prompt create works but update also creates a new prompt instead of just updating
     the record. 20221017 Finally! I now have view, create, edit, and delete working. I dropped
     back to the 20221005 version and then worked on the cases in the switch in the
-    yyyprompt_edit.php file until I started getting the results I wanted.
-Diary_929 - Fails to show No prompts when there are None available. 20221020 Showing the two
+    yyyprompt_edit.php file until I started getting the results I wanted. Changed from
+    yyyprompt_edit.php to just prompt_edit.php after I dropped the previous version of the file.
+Diary_929v - Fails to show No prompts when there are None available. 20221020 Showing the two
     strings that report the total prompts, past count, courrent count, and future count.
     echo get_string('tcount', 'diary', $tcount);
     echo get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
     I think this will be sufficient, but may try totally hiding ino if there are not any prompts.
-Diary_931 - Sentence punctuation without a trailing space is counted as a sentence. 20221011 In
+Diary_931v - Sentence punctuation without a trailing space is counted as a sentence. 20221011 In
     diarystats.php down around line 888, I have changed the code for counting sentences. I am
     experimenting with separating $entry into paragraphs, then reassemble into one text blob,
     before trying to count sentences. With my change to the $pattern to look at for splitting
     into sentences, I am able to ignore periods embedded in words. This method seems pretty
     good at NOT counting something like, edit.php as the ending and starting of a new sentence,
     but as one word.
-Diary_932 - Filenames with their extension are incorrectly counted as two words. Changed to
+Diary_932v - Filenames with their extension are incorrectly counted as two words. Changed to
     new code so that I am counting based on character groups (words) separated by at least
     one space. This eliminates erroneously counting words, such as filenames. with embedded
     periods, as two words.
-Diary_934 - Character count is wrong when using multibyte characters such as é. 20221012 Went to
+Diary_934v - Character count is wrong when using multibyte characters such as é. 20221012 Went to
     the php manual page for strlen() where I discovered it counts bytes, so multibyte letters,
     such as é, was increasing the character count by at least one extra. I discovered that I
     should have been using, iconv_strlen($entry), or mb_strlen($entry). 20221012 Currently
     using mb_strlen().
-Diary_936 - Should add a radius to the, Start new entry, button on view.php page. Added,
+Diary_936v - Should add a radius to the, Start new entry, button on view.php page. Added,
      "style" => "border-radius: 8px" in the two places needed for this.
-Diary_937 - The edit.php file line 369/370 is broken on my 3.11 sandbox site on Onos. This
+Diary_937v - The edit.php file line 369/370 is broken on my 3.11 sandbox site on Onos. This
     was the same problem as Diary_949. While fixing, I discovered another problem that is
     fixed as part of this ticket caused when Diary ID has been deleted.
-Diary_938 - Need to add a promptid field to the mdl_diary_entries table. See the ticket
+Diary_938v - Need to add a promptid field to the mdl_diary_entries table. See the ticket
     as there is a lot of stuff listed on it.
-Diary_939 - Need to create new icons, monologo.svg and monologo.png. 20221023 Created both
+Diary_939v - Need to create new icons, monologo.svg and monologo.png. 20221023 Created both
     icons and they are being used in my Moodle 4.1.0 test site and my normal dev site. 
-Diary_941 - Prompts are not backed up and restored correctly. Had one field missing in the
+Diary_941v - Prompts are not backed up and restored correctly. Had one field missing in the
     backup_diary_stepslib.php file of the entries table. Added field, promptid, and backup
     and restore seems to be working correctly.
-Diary_942 - Need to add code to delete promts when doing a course reset. Modified the
+Diary_942v - Need to add code to delete promts when doing a course reset. Modified the
     code so prompts are deleted when a diary is deleted. For individual prompts, still in
     progress for detecting and preventing delete if it is still in use. - DONE
-Diary_944 - Language strings need fixing and sorted. Added strings as needed and sorted
+Diary_944v - Language strings need fixing and sorted. Added strings as needed and sorted
     the file contents so the string names are in alphabetical order.
-Diary_948 - Prompt events need to be implemented/worked on. Implemented prompt_removed.php,
+Diary_948v - Prompt events need to be implemented/worked on. Implemented prompt_removed.php,
     prompts_viewed.php, prompt_edited.php, prompt_in_use.php, and prompt_created.php.
-Diary_949 - Fatal errors in edit.php in Moodle 3.11.X+. Code for showing the intro is the
+Diary_949v - Fatal errors in edit.php in Moodle 3.11.X+. Code for showing the intro is the
     problem. Rewrote the code so it works for M311 and lower as well as M4 and higher.
-Diary_950 - CSV file download needs re-write and changed to include prompt data. Rewrote
+Diary_950v - CSV file download needs re-write and changed to include prompt data. Rewrote
     the file code in results.php to include the prompt data. 
-Diary_951 - The diary_entries and diary_prompts tables both have a text field and need
+Diary_951v - The diary_entries and diary_prompts tables both have a text field and need
     separate language strings for CSV downloads. 20221108 The mdl_diary_entries table needs
     $string['entry'] = 'Entry'; and the mdl_diary_prompts table needs $string['text'] =
     'Enter your writing prompt'; Made the needed changes.
 Diary_952v - The results.php file down around line 364 sometimes can break due to hardcoded
     index offset. Changed code to do an array_shift(array) first, then hard coded to use
     an index offset of zero, instead of one. Works great.
-Diary_955 - First diary entry is duplicated in the CSV download file. Completely rewrote
+Diary_955v - First diary entry is duplicated in the CSV download file. Completely rewrote
     the CSV download code. 
-Diary_956 - The provider.php function export_user_data() line 191 appears to be a bug. Comletely
+Diary_956v - The provider.php function export_user_data() line 191 appears to be a bug. Comletely
     rewrote the provider.php file. This is not a problem, now. 
-Diary_960 - Missing the privacy:metadata:diary_entries:xxx strings. Added the missing strings. 
-
+Diary_960v - Missing the privacy:metadata:diary_entries:xxx strings. Added the missing strings. 
 
 === 3.6.0 === Released 20220909
 Diary_672v - Investigate using authenticated user role for front page access. Moodle
@@ -150,7 +150,6 @@ Diary_916v - Need to change min and max to strings in diarystats.php file. Made
     to the language file. 
 Diary_917v - Backup and Restore results in missing data. Corrected 4 field names in
     the backup_diary_stepslib.php file.
-
 
 === 3.5.2 === Released 2022040100
 Diary_797v - Need new Moodle 4.0 icon. Created a branch check and
