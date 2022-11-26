@@ -485,4 +485,4 @@ Really wild idea - add current min's and max's to a prompt so they can change wh
 20221121 Just finished rewrite of provider.php file.
 20221122 Made some additions to the GDPR provider.php file so that the user data for each
     diary entry includes the data for any prompt in effect at the time the entry was created.
-
+20221123 Published Diary v3.7.1.
