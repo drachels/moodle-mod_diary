@@ -6,7 +6,7 @@ activity from notebook, netbook, android, iPhone, iPod or any other device
 which can access the Moodle site. 
 
 - Moodle tracker component: https://github.com/drachels/moodle-mod_diary/issues
-- Documentation: https://github.com/drachels/moodle-mod_diary/wiki
+- Documentation: https://docs.moodle.org/401/en/Diary
 - Source Code: https://github.com/drachels/moodle-mod_diary
 - License: http://www.gnu.org/licenses/gpl-2.0.txt
 
