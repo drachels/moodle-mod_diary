@@ -382,7 +382,7 @@ $url2 = $CFG->wwwroot . '/mod/diary/prompt_edit.php?id='.$cm->id.'&action=create
 echo '<br><a href="'.$url2.'"
     class="btn btn-warning"
     style="border-radius: 8px">';
-echo 'Create new prompt'.'</a> <a href="'.$url1
+echo get_string('createnewprompt', 'diary').'</a> <a href="'.$url1
     .'" class="btn btn-success" style="border-radius: 8px">'
     .get_string('returnto', 'diary', $diary->name)
     .'</a> ';
