@@ -1002,7 +1002,17 @@ class diarystats {
         // This works but breaks every place that uses charactercount in math for statistics.
         // Will need to detect and separate the two counts so the math works.
 
-        return mb_strlen($entry);
+        //print_object(substr_count($entry, ' '));
+        $temp1 = mb_strlen($entry);
+        $temp2 = $temp1 - substr_count($entry, ' ');
+        //$text = $temp1.' | '.$temp2;
+        //$text = $temp1.' - '.substr_count($entry, ' ').' = '.$temp2;
+        //print_object($text);
+
+        return $temp2;
+//        return $text;
+
+//        return mb_strlen($entry);
     }
 
     /**
