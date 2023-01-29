@@ -473,8 +473,6 @@ class mod_diary_prompt_form extends moodleform {
         // 20210613 Retrieve customdata info for use.
         $promptid = $this->_customdata['editoroptions']['promptid'];
 
-        $mform->addElement('static', 'description', 'Static text testing $diaryid', $promptid);
-
         $timeclose = $this->_customdata['editoroptions']['timeclose'];
         $editall = $this->_customdata['editoroptions']['editall'];
         $editdates = $this->_customdata['editoroptions']['editdates'];
