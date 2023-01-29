@@ -59,6 +59,7 @@ $string['commonerrorpercentset'] = 'Common error percent setting {$a}%';
 $string['commonerrors_help'] = 'The common errors are defined in the "Glossary of errors" associated with this question.';
 $string['commonerrors'] = 'Common errors';
 $string['configdateformat'] = 'This defines how dates are shown in diary reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
+$string['createnewprompt'] = 'Create new prompt';
 $string['created'] = 'Created {$a->one} days and {$a->two} hours ago.';
 $string['crontask'] = 'Background processing for Diary module';
 $string['csvexport'] = 'Export to .csv';
