@@ -41,11 +41,21 @@ $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(defa
 $emailpreference = optional_param('emailpreference', get_user_preferences
                                  ('diary_email', get_config('mod_diary', 'teacheremail')), PARAM_INT);
 
+$statspreference = optional_param('statspreference', get_user_preferences
+                                 ('diary_stats', get_config('mod_diary', 'statsview')), PARAM_INT);
+
 if ($emailpreference == 1 || $emailpreference == 'ON') {
     set_user_preference('diary_email', 'OFF');
 } else {
     set_user_preference('diary_email', 'ON');
 }
+
+// 20230129 Added stats toggle.
+//if ($statspreference == 1 || $statspreference == 'ON') {
+//    set_user_preference('diary_stats', 'OFF');
+//} else {
+//    set_user_preference('diary_stats', 'ON');
+//}
 
 if (!$cm) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -265,7 +275,8 @@ if ($entriesmanager) {
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
     $ouput = groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
-    $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
+    // 20230131 Ticket, Diary_954, fixes entry count shown for selected group.
+    $entrycount = results::diary_count_entries($diary, $currentgroup);
 
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
     $temp = '<span class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
@@ -443,8 +454,23 @@ if ($timenow > $timestart) {
                     $editthisentry = ' ';
                 }
 
+                // 20230129 Developing hide/show statistics tool icons.
+                $url2 = new moodle_url('/mod/diary/view.php', $options);
+                //echo $statspreference;
+                if ($statspreference == 1 || $statspreference == 'ON') {
+                    $statstool = html_writer::link($url2, $output->pix_icon('i/show', get_string('statshide', 'diary')),
+                        array('class' => 'toolbutton'));
+                        set_user_preference('diary_stats', 'OFF');
+
+                } else {
+                    $statstool = html_writer::link($url2, $output->pix_icon('i/hide', get_string('statsshow', 'diary')),
+                        array('class' => 'toolbutton'));
+                        set_user_preference('diary_stats', 'ON');
+
+                }
+
                 // Add, Entry, then date time group heading for each entry on the page.
-                echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
+                echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry.'  '.$statstool);
 
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
@@ -457,21 +483,24 @@ if ($timenow > $timestart) {
                 if ($timenow < $timefinish) {
                     // 20211217 If there is a user entry, format it and show it.
                     if ($entry) {
-                        $temp = $entry;
-                        // 20210704 Go calculate stats and print stats table.
-                        // 20210703 Moved to here from up above so the table gets rendered in the right spot.
-                        $statsdata = diarystats::get_diary_stats($temp, $diary);
-                        // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
-                        echo $statsdata;
+                        if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
+                            $temp = $entry;
+                            // 20210704 Go calculate stats and print stats table.
+                            // 20210703 Moved to here from up above so the table gets rendered in the right spot.
+                            $statsdata = diarystats::get_diary_stats($temp, $diary);
+                            // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
 
-                        // 20211212 Added separate function to get the glossary common error data here.
-                        $comerrdata = diarystats::get_common_error_stats($temp, $diary);
-                        echo $comerrdata;
-                        // 20211212 Added separate function to get the autorating data here.
-                        list($autoratingdata,
-                            $currentratingdata)
-                            = diarystats::get_auto_rating_stats($temp, $diary);
-                        echo $autoratingdata;
+                            echo $statsdata;
+                        
+                            // 20211212 Added separate function to get the glossary common error data here.
+                            $comerrdata = diarystats::get_common_error_stats($temp, $diary);
+                            echo $comerrdata;
+                            // 20211212 Added separate function to get the autorating data here.
+                            list($autoratingdata,
+                                $currentratingdata)
+                                = diarystats::get_auto_rating_stats($temp, $diary);
+                            echo $autoratingdata;
+                        }
                     } else {
                         print_string("noentry", "diary");
                         // 20210701 Moved copy 2 of 2 here due to new stats.
