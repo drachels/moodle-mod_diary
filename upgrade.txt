@@ -17,6 +17,17 @@ This files describes API changes and other work in the diary code.
 
 
 === 3.7.2=== Pending
+20221012 Diary_933 - Should, Character count, include spaces? 20230129 Currently, I
+    the code changed so that spaces are not counted, and I have asked for votes in
+    the General Help Forum.
+20221013 Diary_935 - Since the page for each entry is getting longer, might be nice
+    to be able to toggle stats view on/off. I have added, Hide stats/Show stats, icons
+    at the end of the each entry title or edit pencil.
+20221116 Diary_954 - View x diary entries count seems to be wrong. It was not taking the
+    correct groupid to use for the count. See the ticket for further details on the fix.
+20221124 Diary_962 - The prompt_edit.php page shows, Static text testing $diaryid,
+    that should not be there. Needed to put it back for development, so as of 20230129
+    it is still there, so I opened another ticket, Diary_1003.
 20230128 Diary_1001 - Issue #18 Link to documentation on github wrong? 20230128 Changed
     the link and made it current, so that instead of pointing to the github wiki it
     points to the Moodle wiki. 
@@ -27,7 +38,8 @@ This files describes API changes and other work in the diary code.
     $diaryid. 20230129 Line 476 of mod_form.php was added just for development, and
     then I got so used to it being there that I just forgot to remove it. It will be
     removed from the next release. 
-
+20230131 Diary_1006 - In the results.php file, there are 12 places where $esql should
+    just be $sql. Changed all 12 from $esql to $sql.
 
 
 === 3.7.0/1 === 20221123
