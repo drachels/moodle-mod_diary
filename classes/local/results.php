@@ -308,7 +308,7 @@ class results {
 
         // Create SQL for diary entries.
         if ($CFG->dbtype == 'pgsql') {
-            $esql = "SELECT de.id AS entry,
+            $sql = "SELECT de.id AS entry,
                            u.firstname AS firstname,
                            u.lastname AS lastname,
                            de.diary AS diary,
@@ -330,7 +330,7 @@ class results {
                       JOIN {diary} d ON d.id = de.diary
                      WHERE de.userid > 0 ";
         } else {
-            $esql = "SELECT de.id AS entry,
+            $sql = "SELECT de.id AS entry,
                            u.firstname AS 'firstname',
                            u.lastname AS 'lastname',
                            de.diary AS diary,
@@ -353,13 +353,13 @@ class results {
                      WHERE de.userid > 0 ";
         }
 
-        $esql .= ($whichdiary);
-        $esql .= ($whichuser);
-        $esql .= " GROUP BY d.id, de.id, u.lastname, u.firstname
+        $sql .= ($whichdiary);
+        $sql .= ($whichuser);
+        $sql .= " GROUP BY d.id, de.id, u.lastname, u.firstname
                   ORDER BY d.id ASC, d.course ASC, u.lastname ASC, u.firstname ASC, de.timecreated ASC";
 
         // Add the list of users and diaries to our data array.
-        if ($des = $DB->get_records_sql($esql, $entryfields)) {
+        if ($des = $DB->get_records_sql($sql, $entryfields)) {
             $firstrowflag = 1;
             if (is_siteadmin($USER->id)) {
                 // 20221113 Use the array_shift, in case the first diary id is not 1.
@@ -983,40 +983,38 @@ class results {
 
         // If user is in a group, how many users in each Diary activity?
         if ($groupid && ($groupmode > '0')) {
-            // Extract each group id from $groupid and process based on whether viewer is a member of the group.
-            // Show user and entry counts only if a member of the current group.
-            foreach ($groupid as $gid) {
-                $esql = "SELECT DISTINCT u.id FROM {diary_entries} de
-                          JOIN {groups_members} g ON g.userid = de.userid
-                          JOIN {user} u ON u.id = g.userid
-                         WHERE de.diary = :did AND g.groupid = :gidid";
+            // Show entry counts only if a member of the currently selected group.
+            // 20230131 Fixed ticket Diary_954.
+            $sql = "SELECT DISTINCT u.id FROM {diary_entries} de
+                       JOIN {groups_members} g ON g.userid = de.userid
+                       JOIN {user} u ON u.id = g.userid
+                      WHERE de.diary = :did AND g.groupid = :gidid";
 
-                $params = array();
-                $params = ['did' => $diary->id] + ['gidid' => $gid->id];
-                $diarys = $DB->get_records_sql($esql, $params);
-            }
+            $params = array();
+            // 20230131 Changed gidid to use $groupid;
+            $params = ['did' => $diary->id] + ['gidid' => $groupid];
+            $diarys = $DB->get_records_sql($sql, $params);
         } else if (!$groupid && ($groupmode > '0')) {
             // Check all the diary entries from the whole course.
             // If not currently a group member, but group mode is set for separate groups or visible groups,
             // see if this user has made entries anyway, made an entry before mode was changed or made an
             // entry before removal from a group.
-            $esql = "SELECT COUNT(DISTINCT de.userid) AS ucount, COUNT(DISTINCT de.text) AS qcount
-                      FROM {diary_entries} de
-                      JOIN {user} u ON u.id = de.userid
-                     WHERE de.diary = :deid
-                       AND de.userid = :userid";
-
-            $params = array();
-            $params = ['deid' => $diary->id] + ['userid' => $USER->id];
-            $diarys = $DB->get_records_sql($esql, $params);
-        } else { // Count all the entries from the whole course.
-
-            $esql = "SELECT DISTINCT u.id FROM {diary_entries} de
-                      JOIN {user} u ON u.id = de.userid
-                     WHERE de.diary = :did";
+            $sql = "SELECT DISTINCT u.id
+                       FROM {diary_entries} de
+                       JOIN {user} u ON u.id = de.userid
+                      WHERE de.diary = :did";
             $params = array();
             $params = ['did' => $diary->id];
-            $diarys = $DB->get_records_sql($esql, $params);
+            $diarys = $DB->get_records_sql($sql, $params);
+        } else {
+            // 20230131 Swapped this and the one right above. If activity is set to, No groups, use this.
+            $sql = "SELECT DISTINCT u.id
+                       FROM {diary_entries} de
+                       JOIN {user} u ON u.id = de.userid
+                      WHERE de.diary = :did";
+            $params = array();
+            $params = ['did' => $diary->id];
+            $diarys = $DB->get_records_sql($sql, $params);
         }
 
         if (!$diarys) {
