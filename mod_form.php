@@ -191,6 +191,22 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->enablestats);
 
+        // 20230204 Added enable/disable setting for teacheremail.
+        $name = 'teacheremail';
+        $label = get_string($name, $plugin);
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, $diaryconfig->teacheremail);
+
+        // 20230204 Added enable/disable setting for studentemail.
+        $name = 'studentemail';
+        $label = get_string($name, $plugin);
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, $diaryconfig->studentemail);
+
         // 20210704 Added heading for autorating options section.
         $name = 'autorating';
         $label = get_string($name, $plugin);

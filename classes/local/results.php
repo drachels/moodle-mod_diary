@@ -34,7 +34,7 @@ use csv_export_writer;
 use html_writer;
 use context_module;
 use calendar_event;
-
+use core_tag_tag;
 /**
  * Utility class for Diary results.
  *
@@ -466,7 +466,7 @@ class results {
 
                     $csv->add_data($activityinfo);
                     $csv->add_data($entryfields);
-                    //$csv->add_data($fields2);
+                    // ...$csv->add_data($fields2);...
                     $firstrowflag = 0;
                 }
 
@@ -568,6 +568,20 @@ class results {
                  = diarystats::get_auto_rating_stats($temp, $diary);
             // 20211212 Added list function to get and print the autorating data here.
             echo $autoratingdata;
+
+// Remove this later!
+echo 'test for tag location for entry id '.$entry->id;
+            // 20230302 Added tags to each entry.
+            echo $OUTPUT->tag_list(
+                core_tag_tag::get_item_tags(
+                    'mod_diary',
+                    'diary_entries',
+                    $entry->id
+                ),
+                null,
+                'diary-tags'
+            );
+
         } else {
             print_string("noentry", "diary");
             // 20210701 Moved copy 2 of 2 here due to new stats.

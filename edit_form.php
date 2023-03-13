@@ -44,50 +44,139 @@ class mod_diary_entry_form extends moodleform {
         $mform = $this->_form;
 
         // 20201119 Get the, Edit entry dates, setting for this Diary activity.
-        $mform->addElement('hidden', 'diary');
-        $mform->setType('diary', PARAM_INT);
-        $mform->setDefault('diary', $this->_customdata['diary']);
+        $mform->addElement(
+            'hidden',
+            'diary'
+        );
+        $mform->setType(
+            'diary',
+            PARAM_INT
+        );
+        $mform->setDefault(
+            'diary',
+            $this->_customdata['diary']
+        );
 
         // 20210613 Retrieve Diary info for use.
         $timeclose = $this->_customdata['editoroptions']['timeclose'];
         $editall = $this->_customdata['editoroptions']['editall'];
         $editdates = $this->_customdata['editoroptions']['editdates'];
+        $currententry      = $this->_customdata['current'];
 
         // 20210613 Do not just hide the date selector, skip it unless editdates is enabled. Issue #9.
         if ($editdates) {
             // 20201119 Added date selector. Can show/hide depending on the, Edit entry dates, setting.
-            $mform->addElement('date_time_selector', 'timecreated', get_string('diaryentrydate', 'diary'));
-            $mform->setType('timecreated', PARAM_INT);
+            $mform->addElement(
+                'date_time_selector',
+                'timecreated',
+                get_string('diaryentrydate', 'diary')
+            );
+            $mform->setType(
+                'timecreated',
+                PARAM_INT
+            );
             // 20201231 For Moodle 3.4 and higher, hide and disable calendar selector, if not enabled.
             // For Moodle 3.3 and lower, disable calendar selector, if not enabled.
             if ($CFG->branch > 33) {
-                $mform->hideIf('timecreated', 'diary', 'neq', '1');
-                $mform->disabledIf('timecreated', 'diary', 'neq', '1');
+                $mform->hideIf(
+                    'timecreated',
+                    'diary',
+                    'neq',
+                    '1'
+                );
+                $mform->disabledIf(
+                    'timecreated',
+                    'diary',
+                    'neq',
+                    '1'
+                );
             } else {
-                $mform->disabledIf('timecreated', 'diary', 'neq', '1');
+                $mform->disabledIf(
+                    'timecreated',
+                    'diary',
+                    'neq',
+                    '1'
+                );
             }
         } else {
-            $mform->addElement('hidden', 'timecreated');
-            $mform->setType('timecreated', PARAM_INT);
+            $mform->addElement(
+                'hidden',
+                'timecreated'
+            );
+            $mform->setType(
+                'timecreated',
+                PARAM_INT
+            );
         }
 
-        $mform->addElement('editor',
-                           'text_editor',
-                           get_string('entry', 'mod_diary'),
-                           null,
-                           $this->_customdata['editoroptions']);
+        $mform->addElement(
+            'editor',
+            'text_editor',
+            get_string('entry', 'mod_diary'),
+            null,
+            $this->_customdata['editoroptions']
+        );
 
-        $mform->setType('text_editor', PARAM_RAW);
-        $mform->addRule('text_editor', null, 'required', null, 'client');
+        $mform->setType(
+            'text_editor',
+            PARAM_RAW
+        );
+        $mform->addRule(
+            'text_editor',
+            null,
+            'required',
+            null,
+            'client'
+        );
 
-        $mform->addElement('hidden', 'id');
-        $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'firstkey');
-        $mform->setType('firstkey', PARAM_INT);
-        $mform->addElement('hidden', 'entryid');
-        $mform->setType('entryid', PARAM_INT);
+        // 20230302 Added tags.
+        if (core_tag_tag::is_enabled('mod_diary', 'diary_entries')) {
+            $mform->addElement(
+                'header',
+                'tagshdr',
+                get_string('tags', 'tag')
+            );
+
+            $mform->addElement(
+                'tags',
+                'tags',
+                get_string('tags'),
+                [
+                    'itemtype' => 'diary_entries',
+                    'component' => 'mod_diary'
+                ]
+            );
+        }
+
+
+        $mform->addElement(
+            'hidden',
+            'id'
+        );
+        $mform->setType(
+            'id',
+            PARAM_INT
+        );
+        $mform->addElement(
+            'hidden',
+            'firstkey'
+        );
+        $mform->setType(
+            'firstkey',
+            PARAM_INT
+        );
+        $mform->addElement(
+            'hidden',
+            'entryid'
+        );
+        $mform->setType(
+            'entryid',
+            PARAM_INT
+        );
 
         $this->add_action_buttons();
+        $this->set_data($currententry);
+
     }
 }
 

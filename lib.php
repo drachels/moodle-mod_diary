@@ -451,6 +451,7 @@ function diary_scale_used_anywhere($scaleid) {
 function diary_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'diaryheader', get_string('modulenameplural', 'diary'));
     $mform->addElement('advcheckbox', 'reset_diary', get_string('removemessages', 'diary'));
+    $mform->addElement('checkbox', 'reset_diary_tags', get_string('removealldiarytags', 'diary'));
 }
 
 /**
@@ -475,24 +476,150 @@ function diary_reset_userdata($data) {
     require_once($CFG->libdir . '/filelib.php');
     require_once($CFG->dirroot . '/rating/lib.php');
 
+    $componentstr = get_string('modulenameplural', 'diary');
     $status = array();
-    // THIS FUNCTION NEEDS REWRITE!
-    if (! empty($data->reset_diary)) {
 
-        $sql = "SELECT d.id
-                FROM {diary} d
-                WHERE d.course = ?";
-        $params = array(
-            $data->courseid
-        );
+    $alldatassql = "SELECT d.id
+                      FROM {diary} d
+                     WHERE d.course=?";
 
-        $DB->delete_records_select('diary_entries', "diary IN ($sql)", $params);
+    $rm = new rating_manager();
+    $ratingdeloptions = new stdClass;
+    $ratingdeloptions->component = 'mod_diary';
+    $ratingdeloptions->ratingarea = 'entry';
+
+    // Set the file storage - may need it to remove files later.
+    $fs = get_file_storage();
+
+    // Delete entries if requested.
+    if (!empty($data->reset_diary)) {
+
+        //$sql = "SELECT d.id
+        //        FROM {diary} d
+        //        WHERE d.course = ?";
+        //$params = array(
+        //    $data->courseid
+        //);
+
+        $DB->delete_records_select('diary_entries', "dataid IN ($alldatassql)", array($data->courseid));
+
+        //$DB->delete_records_select('diary_entries', "diary IN ($sql)", $params);
+
+        if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
+            foreach ($datas as $dataid=>$unused) {
+                if (!$cm = get_coursemodule_from_instance('diary', $dataid)) {
+                    continue;
+                }
+                $datacontext = context_module::instance($cm->id);
+
+                // Delete any files that may exist.
+                $fs->delete_area_files($datacontext->id, 'mod_diary', 'content');
+
+                $ratingdeloptions->contextid = $datacontext->id;
+                $rm->delete_ratings($ratingdeloptions);
+
+                core_tag_tag::delete_instances('mod_diary', null, $datacontext->id);
+            }
+        }
+
+        if (empty($data->reset_gradebook_grades)) {
+            // remove all grades from gradebook
+            data_reset_gradebook($data->courseid);
+        }
 
         $status[] = array(
-            'component' => get_string('modulenameplural', 'diary'),
+            'component' => $componentstr,
             'item' => get_string('removeentries', 'diary'),
             'error' => false
         );
+    }
+
+
+    // Remove entries by users not enrolled into the course.
+    if (!empty($data->reset_data_notenrolled)) {
+        $recordssql = "SELECT de.id, de.userid, de.diary, u.id AS userexists, u.deleted AS userdeleted
+                         FROM {diary_entries} de
+                              JOIN {diary} d ON d.id = de.diary
+                              LEFT JOIN {user} u ON de.userid = u.id
+                        WHERE d.course = ? AND de.userid > 0";
+
+        $course_context = context_course::instance($data->courseid);
+        $notenrolled = array();
+        $fields = array();
+        $rs = $DB->get_recordset_sql($recordssql, array($data->courseid));
+        foreach ($rs as $record) {
+            if (array_key_exists($record->userid, $notenrolled) or !$record->userexists or $record->userdeleted
+              or !is_enrolled($course_context, $record->userid)) {
+                // Delete ratings.
+                if (!$cm = get_coursemodule_from_instance('diary', $record->dataid)) {
+                    continue;
+                }
+                $datacontext = context_module::instance($cm->id);
+                $ratingdeloptions->contextid = $datacontext->id;
+                $ratingdeloptions->itemid = $record->id;
+                $rm->delete_ratings($ratingdeloptions);
+
+                // Delete any files that may exist.
+                if ($contents = $DB->get_records('diary_entries', array('recordid' => $record->id), '', 'id')) {
+                    foreach ($contents as $content) {
+                        $fs->delete_area_files($datacontext->id, 'mod_data', 'content', $content->id);
+                    }
+                }
+                $notenrolled[$record->userid] = true;
+
+                core_tag_tag::remove_all_item_tags('mod_diary', 'diary_entries', $record->id);
+
+                $DB->delete_records('diary_entries', array('recordid' => $record->id));
+            }
+        }
+        $rs->close();
+        $status[] = array('component'=>$componentstr, 'item'=>get_string('deletenotenrolled', 'diary'), 'error'=>false);
+    }
+
+    // Remove all ratings.
+    if (!empty($data->reset_data_ratings)) {
+        if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
+            foreach ($datas as $dataid=>$unused) {
+                if (!$cm = get_coursemodule_from_instance('diary', $dataid)) {
+                    continue;
+                }
+                $datacontext = context_module::instance($cm->id);
+
+                $ratingdeloptions->contextid = $datacontext->id;
+                $rm->delete_ratings($ratingdeloptions);
+            }
+        }
+
+        if (empty($data->reset_gradebook_grades)) {
+            // Remove all grades from gradebook.
+            data_reset_gradebook($data->courseid);
+        }
+
+        $status[] = array('component'=>$componentstr, 'item'=>get_string('deleteallratings'), 'error'=>false);
+    }
+
+    // Remove all the tags.
+    if (!empty($data->reset_data_tags)) {
+        if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
+            foreach ($datas as $dataid => $unused) {
+                if (!$cm = get_coursemodule_from_instance('data', $dataid)) {
+                    continue;
+                }
+
+                $context = context_module::instance($cm->id);
+                core_tag_tag::delete_instances('mod_diary', null, $context->id);
+
+            }
+        }
+        $status[] = array('component' => $componentstr, 'item' => get_string('tagsdeleted', 'data'), 'error' => false);
+    }
+    // Updating dates - shift may be negative too.
+    if ($data->timeshift) {
+        // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
+        // See MDL-9367.
+        shift_course_mod_dates('diary', array('timeavailablefrom', 'timeavailableto',
+            'timeviewfrom', 'timeviewto', 'assesstimestart', 'assesstimefinish'), $data->timeshift, $data->courseid);
+        $status[] = array('component'=>$componentstr, 'item'=>get_string('datechanged'), 'error'=>false);
     }
 
     return $status;

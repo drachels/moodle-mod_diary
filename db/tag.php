@@ -13,21 +13,24 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * Defines the version of Diary.
- *
- * This code fragment is called by moodle_needs_upgrading() and
- * /admin/index.php
+ * Tag areas in component mod_diary.
  *
  * @package   mod_diary
- * @copyright 2019 onwards AL Rachels drachels@drachels.com
+ * @copyright 2023 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2023031300;      // The current module version (Date: YYYYMMDDXX).
-$plugin->requires  = 2019052000;      // Requires Moodle 3.7 version.
-$plugin->cron      = 60;              // Period for cron to check this module (secs).
-$plugin->component = 'mod_diary';
-$plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '3.7.2 (Build: 2023031300)'; // User-friendly version number.
+defined('MOODLE_INTERNAL') || die();
+use mod_diary\local\diarytags;
+
+$tagareas = array(
+    array(
+        'itemtype' => 'diary_entries',
+        'component' => 'mod_diary',
+        'callback' => 'mod_diary_get_tagged_entries',
+        'callbackfile' => '/mod/diary/locallib.php',
+    ),
+);
+

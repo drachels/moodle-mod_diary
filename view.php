@@ -213,6 +213,24 @@ if (!empty($action)) {
             }
             break;
 
+        // Sort list from most recently modified to the one modified the longest time ago.
+        case 'togglestats':
+            if (has_capability('mod/diary:addentries', $context)) {
+                $sortorderinfo = (get_string('sortlastentry', 'diary'));
+                // May be needed for future version if editing old entries is allowed.
+                $entrys = $DB->get_records("diary_entries", array(
+                    'userid' => $USER->id,
+                    'diary' => $diary->id
+                ), $sort = 'timemodified DESC');
+                $firstkey = ''; // Fixes error if user has no entries at all.
+                foreach ($entrys as $firstkey => $firstvalue) {
+                    break;
+                }
+            }
+            break;
+
+
+
         default:
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
@@ -453,7 +471,7 @@ if ($timenow > $timestart) {
                 } else {
                     $editthisentry = ' ';
                 }
-
+/*
                 // 20230129 Developing hide/show statistics tool icons.
                 $url2 = new moodle_url('/mod/diary/view.php', $options);
                 //echo $statspreference;
@@ -468,9 +486,10 @@ if ($timenow > $timestart) {
                         set_user_preference('diary_stats', 'ON');
 
                 }
-
+*/
                 // Add, Entry, then date time group heading for each entry on the page.
-                echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry.'  '.$statstool);
+                //echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry.'  '.$statstool);
+                echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
 
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
@@ -525,6 +544,17 @@ if ($timenow > $timestart) {
                     echo '<div class="editend"><strong>'.get_string('editingended', 'diary').': </strong> ';
                     echo userdate($timefinish).'</div>';
                 }
+
+                // 20230302 Added tags to each entry.
+                echo $OUTPUT->tag_list(
+                    core_tag_tag::get_item_tags(
+                        'mod_diary',
+                        'diary_entries',
+                        $entry->id
+                    ),
+                    null,
+                    'diary-tags'
+                );
 
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) || !empty($entry->rating)) {

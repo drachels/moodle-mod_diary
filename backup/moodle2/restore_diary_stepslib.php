@@ -153,16 +153,17 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
     protected function process_diary_entry_tag($data) {
         $data = (object) $data;
 
-        if (! core_tag_tag::is_enabled('mod_diary', 'diary_entries')) { // Tags disabled in server, nothing to process.
-            return;
-        }
-
-        if (! $itemid = $this->get_mappingid('diary_entries', $data->itemid)) {
-            // Some orphaned tag, we could not find the data record for it - ignore.
+        if (!core_tag_tag::is_enabled('mod_diary', 'diary_entries')) { // Tags disabled in server, nothing to process.
             return;
         }
 
         $tag = $data->rawname;
+
+        if (!$itemid = $this->get_mappingid('diary_entries', $data->itemid)) {
+            // Some orphaned tag, we could not find the data record for it - ignore.
+            return;
+        }
+
         $context = context_module::instance($this->task->get_moduleid());
         core_tag_tag::add_item_tag('mod_diary', 'diary_entries', $itemid, $context, $tag);
     }

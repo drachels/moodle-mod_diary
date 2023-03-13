@@ -28,7 +28,7 @@ use mod_diary\local\prompts;
 use \mod_diary\event\invalid_access_attempt;
 
 require_once("../../config.php");
-require_once('lib.php'); // May not need this.
+require_once('locallib.php'); // May not need this.
 require_once('./edit_form.php');
 global $DB;
 $id = required_param('id', PARAM_INT); // Course Module ID.
@@ -98,6 +98,8 @@ $entry = $DB->get_record("diary_entries", array(
     "userid" => $USER->id,
     'id' => $firstkey
 ));
+// 20230306 Added code that lists the tags on the edit_form page.
+$data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
 
 if ($action == 'currententry' && $entry) {
     $data->entryid = $entry->id;
@@ -253,9 +255,38 @@ if ($form->is_cancelled()) {
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
     $newentry->timecreated = $fromform->timecreated;
+    $newentry->tags = $fromform->tags;
 
     $DB->update_record('diary_entries', $newentry);
         $debug['CP6 checking item: $newentry '] = $newentry;
+
+    // Do some other processing here,
+    // If this is a new page (entry) you need to insert it in the DB and obtain id.
+
+// This snippet is from forum post.php file about line 1168. Does not work for me, yet.
+//    $data = (object) [
+//        'tags' => core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $newentry->id)
+//    ];
+//    $form->set_data($data);
+//if (!empty($newentry)) {
+//    $newentry = (object) [
+//        'tags' => core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $newentry->id)
+//    ];
+//    $form->set_data($newentry);
+//}
+    //$pageid = $newentry->id;
+//print_object($context->instanceid);
+//die;
+
+    core_tag_tag::set_item_tags(
+        'mod_diary',
+        'diary_entries',
+        $newentry->id,
+        $context,
+        $newentry->tags
+    );
+
+
 
     // Try adding autosave cleanup here.
     // will need to search the mdl_editor_atto_autosave table
@@ -346,6 +377,24 @@ if (($diary->intro) && ($CFG->branch < 400)) {
 }
 echo $OUTPUT->box($intro);
 
+
+/*
+///////////////////////////////////////////////
+    $data = (object) [
+        'tags' => core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $newentry->id)
+    ];
+    $form->set_data($data);
+echo 'testing location for tags';
+//////////////////////////////////////////////
+
+    core_tag_tag::set_item_tags(
+        'mod_diary',
+        'diary_entries',
+        $newentry->id,
+        $context,
+        $newentry->tags
+    );
+*/
 // Otherwise fill and print the form.
 $form->display();
 
