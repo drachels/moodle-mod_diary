@@ -37,12 +37,27 @@ $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete 
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
+//print_object('spacer 1');
+//print_object('spacer 2');
+//print_object('spacer 3');
+//print_object('spacer 4');
+//print_object($id);
+//print_object($cm);
+//print_object($course);
+//print_object($action);
+
+// Coming from the tags listing page, I see all four of these items'
+// The $cm->instance is the id of the diary the tag listing belongs to.
+// I do not see anything that would be the actual entry id.
+//die;
+
+
 // Set a preference and then retrieve it.
 $emailpreference = optional_param('emailpreference', get_user_preferences
                                  ('diary_email', get_config('mod_diary', 'teacheremail')), PARAM_INT);
 
-$statspreference = optional_param('statspreference', get_user_preferences
-                                 ('diary_stats', get_config('mod_diary', 'statsview')), PARAM_INT);
+//$statspreference = optional_param('statspreference', get_user_preferences
+//                                 ('diary_stats', get_config('mod_diary', 'statsview')), PARAM_INT);
 
 if ($emailpreference == 1 || $emailpreference == 'ON') {
     set_user_preference('diary_email', 'OFF');
@@ -350,6 +365,9 @@ if ($timenow > $timestart) {
     $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
     $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
 
+    $oldstatspreference = get_user_preferences('diary_statspreference_'.$diary->id, null);
+    $statspreference = optional_param('statspreference', $oldstatspreference, PARAM_INT);
+
     echo $OUTPUT->box_start();
     // 20200815 Create table and added sort order and type of rating and current rating. 20201004 Moved info here.
     echo '<table class="sortandaggregate">'
@@ -427,6 +445,32 @@ if ($timenow > $timestart) {
             echo '</select>'.get_string('outof', 'diary', (count($entrys)));
             echo '</form>';
 
+///////////////////////////////////////////////////////////////////////////////
+            // 20200709 Added selector for prefered stats view. Default is ON.
+            echo '<form method="post">';
+
+            if ($statspreference != $oldstatspreference) {
+                //set_user_preference('diary_statspreference_'.$diary->id, $statspreference);
+                set_user_preference('diary_statspreference_'.$diary->id, 2);
+            }
+
+            $listoptions = array(
+                1 => get_string('statsshow', 'diary'),
+                2 => get_string('statshide', 'diary')
+            );
+            // This creates the dropdown list for how many entries to show on the page.
+            $selection = html_writer::select($listoptions, 'statspreference', $statspreference, false, array(
+                'id' => 'pref_stats',
+                'class' => 'custom-select'
+            ));
+
+            echo get_string('statshdr', 'diary').': <select onchange="this.form.submit()" name="statspreference">';
+            echo '<option selected="true" value="'.$selection.'</option>';
+            // 20200905 Added count of all user entries.
+            echo '</select>';
+            echo '</form>';
+///////////////////////////////////////////////////////////////////////////////
+
             echo $output->box_end();
         }
     } else {
@@ -491,6 +535,16 @@ if ($timenow > $timestart) {
                 //echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry.'  '.$statstool);
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
 
+                // 20230314 If one exists, display the apllicable prompt.
+                if ($entry->promptid > 0) {
+                    $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
+                    $prompt = $DB->get_record('diary_prompts', array('id' => $entry->promptid, 'diaryid' => $diary->id));
+                    //echo '<div class="entry" style="background: '.$color4.';">';
+                    echo '<div class="entry" style="background: '.$errorcmid.';">';
+
+                    echo '<strong>'.get_string('prompttext', 'diary').'</strong>: '.$prompt->text.'</div>';
+                }
+
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
                 echo '<div class="entry" style="background: '.$color4.';">';
@@ -502,7 +556,9 @@ if ($timenow > $timestart) {
                 if ($timenow < $timefinish) {
                     // 20211217 If there is a user entry, format it and show it.
                     if ($entry) {
-                        if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
+                        //if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
+                        //if ($entry && ($statspreference == 1)) {
+                        if ($entry && $statspreference) {
                             $temp = $entry;
                             // 20210704 Go calculate stats and print stats table.
                             // 20210703 Moved to here from up above so the table gets rendered in the right spot.

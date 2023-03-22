@@ -129,6 +129,10 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
     if ($items) {
         $tagfeed = new core_tag\output\tagfeed();
         foreach ($items as $item) {
+print_object('spacer 1');
+print_object('spacer 2');
+print_object('spacer 3');
+print_object($item);
             context_helper::preload_from_record($item);
             $modinfo = get_fast_modinfo($item->courseid);
             $cm = $modinfo->get_cm($item->cmid);
@@ -150,7 +154,7 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
             $coursename = format_string($item->fullname, true, array('context' => context_course::instance($item->courseid)));
             $coursename = html_writer::link($courseurl, $coursename);
             $icon = html_writer::link($pageurl, html_writer::empty_tag('img', array('src' => $cm->get_icon_url())));
-            $tagfeed->add($icon, $pagename, $cmname.'<br>'.$coursename);
+            $tagfeed->add($icon, $item->id.' '.$pagename, $cmname.'<br>'.$coursename);
         }
 
         $content = $OUTPUT->render_from_template('core_tag/tagfeed', $tagfeed->export_for_template($OUTPUT));

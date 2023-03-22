@@ -17,12 +17,16 @@ This files describes API changes and other work in the diary code.
 
 
 === 3.7.2=== 20230313 BETA
+20220912 Diary - It would be nice to have a button that would let users show/hide stats
+    on view.php. 20230322 As of today, I have a nice selection list working for this.
+    This also clears Diary_935.
 20221012 Diary_933 - Should, Character count, include spaces? 20230129 Currently, I
     have the code changed so that spaces are not counted, and I have asked for votes in
     the General Help Forum. So far, the consensis is to not count spaces.
 20221013 Diary_935 - Since the page for each entry is getting longer, might be nice
     to be able to toggle stats view on/off. I have added, Hide stats/Show stats, icons
-    at the end of the each entry title or edit pencil.
+    at the end of the each entry title or edit pencil. 
+    20230322 of of this day, I totally changed the code and have a slection list working.
 20221116 Diary_954 - View x diary entries count seems to be wrong. It was not taking the
     correct groupid to use for the count. See the ticket for further details on the fix.
 20221124 Diary_962 - The prompt_edit.php page shows, Static text testing $diaryid,
@@ -42,6 +46,8 @@ This files describes API changes and other work in the diary code.
     just be $sql. Changed all 12 from $esql to $sql.
 20230227 Diary_1014 - Need to see about adding a Tag field when editing/creating a
     new diary entry. Added code as needed using example from, Tag API.
+20230313 Diary_1020 - Need to add the prompt used for an entry to the view.php page.
+    Added the needed code in view.php, starting down around line 493. 
 
 === 3.7.0/1 === 20221123
 20210815 Diary_741v - Need to verify communications when rating or when student
