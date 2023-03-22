@@ -556,9 +556,9 @@ if ($timenow > $timestart) {
                 if ($timenow < $timefinish) {
                     // 20211217 If there is a user entry, format it and show it.
                     if ($entry) {
-                        //if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
-                        //if ($entry && ($statspreference == 1)) {
-                        if ($entry && $statspreference) {
+                        // if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
+                        if ($entry && ($statspreference == 1)) {
+                        // if ($entry && $statspreference) {
                             $temp = $entry;
                             // 20210704 Go calculate stats and print stats table.
                             // 20210703 Moved to here from up above so the table gets rendered in the right spot.
