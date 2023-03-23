@@ -36,41 +36,31 @@ $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
-
-//print_object('spacer 1');
-//print_object('spacer 2');
-//print_object('spacer 3');
-//print_object('spacer 4');
-//print_object($id);
-//print_object($cm);
-//print_object($course);
-//print_object($action);
-
+/*
+print_object('spacer 1');
+print_object('spacer 2');
+print_object('spacer 3');
+print_object('spacer 4');
+print_object($id);
+print_object($cm);
+print_object($course);
+print_object($action);
+*/
 // Coming from the tags listing page, I see all four of these items'
 // The $cm->instance is the id of the diary the tag listing belongs to.
 // I do not see anything that would be the actual entry id.
 //die;
 
-
 // Set a preference and then retrieve it.
-$emailpreference = optional_param('emailpreference', get_user_preferences
-                                 ('diary_email', get_config('mod_diary', 'teacheremail')), PARAM_INT);
+//$emailpreference = optional_param('emailpreference', get_user_preferences
+//                                 ('diary_email', get_config('mod_diary', 'teacheremail')), PARAM_INT);
 
-//$statspreference = optional_param('statspreference', get_user_preferences
-//                                 ('diary_stats', get_config('mod_diary', 'statsview')), PARAM_INT);
-
-if ($emailpreference == 1 || $emailpreference == 'ON') {
-    set_user_preference('diary_email', 'OFF');
-} else {
-    set_user_preference('diary_email', 'ON');
-}
-
-// 20230129 Added stats toggle.
-//if ($statspreference == 1 || $statspreference == 'ON') {
-//    set_user_preference('diary_stats', 'OFF');
+//if ($emailpreference == 1 || $emailpreference == 'ON') {
+//    set_user_preference('diary_email', 'OFF');
 //} else {
-//    set_user_preference('diary_stats', 'ON');
+//    set_user_preference('diary_email', 'ON');
 //}
+
 
 if (!$cm) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -106,7 +96,8 @@ foreach ($diarys as $temp) {
         $errorcmid = $diary->errorcmid;
     }
 }
-
+//print_object('made it here');
+//die;
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
 $promptid = prompts::get_current_promptid($diary);
 
@@ -228,21 +219,21 @@ if (!empty($action)) {
             }
             break;
 
-        // Sort list from most recently modified to the one modified the longest time ago.
-        case 'togglestats':
-            if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = (get_string('sortlastentry', 'diary'));
-                // May be needed for future version if editing old entries is allowed.
-                $entrys = $DB->get_records("diary_entries", array(
-                    'userid' => $USER->id,
-                    'diary' => $diary->id
-                ), $sort = 'timemodified DESC');
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
-            break;
+//        // Sort list from most recently modified to the one modified the longest time ago.
+//        case 'togglestats':
+//            if (has_capability('mod/diary:addentries', $context)) {
+//                $sortorderinfo = (get_string('sortlastentry', 'diary'));
+//                // May be needed for future version if editing old entries is allowed.
+//                $entrys = $DB->get_records("diary_entries", array(
+//                    'userid' => $USER->id,
+//                    'diary' => $diary->id
+//                ), $sort = 'timemodified DESC');
+//                $firstkey = ''; // Fixes error if user has no entries at all.
+//                foreach ($entrys as $firstkey => $firstvalue) {
+//                    break;
+//                }
+//            }
+//            break;
 
 
 
@@ -314,8 +305,10 @@ if ($entriesmanager) {
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
     $temp = '<span class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
     $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
-    $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
-    $temp .= '<a href="view.php?id='.$cm->id.'">'.get_string('emailpreference', 'diary', $emailpreference).'</a></span>';
+    //$temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
+    $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
+    //$temp .= '<a href="view.php?id='.$cm->id.'">'.get_string('emailpreference', 'diary', $emailpreference).'</a></span>';
+    $temp .= '</a></span>';
     echo $temp;
 
 } else {
@@ -367,6 +360,9 @@ if ($timenow > $timestart) {
 
     $oldstatspreference = get_user_preferences('diary_statspreference_'.$diary->id, null);
     $statspreference = optional_param('statspreference', $oldstatspreference, PARAM_INT);
+
+    $oldemailpreference = get_user_preferences('diary_emailpreference_'.$diary->id, null);
+    $emailpreference = optional_param('emailpreference', $oldemailpreference, PARAM_INT);
 
     echo $OUTPUT->box_start();
     // 20200815 Create table and added sort order and type of rating and current rating. 20201004 Moved info here.
@@ -443,11 +439,11 @@ if ($timenow > $timestart) {
             echo '<option selected="true" value="'.$selection.'</option>';
             // 20200905 Added count of all user entries.
             echo '</select>'.get_string('outof', 'diary', (count($entrys)));
-            echo '</form>';
+            //echo '</form>';
 
 ///////////////////////////////////////////////////////////////////////////////
-            // 20200709 Added selector for prefered stats view. Default is ON.
-            echo '<form method="post">';
+            // 20230322 Added selector for prefered stats view. Default is ON.
+            //echo '<form method="post">';
 
             if ($statspreference != $oldstatspreference) {
                 //set_user_preference('diary_statspreference_'.$diary->id, $statspreference);
@@ -464,13 +460,33 @@ if ($timenow > $timestart) {
                 'class' => 'custom-select'
             ));
 
-            echo get_string('statshdr', 'diary').': <select onchange="this.form.submit()" name="statspreference">';
+            echo ' | '.get_string('statshdr', 'diary').': <select onchange="this.form.submit()" name="statspreference">';
             echo '<option selected="true" value="'.$selection.'</option>';
-            // 20200905 Added count of all user entries.
             echo '</select>';
+///////////////////////////////////////////////////////////////////////////////
+            // 20230323 Added selector for prefered email delivery. Default is ON.
+            // Need to check if user is an entry manager here so that students do not see the email pref.
+            if ($entriesmanager) {
+                if ($emailpreference != $oldemailpreference) {
+                    set_user_preference('diary_emailpreference_'.$diary->id, 2);
+                }
+
+                $listoptions = array(
+                    1 => get_string('emailnow', 'diary'),
+                    2 => get_string('emaillater', 'diary')
+                );
+                // This creates the dropdown list for how many entries to show on the page.
+                $selection = html_writer::select($listoptions, 'emailpreference', $emailpreference, false, array(
+                    'id' => 'pref_emails',
+                    'class' => 'custom-select'
+                ));
+
+                echo ' | '.get_string('emailpreference', 'diary').': <select onchange="this.form.submit()" name="emailpreference">';
+                echo '<option selected="true" value="'.$selection.'</option>';
+                echo '</select>';
+            }
             echo '</form>';
 ///////////////////////////////////////////////////////////////////////////////
-
             echo $output->box_end();
         }
     } else {
@@ -558,7 +574,6 @@ if ($timenow > $timestart) {
                     if ($entry) {
                         // if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
                         if ($entry && ($statspreference == 1)) {
-                        // if ($entry && $statspreference) {
                             $temp = $entry;
                             // 20210704 Go calculate stats and print stats table.
                             // 20210703 Moved to here from up above so the table gets rendered in the right spot.
