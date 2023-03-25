@@ -48,13 +48,12 @@ defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
  */
 function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0, $ctx = 0, $rec = 1, $page = 0) {
     // Find items.
-    global $OUTPUT;
+    global $OUTPUT, $USER;
     $perpage = $exclusivemode ? 20 : 5;
 
     // Build the SQL query.
     $ctxselect = context_helper::get_preload_record_columns_sql('ctx');
-    //$query = "SELECT de.id, de.text, de.diary, de.hidden,
-    $query = "SELECT de.id, de.text, de.diary,
+    $query = "SELECT de.id, de.text, de.diary, de.userid,
                     cm.id AS cmid, c.id AS courseid, c.shortname, c.fullname, $ctxselect
                 FROM {diary_entries} de
                 JOIN {diary} d ON d.id = de.diary
@@ -67,7 +66,6 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
                  AND cm.deletioninprogress = 0
                  AND de.id %ITEMFILTER% AND c.id %COURSEFILTER%";
 
-    //$params = array('itemtype' => 'book_chapters', 'tagid' => $tag->id, 'component' => 'mod_book',
     $params = array('itemtype' => 'diary_entries', 'tagid' => $tag->id, 'component' => 'mod_diary',
                     'coursemodulecontextlevel' => CONTEXT_MODULE);
 
@@ -91,7 +89,8 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
     $totalpages = $page + 1;
 
     // Use core_tag_index_builder to build and filter the list of items.
-    // Notice how we search for 6 items when we need to display 5 - this way we will know that we need to display a link to the next page.
+    // Notice how we search for 6 items when we need to display 5.
+    // This way we will know that we need to display a link to the next page.
     $builder = new core_tag_index_builder('mod_diary', 'diary_entries', $query, $params, $page * $perpage, $perpage + 1);
 
     while ($item = $builder->has_item_that_needs_access_check()) {
@@ -129,32 +128,40 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
     if ($items) {
         $tagfeed = new core_tag\output\tagfeed();
         foreach ($items as $item) {
-print_object('spacer 1');
-print_object('spacer 2');
-print_object('spacer 3');
-print_object($item);
-            context_helper::preload_from_record($item);
-            $modinfo = get_fast_modinfo($item->courseid);
-            $cm = $modinfo->get_cm($item->cmid);
-            //$pageurl = new moodle_url('/mod/diary/view.php', array('diaryid' => $item->id, 'd' => $item->diary));
-            //$pageurl = new moodle_url('/mod/diary/view.php', array('diaryid' => $item->id, 'd' => $item->diary));
-            $pageurl = new moodle_url('/mod/diary/view.php', array('id' => $item->cmid));
+            $context = context_module::instance($item->cmid);
+            $canmanage = has_capability('mod/diary:manageentries', $context);
+            // 20230325 Show tagged item only if allowed to see it.
+            // if (($item->userid == $USER->id) || has_capability('mod/diary:manageentries', $context)) {
+            if (($item->userid == $USER->id) || $canmanage) {
+                context_helper::preload_from_record($item);
+                $modinfo = get_fast_modinfo($item->courseid);
+                $cm = $modinfo->get_cm($item->cmid);
+                // 20230325 Student go to their view page and teachers, etc. go to reportsingle for the applicable user.
+                if ($canmanage) {
+                    $pageurl = new moodle_url('/mod/diary/reportsingle.php', array(
+                        'id' => $item->cmid,
+                        'action' => 'allentries',
+                        'user' => $item->userid
+                        ));
+                } else {
+                    $pageurl = new moodle_url('/mod/diary/view.php', array('id' => $item->cmid));
+                }
+                // 20230308 Added this code to limit the amount of an entries text that is shown.
+                $strtocut = $item->text;
+                $strtocut = str_replace('\n', '<br>', $strtocut);
+                if (strlen($strtocut) > 200) {
+                    $strtocut = substr($strtocut, 0, 200).'...';
+                }
 
-            // 20230308 Added this code to limit the amount of an entries text that is shown.
-            $strtocut = $item->text;
-            $strtocut = str_replace('\n', '<br>', $strtocut);
-            if (strlen($strtocut) > 200) {
-                $strtocut = substr($strtocut, 0, 200).'...';
+                $pagename = format_string($strtocut, true, array('context' => context_module::instance($item->cmid)));
+                $pagename = html_writer::link($pageurl, $pagename);
+                $courseurl = course_get_url($item->courseid, $cm->sectionnum);
+                $cmname = html_writer::link($cm->url, $cm->get_formatted_name());
+                $coursename = format_string($item->fullname, true, array('context' => context_course::instance($item->courseid)));
+                $coursename = html_writer::link($courseurl, $coursename);
+                $icon = html_writer::link($pageurl, html_writer::empty_tag('img', array('src' => $cm->get_icon_url())));
+                $tagfeed->add($icon, $item->id.' '.$pagename, $cmname.'<br>'.$coursename);
             }
-
-            $pagename = format_string($strtocut, true, array('context' => context_module::instance($item->cmid)));
-            $pagename = html_writer::link($pageurl, $pagename);
-            $courseurl = course_get_url($item->courseid, $cm->sectionnum);
-            $cmname = html_writer::link($cm->url, $cm->get_formatted_name());
-            $coursename = format_string($item->fullname, true, array('context' => context_course::instance($item->courseid)));
-            $coursename = html_writer::link($courseurl, $coursename);
-            $icon = html_writer::link($pageurl, html_writer::empty_tag('img', array('src' => $cm->get_icon_url())));
-            $tagfeed->add($icon, $item->id.' '.$pagename, $cmname.'<br>'.$coursename);
         }
 
         $content = $OUTPUT->render_from_template('core_tag/tagfeed', $tagfeed->export_for_template($OUTPUT));
