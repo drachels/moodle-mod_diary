@@ -262,22 +262,6 @@ if ($form->is_cancelled()) {
 
     // Do some other processing here,
     // If this is a new page (entry) you need to insert it in the DB and obtain id.
-
-// This snippet is from forum post.php file about line 1168. Does not work for me, yet.
-//    $data = (object) [
-//        'tags' => core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $newentry->id)
-//    ];
-//    $form->set_data($data);
-//if (!empty($newentry)) {
-//    $newentry = (object) [
-//        'tags' => core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $newentry->id)
-//    ];
-//    $form->set_data($newentry);
-//}
-    //$pageid = $newentry->id;
-//print_object($context->instanceid);
-//die;
-
     core_tag_tag::set_item_tags(
         'mod_diary',
         'diary_entries',
@@ -286,12 +270,9 @@ if ($form->is_cancelled()) {
         $newentry->tags
     );
 
-
-
     // Try adding autosave cleanup here.
     // will need to search the mdl_editor_atto_autosave table
     // will need to find a match with contextid and user id.
-
     if ($entry) {
         // Trigger module entry updated event.
         $event = \mod_diary\event\entry_updated::create(array(
@@ -349,8 +330,8 @@ if ($form->is_cancelled()) {
         $posthtml = "";
     }
 
-    // Send now an email for each teacher in the course
-    // First check to see if the actual data has changed by comparing before and after text fields
+    // Send now an email for each teacher in the course.
+    // First check to see if the actual data has changed by comparing before and after text fields.
     // I think I might need to do some more debugging on the $data->text as I am receiving an email
     // even when the user opens for edit, then saves without making any changes.
     if ($data->text !== $newentry->text) {
@@ -377,24 +358,6 @@ if (($diary->intro) && ($CFG->branch < 400)) {
 }
 echo $OUTPUT->box($intro);
 
-
-/*
-///////////////////////////////////////////////
-    $data = (object) [
-        'tags' => core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $newentry->id)
-    ];
-    $form->set_data($data);
-echo 'testing location for tags';
-//////////////////////////////////////////////
-
-    core_tag_tag::set_item_tags(
-        'mod_diary',
-        'diary_entries',
-        $newentry->id,
-        $context,
-        $newentry->tags
-    );
-*/
 // Otherwise fill and print the form.
 $form->display();
 

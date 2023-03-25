@@ -494,19 +494,10 @@ function diary_reset_userdata($data) {
     // Delete entries if requested.
     if (!empty($data->reset_diary)) {
 
-        //$sql = "SELECT d.id
-        //        FROM {diary} d
-        //        WHERE d.course = ?";
-        //$params = array(
-        //    $data->courseid
-        //);
-
         $DB->delete_records_select('diary_entries', "dataid IN ($alldatassql)", array($data->courseid));
 
-        //$DB->delete_records_select('diary_entries', "diary IN ($sql)", $params);
-
         if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
-            foreach ($datas as $dataid=>$unused) {
+            foreach ($datas as $dataid => $unused) {
                 if (!$cm = get_coursemodule_from_instance('diary', $dataid)) {
                     continue;
                 }
@@ -523,7 +514,7 @@ function diary_reset_userdata($data) {
         }
 
         if (empty($data->reset_gradebook_grades)) {
-            // remove all grades from gradebook
+            // Remove all grades from gradebook.
             data_reset_gradebook($data->courseid);
         }
 
@@ -534,7 +525,6 @@ function diary_reset_userdata($data) {
         );
     }
 
-
     // Remove entries by users not enrolled into the course.
     if (!empty($data->reset_data_notenrolled)) {
         $recordssql = "SELECT de.id, de.userid, de.diary, u.id AS userexists, u.deleted AS userdeleted
@@ -543,13 +533,13 @@ function diary_reset_userdata($data) {
                               LEFT JOIN {user} u ON de.userid = u.id
                         WHERE d.course = ? AND de.userid > 0";
 
-        $course_context = context_course::instance($data->courseid);
+        $coursecontext = context_course::instance($data->courseid);
         $notenrolled = array();
         $fields = array();
         $rs = $DB->get_recordset_sql($recordssql, array($data->courseid));
         foreach ($rs as $record) {
-            if (array_key_exists($record->userid, $notenrolled) or !$record->userexists or $record->userdeleted
-              or !is_enrolled($course_context, $record->userid)) {
+            if (array_key_exists($record->userid, $notenrolled) || !$record->userexists || $record->userdeleted
+              || !is_enrolled($coursecontext, $record->userid)) {
                 // Delete ratings.
                 if (!$cm = get_coursemodule_from_instance('diary', $record->dataid)) {
                     continue;
@@ -573,13 +563,13 @@ function diary_reset_userdata($data) {
             }
         }
         $rs->close();
-        $status[] = array('component'=>$componentstr, 'item'=>get_string('deletenotenrolled', 'diary'), 'error'=>false);
+        $status[] = array('component' => $componentstr, 'item' => get_string('deletenotenrolled', 'diary'), 'error' => false);
     }
 
     // Remove all ratings.
     if (!empty($data->reset_data_ratings)) {
         if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
-            foreach ($datas as $dataid=>$unused) {
+            foreach ($datas as $dataid => $unused) {
                 if (!$cm = get_coursemodule_from_instance('diary', $dataid)) {
                     continue;
                 }
@@ -595,7 +585,7 @@ function diary_reset_userdata($data) {
             data_reset_gradebook($data->courseid);
         }
 
-        $status[] = array('component'=>$componentstr, 'item'=>get_string('deleteallratings'), 'error'=>false);
+        $status[] = array('component' => $componentstr, 'item' => get_string('deleteallratings'), 'error' => false);
     }
 
     // Remove all the tags.
@@ -619,7 +609,7 @@ function diary_reset_userdata($data) {
         // See MDL-9367.
         shift_course_mod_dates('diary', array('timeavailablefrom', 'timeavailableto',
             'timeviewfrom', 'timeviewto', 'assesstimestart', 'assesstimefinish'), $data->timeshift, $data->courseid);
-        $status[] = array('component'=>$componentstr, 'item'=>get_string('datechanged'), 'error'=>false);
+        $status[] = array('component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false);
     }
 
     return $status;

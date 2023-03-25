@@ -131,50 +131,6 @@ class mod_diary_renderer extends plugin_renderer_base {
             'class' => 'toolbutton'
         ));
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Need this to be onclick or onsubmit, instead of the simple if in use right now.
-        // Print toggle statistics ON/OFF toolbutton.
-        $options['action'] = 'togglestats';
-        $options['firstkey'] = $firstkey;
-
-        //$oldstatspreference = get_user_preferences('diary_stats', get_config('mod_diary', 'statsview'));
-        $oldstatspreference = get_user_preferences('diary_stats', get_config('mod_diary', 1));
-        $statspreference = optional_param('statspreference', $oldstatspreference, PARAM_INT);
-
-        //$statspreference = optional_param('statspreference', get_user_preferences
-        //    ('diary_stats', get_config('mod_diary', 'statsview')), PARAM_INT);
-
-        $url = new moodle_url('/mod/diary/view.php', $options);
-        if ($statspreference == 1 || $statspreference == 'ON') {
-            $output .= '<select onchange="togglestats">';
-
-            $output .= html_writer::link($url, $this->pix_icon('i/show', get_string('statshide', 'diary')),
-                array('class' => 'toolbutton'));
-            $output .= '</select>';
-                set_user_preference('diary_stats', 'OFF');
-
-        } else {
-            $output .= '<select onchange="togglestats">';
-
-            $output .= html_writer::link($url, $this->pix_icon('i/hide', get_string('statsshow', 'diary')),
-                array('class' => 'toolbutton'));
-                set_user_preference('diary_stats', 'ON');
-            $output .= '</select>';
-
-        }
-
-// Example of how I did it perpage.
-/*
-            echo get_string('pagesize', 'diary').': <select onchange="this.form.submit()" name="perpage">';
-            echo '<option selected="true" value="'.$selection.'</option>';
-            // 20200905 Added count of all user entries.
-            echo '</select>'.get_string('outof', 'diary', (count($entrys)));
-*/
-
-        //$output .= html_writer::link($url, $this->pix_icon('i/show', get_string('latestmodifiedentry', 'diary')), array(
-        //    'class' => 'toolbutton'
-        //));
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $firstkey = '';
         // Return all available toolbuttons.
         return $output;

@@ -11,43 +11,50 @@ This files describes API changes and other work in the diary code.
     file. Updated backup files. Updated the mod_form.php file.
 20211130 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
-20220220 Diary_823 - Missing completion information on the view.php page. Got
-    it working on course page - BUT - the ticket is still open for further
+
+
+
+=== 3.7.2=== 20230324 STABLE
+20220220 Diary_823v - Missing completion information on the view.php page. Got
+    it working on course page - BUT - might need another ticket for further
     development to also require X number of Posts.
-
-
-=== 3.7.2=== 20230313 BETA
-20220912 Diary - It would be nice to have a button that would let users show/hide stats
+20220912 Diary_920v - It would be nice to have a button that would let users show/hide stats
     on view.php. 20230322 As of today, I have a nice selection list working for this.
     This also clears Diary_935.
-20221012 Diary_933 - Should, Character count, include spaces? 20230129 Currently, I
+20221012 Diary_933v - Should, Character count, include spaces? 20230129 Currently, I
     have the code changed so that spaces are not counted, and I have asked for votes in
     the General Help Forum. So far, the consensis is to not count spaces.
-20221013 Diary_935 - Since the page for each entry is getting longer, might be nice
+20221013 Diary_935v - Since the page for each entry is getting longer, might be nice
     to be able to toggle stats view on/off. I have added, Hide stats/Show stats, icons
     at the end of the each entry title or edit pencil. 
     20230322 of of this day, I totally changed the code and have a slection list working.
-20221116 Diary_954 - View x diary entries count seems to be wrong. It was not taking the
+20221116 Diary_954v - View x diary entries count seems to be wrong. It was not taking the
     correct groupid to use for the count. See the ticket for further details on the fix.
-20221124 Diary_962 - The prompt_edit.php page shows, Static text testing $diaryid,
+20221124 Diary_962v - The prompt_edit.php page shows, Static text testing $diaryid,
     that should not be there. Needed to put it back for development, so as of 20230129
     it is still there, so I opened another ticket, Diary_1003.
-20230128 Diary_1001 - Issue #18 Link to documentation on github wrong? 20230128 Changed
+20230128 Diary_1001v - Issue #18 Link to documentation on github wrong? 20230128 Changed
     the link and made it current, so that instead of pointing to the github wiki it
     points to the Moodle wiki. 
-20230128 Diary_1002 - Issue #19 Untranslatable string "create new prompt" 20230128 Added
+20230128 Diary_1002v - Issue #19 Untranslatable string "create new prompt" 20230128 Added
     new string in en language file. Modified the code in file, prompt_edit.php, at about
     line 385 to use the new string, $string['createnewprompt'] = 'Create new prompt';
-20230128 Diary_1003 - Issue #20 Untranslatable string (or thing) Static text testing
+20230128 Diary_1003v - Issue #20 Untranslatable string (or thing) Static text testing
     $diaryid. 20230129 Line 476 of mod_form.php was added just for development, and
     then I got so used to it being there that I just forgot to remove it. It will be
-    removed from the next release. 
-20230131 Diary_1006 - In the results.php file, there are 12 places where $esql should
+    removed from the next release.
+20230131 Diary_1005v - Change email toggle to icon and move it to the toolbar. Instead
+    of an icon on the toolbar, I have created a selector. It can only be seen by entrymanagers.
+20230131 Diary_1006v - In the results.php file, there are 12 places where $esql should
     just be $sql. Changed all 12 from $esql to $sql.
-20230227 Diary_1014 - Need to see about adding a Tag field when editing/creating a
+20230227 Diary_1014v - Need to see about adding a Tag field when editing/creating a
     new diary entry. Added code as needed using example from, Tag API.
-20230313 Diary_1020 - Need to add the prompt used for an entry to the view.php page.
+20230313 Diary_1020v - Need to add the prompt used for an entry to the view.php page.
     Added the needed code in view.php, starting down around line 493. 
+20230325 Diary_1025v - The tag index page shold only show a student their personal Diary
+    entries, but all entries to teachers, etc. Added needed code to function mod_diary_get
+    _tagged_entries in locllib.php. See ticket for further details.
+
 
 === 3.7.0/1 === 20221123
 20210815 Diary_741v - Need to verify communications when rating or when student

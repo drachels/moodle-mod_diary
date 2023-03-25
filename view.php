@@ -36,31 +36,6 @@ $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
-/*
-print_object('spacer 1');
-print_object('spacer 2');
-print_object('spacer 3');
-print_object('spacer 4');
-print_object($id);
-print_object($cm);
-print_object($course);
-print_object($action);
-*/
-// Coming from the tags listing page, I see all four of these items'
-// The $cm->instance is the id of the diary the tag listing belongs to.
-// I do not see anything that would be the actual entry id.
-//die;
-
-// Set a preference and then retrieve it.
-//$emailpreference = optional_param('emailpreference', get_user_preferences
-//                                 ('diary_email', get_config('mod_diary', 'teacheremail')), PARAM_INT);
-
-//if ($emailpreference == 1 || $emailpreference == 'ON') {
-//    set_user_preference('diary_email', 'OFF');
-//} else {
-//    set_user_preference('diary_email', 'ON');
-//}
-
 
 if (!$cm) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -93,11 +68,12 @@ foreach ($diarys as $temp) {
         // 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
         $color3 = $diary->entrybgc;
         $color4 = $diary->entrytextbgc;
-        $errorcmid = $diary->errorcmid;
+        //$errorcmid = $diary->errorcmid; // Should not use this as it is for common errors!
+        // 20230324 Added a background color for prompts used with any individual diary entries.
+        $promptbgc = 'yellow';
     }
 }
-//print_object('made it here');
-//die;
+
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
 $promptid = prompts::get_current_promptid($diary);
 
@@ -219,24 +195,6 @@ if (!empty($action)) {
             }
             break;
 
-//        // Sort list from most recently modified to the one modified the longest time ago.
-//        case 'togglestats':
-//            if (has_capability('mod/diary:addentries', $context)) {
-//                $sortorderinfo = (get_string('sortlastentry', 'diary'));
-//                // May be needed for future version if editing old entries is allowed.
-//                $entrys = $DB->get_records("diary_entries", array(
-//                    'userid' => $USER->id,
-//                    'diary' => $diary->id
-//                ), $sort = 'timemodified DESC');
-//                $firstkey = ''; // Fixes error if user has no entries at all.
-//                foreach ($entrys as $firstkey => $firstvalue) {
-//                    break;
-//                }
-//            }
-//            break;
-
-
-
         default:
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
@@ -305,9 +263,7 @@ if ($entriesmanager) {
     // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
     $temp = '<span class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
     $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
-    //$temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
     $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
-    //$temp .= '<a href="view.php?id='.$cm->id.'">'.get_string('emailpreference', 'diary', $emailpreference).'</a></span>';
     $temp .= '</a></span>';
     echo $temp;
 
@@ -400,14 +356,15 @@ if ($timenow > $timestart) {
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
 
-            if ($perpage < 2) {
-                $perpage = 2;
-            }
+            //if ($perpage < 2) {
+            //    $perpage = 2;
+            //}
             if ($perpage != $oldperpage) {
                 set_user_preference('diary_perpage_'.$diary->id, $perpage);
             }
 
             $pagesizes = array(
+                1 => 1,
                 2 => 2,
                 3 => 3,
                 4 => 4,
@@ -439,14 +396,10 @@ if ($timenow > $timestart) {
             echo '<option selected="true" value="'.$selection.'</option>';
             // 20200905 Added count of all user entries.
             echo '</select>'.get_string('outof', 'diary', (count($entrys)));
-            //echo '</form>';
+            // Extend the form to include the stats selector.
 
-///////////////////////////////////////////////////////////////////////////////
             // 20230322 Added selector for prefered stats view. Default is ON.
-            //echo '<form method="post">';
-
             if ($statspreference != $oldstatspreference) {
-                //set_user_preference('diary_statspreference_'.$diary->id, $statspreference);
                 set_user_preference('diary_statspreference_'.$diary->id, 2);
             }
 
@@ -463,8 +416,8 @@ if ($timenow > $timestart) {
             echo ' | '.get_string('statshdr', 'diary').': <select onchange="this.form.submit()" name="statspreference">';
             echo '<option selected="true" value="'.$selection.'</option>';
             echo '</select>';
-///////////////////////////////////////////////////////////////////////////////
-            // 20230323 Added selector for prefered email delivery. Default is ON.
+
+            // 20230323 Extend form and added selector for prefered email delivery. Default is ON.
             // Need to check if user is an entry manager here so that students do not see the email pref.
             if ($entriesmanager) {
                 if ($emailpreference != $oldemailpreference) {
@@ -486,7 +439,6 @@ if ($timenow > $timestart) {
                 echo '</select>';
             }
             echo '</form>';
-///////////////////////////////////////////////////////////////////////////////
             echo $output->box_end();
         }
     } else {
@@ -531,32 +483,16 @@ if ($timenow > $timestart) {
                 } else {
                     $editthisentry = ' ';
                 }
-/*
-                // 20230129 Developing hide/show statistics tool icons.
-                $url2 = new moodle_url('/mod/diary/view.php', $options);
-                //echo $statspreference;
-                if ($statspreference == 1 || $statspreference == 'ON') {
-                    $statstool = html_writer::link($url2, $output->pix_icon('i/show', get_string('statshide', 'diary')),
-                        array('class' => 'toolbutton'));
-                        set_user_preference('diary_stats', 'OFF');
 
-                } else {
-                    $statstool = html_writer::link($url2, $output->pix_icon('i/hide', get_string('statsshow', 'diary')),
-                        array('class' => 'toolbutton'));
-                        set_user_preference('diary_stats', 'ON');
-
-                }
-*/
                 // Add, Entry, then date time group heading for each entry on the page.
-                //echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry.'  '.$statstool);
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
 
                 // 20230314 If one exists, display the apllicable prompt.
                 if ($entry->promptid > 0) {
                     $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
                     $prompt = $DB->get_record('diary_prompts', array('id' => $entry->promptid, 'diaryid' => $diary->id));
-                    //echo '<div class="entry" style="background: '.$color4.';">';
-                    echo '<div class="entry" style="background: '.$errorcmid.';">';
+                    // 20230321 Use contrasting color for the prompt used background.
+                    echo '<div class="entry" style="background: '.$promptbgc.';">';
 
                     echo '<strong>'.get_string('prompttext', 'diary').'</strong>: '.$prompt->text.'</div>';
                 }
@@ -572,6 +508,7 @@ if ($timenow > $timestart) {
                 if ($timenow < $timefinish) {
                     // 20211217 If there is a user entry, format it and show it.
                     if ($entry) {
+                        // Need to check stats setting for this diary activity.
                         // if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
                         if ($entry && ($statspreference == 1)) {
                             $temp = $entry;
@@ -581,7 +518,7 @@ if ($timenow > $timestart) {
                             // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
 
                             echo $statsdata;
-                        
+
                             // 20211212 Added separate function to get the glossary common error data here.
                             $comerrdata = diarystats::get_common_error_stats($temp, $diary);
                             echo $comerrdata;

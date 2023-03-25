@@ -61,7 +61,7 @@ class mod_diary_entry_form extends moodleform {
         $timeclose = $this->_customdata['editoroptions']['timeclose'];
         $editall = $this->_customdata['editoroptions']['editall'];
         $editdates = $this->_customdata['editoroptions']['editdates'];
-        $currententry      = $this->_customdata['current'];
+        $currententry = $this->_customdata['current'];
 
         // 20210613 Do not just hide the date selector, skip it unless editdates is enabled. Issue #9.
         if ($editdates) {
@@ -147,7 +147,6 @@ class mod_diary_entry_form extends moodleform {
                 ]
             );
         }
-
 
         $mform->addElement(
             'hidden',

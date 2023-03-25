@@ -728,7 +728,7 @@ class prompts {
                     $start = '<td>'.userdate($data->datestart).'</td>';
                     $stop = '<td>'.userdate($data->datestop).'</td>';
 
-                    $prompttext = '<td>'.
+                    $prompttext = '<b><td>'.
                                   get_string('writingpromptlable', 'diary',
                                   ['counter' => $counter,
                                   'entryid' => $data->entryid,
@@ -754,7 +754,7 @@ class prompts {
                                   .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td>';
                     $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
                     if ($status) {
-                        $diary->intro .= $status.'<hr>';
+                        $diary->intro .= $status.'</b><hr>';
                     }
                 }
             }

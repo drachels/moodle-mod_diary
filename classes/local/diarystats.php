@@ -240,19 +240,19 @@ class diarystats {
 
         if (self::$aliases === null) {
             // Human readable aliases for regexp strings.
-            self::$aliases = array(' OR '  => '|',
-                                   ' OR'   => '|',
-                                   'OR '   => '|',
-                                   ' , '   => '|',
-                                   ' ,'    => '|',
-                                   ', '    => '|',
-                                   ','     => '|',
+            self::$aliases = array(' OR ' => '|',
+                                   ' OR' => '|',
+                                   'OR ' => '|',
+                                   ' , ' => '|',
+                                   ' ,' => '|',
+                                   ', ' => '|',
+                                   ',' => '|',
                                    ' AND ' => '\\b.*\\b',
-                                   ' AND'  => '\\b.*\\b',
-                                   'AND '  => '\\b.*\\b',
+                                   ' AND' => '\\b.*\\b',
+                                   'AND ' => '\\b.*\\b',
                                    ' ANY ' => '\\b.*\\b',
-                                   ' ANY'  => '\\b.*\\b',
-                                   'ANY '  => '\\b.*\\b');
+                                   ' ANY' => '\\b.*\\b',
+                                   'ANY ' => '\\b.*\\b');
 
             // Allowable regexp strings and their internal aliases.
             self::$metachars = array('^' => 'CARET',
@@ -998,21 +998,9 @@ class diarystats {
      */
     public static function get_stats_chars($entry) {
         // 20221012 Original strlen() returns bytes while iconv_strlen and mb_strlen returns character count.
-
-        // This works but breaks every place that uses charactercount in math for statistics.
-        // Will need to detect and separate the two counts so the math works.
-
-        //print_object(substr_count($entry, ' '));
         $temp1 = mb_strlen($entry);
         $temp2 = $temp1 - substr_count($entry, ' ');
-        //$text = $temp1.' | '.$temp2;
-        //$text = $temp1.' - '.substr_count($entry, ' ').' = '.$temp2;
-        //print_object($text);
-
         return $temp2;
-//        return $text;
-
-//        return mb_strlen($entry);
     }
 
     /**

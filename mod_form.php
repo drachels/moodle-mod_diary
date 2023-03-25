@@ -39,9 +39,9 @@ class mod_diary_mod_form extends moodleform_mod {
     /** @var int */
     const NUM_ITEMS_DEFAULT = 0;
     /** @var int */
-    const NUM_ITEMS_MIN     = 0;
+    const NUM_ITEMS_MIN = 0;
     /** @var int */
-    const NUM_ITEMS_ADD     = 1;
+    const NUM_ITEMS_ADD = 1;
 
     /** Number of rows in TEXTAREA elements. */
     /** @var int */
@@ -87,9 +87,9 @@ class mod_diary_mod_form extends moodleform_mod {
         $PAGE->requires->js_call_amd("$plugin/form", 'init', $params);
 
         // 20210706 Cache options for form elements to input text.
-        $shorttextoptions  = array('size' => 3,  'style' => 'width: auto');
+        $shorttextoptions = array('size' => 3,  'style' => 'width: auto');
         $mediumtextoptions = array('size' => 5,  'style' => 'width: auto');
-        $longtextoptions   = array('size' => 10, 'style' => 'width: auto');
+        $longtextoptions = array('size' => 10, 'style' => 'width: auto');
 
         // 20210706 Cache options for show/hide elements.
         // 20220115 NOT in use yet.
@@ -496,9 +496,9 @@ class mod_diary_prompt_form extends moodleform {
         $plugin = 'mod_diary';
         $ratingoptions = diarystats::get_rating_options($plugin);
         // 20220920 Cache options for form elements to input text.
-        $shorttextoptions  = array('size' => 3,  'style' => 'width: auto');
-        $mediumtextoptions = array('size' => 5,  'style' => 'width: auto');
-        $longtextoptions   = array('size' => 10, 'style' => 'width: auto');
+        $shorttextoptions = array('size' => 3, 'style' => 'width: auto');
+        $mediumtextoptions = array('size' => 5, 'style' => 'width: auto');
+        $longtextoptions = array('size' => 10, 'style' => 'width: auto');
 
         $mform->addElement('date_time_selector', 'datestart', get_string('datestart', 'mod_diary', $promptid));
         $mform->setType('datestart', PARAM_INT);
@@ -632,9 +632,9 @@ class mod_diary_prompt_edit_form extends moodleform {
         $plugin = 'mod_diary';
         $ratingoptions = diarystats::get_rating_options($plugin);
         // 20220923 Cache options for form elements to input text.
-        $shorttextoptions  = array('size' => 3,  'style' => 'width: auto');
-        $mediumtextoptions = array('size' => 5,  'style' => 'width: auto');
-        $longtextoptions   = array('size' => 10, 'style' => 'width: auto');
+        $shorttextoptions = array('size' => 3, 'style' => 'width: auto');
+        $mediumtextoptions = array('size' => 5, 'style' => 'width: auto');
+        $longtextoptions = array('size' => 10, 'style' => 'width: auto');
 
         $name = 'datestart';
         $label = get_string($name, $plugin);

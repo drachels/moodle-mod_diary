@@ -29,7 +29,7 @@ require_once($CFG->dirroot.'/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
-$user = required_param('user', PARAM_INT); // Course module.
+$user = required_param('user', PARAM_INT); // User ID.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));

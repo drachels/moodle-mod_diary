@@ -153,9 +153,9 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         if ($this->get_setting_value('userinfo')) {
             $entry->set_source_table('diary_entries', array('diary' => backup::VAR_PARENTID));
 
-            $rating->set_source_table('rating', array('contextid'  => backup::VAR_CONTEXTID,
-                                                      'itemid'     => backup::VAR_PARENTID,
-                                                      'component'  => backup_helper::is_sqlparam('mod_diary'),
+            $rating->set_source_table('rating', array('contextid' => backup::VAR_CONTEXTID,
+                                                      'itemid' => backup::VAR_PARENTID,
+                                                      'component' => backup_helper::is_sqlparam('mod_diary'),
                                                       'ratingarea' => backup_helper::is_sqlparam('entry')));
 
             $rating->set_source_alias('rating', 'value');

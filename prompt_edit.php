@@ -34,7 +34,7 @@ global $DB;
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
-$action  = optional_param('action', '', PARAM_ACTION);  // Action(promt).
+$action = optional_param('action', '', PARAM_ACTION); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
@@ -84,8 +84,8 @@ if (!empty($action)) {
                 $debug['CP A Edit and checking item: $action is: '] = $action;
                 $debug['CP B Edit and checking item: $promptid is: '] = $promptid;
 
-                $promptid = required_param('promptid',  PARAM_INT);  // Prompt ID to edit.
-                $action  = optional_param('action', 'edit', PARAM_ACTION);  // Action(promt).
+                $promptid = required_param('promptid',  PARAM_INT); // Prompt ID to edit.
+                $action = optional_param('action', 'edit', PARAM_ACTION); // Action(promt).
 
                 $data = $DB->get_record('diary_prompts', array('id' => $promptid));
                 $debug['CP C Edit and checking item: $data is: '] = $data;
@@ -116,7 +116,7 @@ if (!empty($action)) {
                 $debug['CP A Create and checking item: $action is: '] = $action;
                 $debug['CP B Create and checking item: $promptid is: '] = $promptid;
 
-                $action  = optional_param('action', 'create', PARAM_ACTION);  // Action(promt).
+                $action = optional_param('action', 'create', PARAM_ACTION); // Action(promt).
 
                 $temp = $DB->insert_record('diary_prompts', array('diaryid' => $diary->id));
 

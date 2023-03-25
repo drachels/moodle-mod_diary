@@ -66,7 +66,7 @@ class results {
             // Diary start calendar events.
             $event = new stdClass();
             $event->eventtype = DIARY_EVENT_TYPE_OPEN;
-            // The MOOTYPER_EVENT_TYPE_OPEN event should only be an action event if no close time is specified.
+            // The DIARY_EVENT_TYPE_OPEN event should only be an action event if no close time is specified.
             $event->type = empty($diary->timeclose) ? CALENDAR_EVENT_TYPE_ACTION : CALENDAR_EVENT_TYPE_STANDARD;
             if ($event->id = $DB->get_field('event', 'id', array(
                 'modulename' => 'diary',
@@ -466,7 +466,6 @@ class results {
 
                     $csv->add_data($activityinfo);
                     $csv->add_data($entryfields);
-                    // ...$csv->add_data($fields2);...
                     $firstrowflag = 0;
                 }
 
@@ -569,8 +568,6 @@ class results {
             // 20211212 Added list function to get and print the autorating data here.
             echo $autoratingdata;
 
-// Remove this later!
-echo 'test for tag location for entry id '.$entry->id;
             // 20230302 Added tags to each entry.
             echo $OUTPUT->tag_list(
                 core_tag_tag::get_item_tags(
