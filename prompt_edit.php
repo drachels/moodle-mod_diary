@@ -81,22 +81,11 @@ if (!empty($action)) {
         break;
         case 'edit':
             if (has_capability('mod/diary:manageentries', $context)) {
-                $debug['CP A Edit and checking item: $action is: '] = $action;
-                $debug['CP B Edit and checking item: $promptid is: '] = $promptid;
-
                 $promptid = required_param('promptid',  PARAM_INT); // Prompt ID to edit.
                 $action = optional_param('action', 'edit', PARAM_ACTION); // Action(promt).
-
                 $data = $DB->get_record('diary_prompts', array('id' => $promptid));
-                $debug['CP C Edit and checking item: $data is: '] = $data;
-
                 $prompts = $DB->get_records('diary_prompts', array('id' => $promptid), $sort = 'id ASC');
-                foreach ($prompts as $prompt => $temp) {
-                    $debug['CP D Edit in foreach loop and checking item: $prompt is: '] = $prompt;
-                    $debug['CP E Edit in foreach loop and checking item: $temp is: '] = $temp;
 
-                    break;
-                }
                 // Trigger prompt edited event.
                 $event = \mod_diary\event\prompt_edited::create(array(
                     'objectid' => $cm->id,
@@ -113,17 +102,10 @@ if (!empty($action)) {
         break;
         case 'create':
             if (has_capability('mod/diary:manageentries', $context)) {
-                $debug['CP A Create and checking item: $action is: '] = $action;
-                $debug['CP B Create and checking item: $promptid is: '] = $promptid;
-
                 $action = optional_param('action', 'create', PARAM_ACTION); // Action(promt).
-
                 $temp = $DB->insert_record('diary_prompts', array('diaryid' => $diary->id));
-
-                $debug['CP C Create and new record is item: $temp is: '] = $temp;
                 // Pretty sure I do not need the next line of code. Need to verify.
                 $data = $DB->get_record('diary_prompts', array('id' => $temp));
-
                 $prompts = $DB->get_records('diary_prompts', array('diaryid' => $diary->id), $sort = 'id ASC');
                 foreach ($prompts as $prompt => $temp) {
                     break;
@@ -328,7 +310,6 @@ if ($form->is_cancelled()) {
     $newentry->minmaxparagraphpercent = $fromform->minmaxparagraphpercent;
 
     if ($fromform->entryid) {
-        $debug['CP5 existing prompt save checking item: $fromform->entryid '] = $fromform->entryid;
         $newentry->id = $fromform->entryid;
         if (!$DB->update_record('diary_prompts', $newentry)) {
             throw new \moodle_exception(get_string('couldnotupdateprompt', 'diary'));

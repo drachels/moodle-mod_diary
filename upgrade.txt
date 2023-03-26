@@ -14,7 +14,7 @@ This files describes API changes and other work in the diary code.
 
 
 
-=== 3.7.2=== 20230324 STABLE
+=== 3.7.2=== 20230326 STABLE
 20220220 Diary_823v - Missing completion information on the view.php page. Got
     it working on course page - BUT - might need another ticket for further
     development to also require X number of Posts.

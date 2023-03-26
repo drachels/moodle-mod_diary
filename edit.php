@@ -167,7 +167,6 @@ $form = new mod_diary_entry_form(null, array(
 
 // Set existing data loaded from the database for this entry.
 $form->set_data($data);
-        $debug['CP3 checking item: $form->set_data($data) '] = $form->set_data($data);
 
 if ($form->is_cancelled()) {
     redirect($CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id);
@@ -183,7 +182,6 @@ if ($form->is_cancelled()) {
     $newentry->timemodified = $timenow;
     $newentry->text = $fromform->text_editor['text'];
     $newentry->format = $fromform->text_editor['format'];
-        $debug['CP4 checking item: $newentry '] = $newentry;
 
     if (! $diary->editdates) {
         // If editdates is NOT enabled do attempted cheat testing here.
@@ -215,8 +213,6 @@ if ($form->is_cancelled()) {
             $fromform->timecreated = $entry->timecreated;
             $newentry->entrycomment .= get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
             $DB->update_record("diary_entries", $newentry);
-
-            $debug['CP5 checking item: $newentry '] = $newentry;
 
             // Trigger module entry updated event.
             $event = \mod_diary\event\invalid_entry_attempt::create(array(
@@ -258,7 +254,6 @@ if ($form->is_cancelled()) {
     $newentry->tags = $fromform->tags;
 
     $DB->update_record('diary_entries', $newentry);
-        $debug['CP6 checking item: $newentry '] = $newentry;
 
     // Do some other processing here,
     // If this is a new page (entry) you need to insert it in the DB and obtain id.

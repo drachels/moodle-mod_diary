@@ -68,8 +68,8 @@ foreach ($diarys as $temp) {
         // 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
         $color3 = $diary->entrybgc;
         $color4 = $diary->entrytextbgc;
-        //$errorcmid = $diary->errorcmid; // Should not use this as it is for common errors!
         // 20230324 Added a background color for prompts used with any individual diary entries.
+        // Will need to convert this to a setting.
         $promptbgc = 'yellow';
     }
 }
@@ -356,9 +356,9 @@ if ($timenow > $timestart) {
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
 
-            //if ($perpage < 2) {
-            //    $perpage = 2;
-            //}
+            if ($perpage < 2) {
+                $perpage = 2;
+            }
             if ($perpage != $oldperpage) {
                 set_user_preference('diary_perpage_'.$diary->id, $perpage);
             }
@@ -508,17 +508,14 @@ if ($timenow > $timestart) {
                 if ($timenow < $timefinish) {
                     // 20211217 If there is a user entry, format it and show it.
                     if ($entry) {
-                        // Need to check stats setting for this diary activity.
-                        // if ($entry && ($statspreference == 1 || $statspreference == 'ON')) {
+                        // 20230323 Added a check for stats preference.
                         if ($entry && ($statspreference == 1)) {
                             $temp = $entry;
                             // 20210704 Go calculate stats and print stats table.
                             // 20210703 Moved to here from up above so the table gets rendered in the right spot.
                             $statsdata = diarystats::get_diary_stats($temp, $diary);
                             // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
-
                             echo $statsdata;
-
                             // 20211212 Added separate function to get the glossary common error data here.
                             $comerrdata = diarystats::get_common_error_stats($temp, $diary);
                             echo $comerrdata;
