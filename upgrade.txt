@@ -61,6 +61,9 @@ This files describes API changes and other work in the diary code.
 20230327 Diary_1027v - Need to fix emailnow for when the teacher provides feedback. Changed
     the $cuttofftime and added $cuttofftime2 in cron_task.php, plus, then added a check
     of each entries timemarked vs applicable cuttofftime and emailpreference. 
+20230402 Diary_1028v - Text at about line 336 in edit.php needs t be changed to a string. 
+     Added the needed string to the diary/lang/en/diary.php, file.
+
 
 === 3.7.0/1 === 20221123
 20210815 Diary_741v - Need to verify communications when rating or when student
