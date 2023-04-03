@@ -24,6 +24,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['accessdenied'] = 'Access denied';
+$string['additionallinks'] = 'Additional links for this activity and course:';
 $string['addtofeedback'] = 'Add to feedback';
 $string['alias'] = 'Keyword';
 $string['aliases_help'] = 'Each diary entry can have an associated list of keywords (or aliases).
@@ -96,7 +97,7 @@ $string['diarymail'] = 'Greetings {$a->user},
 You can see it appended to your diary entry:
 
     {$a->url}';
-$string['diarymailhtml'] = 'Greetings {$a->user},
+$string['diarymailhtml'] = 'Greetings {$a->user},<br>
 {$a->teacher} has posted some feedback on your
 diary entry for \'<i>{$a->diary}</i>\'.<br /><br />
 You can see it appended to your <a href="{$a->url}">diary entry</a>.';

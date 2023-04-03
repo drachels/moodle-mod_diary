@@ -14,7 +14,7 @@ This files describes API changes and other work in the diary code.
 
 
 
-=== 3.7.2=== 20230326 STABLE
+=== 3.7.2=== 20230402 STABLE
 20220220 Diary_823v - Missing completion information on the view.php page. Got
     it working on course page - BUT - might need another ticket for further
     development to also require X number of Posts.
@@ -47,6 +47,8 @@ This files describes API changes and other work in the diary code.
     of an icon on the toolbar, I have created a selector. It can only be seen by entrymanagers.
 20230131 Diary_1006v - In the results.php file, there are 12 places where $esql should
     just be $sql. Changed all 12 from $esql to $sql.
+20230204 Diary_1008v - Need email settings added to the mod_form.php page. Added settings,
+    added fields, updated install.xml, updated backup. bumpted version. 
 20230227 Diary_1014v - Need to see about adding a Tag field when editing/creating a
     new diary entry. Added code as needed using example from, Tag API.
 20230313 Diary_1020v - Need to add the prompt used for an entry to the view.php page.
@@ -54,7 +56,11 @@ This files describes API changes and other work in the diary code.
 20230325 Diary_1025v - The tag index page shold only show a student their personal Diary
     entries, but all entries to teachers, etc. Added needed code to function mod_diary_get
     _tagged_entries in locllib.php. See ticket for further details.
-
+20230326 Diary_1026v - Emails being sent twice and need to improve the email messages located
+    in edit.php. Fixed the emailpreference code and added a preference menu on view.php page.
+20230327 Diary_1027v - Need to fix emailnow for when the teacher provides feedback. Changed
+    the $cuttofftime and added $cuttofftime2 in cron_task.php, plus, then added a check
+    of each entries timemarked vs applicable cuttofftime and emailpreference. 
 
 === 3.7.0/1 === 20221123
 20210815 Diary_741v - Need to verify communications when rating or when student

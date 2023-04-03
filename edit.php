@@ -288,53 +288,59 @@ if ($form->is_cancelled()) {
 
     // Add confirmation of record being saved.
     echo $OUTPUT->notification(get_string('entrysuccess', 'diary'), 'notifysuccess');
-
     // Start new code to send teachers note when diary is done.
     $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
     $contextcourse = context_course::instance($course->id);
 
     $teachers = get_role_users($role->id, $contextcourse);
     $admin = get_admin();
+    // BEFORE we do any email creation, we need to see if we even need to do it!
+    // The foreeach $teachers needs to be before the email wording creation.
+    // This move will allow me to use the diarymail and diarymailhtml greetings strings.
 
-    // Code for Email.
-    $diaryinfo = new stdClass();
-    $diaryinfo->diary = format_string($diary->name, true);
-    $diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id&user=$USER->id&action=currententry";
-    $modnamepl = get_string( 'modulenameplural', 'diary' );
-    $msubject = get_string( 'mailsubject', 'diary' );
-
-    $postsubject = fullname($USER)." has posted a diary entry in '$course->shortname'";
-    $posttext = "Hi,\n Testing \n";
-    $posttext .= "$course->shortname -> $modnamepl -> ".format_string($diary->name, true)."\n";
-    $posttext .= "---------------------------------------------------------------------\n";
-    $posttext .= fullname($USER).' '.get_string("diarymailuser", "diary", $diaryinfo)."\n";
-    $posttext .= "---------------------------------------------------------------------\n";
-
-    // If user wants HTML format, use this code.
-    if ($USER->mailformat == 1) {  // HTML.
-        $posthtml = "<p><font face=\"sans-serif\">"."Hi,<br>".
-            "<p>".fullname($USER).'&nbsp;'.get_string("diarymailhtmluser", "diary", $diaryinfo)."</p>".
-            "<p>The ".$SITE->shortname." Team</p>".
-            "<br /><hr /><font face=\"sans-serif\">".
-            "<p>Additional links for this activity and course:</p>".
-            "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
-            "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
-            "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$cm->id\">".format_string($diary->name, true)."</a></font></p>".
-            "</font><hr />";
-    } else {
-        $posthtml = "";
-    }
-
-    // Send now an email for each teacher in the course.
+    // Now send an email for each teacher in the course.
     // First check to see if the actual data has changed by comparing before and after text fields.
     // I think I might need to do some more debugging on the $data->text as I am receiving an email
     // even when the user opens for edit, then saves without making any changes.
     if ($data->text !== $newentry->text) {
         // If data has changed, then send the email(s).
-        if (get_config('mod_diary', 'teacheremail')) {
+        // 20230402 Since I added the two new fields to mdl_diary table, the following, if, check needs to be changed. //
+        // if (get_config('mod_diary', 'teacheremail')) {
+        if )(get_config('mod_diary', 'teacheremail')) && ($diary->teacheremail || $diary->studentemail)) {
             foreach ($teachers as $teacher) {
-                if (get_user_preferences('diary_email', null, $teacher->id) == 'ON') {
+                if (get_user_preferences('diary_emailpreference_'.$diary->id, null, $teacher->id) == 1) {
+                    // Code for plain text Email.
+                    $diaryinfo = new stdClass();
+                    $diaryinfo->diary = format_string($diary->name, true);
+                    $diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id&user=$USER->id&action=currententry";
+                    $modnamepl = get_string( 'modulenameplural', 'diary' );
+                    $msubject = get_string( 'mailsubject', 'diary' );
+                    $postsubject = fullname($USER)." has posted a diary entry in '$course->shortname'";
+                    $posttext = "Hi, \n";
+                    $posttext .= "$course->shortname -> $modnamepl -> ".format_string($diary->name, true)."\n";
+                    $posttext .= "---------------------------------------------------------------------\n";
+                    $posttext .= fullname($USER).' '.get_string("diarymailuser", "diary", $diaryinfo)."\n";
+                    $posttext .= "---------------------------------------------------------------------\n";
+
+                    // If user wants HTML format, use this code.
+                    if ($USER->mailformat == 1) {  // HTML.
+                        $posthtml = "<p><font face=\"sans-serif\">".
+                            "Hi $teacher->firstname $teacher->lastname,<br>".
+
+                            "<p>".fullname($USER).'&nbsp;'.get_string("diarymailhtmluser", "diary", $diaryinfo)."</p>".
+                            "<p>The ".$SITE->shortname." Team</p>".
+                            "<br /><hr /><font face=\"sans-serif\">".
+                            "<p>".get_string("additionallinks", "diary")."</p>".
+                            "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
+                            "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
+                            "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$cm->id\">".format_string($diary->name, true).
+                            "</a></font></p>".
+                            "</font><hr />";
+                    } else {
+                        $posthtml = "";
+                    }
                     $testemail = email_to_user($teacher, $admin, $postsubject, $posttext, $posthtml);
+
                 }
             }
         }

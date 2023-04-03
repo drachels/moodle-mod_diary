@@ -482,5 +482,30 @@ function xmldb_diary_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2022111400, 'diary');
     }
 
+    // New fields for mdl_diary table for version 3.7.2.
+    if ($oldversion < 2023040200) {
+
+        // Define field teacheremail to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('teacheremail', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enablestats');
+
+        // Conditionally launch add field teacheremail.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field studentemail to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('studentemail', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'teacheremail');
+
+        // Conditionally launch add field studentemail.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2023040200, 'diary');
+    }
+
     return true;
 }

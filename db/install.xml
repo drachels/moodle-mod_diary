@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/diary/db" VERSION="20221021" COMMENT="XMLDB file for Moodle mod/diary"
+<XMLDB PATH="mod/diary/db" VERSION="20230402" COMMENT="XMLDB file for Moodle mod/diary"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -25,6 +25,8 @@
         <FIELD NAME="entrybgc" TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="#93FC84" SEQUENCE="false" COMMENT="Overall background color for an entry."/>
         <FIELD NAME="entrytextbgc" TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="#EEFC84" SEQUENCE="false" COMMENT="Background color for the text of a Diary entry."/>
         <FIELD NAME="enablestats" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Show/hide statistics."/>
+        <FIELD NAME="teacheremail" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Enable email now without waiting for max edit time."/>
+        <FIELD NAME="studentemail" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Enable email now without waiting for max edit time."/>
         <FIELD NAME="mincharacterlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum character limit."/>
         <FIELD NAME="maxcharacterlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum character limit."/>
         <FIELD NAME="minmaxcharpercent" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Penalty percentage for min, max of characters used."/>

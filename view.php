@@ -400,7 +400,7 @@ if ($timenow > $timestart) {
 
             // 20230322 Added selector for prefered stats view. Default is ON.
             if ($statspreference != $oldstatspreference) {
-                set_user_preference('diary_statspreference_'.$diary->id, 2);
+                set_user_preference('diary_statspreference_'.$diary->id, $statspreference);
             }
 
             $listoptions = array(
@@ -419,16 +419,16 @@ if ($timenow > $timestart) {
 
             // 20230323 Extend form and added selector for prefered email delivery. Default is ON.
             // Need to check if user is an entry manager here so that students do not see the email pref.
-            if ($entriesmanager) {
+            if (($entriesmanager) && (($diary->teacheremail == 1) || ($diary->studentemail == 1))) {
                 if ($emailpreference != $oldemailpreference) {
-                    set_user_preference('diary_emailpreference_'.$diary->id, 2);
+                    set_user_preference('diary_emailpreference_'.$diary->id, $emailpreference);
                 }
 
                 $listoptions = array(
                     1 => get_string('emailnow', 'diary'),
                     2 => get_string('emaillater', 'diary')
                 );
-                // This creates the dropdown list for how many entries to show on the page.
+                // This creates the dropdown list for email preference on the page above the first entry.
                 $selection = html_writer::select($listoptions, 'emailpreference', $emailpreference, false, array(
                     'id' => 'pref_emails',
                     'class' => 'custom-select'
