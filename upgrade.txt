@@ -3,7 +3,7 @@ This files describes API changes and other work in the diary code.
 20201006 Diary_627 - Included files are not restored correctly.
 20210515 Diary_719 - Media files are NOT there after a restore.
 20210815 Diary_736 - Need a way to slectively turn off autosave. It is not
-    needed when starting a totally new entry.
+    needed when starting a totally new entry. Note: Same for tags.
 20210815 Diary_737 - Config settings are not all named the same. Added mod_ to
     the four items that were missing it. As of 20220828 still have three.
 20210819 Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive,
@@ -12,6 +12,15 @@ This files describes API changes and other work in the diary code.
 20211130 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
 
+
+=== 3.7.3=== pending
+20200601 Diary_520 - Need to remove un-needed functions from lib.php.20211229 Removed
+    function diary_user_complete($course, $user, $mod, $diary) { as it has been
+    superseded by public static function diary_print_user_entry($context, $course,
+    $diary, $user, $entry, $teachers, $grades) in the results.php file. 20230409
+    Removed, function diary_log_info($log) {, from lib.php.
+20230409 Diary_1029 - In Moodle 4.2 I am getting multiple Invalid event function
+    defined messages. Went through all diary files and removed deprecated log code. 
 
 
 === 3.7.2=== 20230402 STABLE
@@ -47,6 +56,8 @@ This files describes API changes and other work in the diary code.
     of an icon on the toolbar, I have created a selector. It can only be seen by entrymanagers.
 20230131 Diary_1006v - In the results.php file, there are 12 places where $esql should
     just be $sql. Changed all 12 from $esql to $sql.
+20230204 Diary1007v - Need to change email default settings. In the settings file,
+    I changed the default from 1, to 0, in lines 256 and 260.
 20230204 Diary_1008v - Need email settings added to the mod_form.php page. Added settings,
     added fields, updated install.xml, updated backup. bumpted version. 
 20230227 Diary_1014v - Need to see about adding a Tag field when editing/creating a
@@ -61,7 +72,7 @@ This files describes API changes and other work in the diary code.
 20230327 Diary_1027v - Need to fix emailnow for when the teacher provides feedback. Changed
     the $cuttofftime and added $cuttofftime2 in cron_task.php, plus, then added a check
     of each entries timemarked vs applicable cuttofftime and emailpreference. 
-20230402 Diary_1028v - Text at about line 336 in edit.php needs t be changed to a string. 
+20230402 Diary_1028v - Text at about line 336 in edit.php needs to be changed to a string. 
      Added the needed string to the diary/lang/en/diary.php, file.
 
 

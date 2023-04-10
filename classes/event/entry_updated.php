@@ -73,23 +73,4 @@ class entry_updated extends \core\event\base {
             'id' => $this->contextinstanceid
         ));
     }
-
-    /**
-     * replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('edit.php', array(
-            'id' => $this->contextinstanceid
-        ));
-        return array(
-            $this->courseid,
-            'diary',
-            'edit',
-            $url->out(),
-            $this->objectid,
-            $this->contextinstanceid
-        );
-    }
 }

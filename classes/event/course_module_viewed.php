@@ -56,23 +56,4 @@ class course_module_viewed extends \core\event\course_module_viewed {
             'id' => $this->objectid
         ));
     }
-
-    /**
-     * Return the legacy event log data.
-     *
-     * @return array|null
-     */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('view.php', array(
-            'id' => $this->contextinstanceid
-        ));
-        return array(
-            $this->courseid,
-            'diary',
-            'view',
-            $url->out(),
-            $this->objectid,
-            $this->contextinstanceid
-        );
-    }
 }

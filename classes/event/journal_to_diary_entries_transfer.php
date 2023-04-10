@@ -74,23 +74,4 @@ class journal_to_diary_entries_transfer extends \core\event\base {
             'id' => $this->contextinstanceid
         ));
     }
-
-    /**
-     * Replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('journaltodiaryxfr.php', array(
-            'id' => $this->contextinstanceid
-        ));
-        return array(
-            $this->courseid,
-            'diary',
-            'transfer',
-            $url->out(),
-            $this->objectid,
-            $this->contextinstanceid
-        );
-    }
 }

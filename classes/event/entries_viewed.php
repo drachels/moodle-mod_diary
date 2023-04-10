@@ -73,23 +73,4 @@ class entries_viewed extends \core\event\base {
             'id' => $this->contextinstanceid
         ));
     }
-
-    /**
-     * replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('report.php', array(
-            'id' => $this->contextinstanceid
-        ));
-        return array(
-            $this->courseid,
-            'diary',
-            'report',
-            $url->out(),
-            $this->objectid,
-            $this->contextinstanceid
-        );
-    }
 }

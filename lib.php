@@ -832,25 +832,6 @@ function diary_get_users_done($diary, $currentgroup, $sortoption) {
 }
 
 /**
- * Return diary log info.
- *
- * @param string $log
- * @return object
- */
-function diary_log_info($log) {
-    global $DB;
-
-    $sql = "SELECT d.*, u.firstname, u.lastname
-              FROM {diary} d
-              JOIN {diary_entries} de ON de.diary = d.id
-              JOIN {user} u ON u.id = de.userid
-             WHERE de.id = ?";
-    return $DB->get_record_sql($sql, array(
-        $log->info
-    ));
-}
-
-/**
  * Returns the diary instance course_module id.
  *
  * @param integer $diaryid
