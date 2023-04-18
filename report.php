@@ -28,16 +28,16 @@ require_once("lib.php");
 require_once($CFG->dirroot . '/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
-$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
-    print_error('invalidcoursemodule');
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
 if (! $course = $DB->get_record("course", array(
     "id" => $cm->course
 ))) {
-    print_error('coursemisconf');
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 require_login($course, false, $cm);
@@ -49,9 +49,10 @@ require_capability('mod/diary:manageentries', $context);
 if (! $diary = $DB->get_record("diary", array(
     "id" => $cm->instance
 ))) {
-    print_error('invalidid', 'diary');
+    throw new moodle_exception(get_string('invalidid', 'diary'));
 }
-
+$diaryid = optional_param('diary', $diary->id, PARAM_INT);
+$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 // 20201016 Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, array(
     'context' => $context
@@ -156,21 +157,26 @@ if (! empty($action)) {
 
 // Header.
 $PAGE->set_url('/mod/diary/report.php', array(
-    'id' => $id
+    'id' => $id,
+    'diary' => $diaryid,
+    'action' => $action
 ));
-$PAGE->navbar->add((get_string("rate", "diary")) . ' ' . (get_string("entries", "diary")));
+
+$PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
-// 20201016 Added missing header label.
-echo $OUTPUT->heading('<h5>' . get_string('sortorder', "diary") . '</h5>');
-echo $OUTPUT->heading('<h5>' . get_string($stringlable, "diary") . '</h5>');
+// 20210511 Changed to using div and span.
+echo '<div class="sortandaggregate">';
+echo ('<span>'.get_string('sortorder', "diary"));
+echo (get_string($stringlable, "diary").'</span>');
 
-// 20200827 Added link to index.php page.
-echo '<div class="reportlink"><a href="index.php?id=' . $course->id . '">' . get_string('viewalldiaries', 'diary') . '</a></div>';
+// 20200827 Added link to index.php page. 20210501 Moved to here.
+echo '<span><a style="float: right;" href="index.php?id='.$course->id.'">'
+    .get_string('viewalldiaries', 'diary').'</a></span></div>';
 
 // Get a list of groups for this course.
 $currentgroup = groups_get_activity_group($cm, true);
@@ -194,94 +200,9 @@ if ($eee) {
     $entrybyuser = array();
     $entrybyentry = array();
 }
-
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
-    confirm_sesskey();
-    $feedback = array();
-    $data = (array) $data;
-    // My single data entry contains id, sesskey, and three other items, entry, feedback, and ???
-    // Peel out all the data from variable names.
-    foreach ($data as $key => $val) {
-        if (strpos($key, 'r') === 0 || strpos($key, 'c') === 0) {
-            $type = substr($key, 0, 1);
-            $num = substr($key, 1);
-            $feedback[$num][$type] = $val;
-        }
-    }
-
-    $timenow = time();
-    $count = 0;
-    foreach ($feedback as $num => $vals) {
-        $entry = $entrybyentry[$num];
-        // Only update entries where feedback has actually changed.
-        $ratingchanged = false;
-        if ($diary->assessed != RATING_AGGREGATE_NONE) {
-            $studentrating = clean_param($vals['r'], PARAM_INT);
-        } else {
-            $studentrating = '';
-        }
-        $studentcomment = clean_text($vals['c'], FORMAT_PLAIN);
-
-        if ($studentrating != $entry->rating && ! ($studentrating == '' && $entry->rating == "0")) {
-            $ratingchanged = true;
-        }
-
-        if ($ratingchanged || $studentcomment != $entry->entrycomment) {
-            $newentry = new StdClass();
-            $newentry->rating = $studentrating;
-            $newentry->entrycomment = $studentcomment;
-            $newentry->teacher = $USER->id;
-            $newentry->timemarked = $timenow;
-            $newentry->mailed = 0; // Make sure mail goes out (again, even).
-            $newentry->id = $num;
-            if (! $DB->update_record("diary_entries", $newentry)) {
-                notify("Failed to update the diary feedback for user $entry->userid");
-            } else {
-                $count ++;
-            }
-            $entrybyuser[$entry->userid]->rating = $studentrating;
-            $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
-            $entrybyuser[$entry->userid]->teacher = $USER->id;
-            $entrybyuser[$entry->userid]->timemarked = $timenow;
-
-            $records[$entry->id] = $entrybyuser[$entry->userid];
-
-            // Compare to database view.php line 465.
-            if ($diary->assessed != RATING_AGGREGATE_NONE) {
-                // 20200812 Added rating code and got it working.
-                $ratingoptions = new stdClass();
-                $ratingoptions->contextid = $context->id;
-                $ratingoptions->component = 'mod_diary';
-                $ratingoptions->ratingarea = 'entry';
-                $ratingoptions->itemid = $entry->id;
-                $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
-                $ratingoptions->scaleid = $diary->scale;
-                $ratingoptions->rating = $studentrating;
-                $ratingoptions->userid = $entry->userid;
-                $ratingoptions->timecreated = $entry->timecreated;
-                $ratingoptions->timemodified = $entry->timemodified;
-                $ratingoptions->returnurl = $CFG->wwwroot . '/mod/diary/report.php?id' . $id;
-
-                $ratingoptions->assesstimestart = $diary->assesstimestart;
-                $ratingoptions->assesstimefinish = $diary->assesstimefinish;
-                // 20200813 Check if there is already a rating, and if so, just update it.
-                if ($rec = results::check_rating_entry($ratingoptions)) {
-                    $ratingoptions->id = $rec->id;
-                    $DB->update_record('rating', $ratingoptions, false);
-                } else {
-                    $DB->insert_record('rating', $ratingoptions, false);
-                }
-            }
-
-            $diary = $DB->get_record("diary", array(
-                "id" => $entrybyuser[$entry->userid]->diary
-            ));
-            $diary->cmidnumber = $cm->idnumber;
-
-            diary_update_grades($diary, $entry->userid);
-        }
-    }
+    results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
 
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(array(
@@ -292,11 +213,7 @@ if ($data = data_submitted()) {
     $event->add_record_snapshot('course', $course);
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
-
-    // Report how many entries were updated when the, Save all my feedback button was pressed.
-    echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
 } else {
-
     // Trigger module viewed event.
     $event = \mod_diary\event\entries_viewed::create(array(
         'objectid' => $diary->id,
@@ -311,15 +228,13 @@ if ($data = data_submitted()) {
 if (! $users) {
     echo $OUTPUT->heading(get_string("nousersyet"));
 } else {
-    groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id");
-
-    // Create download, reload, current, oldest, lowest, highest, and most recent edit button for all entries in this diary.
+    $output = '';
+    // Create download, reload, current, oldest, lowest, highest, and most recent tool buttons for all entries.
     if (has_capability('mod/diary:manageentries', $context)) {
         // 20201003 Changed toolbar code to $output instead of html_writer::alist.
         $options = array();
         $options['id'] = $id;
         $options['diary'] = $diary->id;
-        $output = ' ';
 
         // Add download button.
         $options['action'] = 'download';
@@ -379,52 +294,52 @@ if (! $users) {
             'class' => 'toolbutton'
         ));
 
-        echo ' ' . get_string('toolbar', 'diary');
-        // Add the toolbar to the top of the report page.
-        echo $output;
+        // 20210511 Reorganized group and toolbar output. 20220102 Added action.
+        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/report.php?id=$cm->id&action=currententry")
+            .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
     }
 
     // Next line is different from Journal line 171.
     $grades = make_grades_menu($diary->scale);
 
     if (! $teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
-        print_error('noentriesmanagers', 'diary');
+        throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
     }
-    // Start the page area where feedback and grades are added and will need to be saved.
-    echo '<form action="report.php" method="post">';
-    // Create a variable with all the info to save all my feedback, so it can be used multiple places.
-    $saveallbutton = '';
-    $saveallbutton = "<p class=\"feedbacksave\">";
-    $saveallbutton .= "<input type=\"hidden\" name=\"id\" value=\"$cm->id\" />";
-    $saveallbutton .= "<input type=\"hidden\" name=\"sesskey\" value=\"" . sesskey() . "\" />";
-    $saveallbutton .= "<input type=\"submit\" class='btn btn-primary' value=\"" . get_string("saveallfeedback", "diary") . "\" />";
 
+    // 20211230 Changed action so that the sort order (action) is maintained.
+    // Start the page area where feedback and grades are added and will need to be saved.
+    echo '<form action="report.php?id='.$id.'&diaryid='.$diaryid.'&action='.$action.'" method="post">';
+    // Create a variable with all the info to save all my feedback, so it can be used multiple places.
+    // 20211027 changed to rounded buttons. 20211229 Removed escaped double quotes.
+    $saveallbutton = '';
+    $saveallbutton = '<p class="feedbacksave">';
+    $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
+    $saveallbutton .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
+                      .get_string("saveallfeedback", "diary").'" />';
     // 20200421 Added a return button.
     $url = $CFG->wwwroot . '/mod/diary/view.php?id=' . $id;
     $saveallbutton .= ' <a href="'.$url
-                     .'" class="btn btn-secondary" role="button">'
+                     .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
                      .get_string('returnto', 'diary', $diary->name)
                      .'</a>';
 
-    $saveallbutton .= "</p>";
+    $saveallbutton .= '</p>';
 
     // Add save button at the top of the list of users with entries.
     echo $saveallbutton;
 
-    $dcolor3 = get_config('mod_diary', 'entrybgc');
-    $dcolor4 = get_config('mod_diary', 'entrytextbgc');
+    // 20210705 Added new activity color setting. Only the overall background here. Entry text bgc is in results.
+    $dcolor3 = $diary->entrybgc;
 
     // Print a list of users who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup, $sortoption)) {
         foreach ($usersdone as $user) {
-            echo '<div align="center" style="font-size:1em;
-                font-weight:bold;background: ' . $dcolor3 . ';
-                border:2px solid black;
-                -webkit-border-radius:16px;
-                -moz-border-radius:16px;border-radius:16px;">';
+            echo '<div class="entry" style="background: '.$dcolor3.'">';
 
-            // Based on toolbutton and on list of users with at least one entry, print the entries onscreen.
-            echo results::diary_print_user_entry($course,
+            // Based on toolbutton and on list of users with at least one entry, print the entries on screen.
+            echo results::diary_print_user_entry($context,
+                                                 $course,
                                                  $diary,
                                                  $user,
                                                  $entrybyuser[$user->id],
@@ -442,12 +357,11 @@ if (! $users) {
 
     // List remaining users with no entries.
     foreach ($users as $user) {
-        echo '<div align="center" style="font-size:1em;
-            font-weight:bold;background: ' . $dcolor3 . ';
-            border:2px solid black;
-            -webkit-border-radius:16px;
-            -moz-border-radius:16px;border-radius:16px;">';
-        echo results::diary_print_user_entry($course,
+        // 20210511 Changed to class.
+        echo '<div class="entry" style="background: '.$dcolor3.'">';
+
+        echo results::diary_print_user_entry($context,
+                                             $course,
                                              $diary,
                                              $user,
                                              null,
@@ -455,8 +369,12 @@ if (! $users) {
                                              $grades);
         echo '</div><br>';
     }
-    // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
-    echo $saveallbutton;
+    // 20210609 Check for empty list to prevent two sets of buttons at bottom of the report page.
+    if ($users) {
+        // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
+        echo $saveallbutton;
+    }
+
     // End the page area where feedback and grades are added and will need to be saved.
     echo "</form>";
 }
