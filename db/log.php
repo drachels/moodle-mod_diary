@@ -21,7 +21,7 @@
  * @copyright 2020 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 $logs = array(
     array(
@@ -57,6 +57,12 @@ $logs = array(
     array(
         'module' => 'diary',
         'action' => 'update feedback',
+        'mtable' => 'diary',
+        'field' => 'name'
+    ),
+    array(
+        'module' => 'diary',
+        'action' => 'transfer',
         'mtable' => 'diary',
         'field' => 'name'
     )
