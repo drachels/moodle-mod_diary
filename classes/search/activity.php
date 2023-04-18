@@ -23,7 +23,7 @@
  */
 namespace mod_diary\search;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * Search area for mod_diary activities.
