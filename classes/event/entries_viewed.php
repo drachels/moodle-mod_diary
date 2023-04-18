@@ -23,7 +23,7 @@
  */
 namespace mod_diary\event;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * The mod_diary entries viewed event class.
@@ -72,24 +72,5 @@ class entries_viewed extends \core\event\base {
         return new \moodle_url('/mod/diary/report.php', array(
             'id' => $this->contextinstanceid
         ));
-    }
-
-    /**
-     * replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('report.php', array(
-            'id' => $this->contextinstanceid
-        ));
-        return array(
-            $this->courseid,
-            'diary',
-            'report',
-            $url->out(),
-            $this->objectid,
-            $this->contextinstanceid
-        );
     }
 }
