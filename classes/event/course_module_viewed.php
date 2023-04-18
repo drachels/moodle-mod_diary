@@ -23,7 +23,7 @@
  */
 namespace mod_diary\event;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * The mod_diary course module viewed event class.
@@ -47,7 +47,7 @@ class course_module_viewed extends \core\event\course_module_viewed {
     }
 
     /**
-     * Get URL related to the action
+     * Get URL related to the action.
      *
      * @return \moodle_url
      */
@@ -55,24 +55,5 @@ class course_module_viewed extends \core\event\course_module_viewed {
         return new \moodle_url('/mod/diary/view.php', array(
             'id' => $this->objectid
         ));
-    }
-
-    /**
-     * Return the legacy event log data.
-     *
-     * @return array|null
-     */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('view.php', array(
-            'id' => $this->contextinstanceid
-        ));
-        return array(
-            $this->courseid,
-            'diary',
-            'view',
-            $url->out(),
-            $this->objectid,
-            $this->contextinstanceid
-        );
     }
 }
