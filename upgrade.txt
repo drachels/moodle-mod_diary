@@ -13,6 +13,7 @@ This files describes API changes and other work in the diary code.
     set this ticket status to waiting.
 
 
+<<<<<<< HEAD
 === 3.7.3=== 20230409 STABLE
 20200601 Diary_520 - Need to remove un-needed functions from lib.php.20211229 Removed
     function diary_user_complete($course, $user, $mod, $diary) { as it has been
