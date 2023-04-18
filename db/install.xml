@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/diary/db" VERSION="20201119" COMMENT="XMLDB file for Moodle mod/diary"
+<XMLDB PATH="mod/diary/db" VERSION="20230402" COMMENT="XMLDB file for Moodle mod/diary"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -11,6 +11,7 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="alwaysshowdescription" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="days" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="7" SEQUENCE="false"/>
         <FIELD NAME="scale" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="assessed" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
@@ -21,6 +22,31 @@
         <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="editall" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Edit all comments setting."/>
         <FIELD NAME="editdates" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Edit any entry date."/>
+        <FIELD NAME="entrybgc" TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="#93FC84" SEQUENCE="false" COMMENT="Overall background color for an entry."/>
+        <FIELD NAME="entrytextbgc" TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="#EEFC84" SEQUENCE="false" COMMENT="Background color for the text of a Diary entry."/>
+        <FIELD NAME="enablestats" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Show/hide statistics."/>
+        <FIELD NAME="teacheremail" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Enable email now without waiting for max edit time."/>
+        <FIELD NAME="studentemail" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Enable email now without waiting for max edit time."/>
+        <FIELD NAME="mincharacterlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum character limit."/>
+        <FIELD NAME="maxcharacterlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum character limit."/>
+        <FIELD NAME="minmaxcharpercent" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Penalty percentage for min, max of characters used."/>
+        <FIELD NAME="minwordlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum word limit."/>
+        <FIELD NAME="maxwordlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum word limit."/>
+        <FIELD NAME="minmaxwordpercent" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="minsentencelimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum sentence limit."/>
+        <FIELD NAME="maxsentencelimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum sentence limit."/>
+        <FIELD NAME="minmaxsentpercent" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Penalty percentage for min, mx of sentences used."/>
+        <FIELD NAME="minparagraphlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum paragraph limit."/>
+        <FIELD NAME="maxparagraphlimit" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum paragraph limit."/>
+        <FIELD NAME="minmaxparapercent" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Penalty percentage for min, max of paragraphs used."/>
+        <FIELD NAME="enableautorating" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="showtextstats" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="textstatitems" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="errorcmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="errorpercent" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Penalty percentage for each common error."/>
+        <FIELD NAME="errorfullmatch" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="errorcasesensitive" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="errorignorebreaks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -33,6 +59,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="diary" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="promptid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Prompt ID used for autorating."/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -47,10 +74,37 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="diary" TYPE="foreign" FIELDS="diary" REFTABLE="diary" REFFIELDS="id"/>
+        <KEY NAME="promptid" TYPE="foreign" FIELDS="promptid" REFTABLE="diary_prompts" REFFIELDS="id" COMMENT="Prompt ID used for auto rating."/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="diary_prompts" COMMENT="Automatic, timed release, writing prompts.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="diaryid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="ID of the diary this prompt belongs to."/>
+        <FIELD NAME="datestart" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Date for this prompt to start."/>
+        <FIELD NAME="datestop" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Date for this prompt to end."/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Text of this prompt."/>
+        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="minchar" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum required character count."/>
+        <FIELD NAME="maxchar" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum allowed character count."/>
+        <FIELD NAME="minmaxcharpercent" TYPE="int" LENGTH="6" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Each character error percentage off."/>
+        <FIELD NAME="minword" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum required word count."/>
+        <FIELD NAME="maxword" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum allowed word count."/>
+        <FIELD NAME="minmaxwordpercent" TYPE="int" LENGTH="6" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Each word error percentage off."/>
+        <FIELD NAME="minsentence" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum required sentence count."/>
+        <FIELD NAME="maxsentence" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum allowed sentence count."/>
+        <FIELD NAME="minmaxsentencepercent" TYPE="int" LENGTH="6" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Each sentence error percentage off."/>
+        <FIELD NAME="minparagraph" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum required paragraph count."/>
+        <FIELD NAME="maxparagraph" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum allowed paragraph count."/>
+        <FIELD NAME="minmaxparagraphpercent" TYPE="int" LENGTH="6" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Each paragraph error percentage off."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="diaryid" TYPE="foreign" FIELDS="diaryid" REFTABLE="diary" REFFIELDS="id"/>
+      </KEYS>
     </TABLE>
   </TABLES>
 </XMLDB>
