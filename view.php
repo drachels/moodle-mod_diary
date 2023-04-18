@@ -21,25 +21,28 @@
  * @copyright 2019 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use mod_diary\local\diarystats;
+use mod_diary\local\prompts;
 use mod_diary\local\results;
+// @codingStandardsIgnoreLine
+// use core_text;
 
-require_once("../../config.php");
-require_once("lib.php");
-require_once($CFG->dirroot.'/lib/gradelib.php');
+// 20210605 Changed to this format.
+require_once(__DIR__ .'/../../config.php');
+require_once(__DIR__ .'/lib.php');
+require_once(__DIR__ .'/../../lib/gradelib.php');
 
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
-$course = $DB->get_record('course', array(
-    'id' => $cm->course
-), '*', MUST_EXIST); // Complete details about this course.
+$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST); // Complete details about this course.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
-if (! $cm) {
-    print_error('invalidcoursemodule');
+if (!$cm) {
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
-if (! $course) {
-    print_error('coursemisconf');
+if (!$course) {
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 $context = context_module::instance($cm->id);
@@ -50,20 +53,34 @@ require_login($course, true, $cm);
 $entriesmanager = has_capability('mod/diary:manageentries', $context);
 $canadd = has_capability('mod/diary:addentries', $context);
 
-if (! $entriesmanager && ! $canadd) {
-    print_error('accessdenied', 'diary');
+if (!$entriesmanager && !$canadd) {
+    throw new moodle_exception(get_string('accessdenied', 'diary'));
 }
 
-if (! $diary = $DB->get_record("diary", array(
-    "id" => $cm->instance
-))) {
-    print_error('invalidcoursemodule');
+if (!$diarys = get_all_instances_in_course('diary', $course)) {
+    notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
+    die();
 }
 
-if (! $cw = $DB->get_record("course_sections", array(
+foreach ($diarys as $temp) {
+    if ($temp->id === $cm->instance) {
+        $diary = $temp;
+        // 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
+        $color3 = $diary->entrybgc;
+        $color4 = $diary->entrytextbgc;
+        // 20230324 Added a background color for prompts used with any individual diary entries.
+        // Will need to convert this to a setting.
+        $promptbgc = 'yellow';
+    }
+}
+
+// Need to call a prompt function that returns the current promptid, if there is one that is current.
+$promptid = prompts::get_current_promptid($diary);
+
+if (!$cw = $DB->get_record("course_sections", array(
     "id" => $cm->section
 ))) {
-    print_error('invalidcoursemodule');
+    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
 // Get the name for this diary activity.
@@ -76,7 +93,7 @@ $output = $PAGE->get_renderer('mod_diary');
 $output->init($cm);
 
 // Handle toolbar capabilities.
-if (! empty($action)) {
+if (!empty($action)) {
     switch ($action) {
         case 'download':
             if (has_capability('mod/diary:addentries', $context)) {
@@ -89,7 +106,7 @@ if (! empty($action)) {
         case 'reload':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
                 $entrys = $DB->get_records('diary_entries', array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -105,7 +122,7 @@ if (! empty($action)) {
         case 'currententry':
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
                 $entrys = $DB->get_records('diary_entries', array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -120,7 +137,7 @@ if (! empty($action)) {
         // Sort the list of entries from oldest to newest based on timecreated.
         case 'sortfirstentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sortfirstentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortfirstentry', 'diary'));
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -135,7 +152,7 @@ if (! empty($action)) {
         // Sort the list from lowest grade to highest grade. Show ungraded first, from oldest to newest.
         case 'lowestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sortlowestentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortlowestentry', 'diary'));
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -150,7 +167,7 @@ if (! empty($action)) {
         // Sort list from highest grade to lowest grade. If tie grade, further sort from newest to oldest.
         case 'highestgradeentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sorthighestentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sorthighestentry', 'diary'));
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -165,7 +182,7 @@ if (! empty($action)) {
         // Sort list from most recently modified to the one modified the longest time ago.
         case 'latestmodifiedentry':
             if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = ('<h5>'.get_string('sortlastentry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortlastentry', 'diary'));
                 // May be needed for future version if editing old entries is allowed.
                 $entrys = $DB->get_records("diary_entries", array(
                     'userid' => $USER->id,
@@ -181,7 +198,7 @@ if (! empty($action)) {
         default:
             if (has_capability('mod/diary:addentries', $context)) {
                 // Reload the current page.
-                $sortorderinfo = ('<h5>'.get_string('sortcurrententry', 'diary').'</h5>');
+                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
                 $entrys = $DB->get_records('diary_entries', array(
                     'userid' => $USER->id,
                     'diary' => $diary->id
@@ -208,43 +225,66 @@ if ($CFG->branch > 31) {
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($diaryname);
+// 20220123 Added if check for an intro and also checks for Moodle 4.0 code. Was showing twice on last update.
+if (($diary->intro) && ($CFG->branch < 400)) {
+    echo $OUTPUT->heading($diaryname);
+    echo $output->introduction($diary, $cm); // Output introduction in renderer.php.
+}
+
+// 20221008 Hide the prompts info if the Diary activity is not available.
+// 20221027 Halt and force a fix if too many current prompts.
+if (prompts::diary_available($diary)) {
+    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
+    if ($current > 1) {
+        $url1 = $CFG->wwwroot . '/mod/diary/prompt_edit.php?id='.$cm->id;
+        echo '</a> <a href="'.$url1
+            .'" class="btn btn-success" style="border-radius: 8px">'
+            .get_string('warning', 'diary', $current)
+            .'</a> ';
+        die;
+    } else {
+        $status = prompts::prompts_viewcurrent($diary);
+        // Show the current prompt.
+        echo '<b>'.$diary->intro.'</b>';
+    }
+    echo get_string('tcount', 'diary', $tcount);
+    echo get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
+}
 
 // If viewer is a manager, create a link to report.php showing diary entries made by users.
 if ($entriesmanager) {
     // Check to see if groups are being used here.
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
-    groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
+    $ouput = groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/view.php?id=$cm->id");
+    // 20230131 Ticket, Diary_954, fixes entry count shown for selected group.
+    $entrycount = results::diary_count_entries($diary, $currentgroup);
 
-    $entrycount = diary_count_entries($diary, $currentgroup);
+    // 20200827 Add link to index.php page right after the report.php link. 20210501 modified to remove div.
+    $temp = '<span class="reportlink"><a href="report.php?id='.$cm->id.'&action=currententry">';
+    $temp .= get_string('viewallentries', 'diary', $entrycount).'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
+    $temp .= '<a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
+    $temp .= '</a></span>';
+    echo $temp;
 
-    // 20200827 Add link to index.php page right after the report.php link.
-    echo '<div class="reportlink"><a href="report.php?id='.$cm->id
-        .'&action=currententry">'.get_string('viewallentries', 'diary', $entrycount)
-        .'</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary')
-        .'</a></div>';
 } else {
-    // 20200831 Added to show link to index.php page for students.
-    echo '<div class="reportlink"><a href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a></div>';
+    // 20200831 Added to show link to only index.php page for students. 20210501 modified to remove div.
+    echo '<a class="reportlink" href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
 }
-
-echo $output->introduction($diary, $cm); // Ouput introduction in renderer.php.
 
 // 20200901 Visual separator between activity info and entries.
 echo '<hr>';
 
 // Check to see if diary is currently available.
 $timenow = time();
-if ($course->format == 'weeks' and $diary->days) {
+if ($course->format == 'weeks' && $diary->days) {
     $timestart = $course->startdate + (($cw->section - 1) * 604800);
     if ($diary->days) {
         $timefinish = $timestart + (3600 * 24 * $diary->days);
     } else {
         $timefinish = $course->enddate;
     }
-} else if (! (results::diary_available($diary))) {
+} else if (!(results::diary_available($diary))) {
     // 20200904 If used, set calendar availability time limits on the diarys.
     $timestart = $diary->timeopen;
     $timefinish = $diary->timeclose;
@@ -259,6 +299,7 @@ if ($course->format == 'weeks' and $diary->days) {
 // 20200815 Get the current rating for this user, if this diary is assessed.
 if ($diary->assessed != 0) {
     $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $USER->id);
+
     $gradeitemgrademax = $gradinginfo->items[0]->grademax;
     $userfinalgrade = $gradinginfo->items[0]->grades[$USER->id];
     $currentuserrating = $userfinalgrade->str_long_grade;
@@ -273,29 +314,44 @@ if ($timenow > $timestart) {
     $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
     $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
 
+    $oldstatspreference = get_user_preferences('diary_statspreference_'.$diary->id, null);
+    $statspreference = optional_param('statspreference', $oldstatspreference, PARAM_INT);
+
+    $oldemailpreference = get_user_preferences('diary_emailpreference_'.$diary->id, null);
+    $emailpreference = optional_param('emailpreference', $oldemailpreference, PARAM_INT);
+
     echo $OUTPUT->box_start();
-    // 20200815 Added type of rating and current rating. 20201004 Moved info here.
-    echo '<table style="width:100%"><tr><td>'
-        .get_string('sortorder', 'diary').'</td>'
-        .'<td> </td>
-        <td><h5>'.$aggregatestr.'</h5></td></tr>';
-    echo '<tr><td>'.$sortorderinfo.'</td><td> </td><td><h5>'.$currentuserrating.' </h5></td></table>';
+    // 20200815 Create table and added sort order and type of rating and current rating. 20201004 Moved info here.
+    echo '<table class="sortandaggregate">'
+        .'<tr><td>'.get_string('sortorder', 'diary').'</td>'
+        .'<td> </td>'
+        .'<td class="cell">'.$aggregatestr.'</td></tr>'
+        . '<tr><td>'.$sortorderinfo.'</td><td> </td><td class="cell">'.$currentuserrating.' </td></tr></table>';
+
     // Add Current entry Edit button and user toolbar.
     if ($timenow < $timefinish) {
         if ($canadd) {
             echo $output->box_start();
 
-            // Add button for editing current entry or starting a new entry.
-            echo $OUTPUT->single_button('edit.php?id='.$cm->id
-                .'&firstkey='.$firstkey
-                .'&action=currententry', get_string('startoredit', 'diary'), 'get', array(
-                "class" => "singlebutton diarystart"
-            ));
+            if ($diary->editdates) {
+                // 20210425 Add button for starting a new entry.
+                echo $OUTPUT->single_button('edit.php?id='.$cm->id
+                    .'&firstkey='.$firstkey
+                    .'&action=currententry', get_string('startnewentry', 'diary'), 'get', array(
+                    "class" => "singlebutton diarystart"
+                ));
+            } else {
+                // Add button for editing current entry or starting a new entry.
+                echo $OUTPUT->single_button('edit.php?id='.$cm->id
+                    .'&firstkey='.$firstkey
+                    .'&action=currententry', get_string('startoredit', 'diary'), 'get', array(
+                    "class" => "singlebutton diarystart"
+                ));
+            }
             // Print user toolbar icons only if there is at least one entry for this user.
             if ($entrys) {
-                echo ' '.get_string('usertoolbar', 'diary');
-
-                echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey);
+                echo '<span style="float: right;">'.get_string('usertoolbar', 'diary');
+                echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey).'</span>';
             }
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
@@ -308,6 +364,7 @@ if ($timenow > $timestart) {
             }
 
             $pagesizes = array(
+                1 => 1,
                 2 => 2,
                 3 => 3,
                 4 => 4,
@@ -339,8 +396,49 @@ if ($timenow > $timestart) {
             echo '<option selected="true" value="'.$selection.'</option>';
             // 20200905 Added count of all user entries.
             echo '</select>'.get_string('outof', 'diary', (count($entrys)));
-            echo '</form>';
+            // Extend the form to include the stats selector.
 
+            // 20230322 Added selector for prefered stats view. Default is ON.
+            if ($statspreference != $oldstatspreference) {
+                set_user_preference('diary_statspreference_'.$diary->id, $statspreference);
+            }
+
+            $listoptions = array(
+                1 => get_string('statsshow', 'diary'),
+                2 => get_string('statshide', 'diary')
+            );
+            // This creates the dropdown list for how many entries to show on the page.
+            $selection = html_writer::select($listoptions, 'statspreference', $statspreference, false, array(
+                'id' => 'pref_stats',
+                'class' => 'custom-select'
+            ));
+
+            echo ' | '.get_string('statshdr', 'diary').': <select onchange="this.form.submit()" name="statspreference">';
+            echo '<option selected="true" value="'.$selection.'</option>';
+            echo '</select>';
+
+            // 20230323 Extend form and added selector for prefered email delivery. Default is ON.
+            // Need to check if user is an entry manager here so that students do not see the email pref.
+            if (($entriesmanager) && (($diary->teacheremail == 1) || ($diary->studentemail == 1))) {
+                if ($emailpreference != $oldemailpreference) {
+                    set_user_preference('diary_emailpreference_'.$diary->id, $emailpreference);
+                }
+
+                $listoptions = array(
+                    1 => get_string('emailnow', 'diary'),
+                    2 => get_string('emaillater', 'diary')
+                );
+                // This creates the dropdown list for email preference on the page above the first entry.
+                $selection = html_writer::select($listoptions, 'emailpreference', $emailpreference, false, array(
+                    'id' => 'pref_emails',
+                    'class' => 'custom-select'
+                ));
+
+                echo ' | '.get_string('emailpreference', 'diary').': <select onchange="this.form.submit()" name="emailpreference">';
+                echo '<option selected="true" value="'.$selection.'</option>';
+                echo '</select>';
+            }
+            echo '</form>';
             echo $output->box_end();
         }
     } else {
@@ -364,15 +462,8 @@ if ($timenow > $timestart) {
                 echo '<p align="center"><b>'.get_string('blankentry', 'diary').'</b></p>';
             } else if ($thispage <= $perpage) {
                 $thispage ++;
-                $color3 = get_config('mod_diary', 'entrybgc');
-                $color4 = get_config('mod_diary', 'entrytextbgc');
-
-                // Start a division to contain the overall entry.
-                echo '<div align="left" style="font-size:1em; padding: 5px;
-                    font-weight:bold;background: '.$color3.';
-                    border:2px solid black;
-                    -webkit-border-radius:16px;
-                    -moz-border-radius:16px;border-radius:16px;">';
+                // 20210501 Changed to class, start a division to contain the overall entry.
+                echo '<div class="entry" style="background: '.$color3.';">';
 
                 $date1 = new DateTime(date('Y-m-d G:i:s', time()));
                 $date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
@@ -382,6 +473,7 @@ if ($timenow > $timestart) {
                 $options['id'] = $cm->id;
                 $options['action'] = 'editentry';
                 $options['firstkey'] = $entry->id;
+                $options['promptid'] = $promptid;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
@@ -392,47 +484,64 @@ if ($timenow > $timestart) {
                     $editthisentry = ' ';
                 }
 
-                // Add a heading for each entry on the page.
+                // Add, Entry, then date time group heading for each entry on the page.
                 echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
 
-                // Start an inner division for the user's text entry container.
-                echo '<div align="left" style="font-size:1em; padding: 5px;
-                    font-weight:bold;background: '.$color4.';
-                    border:1px solid black;
-                    -webkit-border-radius:16px;
-                    -moz-border-radius:16px;
-                    border-radius:16px;">';
+                // 20230314 If one exists, display the apllicable prompt.
+                if ($entry->promptid > 0) {
+                    $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
+                    $prompt = $DB->get_record('diary_prompts', array('id' => $entry->promptid, 'diaryid' => $diary->id));
+                    // 20230321 Use contrasting color for the prompt used background.
+                    echo '<div class="entry" style="background: '.$promptbgc.';">';
+
+                    echo '<strong>'.get_string('prompttext', 'diary').'</strong>: '.$prompt->text.'</div>';
+                }
+
+                // 20210511 Start an inner division for the user's text entry container.
+                // 20210705 Added new activity color setting. 20210704 Switched to a setting.
+                echo '<div class="entry" style="background: '.$color4.';">';
 
                 // This adds the actual entry text division close tag for each entry listed on the page.
                 echo results::diary_format_entry_text($entry, $course, $cm).'</div>';
 
-                // Info regarding last edit and word count.
+                // Info regarding entry details with stats, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
-                    if (! empty($entry->timemodified)) {
-                        echo '<div class="lastedit"><strong>'
-                            .get_string('details', 'diary').'</strong> ('
-                            .get_string('numwords', '', count_words($entry->text)).') '
-                            .get_string('created', 'diary',
-                            ['one' => $diff->days, 'two' => $diff->h]).'<br>';
-
-                        echo '<strong>'.get_string('timecreated', 'diary').': </strong> ';
-                        echo userdate($entry->timecreated).'<br>';
-
-                        echo '<strong> '.get_string('lastedited').': </strong> ';
-                        echo userdate($entry->timemodified).'<br>';
-
-                        echo "</div>";
+                    // 20211217 If there is a user entry, format it and show it.
+                    if ($entry) {
+                        // 20230323 Added a check for stats preference.
+                        if ($entry && ($statspreference == 1)) {
+                            $temp = $entry;
+                            // 20210704 Go calculate stats and print stats table.
+                            // 20210703 Moved to here from up above so the table gets rendered in the right spot.
+                            $statsdata = diarystats::get_diary_stats($temp, $diary);
+                            // 20211212 Moved the echo for output here instead of in the function in the diarystats file.
+                            echo $statsdata;
+                            // 20211212 Added separate function to get the glossary common error data here.
+                            $comerrdata = diarystats::get_common_error_stats($temp, $diary);
+                            echo $comerrdata;
+                            // 20211212 Added separate function to get the autorating data here.
+                            list($autoratingdata,
+                                $currentratingdata)
+                                = diarystats::get_auto_rating_stats($temp, $diary);
+                            echo $autoratingdata;
+                        }
+                    } else {
+                        print_string("noentry", "diary");
+                        // 20210701 Moved copy 2 of 2 here due to new stats.
+                        echo '</div></td><td style="width:55px;"></td></tr>';
                     }
 
-                    // Added lines to mark entry as being dirty and needing regrade.
-                    if (! empty($entry->timecreated) and ! empty($entry->timemodified) and empty($entry->timemarked)) {
-                        echo "<div class=\"needsedit\">".get_string("needsgrading", "diary")."</div>";
-                    } else if (! empty($entry->timemodified) and ! empty($entry->timemarked)
-                              and $entry->timemodified > $entry->timemarked) {
-                        echo "<div class=\"needsedit\">".get_string("needsregrade", "diary")."</div>";
+                    echo '</table>';
+
+                    // Added lines to mark entry as needing to be rated or rated again after the entry was updated.
+                    if (!empty($entry->timecreated) && !empty($entry->timemodified) && empty($entry->timemarked)) {
+                        echo '<div class="needsedit">'.get_string('needsgrading', 'diary').'</div>';
+                    } else if (!empty($entry->timemodified) && !empty($entry->timemarked)
+                        && $entry->timemodified > $entry->timemarked) {
+                        echo '<div class="needsedit">'.get_string('needsregrade', 'diary').'</div>';
                     }
 
-                    if (! empty($diary->days)) {
+                    if (!empty($diary->days)) {
                         echo '<div class="editend"><strong>'.get_string('editingends', 'diary').': </strong> ';
                         echo userdate($timefinish).'</div>';
                     }
@@ -441,14 +550,25 @@ if ($timenow > $timestart) {
                     echo userdate($timefinish).'</div>';
                 }
 
+                // 20230302 Added tags to each entry.
+                echo $OUTPUT->tag_list(
+                    core_tag_tag::get_item_tags(
+                        'mod_diary',
+                        'diary_entries',
+                        $entry->id
+                    ),
+                    null,
+                    'diary-tags'
+                );
+
                 // Print feedback from the teacher for the current entry.
-                if (! empty($entry->entrycomment) or ! empty($entry->rating)) {
+                if (!empty($entry->entrycomment) || !empty($entry->rating)) {
                     // Get the rating for the current entry.
                     $grades = $entry->rating;
                     // Add a heading for each feedback on the page.
                     echo $OUTPUT->heading(get_string('feedback'));
-                    // Format output using renderer.php.
-                    echo $output->diary_print_feedback($course, $entry, $grades);
+                    // Add the teachers feedback.
+                    echo results::diary_print_feedback($course, $entry, $grades);
                 }
                 // This adds blank space between entries.
                 echo '</div></p>';
