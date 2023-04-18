@@ -23,7 +23,7 @@
  */
 namespace mod_diary\search;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 require_once($CFG->dirroot . '/mod/diary/lib.php');
 require_once($CFG->dirroot . '/lib/grouplib.php');
