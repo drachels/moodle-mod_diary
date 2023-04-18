@@ -21,7 +21,7 @@
  * @copyright 2019 onwards AL Rachels drachels@drachels.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * A custom renderer class that extends the plugin_renderer_base and is used by the diary module.
@@ -157,64 +157,5 @@ class mod_diary_renderer extends plugin_renderer_base {
         $output .= $this->output->box_end();
         $output .= $this->output->box_end();
         return $output;
-    }
-
-    /**
-     * Print the teacher feedback.
-     * This renders the teacher feedback on the view.php page.
-     *
-     * @param object $course
-     * @param object $entry
-     * @param object $grades
-     */
-    public function diary_print_feedback($course, $entry, $grades) {
-        global $CFG, $DB;
-
-        require_once($CFG->dirroot . '/lib/gradelib.php');
-
-        if (! $teacher = $DB->get_record('user', array(
-            'id' => $entry->teacher
-        ))) {
-            print_error('Weird diary error');
-        }
-
-        echo '<table class="feedbackbox">';
-
-        echo '<tr>';
-        echo '<td class="left picture">';
-        echo $this->output->user_picture($teacher, array(
-            'courseid' => $course->id,
-            'alttext' => true
-        ));
-        echo '</td>';
-        echo '<td class="entryheader">';
-        echo '<span class="author">' . fullname($teacher) . '</span>';
-        echo '&nbsp;&nbsp;<span class="time">' . userdate($entry->timemarked) . '</span>';
-        echo '</td>';
-        echo '</tr>';
-
-        echo '<tr>';
-        echo '<td class="left side">&nbsp;</td>';
-        echo '<td class="entrycontent">';
-
-        echo '<div class="grade">';
-
-        // Gradebook preference.
-        $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary, array(
-            $entry->userid
-        ));
-
-        // My preference.
-        if (! empty($grades)) {
-            echo get_string('grade') . ': ';
-            echo $grades . '/' . number_format($gradinginfo->items[0]->grademax, 2);
-        } else {
-            print_string('nograde');
-        }
-        echo '</div>';
-
-        // Feedback text.
-        echo format_text($entry->entrycomment, FORMAT_PLAIN);
-        echo '</td></tr></table>';
     }
 }
