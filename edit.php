@@ -305,7 +305,6 @@ if ($form->is_cancelled()) {
     if ($data->text !== $newentry->text) {
         // If data has changed, then send the email(s).
         // 20230402 Since I added the two new fields to mdl_diary table, the following, if, check needs to be changed.
-        // if (get_config('mod_diary', 'teacheremail')) {
         if ((get_config('mod_diary', 'teacheremail')) && ($diary->teacheremail || $diary->studentemail)) {
             foreach ($teachers as $teacher) {
                 if (get_user_preferences('diary_emailpreference_'.$diary->id, null, $teacher->id) == 1) {
