@@ -21,31 +21,36 @@
  * @copyright 1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use mod_diary\local\results;
 require_once(__DIR__ . "/../../config.php");
 require_once("lib.php");
 
 $id = required_param('id', PARAM_INT); // Course.
 
-if (! $course = $DB->get_record('course', array(
-    'id' => $id
-))) {
-    print_error("Course ID is incorrect");
+if (!$course = $DB->get_record('course', array('id' => $id))) {
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 require_course_login($course);
 
 // Header.
-$strdiarys = get_string('modulenameplural', 'diary');
+$PAGE->set_url('/mod/diary/index.php', array('id' => $id));
 $PAGE->set_pagelayout('incourse');
-$PAGE->set_url('/mod/diary/index.php', array(
-    'id' => $id
-));
-$PAGE->navbar->add($strdiarys);
-$PAGE->set_title($strdiarys);
+
+// Trigger course module instance list event.
+$params = array(
+    'context' => context_course::instance($course->id)
+);
+\mod_diary\event\course_module_instance_list_viewed::create($params)->trigger();
+
+// Print the header.
+$strplural = get_string('modulenameplural', 'diary');
+$PAGE->navbar->add($strplural);
+$PAGE->set_title($strplural);
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($strdiarys);
+echo $OUTPUT->heading(format_string($strplural));
 
 if (! $diarys = get_all_instances_in_course('diary', $course)) {
     notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
@@ -67,10 +72,11 @@ $table = new html_table();
 $table->head = array();
 $table->align = array();
 if ($usesections) {
+    // Add column heading based on the course format. e.g. Week, Topic.
     $table->head[] = get_string('sectionname', 'format_' . $course->format);
-    $table->align[] = 'center';
+    $table->align[] = 'left';
 }
-
+// Add activity, Name, and activity, Description, headings.
 $table->head[] = get_string('name');
 $table->align[] = 'left';
 $table->head[] = get_string('description');
@@ -78,6 +84,7 @@ $table->align[] = 'left';
 
 $currentsection = '';
 $i = 0;
+
 foreach ($diarys as $diary) {
 
     $context = context_module::instance($diary->coursemodule);
@@ -105,10 +112,10 @@ foreach ($diarys as $diary) {
     ));
     if (! $diary->visible) {
         // Show dimmed if the mod is hidden.
-        $table->data[$i][] = "<a class=\"dimmed\" href=\"view.php?id=$diary->coursemodule\">" . $diaryname . "</a>";
+        $table->data[$i][] = '<a class="dimmed" href="view.php?id='.$diary->coursemodule.'">'.$diaryname.'</a>';
     } else {
         // Show normal if the mod is visible.
-        $table->data[$i][] = "<a href=\"view.php?id=$diary->coursemodule\">" . $diaryname . "</a>";
+        $table->data[$i][] = '<a href="view.php?id='.$diary->coursemodule.'">'.$diaryname. '</a>';
     }
 
     // Description.
@@ -132,9 +139,11 @@ foreach ($diarys as $diary) {
             }
         }
 
-        $entrycount = diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
-        $table->data[$i][] = "<a href=\"report.php?id=$diary->coursemodule\">"
-            . get_string("viewallentries", "diary", $entrycount) . "</a>";
+        $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
+        // 20220102 Added action to the href.
+        $table->data[$i][] = '<a href="report.php?id='.$diary->coursemodule.'&action=currententry">'
+            .get_string('viewallentries', 'diary', $entrycount).'</a>';
+
     } else if (! empty($managersomewhere)) {
         $table->data[$i][] = "";
     }
@@ -142,16 +151,6 @@ foreach ($diarys as $diary) {
     $i ++;
 }
 
-echo "<br />";
-
 echo html_writer::table($table);
-
-// Trigger course module instance list event.
-$params = array(
-    'context' => context_course::instance($course->id)
-);
-$event = \mod_diary\event\course_module_instance_list_viewed::create($params);
-$event->add_record_snapshot('course', $course);
-$event->trigger();
 
 echo $OUTPUT->footer();
