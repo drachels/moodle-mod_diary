@@ -22,6 +22,20 @@
  * @copyright  2019 AL Rachels (drachels@drachels.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
+/* 20210502 Added in view.php about line 278.*/
+#page-mod-diary-view .sortandaggregate,
+#page-mod-diary-report .sortandaggregate {
+    width: 100%;
+    font-size: 1.0em;
+    /*font-weight: bold;*/
+}
+
+/* 20210502 Added in view.php about line 281 and 282.*/
+#page-mod-diary-view .sortandaggregate .cell {
+    float: right;
+    padding: 5px;
+}
+
 #page-mod-diary-view .feedbackbox { /* Used in renderer.php. */
     width: 85%;
     border-collapse: separate;
@@ -41,43 +55,65 @@
 }
 
 #page-mod-diary-view .diarystart, /* Used in view.php. */
-    #page-mod-diary-report .feedbacksave {
+#page-mod-diary-report .feedbacksave {
     text-align: center;
 }
 
-#page-mod-diary-view .lastedit, #page-mod-diary-view .editend {
+#page-mod-diary-view .lastedit,
+#page-mod-diary-view .editend {
     font-size: 0.7em;
     margin: 5px;
     text-align: center;
 }
 
-#page-mod-diary-view .needsedit, #page-mod-diary-view .editend {
+#page-mod-diary-view .needsedit,
+#page-mod-diary-view .editend {
     font-size: 0.9em;
     color: red;
     text-align: center;
 }
 
-#page-mod-diary-view .author {
+#page-mod-diary-view .author { /* Used in renderer.php about line 191. */
     font-size: 1em;
     font-weight: bold;
 }
 
-#page-mod-diary-view .time {
+#page-mod-diary-view .time { /* Used in renderer.php about line 192. */
     font-size: 0.7em;
     font-style: italic;
 }
 
-#page-mod-diary-view .grade {
+#page-mod-diary-view .grade { /* Used in renderer.php about line 200. */
     font-weight: bold;
     font-style: italic;
     text-align: right;
 }
 
-#page-mod-diary-index .cell {
+#page-mod-diary-index .cell { /* Cannot find this in use, anywhere. */
     font-size: 0.8em;
 }
 
-#page-mod-diary-view .feedbackbox .left, #page-mod-diary-view .feedbackbox .entryheader {
+/* 20210501 Added in view.php about line 381.*/
+/* 20210505 Added in report.php about lines 427 and 455.*/
+/* 20210505 Added in reportsingle.php about line 266.*/
+#page-mod-diary-view .entry,
+#page-mod-diary-report .entry,
+#page-mod-diary-reportsingle .entry {
+    text-align: left;
+    font-size: 1em;
+    padding: 5px;
+    /*font-weight: bold;*/
+    background: #f9f5f0;
+    /*border: 2px solid grey;*/
+    border-style: double;
+    -webkit-border-radius: 16px;
+    -moz-border-radius: 16px;
+    border-radius: 16px;
+
+}
+
+#page-mod-diary-view .feedbackbox .left,
+#page-mod-diary-view .feedbackbox .entryheader { /* Used in renderer.php about line 190. */
     background-color: #ddd;
 }
 
@@ -94,6 +130,12 @@
 
 #page-mod-diary-view .feedbackbox .entrycontent {
     -moz-border-radius-bottomright: 15px;
+}
+
+#page-mod-diary-view .reportlink,
+#page-mod-diary-report .reportlink {
+    float: right;
+    padding: 15px;
 }
 
 #page-mod-diary-report .diaryuserentry {
