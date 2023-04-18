@@ -21,7 +21,7 @@
  * @copyright 2020 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 require_once($CFG->dirroot . '/mod/diary/backup/moodle2/restore_diary_stepslib.php');
 
@@ -54,7 +54,7 @@ class restore_diary_activity_task extends restore_activity_task {
      *
      * @return array
      */
-    static public function define_decode_contents() {
+    public static function define_decode_contents() {
         $contents = array();
         $contents[] = new restore_decode_content('diary', array(
             'intro'
@@ -63,6 +63,9 @@ class restore_diary_activity_task extends restore_activity_task {
             'text',
             'entrycomment'
         ), 'diary_entry');
+        $contents[] = new restore_decode_content('diary_prompts', array(
+            'text'
+        ), 'diary_prompt');
 
         return $contents;
     }
@@ -73,7 +76,7 @@ class restore_diary_activity_task extends restore_activity_task {
      *
      * @return array of restore_decode_rule
      */
-    static public function define_decode_rules() {
+    public static function define_decode_rules() {
         $rules = array();
         // List of Diary's in the course.
         $rules[] = new restore_decode_rule('DIARYINDEX', '/mod/diary/index.php?id=$1', 'course');
