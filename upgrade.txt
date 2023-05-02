@@ -11,16 +11,17 @@ This files describes API changes and other work in the diary code.
     file. Updated backup files. Updated the mod_form.php file.
 20211130 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
+20230419 Diary_1036 - Modify Pormpts to fire up based on resticted access or completion.
 
+ 
 
-<<<<<<< HEAD
 === 3.7.3=== 20230409 STABLE
-20200601 Diary_520 - Need to remove un-needed functions from lib.php.20211229 Removed
+20200601 Diary_520v - Need to remove un-needed functions from lib.php.20211229 Removed
     function diary_user_complete($course, $user, $mod, $diary) { as it has been
     superseded by public static function diary_print_user_entry($context, $course,
     $diary, $user, $entry, $teachers, $grades) in the results.php file. 20230409
     Removed, function diary_log_info($log) {, from lib.php.
-20230409 Diary_1029 - In Moodle 4.2 I am getting multiple Invalid event function
+20230409 Diary_1029v - In Moodle 4.2 I am getting multiple Invalid event function
     defined messages. Went through all diary files and removed deprecated log code. 
 
 
