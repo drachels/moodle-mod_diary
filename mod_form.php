@@ -374,6 +374,17 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'itemtype', 'eq', 5);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
+        // 20230508 Added a selector to enable/disable removing matches that are substrings of longer matches.
+        $name = 'errorfullmatch';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $this->diary_get_fullmatch_options($plugin));
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setDefault($name, $this->get_my_default_value($name, 1));
+        $mform->setType($name, PARAM_INT);
+        $mform->disabledIf($name, 'errorcmid', 'eq', 0);
+        $mform->disabledIf($name, 'itemtype', 'eq', 5);
+        $mform->disabledIf($name, 'enablestats', 'eq', 0);
+
         // Add the rest of the common settings.
         $this->standard_grading_coursemodule_elements();
         $this->standard_coursemodule_elements();
@@ -396,6 +407,18 @@ class mod_diary_mod_form extends moodleform_mod {
         }
         return $options;
     }
+
+    /**
+     * Get array of full match options.
+     *
+     * @param string $plugin name
+     * @return array(value => description)
+     */
+    protected function get_fullmatch_options($plugin) {
+        return array(0 => get_string('phrasefullmatchno', $plugin),
+                     1 => get_string('phrasefullmatchyes', $plugin));
+    }
+
 
     /**
      * Returns default value for an item.
@@ -436,7 +459,7 @@ class mod_diary_mod_form extends moodleform_mod {
      * @param string $plugin name
      * @return array(value => description)
      */
-    protected function get_fullmatch_options($plugin) {
+    protected function diary_get_fullmatch_options($plugin) {
         return array(0 => get_string('phrasefullmatchno', $plugin),
                      1 => get_string('phrasefullmatchyes', $plugin));
     }

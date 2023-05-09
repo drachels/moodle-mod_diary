@@ -6,16 +6,30 @@ This files describes API changes and other work in the diary code.
     needed when starting a totally new entry. Note: Same for tags.
 20210815 Diary_737 - Config settings are not all named the same. Added mod_ to
     the four items that were missing it. As of 20220828 still have three.
-20210819 Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive,
-    and errorignorebreaks. Added fields to the xml file. Updated the upgrade.php
-    file. Updated backup files. Updated the mod_form.php file.
+
 20211130 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
 20230419 Diary_1036 - Modify Pormpts to fire up based on resticted access or completion.
 
- 
 
-=== 3.7.3=== 20230409 STABLE
+
+=== 3.7.4 === Pending
+20210819 Diary_748 - Need Diary settings for errorfullmatch, errorcasesensitive,
+    and errorignorebreaks. Added fields to the xml file. Updated the upgrade.php
+    file. Updated backup files. Updated the mod_form.php file. 20230508 I have
+    implemented the strings and code to use errorfullmatch. For now, my plan is
+    to not use errorcasesensitive and erroignorebreaks. I have those covered in
+    other ways.
+20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
+    in restore_diary_activity_task.class is missing.
+20230506 Diary1039 - At times the function get_common_errors($text, $diary) does not
+    return correct results. Two problems, did not have some "i" entires in the glossary
+    and needed to remove code that was skipping over matches that were sub-strings.
+    In reality, the code was actually working correctly. I just did not truly understand
+    what was going on.
+
+
+=== 3.7.3 === 20230409 STABLE
 20200601 Diary_520v - Need to remove un-needed functions from lib.php.20211229 Removed
     function diary_user_complete($course, $user, $mod, $diary) { as it has been
     superseded by public static function diary_print_user_entry($context, $course,
@@ -25,7 +39,7 @@ This files describes API changes and other work in the diary code.
     defined messages. Went through all diary files and removed deprecated log code. 
 
 
-=== 3.7.2=== 20230402 STABLE
+=== 3.7.2 === 20230402 STABLE
 20220220 Diary_823v - Missing completion information on the view.php page. Got
     it working on course page - BUT - might need another ticket for further
     development to also require X number of Posts.

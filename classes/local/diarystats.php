@@ -136,14 +136,16 @@ class diarystats {
             array_multisort($lengths, SORT_DESC, $matches);
 
             // Remove matches that are substrings of longer matches.
-            $keys = array();
-            foreach ($matches as $match) {
-                $search = '/^'.preg_quote($match, '/').'.+/iu';
-                $search = preg_grep($search, $matches);
-                if (count($search)) {
-                    unset($errors[$match]);
-                } else {
-                    $keys[] = $match;
+            if (!$diary->errorfullmatch) {
+                $keys = array();
+                foreach ($matches as $match) {
+                    $search = '/^'.preg_quote($match, '/').'.+/iu';
+                    $search = preg_grep($search, $matches);
+                    if (count($search)) {
+                        unset($errors[$match]);
+                    } else {
+                        $keys[] = $match;
+                    }
                 }
             }
         }

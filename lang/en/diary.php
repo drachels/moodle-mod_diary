@@ -58,7 +58,7 @@ $string['charspersentence'] = 'Characters per sentence';
 $string['clearfeedback'] = 'Clear feedback';
 $string['commonerrorpercentset'] = 'Common error percent setting {$a}%';
 $string['commonerrors_help'] = 'The common errors are defined in the "Glossary of errors" associated with this question.';
-$string['commonerrors'] = 'Common errors';
+$string['commonerrors'] = 'Common Errors';
 $string['configdateformat'] = 'This defines how dates are shown in diary reports. The default value, "M d, Y G:i" is Month, day, year and 24 hour format time. Refer to Date in the PHP manual for more examples and predefined date constants.';
 $string['createnewprompt'] = 'Create new prompt';
 $string['created'] = 'Created {$a->one} days and {$a->two} hours ago.';
@@ -80,7 +80,7 @@ $string['deletenotenrolled'] = 'Delete entries by users not enrolled';
 
 $string['deleteexconfirm'] = 'Confirm you are about to delete writing prompt ID ';
 $string['details'] = 'Details: ';
-$string['detectcommonerror'] = 'Detected at least {$a->one}, {$a->two} They are: {$a->three}
+$string['detectcommonerror'] = 'Detected at least {$a->one}, {$a->two}. They are: {$a->three}
 <br>If allowed, you should fix and re-submit.';
 $string['diary:addentries'] = 'Add diary entries';
 $string['diary:addinstance'] = 'Add diary instances';
@@ -150,6 +150,12 @@ $string['errorbehavior_help'] = 'These settings refine the matching behavior for
 $string['errorbehavior'] = 'Error matching behavior';
 $string['errorcmid_help'] = 'Choose the Glossary that contains a list of common errors. Each time one of the errors is found in the essay response, the specified penalty will be deducted from the student\'s rating for this entry.';
 $string['errorcmid'] = 'Glossary of errors';
+
+$string['errorfullmatch'] = 'Error matching behavior';
+$string['errorfullmatch_help'] = 'This setting refines the matching behavior for entries in the Glossary of Common Errors.';
+
+
+
 $string['errorpercent_help'] = 'Select the percentage of total rating that should be deducted for each error that is found in the response.';
 $string['errorpercent'] = 'Penalty per error';
 $string['errp'] = ' Err %: ';
@@ -325,6 +331,10 @@ $string['pluginname'] = 'Diary';
 $string['popoverhelp'] = 'click for info';
 $string['potautoratingerrpen'] = 'Potential Autorating error penalty: {$a->one}% or {$a->two} points off.';
 $string['potcommerrpen'] = 'Potential Common error penalty: {$a->one} * {$a->two} = {$a->three}% or {$a->four} points off.';
+
+$string['phrasefullmatchno'] = 'Match full or partial words.';
+$string['phrasefullmatchyes'] = 'Match full words only.';
+
 $string['present'] = 'Present';
 $string['previousentry'] = 'Previous entry';
 $string['privacy:metadata:diary_entries:diary'] = 'The ID of the Diary activity in which the entry was posted.';
