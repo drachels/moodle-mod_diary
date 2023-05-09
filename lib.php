@@ -930,7 +930,7 @@ function diary_extend_settings_navigation(settings_navigation $settingsnav, navi
 
     // Link to add automatic time released prompts to Diary activities. Visible to teachers and admin only.
     if (has_capability('mod/diary:addinstance', $context)) {
-        $link = new moodle_url('prompt_edit.php', array('id' => $cm->id));
+        $link = new moodle_url('/mod/diary/prompt_edit.php', array('id' => $cm->id));
         $linkname = get_string('promptstitle', 'diary');
         $icon = new pix_icon('icon', '', 'diary', array('class' => 'icon'));
         $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
@@ -938,7 +938,7 @@ function diary_extend_settings_navigation(settings_navigation $settingsnav, navi
 
     // Link to transfer Journal entries to Diary entries. Visible to admin only.
     if (is_siteadmin()) {
-        $link = new moodle_url('journaltodiaryxfr.php', array('id' => $cm->id));
+        $link = new moodle_url('/mod/diary/journaltodiaryxfr.php', array('id' => $cm->id));
         $linkname = get_string('journaltodiaryxfrtitle', 'diary');
         $icon = new pix_icon('icon', '', 'diary', array('class' => 'icon'));
         $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
