@@ -55,8 +55,8 @@ $param4 = optional_param('transferwfb', '', PARAM_TEXT); // Transfer with feedba
 
 // DB transfer.
 if (isset($param1) && get_string('transfer', 'diary') == $param1) {
-    $journalfromid = optional_param('journalid', '', PARAM_RAW);
-    $diarytoid = optional_param('diaryid', '', PARAM_RAW);
+    $journalfromid = optional_param('journalid', '', PARAM_INT);
+    $diarytoid = optional_param('diaryid', '', PARAM_INT);
 
     $sql = 'SELECT *
               FROM {journal_entries} je
