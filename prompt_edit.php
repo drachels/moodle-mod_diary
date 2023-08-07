@@ -182,21 +182,18 @@ if ($prompts) {
         $data->minmaxparagraphpercent = $prompt->minmaxparagraphpercent;
 
         // If user can edit, create a delete link to the current prompt.
+        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'delete', 'promptid' => $prompt->id));
         $jlink1 = '&nbsp;<a onclick="return confirm(\''
                   .get_string('deleteexconfirm', 'diary')
                   .$data->entryid
-                  .'\')" href="prompt_edit.php?id='
-                  .$id.'&action=delete&promptid='
-                  .$prompt->id.'" class="diary_prompt" id="diary_'
-                  .$prompt->id.'"><img src="pix/delete.png" title="'
+                  .'\')" href="'. $url->out(false) .'"><img src="pix/delete.png" title="'
                   .get_string('delete', 'diary') .'" alt="'
                   .get_string('delete', 'diary') .'"/></a>';
 
         // If user can edit, create an edit link to the current prompt.
         // Use prompt ID so we can come back to the Prompt Editor we came from.
-        $jlink2 = '<a href="prompt_edit.php?id='.$id
-                  .'&action=edit&promptid='.$data->entryid
-                  .'"><img src="pix/edit.png" alt='
+        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'edit', 'promptid' => $data->entryid));
+        $jlink2 = '<a href="'.$url->out(false).'"><img src="pix/edit.png" alt='
                   .get_string('eeditlabel', 'diary').'></a>';
 
         $counter++;
@@ -345,7 +342,7 @@ if ($form->is_cancelled()) {
 
     $DB->update_record('diary_prompts', $newentry);
 
-    redirect(new moodle_url('/mod/diary/prompt_edit.php?id='.$cm->id.'&promptid='.$newentry->id));
+    redirect(new moodle_url('/mod/diary/prompt_edit.php', array('id' => $cm->id, 'promptid' => $newentry->id)));
 }
 
 echo $OUTPUT->header();
@@ -357,13 +354,13 @@ $intro = format_module_intro('diary', $diary, $cm->id);
 
 $form->display();
 
-$url1 = $CFG->wwwroot . '/mod/diary/view.php?id='.$id;
-$url2 = $CFG->wwwroot . '/mod/diary/prompt_edit.php?id='.$cm->id.'&action=create&promptid=0';
+$url1 = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', array('id' => $id));
+$url2 = new moodle_url($CFG->wwwroot . '/mod/diary/prompt_edit.php', array('id' => $cm->id, 'action' => 'create', 'promptid' => 0));
 // 20220920 Add a Create button and a return button.
-echo '<br><a href="'.$url2.'"
+echo '<br><a href="'.$url2->out(false).'"
     class="btn btn-warning"
     style="border-radius: 8px">';
-echo get_string('createnewprompt', 'diary').'</a> <a href="'.$url1
+echo get_string('createnewprompt', 'diary').'</a> <a href="'.$url1->out(false)
     .'" class="btn btn-success" style="border-radius: 8px">'
     .get_string('returnto', 'diary', $diary->name)
     .'</a> ';

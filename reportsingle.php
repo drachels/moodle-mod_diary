@@ -150,7 +150,8 @@ if (! $users) {
         throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
     }
     // 20211213 Start the page area where feedback and grades are added and will need to be saved.
-    echo '<form action="reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries" method="post">';
+    $url = new moodle_url('reportsingle.php', array('id' => $id, 'user' => $user->id, 'action' => 'allentries'));
+    echo '<form action="'.$url->out(false).'" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
     // 20211210 Cleaned up unnecessary escaped double quotes.
     $saveallbutton = '';
@@ -173,8 +174,8 @@ if (! $users) {
 
     // 20211230 Tacked on an action for the return URL.
     // 20201222 Added a return to report.php button if you do not want to save feedback.
-    $url2 = $CFG->wwwroot.'/mod/diary/report.php?id='.$id.'&action=currententry';
-    $saveallbutton .= ' <a href="'.$url2
+    $url2 = new moodle_url($CFG->wwwroot.'/mod/diary/report.php', array('id' => $id, 'action' => 'currententry'));
+    $saveallbutton .= ' <a href="'.$url2->out(true)
                      .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
                      .get_string('returntoreport', 'diary', $diary->name)
                      .'</a>';

@@ -308,7 +308,8 @@ if (! $users) {
 
     // 20211230 Changed action so that the sort order (action) is maintained.
     // Start the page area where feedback and grades are added and will need to be saved.
-    echo '<form action="report.php?id='.$id.'&diaryid='.$diaryid.'&action='.$action.'" method="post">';
+    $url = new moodle_url('report.php', array('id' => $id, 'diaryid' => $diaryid, 'action' => $action));
+    echo '<form action="'.$url->out(false).'" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
     // 20211027 changed to rounded buttons. 20211229 Removed escaped double quotes.
     $saveallbutton = '';
@@ -318,8 +319,8 @@ if (! $users) {
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
                       .get_string("saveallfeedback", "diary").'" />';
     // 20200421 Added a return button.
-    $url = $CFG->wwwroot . '/mod/diary/view.php?id=' . $id;
-    $saveallbutton .= ' <a href="'.$url
+    $url = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', array('id' => $id));
+    $saveallbutton .= ' <a href="'.$url->out(false)
                      .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
                      .get_string('returnto', 'diary', $diary->name)
                      .'</a>';
