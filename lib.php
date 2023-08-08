@@ -663,7 +663,7 @@ function diary_print_overview($courses, &$htmlarray) {
         }
 
         if ($diaryopen) {
-            $url = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', array('id' => $diary->coursemodule));
+            $url = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $diary->coursemodule]);
             $str = '<div class="diary overview"><div class="name">'
                 .$strdiary.': <a '
                 .($diary->visible ? '' : ' class="dimmed"')

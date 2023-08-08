@@ -236,7 +236,7 @@ if (($diary->intro) && ($CFG->branch < 400)) {
 if (prompts::diary_available($diary)) {
     list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
     if ($current > 1) {
-        $url1 = new moodle_url($CFG->wwwroot .'/mod/diary/prompt_edit.php', array('id' => $cm->id));
+        $url1 = new moodle_url($CFG->wwwroot .'/mod/diary/prompt_edit.php', ['id' => $cm->id]);
         echo '</a> <a href="'.$url1->out(true)
             .'" class="btn btn-success" style="border-radius: 8px">'
             .get_string('warning', 'diary', $current)
