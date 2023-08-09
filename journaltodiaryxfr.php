@@ -233,7 +233,6 @@ echo '<br><br><input class="btn btn-warning"
                      onClick="return clClick()"
                      type="submit" value="'
                      .get_string('transfer', 'diary').'"> <a href="'.$url2->out(false).'"
-
                      class="btn btn-secondary"
                      style="border-radius: 8px">'
                      .get_string('cancel', 'diary').'</a></input>';
