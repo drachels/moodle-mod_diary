@@ -502,7 +502,7 @@ class results {
         global $USER, $OUTPUT, $DB, $CFG;
         $id = required_param('id', PARAM_INT); // Course module.
         $diaryid = optional_param('diary', $diary->id, PARAM_INT); // Diaryid.
-        $action = required_param('action', PARAM_RAW); // Current sort Action.
+        $action = required_param('action', PARAM_TEXT); // Current sort Action.
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
@@ -523,9 +523,8 @@ class results {
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
             echo userdate($entry->timecreated);
             // 20201202 Added link to show all entries for a single user.
-            echo '  <a href="reportsingle.php?id='.$id
-                .'&user='.$user->id
-                .'&action=allentries">'.get_string('reportsingle', 'diary')
+            $url = new moodle_url('mod/diary/reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
+            echo '  <a href="'.$url->out(false).'">'.get_string('reportsingle', 'diary')
                 .'</a></td><td></td>';
             echo '</tr>';
         }

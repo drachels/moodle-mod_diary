@@ -112,10 +112,12 @@ foreach ($diarys as $diary) {
     ));
     if (! $diary->visible) {
         // Show dimmed if the mod is hidden.
-        $table->data[$i][] = '<a class="dimmed" href="view.php?id='.$diary->coursemodule.'">'.$diaryname.'</a>';
+        $url = new moodle_url('mod/diary/view.php', ['id' => $diary->coursemodule]);
+        $table->data[$i][] = '<a class="dimmed" href="'.$url->out(false).'">'.$diaryname.'</a>';
     } else {
         // Show normal if the mod is visible.
-        $table->data[$i][] = '<a href="view.php?id='.$diary->coursemodule.'">'.$diaryname. '</a>';
+        $url = new moodle_url('mod/diary/view.php', ['id' => $diary->coursemodule]);
+        $table->data[$i][] = '<a href="'.$url->out(false).'">'.$diaryname. '</a>';
     }
 
     // Description.
@@ -141,7 +143,8 @@ foreach ($diarys as $diary) {
 
         $entrycount = results::diary_count_entries($diary, groups_get_all_groups($course->id, $USER->id));
         // 20220102 Added action to the href.
-        $table->data[$i][] = '<a href="report.php?id='.$diary->coursemodule.'&action=currententry">'
+        $url = new moodle_url('mod/diary/report.php', ['id' => $diary->coursemodule, 'action' => 'currententry']);
+        $table->data[$i][] = '<a href="'.$url->out(false).'">'
             .get_string('viewallentries', 'diary', $entrycount).'</a>';
 
     } else if (! empty($managersomewhere)) {
