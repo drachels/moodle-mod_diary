@@ -74,6 +74,10 @@ foreach ($diarys as $temp) {
     }
 }
 
+// 20230511 Following two lines are for View, Automatic Completion marking.
+$completion = new completion_info($course);
+$completion->set_module_viewed($cm);
+
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
 $promptid = prompts::get_current_promptid($diary);
 
