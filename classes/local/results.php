@@ -35,6 +35,7 @@ use html_writer;
 use context_module;
 use calendar_event;
 use core_tag_tag;
+use moodle_url;
 /**
  * Utility class for Diary results.
  *
@@ -500,10 +501,10 @@ class results {
      * @param array $grades
      */
     public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
-        global $USER, $OUTPUT, $DB, $CFG;
+        global $CFG, $DB, $OUTPUT, $USER;
         $id = required_param('id', PARAM_INT); // Course module.
         $diaryid = optional_param('diary', $diary->id, PARAM_INT); // Diaryid.
-        $action = required_param('action', PARAM_TEXT); // Current sort Action.
+        $action = required_param('action', PARAM_RAW); // Current sort Action.
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
@@ -514,7 +515,6 @@ class results {
         // Create a table for the current users entry with area for teacher feedback.
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
         if ($entry) {
-
             // 20211109 needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
             $param1 = optional_param('button1'.$entry->id, '', PARAM_TEXT); // Transfer entry.
             $param2 = optional_param('button2'.$entry->id, '', PARAM_TEXT); // Clear entry.
@@ -524,7 +524,8 @@ class results {
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
             echo userdate($entry->timecreated);
             // 20201202 Added link to show all entries for a single user.
-            $url = new moodle_url('mod/diary/reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
+            // 20230810 Changed based on pull request #29. Also had to add, use moodle_url at the head of the file.
+            $url = new moodle_url('reportsingle.php', array('id' => $id, 'user' => $user->id, 'action' => 'allentries'));
             echo '  <a href="'.$url->out(false).'">'.get_string('reportsingle', 'diary')
                 .'</a></td><td></td>';
             echo '</tr>';

@@ -603,6 +603,7 @@ function diary_reset_userdata($data) {
         }
         $status[] = array('component' => $componentstr, 'item' => get_string('tagsdeleted', 'data'), 'error' => false);
     }
+
     // Updating dates - shift may be negative too.
     if ($data->timeshift) {
         // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
@@ -640,13 +641,11 @@ function diary_print_overview($courses, &$htmlarray) {
 
     $timenow = time();
     foreach ($diarys as $diary) {
-
         if (empty($courses[$diary->course]->format)) {
             $courses[$diary->course]->format = $DB->get_field('course', 'format', array(
                 'id' => $diary->course
             ));
         }
-
         if ($courses[$diary->course]->format == 'weeks' && $diary->days) {
 
             $coursestartdate = $courses[$diary->course]->startdate;
@@ -661,15 +660,14 @@ function diary_print_overview($courses, &$htmlarray) {
         } else {
             $diaryopen = true;
         }
-
         if ($diaryopen) {
-            $url = new moodle_url('mod/diary/view.php', ['id' => $diary->coursemodule]);
+            // 20230810 Changed based on pull rquest #29.
+            $url = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', array('id' => $diary->coursemodule));
             $str = '<div class="diary overview"><div class="name">'
                 .$strdiary.': <a '
                 .($diary->visible ? '' : ' class="dimmed"')
                 .' href="'.$url->out(false).'">'
                 .$diary->name.'</a></div></div>';
-
             if (empty($htmlarray[$diary->course]['diary'])) {
                 $htmlarray[$diary->course]['diary'] = $str;
             } else {
@@ -796,7 +794,8 @@ function diary_get_users_done($diary, $currentgroup, $sortoption) {
 
     $params = array();
 
-    $sql = "SELECT DISTINCT u.* FROM {diary_entries} de
+    $sql = "SELECT DISTINCT u.*
+              FROM {diary_entries} de
               JOIN {user} u ON de.userid = u.id ";
 
     // Group users.
@@ -840,11 +839,11 @@ function diary_get_users_done($diary, $currentgroup, $sortoption) {
 function diary_get_coursemodule($diaryid) {
     global $DB;
 
-    return $DB->get_record_sql("SELECT cm.id FROM {course_modules} cm
+    return $DB->get_record_sql("SELECT cm.id
+                                  FROM {course_modules} cm
                                   JOIN {modules} m ON m.id = cm.module
-                                 WHERE cm.instance = ? AND m.name = 'diary'", array(
-        $diaryid
-    ));
+                                 WHERE cm.instance = ?
+                                   AND m.name = 'diary'", array($diaryid));
 }
 
 /**

@@ -414,11 +414,12 @@ class mod_diary_mod_form extends moodleform_mod {
      * @param string $plugin name
      * @return array(value => description)
      */
+    /*
     protected function get_fullmatch_options($plugin) {
         return array(0 => get_string('phrasefullmatchno', $plugin),
                      1 => get_string('phrasefullmatchyes', $plugin));
     }
-
+    */
 
     /**
      * Returns default value for an item.
