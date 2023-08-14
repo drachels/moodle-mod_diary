@@ -60,7 +60,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
 
     $sql = 'SELECT *
               FROM {journal_entries} je
-             WHERE je.journal = '.$journalfromid.'
+             WHERE je.journal = :journalid
           ORDER BY je.id ASC';
 
     // 20211112 Check and make sure journal transferring from and diary transferring too, actually exist.
@@ -70,7 +70,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
 
         // 20211113 Adding transferred from note to the feedback via $feedbacktag, below.
         $journalck = $DB->get_record('journal', array('id' => $journalfromid), '*', MUST_EXIST);
-        $journalentries = $DB->get_records_sql($sql);
+        $journalentries = $DB->get_records_sql($sql, ['journalid' => $journalfromid]);
 
         foreach ($journalentries as $journalentry) {
             $feedbacktag = new stdClass();
@@ -175,10 +175,10 @@ echo get_string('journaltodiaryxfrp5', 'diary');
 
 $jsql = 'SELECT *
            FROM {journal} j
-          WHERE j.course = '.$cm->course.'
+          WHERE j.course = :course
        ORDER BY j.id ASC';
 
-$journals = $DB->get_records_sql($jsql);
+$journals = $DB->get_records_sql($jsql, ['course' => $cm->course]);
 
 echo get_string('journaltodiaryxfrjid', 'diary');
 
@@ -192,10 +192,10 @@ if ($journals) {
 
 $dsql = 'SELECT *
            FROM {diary} d
-          WHERE d.course = '.$cm->course.'
+          WHERE d.course = :course
        ORDER BY d.id ASC';
 
-$diarys = $DB->get_records_sql($dsql);
+$diarys = $DB->get_records_sql($dsql, ['course' => $cm->course]);
 
 echo get_string('journaltodiaryxfrdid', 'diary');
 
