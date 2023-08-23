@@ -183,8 +183,7 @@ if ($prompts) {
 
         // If user can edit, create a delete link to the current prompt.
         // 20230810 Changed based on pull request #29.
-        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'delete', 'promptid' => $prompt->id));
-        $jlink1 = '&nbsp;<a onclick="return confirm(\''
+        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'delete', 'promptid' => $prompt->id));        $jlink1 = '&nbsp;<a onclick="return confirm(\''
                   .get_string('deleteexconfirm', 'diary')
                   .$data->entryid
                   .'\')" href="'. $url->out(false) .'"><img src="pix/delete.png" title="'
@@ -197,7 +196,6 @@ if ($prompts) {
         $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'edit', 'promptid' => $data->entryid));
         $jlink2 = '<a href="'.$url->out(false).'"><img src="pix/edit.png" alt='
                   .get_string('eeditlabel', 'diary').'></a>';
-
         $counter++;
         $prompttext = '<td>'.get_string('writingpromptlable2', 'diary')
                       .$counter
@@ -357,8 +355,8 @@ $intro = format_module_intro('diary', $diary, $cm->id);
 $form->display();
 
 // 20230810 Changed based on pull request #29.
-$url1 = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', array('id' => $id));
-$url2 = new moodle_url($CFG->wwwroot . '/mod/diary/prompt_edit.php', array('id' => $cm->id, 'action' => 'create', 'promptid' => 0));
+$url1 = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', array('id' => $id));
+$url2 = new moodle_url($CFG->wwwroot.'/mod/diary/prompt_edit.php', array('id' => $cm->id, 'action' => 'create', 'promptid' => 0));
 // 20220920 Add a Create button and a return button. 20230810 Changed due to pull request #29.
 echo '<br><a href="'.$url2->out(false).'"
     class="btn btn-warning"
