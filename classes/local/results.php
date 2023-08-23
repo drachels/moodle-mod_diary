@@ -525,8 +525,9 @@ class results {
             echo userdate($entry->timecreated);
             // 20201202 Added link to show all entries for a single user.
             // 20230810 Changed based on pull request #29. Also had to add, use moodle_url at the head of the file.
-            $url = new moodle_url('mod/diary/reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
-            echo '  <a href="'.$url->out(false).'">'.get_string('reportsingle', 'diary')                .'</a></td><td></td>';
+            $url = new moodle_url('reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
+            echo '  <a href="'.$url->out(false).'">'.get_string('reportsingle', 'diary')
+                .'</a></td><td></td>';
             echo '</tr>';
         }
 
