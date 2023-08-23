@@ -494,7 +494,7 @@ function diary_reset_userdata($data) {
     // Delete entries if requested.
     if (!empty($data->reset_diary)) {
 
-        $DB->delete_records_select('diary_entries', "dairy IN ($alldatassql)", array($data->courseid));
+        $DB->delete_records_select('diary_entries', "diary IN ($alldatassql)", array($data->courseid));
 
         if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
             foreach ($datas as $dataid => $unused) {
