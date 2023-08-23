@@ -16,8 +16,7 @@
 /**
  * Defines the version of Diary.
  *
- * This code fragment is called by moodle_needs_upgrading() and
- * /admin/index.php
+ * This code fragment is called by moodle_needs_upgrading() and /admin/index.php
  *
  * @package   mod_diary
  * @copyright 2019 onwards AL Rachels drachels@drachels.com
