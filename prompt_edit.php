@@ -183,7 +183,8 @@ if ($prompts) {
 
         // If user can edit, create a delete link to the current prompt.
         // 20230810 Changed based on pull request #29.
-        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'delete', 'promptid' => $prompt->id));        $jlink1 = '&nbsp;<a onclick="return confirm(\''
+        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'delete', 'promptid' => $prompt->id));
+        $jlink1 = '&nbsp;<a onclick="return confirm(\''
                   .get_string('deleteexconfirm', 'diary')
                   .$data->entryid
                   .'\')" href="'. $url->out(false) .'"><img src="pix/delete.png" title="'
