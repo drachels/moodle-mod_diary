@@ -272,7 +272,6 @@ if ($entriesmanager) {
     $temp .= '<a href="index.php?id='.$course->id.'&currentgroup='.$currentgroup.'">'.get_string('viewalldiaries', 'diary').'</a>';
     $temp .= '</a></span>';
     echo $temp;
-
 } else {
     // 20200831 Added to show link to only index.php page for students. 20210501 modified to remove div.
     echo '<a class="reportlink" href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
