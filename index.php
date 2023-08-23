@@ -147,6 +147,7 @@ foreach ($diarys as $diary) {
         // 20220102 Added action to the href. 20230810 Changed based on pull request #29.
         $url = new moodle_url('report.php', ['id' => $diary->coursemodule, 'action' => 'currententry']);
         $table->data[$i][] = '<a href="'.$url->out(false).'">'
+            .get_string('viewallentries', 'diary', $entrycount).'</a>';
     } else if (! empty($managersomewhere)) {
         $table->data[$i][] = "";
     }
