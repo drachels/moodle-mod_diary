@@ -162,8 +162,8 @@ echo '<form method="POST">';
 
 // 20211105 Setup a url that takes you back to the Diary you came from.
 // 20230810 Changed based on pull request #29.
-$url1 = new moodle_url('mod/diary/view.php', ['id' => $id]);
-$url2 = new moodle_url('mod/diary/journaltodiaryxfr.php', ['id' => $cm->id]);
+$url1 = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', array('id' => $id));
+$url2 = new moodle_url($CFG->wwwroot.'/mod/diary/journaltodiaryxfr.php', array('id' => $cm->id));
 
 // 20211202 Add some instructions and information to the page.
 echo '<h3 style="text-align:center;"><b>'.get_string('journaltodiaryxfrtitle', 'diary').'</b></h3>';
