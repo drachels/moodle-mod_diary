@@ -989,7 +989,6 @@ class results {
         global $DB, $CFG, $USER;
         $cm = diary_get_coursemodule($diary->id);
         $context = context_module::instance($cm->id);
-
         // Get the groupmode which should be 0, 1, or 2.
         $groupmode = ($diary->groupmode);
 
