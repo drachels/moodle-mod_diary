@@ -30,8 +30,7 @@ use mod_diary\local\results;
  * will create a new instance and return the id number
  * of the new instance.
  *
- * @param object $diary
- *            Object containing required diary properties.
+ * @param object $diary Object containing required diary properties.
  * @return int Diary ID.
  */
 function diary_add_instance($diary) {
