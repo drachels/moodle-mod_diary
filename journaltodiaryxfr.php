@@ -42,9 +42,7 @@ if (! $cm = get_coursemodule_from_id('diary', $id)) {
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
-
 $context = context_module::instance($cm->id);
-
 $diary = $DB->get_record('diary', array('id' => $cm->instance) , '*', MUST_EXIST);
 
 // 20211109 Check to see if Transfer the entries button is clicked and returning 'Transfer the entries' to trigger insert record.
