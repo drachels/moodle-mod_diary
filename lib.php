@@ -494,7 +494,7 @@ function diary_reset_userdata($data) {
     // Delete entries if requested.
     if (!empty($data->reset_diary)) {
 
-        $DB->delete_records_select('diary_entries', "dataid IN ($alldatassql)", array($data->courseid));
+        $DB->delete_records_select('diary_entries', "diary IN ($alldatassql)", array($data->courseid));
 
         if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
             foreach ($datas as $dataid => $unused) {
@@ -515,7 +515,7 @@ function diary_reset_userdata($data) {
 
         if (empty($data->reset_gradebook_grades)) {
             // Remove all grades from gradebook.
-            data_reset_gradebook($data->courseid);
+            diary_reset_gradebook($data->courseid);
         }
 
         $status[] = array(
@@ -582,7 +582,7 @@ function diary_reset_userdata($data) {
 
         if (empty($data->reset_gradebook_grades)) {
             // Remove all grades from gradebook.
-            data_reset_gradebook($data->courseid);
+            diary_reset_gradebook($data->courseid);
         }
 
         $status[] = array('component' => $componentstr, 'item' => get_string('deleteallratings'), 'error' => false);
@@ -608,12 +608,30 @@ function diary_reset_userdata($data) {
     if ($data->timeshift) {
         // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
         // See MDL-9367.
-        shift_course_mod_dates('diary', array('timeavailablefrom', 'timeavailableto',
-            'timeviewfrom', 'timeviewto', 'assesstimestart', 'assesstimefinish'), $data->timeshift, $data->courseid);
+        shift_course_mod_dates('diary', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
         $status[] = array('component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false);
     }
 
     return $status;
+}
+
+/**
+ * Returns gradebook data in module.
+ *
+ * @return array
+ */
+function diary_reset_gradebook($courseid, $type = '') {
+    global $DB;
+
+    $sql = "SELECT d.*, cm.idnumber as cmidnumber, d.course as courseid
+              FROM {diary} d, {course_modules} cm, {modules} m
+             WHERE m.name='diary' AND m.id=cm.module AND cm.instance=d.id AND d.course=?";
+
+    if ($diaries = $DB->get_records_sql($sql, [$courseid])) {
+        foreach ($diaries as $diary) {
+            diary_grade_item_update($diary);
+        }
+    }
 }
 
 /**
