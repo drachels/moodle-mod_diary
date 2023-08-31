@@ -381,7 +381,6 @@ class results {
                     $d->timemodified,
                     $d->format,
                     $d->rating,
-                    //strip_tags($d->entrycomment),
                     $d->entrycomment,
                     $d->teacher,
                     $d->timemarked,
