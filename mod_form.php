@@ -148,13 +148,21 @@ class mod_diary_mod_form extends moodleform_mod {
         ));
         $mform->addHelpButton('timeclose', 'diaryclosetime', 'diary');
 
-        // 20201015 Added Edit all, enable/disable setting.
-        $mform->addElement('selectyesno', 'editall', get_string('editall', 'diary'));
-        $mform->addHelpButton('editall', 'editall', 'diary');
+        // 20201015 Added Edit all, enable/disable setting. 20230925 Modified to use site default.
+        $name = 'editall';
+        $label = get_string($name, $plugin);
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, $diaryconfig->editall);
 
-        // 20201119 Added Edit dates, enable/disable setting.
-        $mform->addElement('selectyesno', 'editdates', get_string('editdates', 'diary'));
-        $mform->addHelpButton('editdates', 'editdates', 'diary');
+        // 20201119 Added Edit dates, enable/disable setting. 20230925 Modified to use site default.
+        $name = 'editdates';
+        $label = get_string($name, $plugin);
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, $diaryconfig->editdates);
 
         // 20210704 Added heading for appearance options section.
         $name = 'appearancehdr';
