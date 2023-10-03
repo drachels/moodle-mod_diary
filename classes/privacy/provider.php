@@ -72,7 +72,7 @@ class provider implements \core_privacy\local\metadata\provider,
                 'entrycomment' => 'privacy:metadata:diary_entries:entrycomment',
                 'teacher' => 'privacy:metadata:diary_entries:teacher',
                 'timemarked' => 'privacy:metadata:diary_entries:timemarked',
-                'mailed' => 'privacy:metadata:diary_entries:mailed'
+                'mailed' => 'privacy:metadata:diary_entries:mailed',
             ],
             'privacy:metadata:diary_entries'
         );
@@ -111,7 +111,7 @@ class provider implements \core_privacy\local\metadata\provider,
         $params = [
             'modid' => $modid,
             'contextlevel' => CONTEXT_MODULE,
-            'userid' => $userid
+            'userid' => $userid,
         ];
 
         // User-created diary entries.
@@ -153,7 +153,7 @@ class provider implements \core_privacy\local\metadata\provider,
         $params = [
             'modid' => $modid,
             'contextlevel' => CONTEXT_MODULE,
-            'contextid' => $context->id
+            'contextid' => $context->id,
         ];
 
         // Find users with diary entries.
@@ -241,7 +241,7 @@ class provider implements \core_privacy\local\metadata\provider,
                 'entrycomment' => strip_tags($diary->entrycomment),
                 'teacher' => $diary->teacher,
                 'timemarked' => $diary->timemarked ? transform::datetime($diary->timemarked) : '',
-                'mailed' => $diary->mailed
+                'mailed' => $diary->mailed,
             ];
         }
         $diarys->close();

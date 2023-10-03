@@ -25,7 +25,7 @@
 use mod_diary\local\results;
 use mod_diary\local\diarystats;
 use mod_diary\local\prompts;
-use \mod_diary\event\invalid_access_attempt;
+use mod_diary\event\invalid_access_attempt;
 
 require_once("../../config.php");
 require_once('locallib.php'); // May not need this.
@@ -39,7 +39,7 @@ if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
-if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
+if (! $course = $DB->get_record("course", ["id" => $cm->course])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -49,7 +49,7 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
+if (! $diary = $DB->get_record("diary", ["id" => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -62,13 +62,13 @@ $promptid = prompts::get_current_promptid($diary);
 // 20210613 Added check to prevent direct access to create new entry when activity is closed.
 if (($diary->timeclose) && (time() > $diary->timeclose)) {
     // Trigger invalid_access_attempt with redirect to the view page.
-    $params = array(
+    $params = [
         'objectid' => $id,
         'context' => $context,
-        'other' => array(
-            'file' => 'edit.php'
-        )
-    );
+        'other' => [
+            'file' => 'edit.php',
+        ],
+    ];
     $event = invalid_access_attempt::create($params);
     $event->trigger();
     redirect('view.php?id='.$id, get_string('invalidaccessexp', 'diary'));
@@ -78,26 +78,27 @@ if (($diary->timeclose) && (time() > $diary->timeclose)) {
 diarystats::get_minmaxes($diary);
 
 // Header.
-$PAGE->set_url('/mod/diary/edit.php', array('id' => $id));
+$PAGE->set_url('/mod/diary/edit.php', ['id' => $id]);
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
 
-
 $data = new stdClass();
 
-$parameters = array(
+$parameters = [
     'userid' => $USER->id,
     'diary' => $diary->id,
     'action' => $action,
-    'firstkey' => $firstkey
-);
+    'firstkey' => $firstkey,
+];
 
 // Get the single record specified by firstkey.
-$entry = $DB->get_record("diary_entries", array(
-    "userid" => $USER->id,
-    'id' => $firstkey
-));
+$entry = $DB->get_record("diary_entries",
+    [
+        "userid" => $USER->id,
+        'id' => $firstkey,
+    ]
+);
 // 20230306 Added code that lists the tags on the edit_form page.
 $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
 
@@ -157,13 +158,15 @@ $data = file_prepare_standard_filemanager($data,
                                           $data->entryid);
 
 // 20201119 Added $diary->editdates setting.
-$form = new mod_diary_entry_form(null, array(
-    'current' => $data,
-    'cm' => $cm,
-    'diary' => $diary->editdates,
-    'editoroptions' => $editoroptions,
-    'attachmentoptions' => $attachmentoptions
-));
+$form = new mod_diary_entry_form(null,
+    [
+        'current' => $data,
+        'cm' => $cm,
+        'diary' => $diary->editdates,
+        'editoroptions' => $editoroptions,
+        'attachmentoptions' => $attachmentoptions,
+    ]
+);
 
 // Set existing data loaded from the database for this entry.
 $form->set_data($data);
@@ -186,10 +189,12 @@ if ($form->is_cancelled()) {
     if (! $diary->editdates) {
         // If editdates is NOT enabled do attempted cheat testing here.
         // 20210619 Before we update, see if there is an entry in database with the same entryid.
-        $entry = $DB->get_record("diary_entries", array(
-            "userid" => $USER->id,
-            'id' => $fromform->entryid
-        ));
+        $entry = $DB->get_record("diary_entries",
+            [
+                "userid" => $USER->id,
+                'id' => $fromform->entryid,
+            ]
+        );
     }
 
     // 20210619 If user tries to change timecreated, prevent it.
@@ -215,10 +220,12 @@ if ($form->is_cancelled()) {
             $DB->update_record("diary_entries", $newentry);
 
             // Trigger module entry updated event.
-            $event = \mod_diary\event\invalid_entry_attempt::create(array(
-                'objectid' => $diary->id,
-                'context' => $context
-            ));
+            $event = \mod_diary\event\invalid_entry_attempt::create(
+                [
+                    'objectid' => $diary->id,
+                    'context' => $context,
+                ]
+            );
             $event->add_record_snapshot('course_modules', $cm);
             $event->add_record_snapshot('course', $course);
             $event->add_record_snapshot('diary', $diary);
@@ -270,16 +277,20 @@ if ($form->is_cancelled()) {
     // will need to find a match with contextid and user id.
     if ($entry) {
         // Trigger module entry updated event.
-        $event = \mod_diary\event\entry_updated::create(array(
-            'objectid' => $diary->id,
-            'context' => $context
-        ));
+        $event = \mod_diary\event\entry_updated::create(
+            [
+                'objectid' => $diary->id,
+                'context' => $context,
+            ]
+        );
     } else {
         // Trigger module entry created event.
-        $event = \mod_diary\event\entry_created::create(array(
-            'objectid' => $diary->id,
-            'context' => $context
-        ));
+        $event = \mod_diary\event\entry_created::create(
+            [
+                'objectid' => $diary->id,
+                'context' => $context,
+            ]
+        );
     }
     $event->add_record_snapshot('course_modules', $cm);
     $event->add_record_snapshot('course', $course);
@@ -289,7 +300,7 @@ if ($form->is_cancelled()) {
     // Add confirmation of record being saved.
     echo $OUTPUT->notification(get_string('entrysuccess', 'diary'), 'notifysuccess');
     // Start new code to send teachers note when diary is done.
-    $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
+    $role = $DB->get_record('role', ['shortname' => 'editingteacher']);
     $contextcourse = context_course::instance($course->id);
 
     $teachers = get_role_users($role->id, $contextcourse);

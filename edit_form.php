@@ -143,7 +143,7 @@ class mod_diary_entry_form extends moodleform {
                 null,
                 [
                     'itemtype' => 'diary_entries',
-                    'component' => 'mod_diary'
+                    'component' => 'mod_diary',
                 ]
             );
         }

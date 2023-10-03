@@ -41,7 +41,7 @@ class entry extends \core_search\base_mod {
      *
      * @var array Internal quick static cache.
      */
-    protected $entriesdata = array();
+    protected $entriesdata = [];
 
     /**
      * Returns recordset containing required data for indexing diary entries.
@@ -64,9 +64,11 @@ class entry extends \core_search\base_mod {
           $contextjoin
                  WHERE de.timemodified >= :timemodified
               ORDER BY de.timemodified ASC";
-        return $DB->get_recordset_sql($sql, array_merge($contextparams, [
-            'timemodified' => $modifiedfrom
-        ]));
+        return $DB->get_recordset_sql($sql, array_merge($contextparams,
+            [
+                'timemodified' => $modifiedfrom,
+            ]
+        ));
     }
 
     /**
@@ -76,7 +78,7 @@ class entry extends \core_search\base_mod {
      * @param array $options
      * @return \core_search\document
      */
-    public function get_document($entry, $options = array()) {
+    public function get_document($entry, $options = []) {
         try {
             $cm = $this->get_cm('diary', $entry->diary, $entry->course);
             $context = \context_module::instance($cm->id);
@@ -160,9 +162,11 @@ class entry extends \core_search\base_mod {
             // Teachers see student's entries in the report page.
             $url = '/mod/diary/report.php#entry-' . $entryuserid;
         }
-        return new \moodle_url($url, array(
-            'id' => $contextmodule->instanceid
-        ));
+        return new \moodle_url($url,
+            [
+                'id' => $contextmodule->instanceid,
+            ]
+        );
     }
 
     /**
@@ -173,9 +177,11 @@ class entry extends \core_search\base_mod {
      */
     public function get_context_url(\core_search\document $doc) {
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
-        return new \moodle_url('/mod/diary/view.php', array(
-            'id' => $contextmodule->instanceid
-        ));
+        return new \moodle_url('/mod/diary/view.php',
+            [
+                'id' => $contextmodule->instanceid,
+            ]
+        );
     }
 
     /**
@@ -191,6 +197,6 @@ class entry extends \core_search\base_mod {
         global $DB;
         return $DB->get_record_sql("SELECT de.*, d.course FROM {diary_entries} de
                                       JOIN {diary} d ON d.id = de.diary
-                                     WHERE de.id = ?", array('id' => $entryid), MUST_EXIST);
+                                     WHERE de.id = ?", ['id' => $entryid], MUST_EXIST);
     }
 }

@@ -23,47 +23,47 @@
  */
 defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
-$logs = array(
-    array(
+$logs = [
+    [
         'module' => 'diary',
         'action' => 'view',
         'mtable' => 'diary',
-        'field' => 'name'
-    ),
-    array(
+        'field' => 'name',
+    ],
+    [
         'module' => 'diary',
         'action' => 'view all',
         'mtable' => 'diary',
-        'field' => 'name'
-    ),
-    array(
+        'field' => 'name',
+    ],
+    [
         'module' => 'diary',
         'action' => 'view responses',
         'mtable' => 'diary',
-        'field' => 'name'
-    ),
-    array(
+        'field' => 'name',
+    ],
+    [
         'module' => 'diary',
         'action' => 'add entry',
         'mtable' => 'diary',
-        'field' => 'name'
-    ),
-    array(
+        'field' => 'name',
+    ],
+    [
         'module' => 'diary',
         'action' => 'update entry',
         'mtable' => 'diary',
-        'field' => 'name'
-    ),
-    array(
+        'field' => 'name',
+    ],
+    [
         'module' => 'diary',
         'action' => 'update feedback',
         'mtable' => 'diary',
-        'field' => 'name'
-    ),
-    array(
+        'field' => 'name',
+    ],
+    [
         'module' => 'diary',
         'action' => 'transfer',
         'mtable' => 'diary',
-        'field' => 'name'
-    )
-);
+        'field' => 'name',
+    ],
+];

@@ -117,27 +117,27 @@ function diary_delete_instance($id) {
 
     $result = true;
 
-    if (! $diary = $DB->get_record("diary", array(
-        "id" => $id
-    ))) {
+    if (! $diary = $DB->get_record("diary", [
+        "id" => $id,
+    ])) {
         return false;
     }
 
-    if (! $DB->delete_records("diary_entries", array(
-        "diary" => $diary->id
-    ))) {
+    if (! $DB->delete_records("diary_entries", [
+        "diary" => $diary->id,
+    ])) {
         $result = false;
     }
 
-    if (! $DB->delete_records("diary_prompts", array(
-        "diaryid" => $diary->id
-    ))) {
+    if (! $DB->delete_records("diary_prompts", [
+        "diaryid" => $diary->id,
+    ])) {
         $result = false;
     }
 
-    if (! $DB->delete_records("diary", array(
-        "id" => $diary->id
-    ))) {
+    if (! $DB->delete_records("diary", [
+        "id" => $diary->id,
+    ])) {
         $result = false;
     }
 
@@ -206,11 +206,11 @@ function diary_supports($feature) {
  * @return array
  */
 function diary_get_view_actions() {
-    return array(
+    return [
         'view',
         'view all',
-        'view responses'
-    );
+        'view responses',
+    ];
 }
 
 /**
@@ -224,11 +224,11 @@ function diary_get_view_actions() {
  * @return array
  */
 function diary_get_post_actions() {
-    return array(
+    return [
         'add entry',
         'update entry',
-        'update feedback'
-    );
+        'update feedback',
+    ];
 }
 
 /**
@@ -245,10 +245,10 @@ function diary_get_post_actions() {
 function diary_user_outline($course, $user, $mod, $diary) {
     global $DB;
 
-    if ($entry = $DB->get_record("diary_entries", array(
+    if ($entry = $DB->get_record("diary_entries", [
         "userid" => $user->id,
-        "diary" => $diary->id
-    ))) {
+        "diary" => $diary->id,
+    ])) {
 
         $numwords = count(preg_split("/\w\b/", $entry->text)) - 1;
 
@@ -277,11 +277,11 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
         return false;
     }
 
-    $dbparams = array(
+    $dbparams = [
         $timestart,
         $course->id,
-        'diary'
-    );
+        'diary',
+    ];
     // 20210611 Added Moodle branch check.
     if ($CFG->branch < 311) {
         $namefields = user_picture::fields('u', null, 'userid');
@@ -303,7 +303,7 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
 
     $modinfo = get_fast_modinfo($course);
 
-    $show = array();
+    $show = [];
 
     foreach ($newentries as $anentry) {
         if (! array_key_exists($anentry->cmid, $modinfo->get_cms())) {
@@ -382,11 +382,11 @@ function diary_get_participants($diaryid) {
     // Get students.
     $students = $DB->get_records_sql("SELECT DISTINCT u.id
                                         FROM {user} u, {diary_entries} d
-                                       WHERE d.diary = ? AND u.id = d.userid", array($diaryid));
+                                       WHERE d.diary = ? AND u.id = d.userid", [$diaryid]);
     // Get teachers.
     $teachers = $DB->get_records_sql("SELECT DISTINCT u.id
                                         FROM {user} u, {diary_entries} d
-                                       WHERE d.diary = ? AND u.id = d.teacher", array($diaryid));
+                                       WHERE d.diary = ? AND u.id = d.teacher", [$diaryid]);
 
     // Add teachers to students.
     if ($teachers) {
@@ -411,10 +411,10 @@ function diary_scale_used($diaryid, $scaleid) {
     global $DB;
     $return = false;
 
-    $rec = $DB->get_record("diary", array(
+    $rec = $DB->get_record("diary", [
         "id" => $diaryid,
-        "grade" => - $scaleid
-    ));
+        "grade" => - $scaleid,
+    ]);
 
     if (! empty($rec) && ! empty($scaleid)) {
         $return = true;
@@ -460,7 +460,7 @@ function diary_reset_course_form_definition(&$mform) {
  * @return array
  */
 function diary_reset_course_form_defaults($course) {
-    return array('reset_diary' => 1);
+    return ['reset_diary' => 1];
 }
 
 /**
@@ -476,7 +476,7 @@ function diary_reset_userdata($data) {
     require_once($CFG->dirroot . '/rating/lib.php');
 
     $componentstr = get_string('modulenameplural', 'diary');
-    $status = array();
+    $status = [];
 
     $alldatassql = "SELECT d.id
                       FROM {diary} d
@@ -493,9 +493,9 @@ function diary_reset_userdata($data) {
     // Delete entries if requested.
     if (!empty($data->reset_diary)) {
 
-        $DB->delete_records_select('diary_entries', "diary IN ($alldatassql)", array($data->courseid));
+        $DB->delete_records_select('diary_entries', "diary IN ($alldatassql)", [$data->courseid]);
 
-        if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
+        if ($datas = $DB->get_records_sql($alldatassql, [$data->courseid])) {
             foreach ($datas as $dataid => $unused) {
                 if (!$cm = get_coursemodule_from_instance('diary', $dataid)) {
                     continue;
@@ -517,11 +517,11 @@ function diary_reset_userdata($data) {
             diary_reset_gradebook($data->courseid);
         }
 
-        $status[] = array(
+        $status[] = [
             'component' => $componentstr,
             'item' => get_string('removeentries', 'diary'),
-            'error' => false
-        );
+            'error' => false,
+        ];
     }
 
     // Remove entries by users not enrolled into the course.
@@ -533,9 +533,9 @@ function diary_reset_userdata($data) {
                         WHERE d.course = ? AND de.userid > 0";
 
         $coursecontext = context_course::instance($data->courseid);
-        $notenrolled = array();
-        $fields = array();
-        $rs = $DB->get_recordset_sql($recordssql, array($data->courseid));
+        $notenrolled = [];
+        $fields = [];
+        $rs = $DB->get_recordset_sql($recordssql, [$data->courseid]);
         foreach ($rs as $record) {
             if (array_key_exists($record->userid, $notenrolled) || !$record->userexists || $record->userdeleted
               || !is_enrolled($coursecontext, $record->userid)) {
@@ -549,7 +549,7 @@ function diary_reset_userdata($data) {
                 $rm->delete_ratings($ratingdeloptions);
 
                 // Delete any files that may exist.
-                if ($contents = $DB->get_records('diary_entries', array('recordid' => $record->id), '', 'id')) {
+                if ($contents = $DB->get_records('diary_entries', ['recordid' => $record->id], '', 'id')) {
                     foreach ($contents as $content) {
                         $fs->delete_area_files($datacontext->id, 'mod_data', 'content', $content->id);
                     }
@@ -558,16 +558,16 @@ function diary_reset_userdata($data) {
 
                 core_tag_tag::remove_all_item_tags('mod_diary', 'diary_entries', $record->id);
 
-                $DB->delete_records('diary_entries', array('recordid' => $record->id));
+                $DB->delete_records('diary_entries', ['recordid' => $record->id]);
             }
         }
         $rs->close();
-        $status[] = array('component' => $componentstr, 'item' => get_string('deletenotenrolled', 'diary'), 'error' => false);
+        $status[] = ['component' => $componentstr, 'item' => get_string('deletenotenrolled', 'diary'), 'error' => false];
     }
 
     // Remove all ratings.
     if (!empty($data->reset_data_ratings)) {
-        if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
+        if ($datas = $DB->get_records_sql($alldatassql, [$data->courseid])) {
             foreach ($datas as $dataid => $unused) {
                 if (!$cm = get_coursemodule_from_instance('diary', $dataid)) {
                     continue;
@@ -584,12 +584,12 @@ function diary_reset_userdata($data) {
             diary_reset_gradebook($data->courseid);
         }
 
-        $status[] = array('component' => $componentstr, 'item' => get_string('deleteallratings'), 'error' => false);
+        $status[] = ['component' => $componentstr, 'item' => get_string('deleteallratings'), 'error' => false];
     }
 
     // Remove all the tags.
     if (!empty($data->reset_data_tags)) {
-        if ($datas = $DB->get_records_sql($alldatassql, array($data->courseid))) {
+        if ($datas = $DB->get_records_sql($alldatassql, [$data->courseid])) {
             foreach ($datas as $dataid => $unused) {
                 if (!$cm = get_coursemodule_from_instance('data', $dataid)) {
                     continue;
@@ -600,15 +600,15 @@ function diary_reset_userdata($data) {
 
             }
         }
-        $status[] = array('component' => $componentstr, 'item' => get_string('tagsdeleted', 'data'), 'error' => false);
+        $status[] = ['component' => $componentstr, 'item' => get_string('tagsdeleted', 'data'), 'error' => false];
     }
 
     // Updating dates - shift may be negative too.
     if ($data->timeshift) {
         // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
         // See MDL-9367.
-        shift_course_mod_dates('diary', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
-        $status[] = array('component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false);
+        shift_course_mod_dates('diary', ['timeopen', 'timeclose'], $data->timeshift, $data->courseid);
+        $status[] = ['component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false];
     }
 
     return $status;
@@ -643,15 +643,15 @@ function diary_print_overview($courses, &$htmlarray) {
     global $USER, $CFG, $DB;
 
     if (! get_config('diary', 'overview')) {
-        return array();
+        return [];
     }
 
     if (empty($courses) || ! is_array($courses) || count($courses) == 0) {
-        return array();
+        return [];
     }
 
     if (! $diarys = get_all_instances_in_courses('diary', $courses)) {
-        return array();
+        return [];
     }
 
     $strdiary = get_string('modulename', 'diary');
@@ -659,9 +659,7 @@ function diary_print_overview($courses, &$htmlarray) {
     $timenow = time();
     foreach ($diarys as $diary) {
         if (empty($courses[$diary->course]->format)) {
-            $courses[$diary->course]->format = $DB->get_field('course', 'format', array(
-                'id' => $diary->course
-            ));
+            $courses[$diary->course]->format = $DB->get_field('course', 'format', ['id' => $diary->course]);
         }
         if ($courses[$diary->course]->format == 'weeks' && $diary->days) {
 
@@ -679,7 +677,7 @@ function diary_print_overview($courses, &$htmlarray) {
         }
         if ($diaryopen) {
             // 20230810 Changed based on pull rquest #29.
-            $url = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', array('id' => $diary->coursemodule));
+            $url = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', ['id' => $diary->coursemodule]);
             $str = '<div class="diary overview"><div class="name">'
                 .$strdiary.': <a '
                 .($diary->visible ? '' : ' class="dimmed"')
@@ -759,10 +757,10 @@ function diary_grade_item_update($diary, $grades = null) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    $params = array(
+    $params = [
         'itemname' => $diary->name,
-        'idnumber' => $diary->cmidnumber
-    );
+        'idnumber' => $diary->cmidnumber,
+    ];
 
     if (! $diary->assessed || $diary->scale == 0) {
         $params['gradetype'] = GRADE_TYPE_NONE;
@@ -793,9 +791,7 @@ function diary_grade_item_delete($diary) {
 
     require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, null, array(
-        'deleted' => 1
-    ));
+    return grade_update('mod/diary', $diary->course, 'mod', 'diary', $diary->id, 0, null, ['deleted' => 1]);
 }
 
 /**
@@ -809,7 +805,7 @@ function diary_grade_item_delete($diary) {
 function diary_get_users_done($diary, $currentgroup, $sortoption) {
     global $DB;
 
-    $params = array();
+    $params = [];
 
     $sql = "SELECT DISTINCT u.*
               FROM {diary_entries} de
@@ -860,7 +856,7 @@ function diary_get_coursemodule($diaryid) {
                                   FROM {course_modules} cm
                                   JOIN {modules} m ON m.id = cm.module
                                  WHERE cm.instance = ?
-                                   AND m.name = 'diary'", array($diaryid));
+                                   AND m.name = 'diary'", [$diaryid]);
 }
 
 /**
@@ -876,7 +872,7 @@ function diary_get_coursemodule($diaryid) {
  * @param array $options Additional options affecting the file serving.
  * @return bool False if file not found, does not return if found - just send the file.
  */
-function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
+function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $DB, $USER;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -891,9 +887,7 @@ function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownlo
 
     // Args[0] should be the entry id.
     $entryid = intval(array_shift($args));
-    $entry = $DB->get_record('diary_entries', array(
-        'id' => $entryid
-    ), 'id, userid', MUST_EXIST);
+    $entry = $DB->get_record('diary_entries', ['id' => $entryid], 'id, userid', MUST_EXIST);
 
     $canmanage = has_capability('mod/diary:manageentries', $context);
     if (! $canmanage && ! has_capability('mod/diary:addentries', $context)) {
@@ -946,17 +940,17 @@ function diary_extend_settings_navigation(settings_navigation $settingsnav, navi
 
     // Link to add automatic time released prompts to Diary activities. Visible to teachers and admin only.
     if (has_capability('mod/diary:addinstance', $context)) {
-        $link = new moodle_url('/mod/diary/prompt_edit.php', array('id' => $cm->id));
+        $link = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id]);
         $linkname = get_string('promptstitle', 'diary');
-        $icon = new pix_icon('icon', '', 'diary', array('class' => 'icon'));
+        $icon = new pix_icon('icon', '', 'diary', ['class' => 'icon']);
         $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
     }
 
     // Link to transfer Journal entries to Diary entries. Visible to admin only.
     if (is_siteadmin()) {
-        $link = new moodle_url('/mod/diary/journaltodiaryxfr.php', array('id' => $cm->id));
+        $link = new moodle_url('/mod/diary/journaltodiaryxfr.php', ['id' => $cm->id]);
         $linkname = get_string('journaltodiaryxfrtitle', 'diary');
-        $icon = new pix_icon('icon', '', 'diary', array('class' => 'icon'));
+        $icon = new pix_icon('icon', '', 'diary', ['class' => 'icon']);
         $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
     }
 }

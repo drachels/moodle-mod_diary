@@ -55,17 +55,26 @@ class restore_diary_activity_task extends restore_activity_task {
      * @return array
      */
     public static function define_decode_contents() {
-        $contents = array();
-        $contents[] = new restore_decode_content('diary', array(
-            'intro'
-        ), 'diary');
-        $contents[] = new restore_decode_content('diary_entries', array(
-            'text',
-            'entrycomment'
-        ), 'diary_entry');
-        $contents[] = new restore_decode_content('diary_prompts', array(
-            'text'
-        ), 'diary_prompt');
+        $contents = [];
+        $contents[] = new restore_decode_content('diary',
+            [
+                'intro',
+            ],
+            'diary'
+        );
+        $contents[] = new restore_decode_content('diary_entries',
+            [
+                'text',
+                'entrycomment',
+            ],
+            'diary_entry'
+        );
+        $contents[] = new restore_decode_content('diary_prompts',
+            [
+                'text',
+            ],
+            'diary_prompt'
+        );
 
         return $contents;
     }
@@ -77,7 +86,7 @@ class restore_diary_activity_task extends restore_activity_task {
      * @return array of restore_decode_rule
      */
     public static function define_decode_rules() {
-        $rules = array();
+        $rules = [];
         // List of Diary's in the course.
         $rules[] = new restore_decode_rule('DIARYINDEX', '/mod/diary/index.php?id=$1', 'course');
         // Diary views by cm->id.
@@ -104,7 +113,7 @@ class restore_diary_activity_task extends restore_activity_task {
      * @return array of restore_log_rule
      */
     public static function define_restore_log_rules() {
-        $rules = array();
+        $rules = [];
 
         $rules[] = new restore_log_rule('diary', 'view', 'view.php?id={course_module}', '{diary}');
         $rules[] = new restore_log_rule('diary', 'view responses', 'report.php?id={course_module}', '{diary}');
@@ -129,7 +138,7 @@ class restore_diary_activity_task extends restore_activity_task {
      * @return array
      */
     public static function define_restore_log_rules_for_course() {
-        $rules = array();
+        $rules = [];
 
         $rules[] = new restore_log_rule('diary', 'view all', 'index.php?id={course}', null);
 

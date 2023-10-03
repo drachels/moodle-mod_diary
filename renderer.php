@@ -74,62 +74,76 @@ class mod_diary_renderer extends plugin_renderer_base {
      */
     public function toolbar($firstkey) {
         // 20201003 Changed toolbar code to $output instead of html_writer::alist.
-        $options = array();
+        $options = [];
         $options['id'] = $this->cm->id;
         $output = ' ';
         // Print export to .csv file toolbutton.
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('i/export', get_string('csvexport', 'diary')), array(
-            'class' => 'toolbutton'
-        ));
+        $output .= html_writer::link($url, $this->pix_icon('i/export', get_string('csvexport', 'diary')),
+            [
+            'class' => 'toolbutton',
+            ]
+        );
 
         // Print reload toolbutton.
         $options['action'] = 'reload';
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/reload', get_string('reload', 'diary')), array(
-            'class' => 'toolbutton'
-        ));
+        $output .= html_writer::link($url, $this->pix_icon('t/reload', get_string('reload', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
 
         // Print edit entry toolbutton.
         $options['action'] = 'editentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/edit.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('i/edit', get_string('edittopoflist', 'diary')), array(
-            'class' => 'toolbutton'
-        ));
+        $output .= html_writer::link($url, $this->pix_icon('i/edit', get_string('edittopoflist', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
 
         // Print sort to first entry toolbutton.
         $options['action'] = 'sortfirstentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/left', get_string('sortfirstentry', 'diary')), array(
-            'class' => 'toolbutton'
-        ));
+        $output .= html_writer::link($url, $this->pix_icon('t/left', get_string('sortfirstentry', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
 
         // Print lowest grade entry toolbutton.
         $options['action'] = 'lowestgradeentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')), array(
-            'class' => 'toolbutton'
-        ));
+        $output .= html_writer::link($url, $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
 
         // Print highest grade entry toolbutton.
         $options['action'] = 'highestgradeentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')), array(
-            'class' => 'toolbutton'
-        ));
+        $output .= html_writer::link($url, $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
 
         // Print latest modified entry toolbutton.
         $options['action'] = 'latestmodifiedentry';
         $options['firstkey'] = $firstkey;
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')), array(
-            'class' => 'toolbutton'
-        ));
+        $output .= html_writer::link($url, $this->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
 
         $firstkey = '';
         // Return all available toolbuttons.

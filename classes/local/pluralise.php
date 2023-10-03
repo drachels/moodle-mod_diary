@@ -41,7 +41,7 @@ class pluralise {
      * http://kuwamoto.org/2007/12/17/improved-pluralizing-in-php-actionscript-and-ror/
      */
     /** @var array null */
-    private static $plural = array(
+    private static $plural = [
         '/(quiz)$/i' => "$1zes",
         '/^(ox)$/i' => "$1en",
         '/([m|l])ouse$/i' => "$1ice",
@@ -59,10 +59,10 @@ class pluralise {
         '/(octop)us$/i' => "$1i",
         '/(ax|test)is$/i' => "$1es",
         '/(us)$/i' => "$1es",
-        '/s$/i' => "s"
-    );
+        '/s$/i' => "s",
+    ];
     /** @var array null */
-    private static $singular = array(
+    private static $singular = [
         '/(quiz)zes$/i' => "$1",
         '/(matr)ices$/i' => "$1ix",
         '/(vert|ind)ices$/i' => "$1ex",
@@ -90,10 +90,10 @@ class pluralise {
         '/(h|bl)ouses$/i' => "$1ouse",
         '/(corpse)s$/i' => "$1",
         '/(us)es$/i' => "$1",
-        '/s$/i' => ""
-    );
+        '/s$/i' => "",
+    ];
     /** @var array null */
-    private static $irregular = array(
+    private static $irregular = [
         'child' => 'children',
         'foot' => 'feet',
         'goose' => 'geese',
@@ -103,13 +103,13 @@ class pluralise {
         'person' => 'people',
         'sex' => 'sexes',
         'tooth' => 'teeth',
-    );
+    ];
 
     // Some words are only uncountable sometimes. For example, "blues" can be
     // uncountable when referring to music, but countable when referring to
     // multiple colours.
     /** @var array null */
-    private static $uncountable = array(
+    private static $uncountable = [
         'beef',
         'bison',
         'buffalo',
@@ -136,8 +136,8 @@ class pluralise {
         'species',
         'surgery',
         'traffic',
-        'water'
-    );
+        'water',
+    ];
 
     /**
      * Get the plural of the word passed in.

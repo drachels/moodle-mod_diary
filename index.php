@@ -28,20 +28,20 @@ require_once("lib.php");
 $id = required_param('id', PARAM_INT); // Course.
 $currentgroup = optional_param('currentgroup', 0, PARAM_INT); // Id of the current group(default to zero).
 
-if (!$course = $DB->get_record('course', array('id' => $id))) {
+if (!$course = $DB->get_record('course', ['id' => $id])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 require_course_login($course);
 
 // Header.
-$PAGE->set_url('/mod/diary/index.php', array('id' => $id));
+$PAGE->set_url('/mod/diary/index.php', ['id' => $id]);
 $PAGE->set_pagelayout('incourse');
 
 // Trigger course module instance list event.
-$params = array(
-    'context' => context_course::instance($course->id)
-);
+$params = [
+    'context' => context_course::instance($course->id),
+];
 \mod_diary\event\course_module_instance_list_viewed::create($params)->trigger();
 
 // Print the header.
@@ -70,8 +70,8 @@ $timenow = time();
 // Table data.
 $table = new html_table();
 
-$table->head = array();
-$table->align = array();
+$table->head = [];
+$table->align = [];
 if ($usesections) {
     // Add column heading based on the course format. e.g. Week, Topic.
     $table->head[] = get_string('sectionname', 'format_' . $course->format);
@@ -108,9 +108,7 @@ foreach ($diarys as $diary) {
     }
 
     // Link.
-    $diaryname = format_string($diary->name, true, array(
-        'context' => $context
-    ));
+    $diaryname = format_string($diary->name, true, ['context' => $context]);
     if (! $diary->visible) {
         // Show dimmed if the mod is hidden. 20230810 Changed based on pull rquest #29.
         $url = new moodle_url('view.php', ['id' => $diary->coursemodule]);

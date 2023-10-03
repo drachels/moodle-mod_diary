@@ -25,12 +25,12 @@
 defined('MOODLE_INTERNAL') || die();
 use mod_diary\local\diarytags;
 
-$tagareas = array(
-    array(
+$tagareas = [
+    [
         'itemtype' => 'diary_entries',
         'component' => 'mod_diary',
         'callback' => 'mod_diary_get_tagged_entries',
         'callbackfile' => '/mod/diary/locallib.php',
-    ),
-);
+    ],
+];
 

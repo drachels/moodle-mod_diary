@@ -72,8 +72,8 @@ class cron_task extends \core\task\scheduled_task {
                                    suspended,
                                    '.implode(', ', $usernamefields);
             // To save some db queries.
-            $users = array();
-            $courses = array();
+            $users = [];
+            $courses = [];
 
             foreach ($entries as $entry) {
                 // 20230401 Added working email preference.
@@ -86,9 +86,7 @@ class cron_task extends \core\task\scheduled_task {
                     if (!empty($users[$entry->userid])) {
                         $user = $users[$entry->userid];
                     } else {
-                        if (!$user = $DB->get_record("user",
-                                                      array("id" => $entry->userid),
-                                                      $requireduserfields)) {
+                        if (!$user = $DB->get_record("user", ["id" => $entry->userid], $requireduserfields)) {
                             $this->log_finish("Could not find user $entry->userid.\n");
                             continue;
                         }
@@ -100,8 +98,7 @@ class cron_task extends \core\task\scheduled_task {
                     if (!empty($courses[$entry->course])) {
                         $course = $courses[$entry->course];
                     } else {
-                        if (!$course = $DB->get_record('course', array(
-                            'id' => $entry->course), 'id, shortname')) {
+                        if (!$course = $DB->get_record('course', ['id' => $entry->course], 'id, shortname')) {
                             $this->log_finish("Could not find course $entry->course.\n");
                             continue;
                         }
@@ -111,9 +108,7 @@ class cron_task extends \core\task\scheduled_task {
                     if (!empty($users[$entry->teacher])) {
                         $teacher = $users[$entry->teacher];
                     } else {
-                        if (!$teacher = $DB->get_record("user", array(
-                                            "id" => $entry->teacher),
-                                            $requireduserfields)) {
+                        if (!$teacher = $DB->get_record("user", ["id" => $entry->teacher], $requireduserfields)) {
                             $this->log_finish("Could not find teacher $entry->teacher.\n");
                             continue;
                         }
@@ -171,7 +166,7 @@ class cron_task extends \core\task\scheduled_task {
                             $entry->id to user $user->id ($user->email).\n");
                     }
                     // Add log entry that a feedback email was sent to a specified user regarding their particular entry.
-                    if (!$DB->set_field("diary_entries", "mailed", "1", array("id" => $entry->id))) {
+                    if (!$DB->set_field("diary_entries", "mailed", "1", ["id" => $entry->id])) {
                         $this->log_finish("Could not update the mailed field for id $entry->id.\n");
                     } else {
                         // 20230331 Changed log to be only for branch 37 and above.
@@ -205,6 +200,6 @@ class cron_task extends \core\task\scheduled_task {
                    AND de.timemarked < ?
                    AND de.timemarked > 0";
 
-        return $DB->get_records_sql($sql, array($cutofftime));
+        return $DB->get_records_sql($sql, [$cutofftime]);
     }
 }

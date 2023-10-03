@@ -66,13 +66,13 @@ class diarystats {
      *
      * @param string $text The cleaned plain text to search for errors.
      * @param array $diary The settings for this diary activity.
-     * @return array($errors, count($errors) * $percent) An array of the common errors and percentage.
+     * @return [$errors, count($errors) * $percent] An array of the common errors and percentage.
      */
     public static function get_common_errors($text, $diary) {
         global $DB;
 
-        $errors = array();
-        $matches = array();
+        $errors = [];
+        $matches = [];
 
         if (empty($diary->errorcmid)) {
             $cm = null;
@@ -87,13 +87,13 @@ class diarystats {
         }
 
         if ($cm) {
-            $entryids = array();
-            if ($entries = $DB->get_records('glossary_entries', array('glossaryid' => $cm->instance), 'concept')) {
+            $entryids = [];
+            if ($entries = $DB->get_records('glossary_entries', ['glossaryid' => $cm->instance], 'concept')) {
                 foreach ($entries as $entry) {
                     if ($match = self::glossary_diaryentry_search_text($entry, $entry->concept, $text)) {
                         list($pos, $length, $match) = $match;
                         $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
-                        $matches[$pos] = (object)array('pos' => $pos, 'length' => $length, 'match' => $match);
+                        $matches[$pos] = (object)['pos' => $pos, 'length' => $length, 'match' => $match];
                     } else {
                         $entryids[] = $entry->id;
                     }
@@ -108,7 +108,7 @@ class diarystats {
                         if ($match = self::glossary_diaryentry_search_text($entry, $alias->alias, $text)) {
                             list($pos, $length, $match) = $match;
                             $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
-                            $matches[$pos] = (object)array('pos' => $pos, 'length' => $length, 'match' => $match);
+                            $matches[$pos] = (object)['pos' => $pos, 'length' => $length, 'match' => $match];
                         }
                     }
                 }
@@ -137,7 +137,7 @@ class diarystats {
 
             // Remove matches that are substrings of longer matches.
             if (!$diary->errorfullmatch) {
-                $keys = array();
+                $keys = [];
                 foreach ($matches as $match) {
                     $search = '/^'.preg_quote($match, '/').'.+/iu';
                     $search = preg_grep($search, $matches);
@@ -149,7 +149,7 @@ class diarystats {
                 }
             }
         }
-        return array($errors, $errortext, count($errors) * $percent);
+        return [$errors, $errortext, count($errors) * $percent];
     }
 
     /**
@@ -173,12 +173,18 @@ class diarystats {
      * @return void, but will update currentresponse property of this object.
      */
     public static function glossary_entry_link($glossaryname, $entry, $text) {
-        $params = array('eid' => $entry->id,
-                        'displayformat' => 'dictionary');
+        $params =
+            [
+                'eid' => $entry->id,
+                'displayformat' => 'dictionary',
+            ];
         $url = new moodle_url('/mod/glossary/showentry.php', $params);
-        $params = array('target' => '_blank',
-                        'title' => $glossaryname.': '.$entry->concept,
-                        'class' => 'glossary autolink concept glossaryid'.$entry->glossaryid);
+        $params =
+            [
+                'target' => '_blank',
+                'title' => $glossaryname.': '.$entry->concept,
+                'class' => 'glossary autolink concept glossaryid'.$entry->glossaryid,
+            ];
         return html_writer::link($url, $text, $params);
     }
 
@@ -189,7 +195,7 @@ class diarystats {
      * @param string $format
      * @param array $options
      */
-    public static function to_plain_text($text, $format, $options = array('noclean' => 'true')) {
+    public static function to_plain_text($text, $format, $options = ['noclean' => 'true']) {
         if (empty($text)) {
             return '';
         }
@@ -242,41 +248,47 @@ class diarystats {
 
         if (self::$aliases === null) {
             // Human readable aliases for regexp strings.
-            self::$aliases = array(' OR ' => '|',
-                                   ' OR' => '|',
-                                   'OR ' => '|',
-                                   ' , ' => '|',
-                                   ' ,' => '|',
-                                   ', ' => '|',
-                                   ',' => '|',
-                                   ' AND ' => '\\b.*\\b',
-                                   ' AND' => '\\b.*\\b',
-                                   'AND ' => '\\b.*\\b',
-                                   ' ANY ' => '\\b.*\\b',
-                                   ' ANY' => '\\b.*\\b',
-                                   'ANY ' => '\\b.*\\b');
+            self::$aliases =
+                [
+                    ' OR ' => '|',
+                    ' OR' => '|',
+                    'OR ' => '|',
+                    ' , ' => '|',
+                    ' ,' => '|',
+                    ', ' => '|',
+                    ',' => '|',
+                    ' AND ' => '\\b.*\\b',
+                    ' AND' => '\\b.*\\b',
+                    'AND ' => '\\b.*\\b',
+                    ' ANY ' => '\\b.*\\b',
+                    ' ANY' => '\\b.*\\b',
+                    'ANY ' => '\\b.*\\b',
+                ];
 
             // Allowable regexp strings and their internal aliases.
-            self::$metachars = array('^' => 'CARET',
-                                     '$' => 'DOLLAR',
-                                     '.' => 'DOT',
-                                     '?' => 'QUESTION_MARK',
-                                     '*' => 'ASTERISK',
-                                     '+' => 'PLUS_SIGN',
-                                     '|' => 'VERTICAL_BAR',
-                                     '-' => 'HYPHEN',
-                                     ':' => 'COLON',
-                                     '!' => 'EXCLAMATION_MARK',
-                                     '=' => 'EQUALS_SIGN',
-                                     '(' => 'OPEN_ROUND',
-                                     ')' => 'CLOSE_ROUND',
-                                     '[' => 'OPEN_SQUARE',
-                                     ']' => 'CLOSE_SQUARE',
-                                     '{' => 'OPEN_CURLY',
-                                     '}' => 'CLOSE_CURLY',
-                                     '<' => 'OPEN_ANGLE',
-                                     '>' => 'CLOSE_ANGLE',
-                                     '\\' => 'BACKSLASH');
+            self::$metachars =
+                [
+                    '^' => 'CARET',
+                    '$' => 'DOLLAR',
+                    '.' => 'DOT',
+                    '?' => 'QUESTION_MARK',
+                    '*' => 'ASTERISK',
+                    '+' => 'PLUS_SIGN',
+                    '|' => 'VERTICAL_BAR',
+                    '-' => 'HYPHEN',
+                    ':' => 'COLON',
+                    '!' => 'EXCLAMATION_MARK',
+                    '=' => 'EQUALS_SIGN',
+                    '(' => 'OPEN_ROUND',
+                    ')' => 'CLOSE_ROUND',
+                    '[' => 'OPEN_SQUARE',
+                    ']' => 'CLOSE_SQUARE',
+                    '{' => 'OPEN_CURLY',
+                    '}' => 'CLOSE_CURLY',
+                    '<' => 'OPEN_ANGLE',
+                    '>' => 'CLOSE_ANGLE',
+                    '\\' => 'BACKSLASH',
+                ];
             self::$flipmetachars = array_flip(self::$metachars);
         }
 
@@ -301,7 +313,7 @@ class diarystats {
             if (core_text::strlen($search) < core_text::strlen($match[0])) {
                 $match = $search;
             }
-            return array($offset, $length, $match);
+            return [$offset, $length, $match];
         } else {
             return ''; // No matches.
         }
@@ -322,69 +334,82 @@ class diarystats {
         if ($entry->promptid > 0) {
             $promptid = $entry->promptid;
             $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
-            $prompt = $DB->get_record('diary_prompts', array('id' => $promptid, 'diaryid' => $diary->id));
+            $prompt = $DB->get_record('diary_prompts',
+                [
+                    'id' => $promptid,
+                    'diaryid' => $diary->id,
+                ]);
 
-            $settingsused = (object)array('promptused' => $promptused,
-                                          'minchar' => $prompt->minchar,
-                                          'maxchar' => $prompt->maxchar,
-                                          'minmaxcharpercent' => $prompt->minmaxcharpercent,
-                                          'minword' => $prompt->minword,
-                                          'maxword' => $prompt->maxword,
-                                          'minmaxwordpercent' => $prompt->minmaxwordpercent,
-                                          'minsentence' => $prompt->minsentence,
-                                          'maxsentence' => $prompt->maxsentence,
-                                          'minmaxsentencepercent' => $prompt->minmaxsentencepercent,
-                                          'minparagraph' => $prompt->minparagraph,
-                                          'maxparagraph' => $prompt->maxparagraph,
-                                          'minmaxparagraphpercent' => $prompt->minmaxparagraphpercent);
+            $settingsused =
+                (object)[
+                    'promptused' => $promptused,
+                    'minchar' => $prompt->minchar,
+                    'maxchar' => $prompt->maxchar,
+                    'minmaxcharpercent' => $prompt->minmaxcharpercent,
+                    'minword' => $prompt->minword,
+                    'maxword' => $prompt->maxword,
+                    'minmaxwordpercent' => $prompt->minmaxwordpercent,
+                    'minsentence' => $prompt->minsentence,
+                    'maxsentence' => $prompt->maxsentence,
+                    'minmaxsentencepercent' => $prompt->minmaxsentencepercent,
+                    'minparagraph' => $prompt->minparagraph,
+                    'maxparagraph' => $prompt->maxparagraph,
+                    'minmaxparagraphpercent' => $prompt->minmaxparagraphpercent,
+                ];
 
         } else {
             $promptused = get_string('writingpromptnotused', 'diary');
             $prompt = '';
-            $settingsused = (object)array('promptused' => $promptused,
-                                          'minchar' => $diary->mincharacterlimit,
-                                          'maxchar' => $diary->maxcharacterlimit,
-                                          'minmaxcharpercent' => $diary->minmaxcharpercent,
-                                          'minword' => $diary->minwordlimit,
-                                          'maxword' => $diary->maxwordlimit,
-                                          'minmaxwordpercent' => $diary->minmaxwordpercent,
-                                          'minsentence' => $diary->minsentencelimit,
-                                          'maxsentence' => $diary->maxsentencelimit,
-                                          'minmaxsentencepercent' => $diary->minmaxsentpercent,
-                                          'minparagraph' => $diary->minparagraphlimit,
-                                          'maxparagraph' => $diary->maxparagraphlimit,
-                                          'minmaxparagraphpercent' => $diary->minmaxparapercent);
+            $settingsused =
+                (object)[
+                    'promptused' => $promptused,
+                    'minchar' => $diary->mincharacterlimit,
+                    'maxchar' => $diary->maxcharacterlimit,
+                    'minmaxcharpercent' => $diary->minmaxcharpercent,
+                    'minword' => $diary->minwordlimit,
+                    'maxword' => $diary->maxwordlimit,
+                    'minmaxwordpercent' => $diary->minmaxwordpercent,
+                    'minsentence' => $diary->minsentencelimit,
+                    'maxsentence' => $diary->maxsentencelimit,
+                    'minmaxsentencepercent' => $diary->minmaxsentpercent,
+                    'minparagraph' => $diary->minparagraphlimit,
+                    'maxparagraph' => $diary->maxparagraphlimit,
+                    'minmaxparagraphpercent' => $diary->minmaxparapercent,
+                ];
         }
 
         // Temporary error fix.
-        $errors = array();
+        $errors = [];
 
-        $temp = array();
+        $temp = [];
         $text = self::to_plain_text($entry->text, $entry->format);
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
-        $diarystats = (object)array('words' => self::get_stats_words($text),
-                                    'characters' => self::get_stats_chars($text),
-                                    'sentences' => self::get_stats_sentences($text),
-                                    'paragraphs' => self::get_stats_paragraphs($text),
-                                    'uniquewords' => self::get_stats_uniquewords($text),
-                                    'minmaxpercent' => 0,
-                                    'shortwords' => 0,
-                                    'mediumwords' => 0,
-                                    'longwords' => 0,
-                                    'item' => 0,
-                                    'itempercent' => 0,
-                                    'fogindex' => 0,
-                                    'commonerrors' => count($errors),
-                                    'commonpercent' => 0,
-                                    'lexicaldensity' => 0,
-                                    'charspersentence' => 0,
-                                    'wordspersentence' => 0,
-                                    'longwordspersentence' => 0,
-                                    'sentencesperparagraph' => 0,
-                                    'totalsyllabels' => 0,
-                                    'newtotalsyllabels' => 0,
-                                    'fkgrade' => 0,
-                                    'freadease' => 0);
+        $diarystats =
+            (object)[
+                'words' => self::get_stats_words($text),
+                'characters' => self::get_stats_chars($text),
+                'sentences' => self::get_stats_sentences($text),
+                'paragraphs' => self::get_stats_paragraphs($text),
+                'uniquewords' => self::get_stats_uniquewords($text),
+                'minmaxpercent' => 0,
+                'shortwords' => 0,
+                'mediumwords' => 0,
+                'longwords' => 0,
+                'item' => 0,
+                'itempercent' => 0,
+                'fogindex' => 0,
+                'commonerrors' => count($errors),
+                'commonpercent' => 0,
+                'lexicaldensity' => 0,
+                'charspersentence' => 0,
+                'wordspersentence' => 0,
+                'longwordspersentence' => 0,
+                'sentencesperparagraph' => 0,
+                'totalsyllabels' => 0,
+                'newtotalsyllabels' => 0,
+                'fkgrade' => 0,
+                'freadease' => 0,
+            ];
 
         if ($diarystats->words) {
             $diarystats->lexicaldensity = round(($diarystats->uniquewords / $diarystats->words) * 100, 0).'%';
@@ -447,7 +472,8 @@ class diarystats {
                         'four' => $diarystats->characters,
                         'five' => (max($settingsused->minchar - $diarystats->characters, 0)),
                         'six' => ((max($settingsused->minchar - $diarystats->characters, 0))
-                                 * $settingsused->minmaxcharpercent)])
+                                 * $settingsused->minmaxcharpercent),
+                        ])
                         .'</span>';
                 } else {
                     $autocharacters = get_string('autoratingbelowmaxitemdetails', 'diary',
@@ -457,7 +483,9 @@ class diarystats {
                         'four' => $diarystats->characters,
                         'five' => (max($settingsused->minchar - $diarystats->characters, 0)),
                         'six' => ((max($settingsused->minchar - $diarystats->characters, 0))
-                                 * $settingsused->minmaxcharpercent)]);
+                                 * $settingsused->minmaxcharpercent),
+                        ]
+                    );
                 }
             }
             if ($diary->enableautorating && $settingsused->maxchar > 0 && $diarystats->characters > $settingsused->maxchar) {
@@ -468,7 +496,8 @@ class diarystats {
                     'four' => $diarystats->characters,
                     'five' => (max($diarystats->characters - $settingsused->maxchar, 0)),
                     'six' => ((max($diarystats->characters - $settingsused->maxchar, 0))
-                             * $settingsused->minmaxcharpercent)])
+                             * $settingsused->minmaxcharpercent),
+                    ])
                     .'</span>';
             }
 
@@ -487,7 +516,8 @@ class diarystats {
                         'four' => $diarystats->words,
                         'five' => (max($settingsused->minword - $diarystats->words, 0)),
                         'six' => ((max($settingsused->minword - $diarystats->words, 0))
-                                 * $settingsused->minmaxwordpercent)])
+                                 * $settingsused->minmaxwordpercent),
+                        ])
                         .'</span>';
                 } else {
                     $autowords = get_string('autoratingbelowmaxitemdetails', 'diary',
@@ -497,7 +527,9 @@ class diarystats {
                         'four' => $diarystats->words,
                         'five' => (max($settingsused->minword - $diarystats->words, 0)),
                         'six' => ((max($settingsused->minword - $diarystats->words, 0))
-                                 * $settingsused->minmaxwordpercent)]);
+                                 * $settingsused->minmaxwordpercent),
+                        ]
+                    );
                 }
             }
             if ($diary->enableautorating && $settingsused->maxword > 0 && $diarystats->words > $settingsused->maxword) {
@@ -508,7 +540,8 @@ class diarystats {
                     'four' => $diarystats->words,
                     'five' => (max($diarystats->words - $settingsused->maxword, 0)),
                     'six' => ((max($diarystats->words - $settingsused->maxword, 0))
-                             * $settingsused->minmaxwordpercent)])
+                             * $settingsused->minmaxwordpercent),
+                    ])
                     .'</span>';
             }
 
@@ -528,7 +561,8 @@ class diarystats {
                         'four' => $diarystats->sentences,
                         'five' => (max($settingsused->minsentence - $diarystats->sentences, 0)),
                         'six' => ((max($settingsused->minsentence - $diarystats->sentences, 0))
-                                 * $settingsused->minmaxsentencepercent)])
+                                 * $settingsused->minmaxsentencepercent),
+                        ])
                         .'</span>';
                 } else {
                     $autosentences = get_string('autoratingbelowmaxitemdetails', 'diary',
@@ -538,20 +572,24 @@ class diarystats {
                         'four' => $diarystats->sentences,
                         'five' => (max($settingsused->minsentence - $diarystats->sentences, 0)),
                         'six' => ((max($settingsused->minsentence - $diarystats->sentences, 0))
-                                 * $settingsused->minmaxsentencepercent)]);
+                                 * $settingsused->minmaxsentencepercent),
+                        ]
+                    );
                 }
             }
             if ($diary->enableautorating
                 && $settingsused->maxsentence > 0
                 && $diarystats->sentences > $settingsused->maxsentence) {
-                $autosentences = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
-                    ['one' => $settingsused->maxsentence,
-                    'two' => $item,
-                    'three' => $settingsused->minmaxsentencepercent,
-                    'four' => $diarystats->sentences,
-                    'five' => (max($diarystats->sentences - $settingsused->maxsentence, 0)),
-                    'six' => ((max($diarystats->sentences - $settingsused->maxsentence, 0))
-                             * $settingsused->minmaxsentencepercent)]).'</span>';
+                    $autosentences = '<span style="background-color:yellow">'.get_string('autoratingovermaxitemdetails', 'diary',
+                        ['one' => $settingsused->maxsentence,
+                        'two' => $item,
+                        'three' => $settingsused->minmaxsentencepercent,
+                        'four' => $diarystats->sentences,
+                        'five' => (max($diarystats->sentences - $settingsused->maxsentence, 0)),
+                        'six' => ((max($diarystats->sentences - $settingsused->maxsentence, 0))
+                             * $settingsused->minmaxsentencepercent),
+                        ])
+                        .'</span>';
             }
 
             // 20220904 Code for auto-rating calculation w/regard min/max paragraph limits.
@@ -570,7 +608,8 @@ class diarystats {
                         'four' => $diarystats->paragraphs,
                         'five' => (max($settingsused->minparagraph - $diarystats->paragraphs, 0)),
                         'six' => ((max($settingsused->minparagraph - $diarystats->paragraphs, 0))
-                                 * $settingsused->minmaxparagraphpercent)])
+                                 * $settingsused->minmaxparagraphpercent),
+                        ])
                         .'</span>';
                 } else {
                     $autoparagraphs = get_string('autoratingbelowmaxitemdetails', 'diary',
@@ -580,7 +619,8 @@ class diarystats {
                         'four' => $diarystats->paragraphs,
                         'five' => (max($settingsused->minparagraph - $diarystats->paragraphs, 0)),
                         'six' => ((max($settingsused->minparagraph - $diarystats->paragraphs, 0))
-                                 * $settingsused->minmaxparagraphpercent)]);
+                                 * $settingsused->minmaxparagraphpercent),
+                        ]);
                 }
             }
             if ($diary->enableautorating
@@ -593,7 +633,8 @@ class diarystats {
                     'four' => $diarystats->paragraphs,
                     'five' => (max($diarystats->paragraphs - $settingsused->maxparagraph, 0)),
                     'six' => ((max($diarystats->paragraphs - $settingsused->maxparagraph, 0))
-                             * $settingsused->minmaxparagraphpercent)])
+                             * $settingsused->minmaxparagraphpercent),
+                    ])
                     .'</span>';
             }
 
@@ -713,34 +754,36 @@ class diarystats {
         global $CFG, $OUTPUT;
         $precision = 1;
         // Temporary error fix.
-        $errors = array();
+        $errors = [];
 
-        $temp = array();
+        $temp = [];
         $text = self::to_plain_text($entry->text, $entry->format);
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
-        $diarystats = (object)array('words' => self::get_stats_words($text),
-                                    'characters' => self::get_stats_chars($text),
-                                    'sentences' => self::get_stats_sentences($text),
-                                    'paragraphs' => self::get_stats_paragraphs($text),
-                                    'uniquewords' => self::get_stats_uniquewords($text),
-                                    'minmaxpercent' => 0,
-                                    'shortwords' => 0,
-                                    'mediumwords' => 0,
-                                    'longwords' => 0,
-                                    'item' => 0,
-                                    'itempercent' => 0,
-                                    'fogindex' => 0,
-                                    'commonerrors' => count($errors),
-                                    'commonpercent' => 0,
-                                    'lexicaldensity' => 0,
-                                    'charspersentence' => 0,
-                                    'wordspersentence' => 0,
-                                    'longwordspersentence' => 0,
-                                    'sentencesperparagraph' => 0,
-                                    'totalsyllabels' => 0,
-                                    'newtotalsyllabels' => 0,
-                                    'fkgrade' => 0,
-                                    'freadease' => 0);
+        $diarystats =
+            (object)['words' => self::get_stats_words($text),
+                'characters' => self::get_stats_chars($text),
+                'sentences' => self::get_stats_sentences($text),
+                'paragraphs' => self::get_stats_paragraphs($text),
+                'uniquewords' => self::get_stats_uniquewords($text),
+                'minmaxpercent' => 0,
+                'shortwords' => 0,
+                'mediumwords' => 0,
+                'longwords' => 0,
+                'item' => 0,
+                'itempercent' => 0,
+                'fogindex' => 0,
+                'commonerrors' => count($errors),
+                'commonpercent' => 0,
+                'lexicaldensity' => 0,
+                'charspersentence' => 0,
+                'wordspersentence' => 0,
+                'longwordspersentence' => 0,
+                'sentencesperparagraph' => 0,
+                'totalsyllabels' => 0,
+                'newtotalsyllabels' => 0,
+                'fkgrade' => 0,
+                'freadease' => 0,
+            ];
         // 20210704 If common errors from the glossary are detected, list them here.
         if ($errors) {
             $x = 1;
@@ -755,7 +798,8 @@ class diarystats {
                                 .get_string('detectcommonerror', 'diary',
                                 ['one' => $diarystats->commonerrors,
                                 'two' => get_string('commonerrors', 'diary'),
-                                'three' => $temp]).'</td></tr>';
+                                'three' => $temp,
+                                ]).'</td></tr>';
         } else {
             $usercommonerrors = '';
         }
@@ -778,69 +822,78 @@ class diarystats {
         if ($entry->promptid > 0) {
             $promptid = $entry->promptid;
             $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
-            $prompt = $DB->get_record('diary_prompts', array('id' => $promptid, 'diaryid' => $diary->id));
+            $prompt = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id]);
 
-            $settingsused = (object)array('promptused' => $promptused,
-                                          'minchar' => $prompt->minchar,
-                                          'maxchar' => $prompt->maxchar,
-                                          'minmaxcharpercent' => $prompt->minmaxcharpercent,
-                                          'minword' => $prompt->minword,
-                                          'maxword' => $prompt->maxword,
-                                          'minmaxwordpercent' => $prompt->minmaxwordpercent,
-                                          'minsentence' => $prompt->minsentence,
-                                          'maxsentence' => $prompt->maxsentence,
-                                          'minmaxsentencepercent' => $prompt->minmaxsentencepercent,
-                                          'minparagraph' => $prompt->minparagraph,
-                                          'maxparagraph' => $prompt->maxparagraph,
-                                          'minmaxparagraphpercent' => $prompt->minmaxparagraphpercent);
+            $settingsused =
+                (object)[
+                    'promptused' => $promptused,
+                    'minchar' => $prompt->minchar,
+                    'maxchar' => $prompt->maxchar,
+                    'minmaxcharpercent' => $prompt->minmaxcharpercent,
+                    'minword' => $prompt->minword,
+                    'maxword' => $prompt->maxword,
+                    'minmaxwordpercent' => $prompt->minmaxwordpercent,
+                    'minsentence' => $prompt->minsentence,
+                    'maxsentence' => $prompt->maxsentence,
+                    'minmaxsentencepercent' => $prompt->minmaxsentencepercent,
+                    'minparagraph' => $prompt->minparagraph,
+                    'maxparagraph' => $prompt->maxparagraph,
+                    'minmaxparagraphpercent' => $prompt->minmaxparagraphpercent,
+                ];
 
         } else {
             $promptused = get_string('writingpromptnotused', 'diary');
             $prompt = '';
-            $settingsused = (object)array('promptused' => $promptused,
-                                          'minchar' => $diary->mincharacterlimit,
-                                          'maxchar' => $diary->maxcharacterlimit,
-                                          'minmaxcharpercent' => $diary->minmaxcharpercent,
-                                          'minword' => $diary->minwordlimit,
-                                          'maxword' => $diary->maxwordlimit,
-                                          'minmaxwordpercent' => $diary->minmaxwordpercent,
-                                          'minsentence' => $diary->minsentencelimit,
-                                          'maxsentence' => $diary->maxsentencelimit,
-                                          'minmaxsentencepercent' => $diary->minmaxsentpercent,
-                                          'minparagraph' => $diary->minparagraphlimit,
-                                          'maxparagraph' => $diary->maxparagraphlimit,
-                                          'minmaxparagraphpercent' => $diary->minmaxparapercent);
+            $settingsused =
+                (object)[
+                    'promptused' => $promptused,
+                    'minchar' => $diary->mincharacterlimit,
+                    'maxchar' => $diary->maxcharacterlimit,
+                    'minmaxcharpercent' => $diary->minmaxcharpercent,
+                    'minword' => $diary->minwordlimit,
+                    'maxword' => $diary->maxwordlimit,
+                    'minmaxwordpercent' => $diary->minmaxwordpercent,
+                    'minsentence' => $diary->minsentencelimit,
+                    'maxsentence' => $diary->maxsentencelimit,
+                    'minmaxsentencepercent' => $diary->minmaxsentpercent,
+                    'minparagraph' => $diary->minparagraphlimit,
+                    'maxparagraph' => $diary->maxparagraphlimit,
+                    'minmaxparagraphpercent' => $diary->minmaxparapercent,
+                ];
         }
 
         // Temporary error fix.
-        $errors = array();
+        $errors = [];
 
-        $temp = array();
+        $temp = [];
         $text = self::to_plain_text($entry->text, $entry->format);
         list($errors, $errortext, $erropercent) = self::get_common_errors($text, $diary);
-        $diarystats = (object)array('words' => self::get_stats_words($text),
-                                    'characters' => self::get_stats_chars($text),
-                                    'sentences' => self::get_stats_sentences($text),
-                                    'paragraphs' => self::get_stats_paragraphs($text),
-                                    'uniquewords' => self::get_stats_uniquewords($text),
-                                    'minmaxpercent' => 0,
-                                    'shortwords' => 0,
-                                    'mediumwords' => 0,
-                                    'longwords' => 0,
-                                    'item' => 0,
-                                    'itempercent' => 0,
-                                    'fogindex' => 0,
-                                    'commonerrors' => count($errors),
-                                    'commonpercent' => 0,
-                                    'lexicaldensity' => 0,
-                                    'charspersentence' => 0,
-                                    'wordspersentence' => 0,
-                                    'longwordspersentence' => 0,
-                                    'sentencesperparagraph' => 0,
-                                    'totalsyllabels' => 0,
-                                    'newtotalsyllabels' => 0,
-                                    'fkgrade' => 0,
-                                    'freadease' => 0);
+        $diarystats =
+            (object)[
+                'words' => self::get_stats_words($text),
+                'characters' => self::get_stats_chars($text),
+                'sentences' => self::get_stats_sentences($text),
+                'paragraphs' => self::get_stats_paragraphs($text),
+                'uniquewords' => self::get_stats_uniquewords($text),
+                'minmaxpercent' => 0,
+                'shortwords' => 0,
+                'mediumwords' => 0,
+                'longwords' => 0,
+                'item' => 0,
+                'itempercent' => 0,
+                'fogindex' => 0,
+                'commonerrors' => count($errors),
+                'commonpercent' => 0,
+                'lexicaldensity' => 0,
+                'charspersentence' => 0,
+                'wordspersentence' => 0,
+                'longwordspersentence' => 0,
+                'sentencesperparagraph' => 0,
+                'totalsyllabels' => 0,
+                'newtotalsyllabels' => 0,
+                'fkgrade' => 0,
+                'freadease' => 0,
+            ];
         // 20210711 Added potential auto rating penalty info. 20211205 Changed from hardcoded text to string.
         $autoratingdata = '<tr class="table-primary"><td colspan="4">'
             .get_string('maxpossrating', 'diary',
@@ -939,34 +992,41 @@ class diarystats {
 
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
                 .get_string('potautoratingerrpen', 'diary',
-                ['one' => $potentialratingdisp,
-                'two' => ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs - $commonerrorrating)])
+                [
+                    'one' => $potentialratingdisp,
+                    'two' => ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs - $commonerrorrating),
+                ])
                 .'</td></tr>';
 
             // Show possible Glossary of common errors penalty. 20211208 Converted hardcoded text to string using {$a}.
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
-                 .get_string('potcommerrpen', 'diary',
-                 ['one' => $diarystats->commonerrors,
-                 'two' => $diary->errorpercent,
-                 'three' => $diarystats->commonpercent,
-                 'four' => $commonerrorrating]).'</td></tr>';
+                .get_string('potcommerrpen', 'diary',
+                    [
+                        'one' => $diarystats->commonerrors,
+                        'two' => $diary->errorpercent,
+                        'three' => $diarystats->commonpercent,
+                        'four' => $commonerrorrating,
+                    ]
+                ).'</td></tr>';
 
             // 20211007 Calculate and show the possible overall rating. Modified 20211119. Modified 20220904.
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
-                            .get_string('currpotrating', 'diary',
-                            ['one' => $currentratingdisp,
-                            'two' => (max($diary->scale - $autoratecharacters
-                                                        - $autoratewords
-                                                         - $autoratesentences
-                                                         - $autorateparagraphs
-                                                         - $commonerrorrating, 0))])
-                            .'</td></tr>';
+                .get_string('currpotrating', 'diary',
+                [
+                    'one' => $currentratingdisp,
+                    'two' => (max($diary->scale - $autoratecharacters
+                        - $autoratewords
+                        - $autoratesentences
+                        - $autorateparagraphs
+                        - $commonerrorrating, 0)),
+                ])
+                .'</td></tr>';
 
             $currentratingdata = (max($diary->scale - $autoratecharacters
                                                     - $autoratewords
-                                                     - $autoratesentences
-                                                     - $autorateparagraphs
-                                                     - $commonerrorrating, 0));
+                                                    - $autoratesentences
+                                                    - $autorateparagraphs
+                                                    - $commonerrorrating, 0));
         }
         // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
         $autoratingdata .= '</table>';
@@ -974,7 +1034,7 @@ class diarystats {
         // 20211230 Return autoratingdata only if autorating is enabled.
         if ($diary->enableautorating) {
             // 20211212 Return list of data to results.
-            return array($autoratingdata, $currentratingdata);
+            return [$autoratingdata, $currentratingdata];
         } else {
             return;
         }
@@ -1030,7 +1090,7 @@ class diarystats {
         // into one text blob, before trying to count sentences. This method
         // seems pretty good at NOT counting something like, edit.php as the
         // ending and starting of a new sentence, but as one word.
-        $items = self::multipleexplode(array("<p", "<p>", "\n", "\r\n"), $entry);
+        $items = self::multipleexplode(["<p", "<p>", "\n", "\r\n"], $entry);
         $items = array_filter($items);
         $results = '';
         foreach ($items as $item) {
@@ -1048,7 +1108,7 @@ class diarystats {
      * @ return int $items The number of paragraphs.
      */
     public static function get_stats_paragraphs($text) {
-        $items = self::multipleexplode(array("<p", "<p>", "\n", "\r\n"), $text);
+        $items = self::multipleexplode(["<p", "<p>", "\n", "\r\n"], $text);
         $items = array_filter($items);
         return count($items);
     }
@@ -1107,7 +1167,7 @@ class diarystats {
                 $mwcount++;
             }
         }
-        return array($swcount, $mwcount, $lwcount, $totalsyllables);
+        return [$swcount, $mwcount, $lwcount, $totalsyllables];
     }
 
     /**
@@ -1151,7 +1211,7 @@ class diarystats {
      * @return array(rating => description)
      */
     public static function get_rating_options($plugin) {
-        $options = array();
+        $options = [];
         for ($i = 0; $i <= 100; $i++) {
             $options[$i] = get_string('percentofentryrating', $plugin, $i);
         }

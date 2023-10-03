@@ -50,9 +50,11 @@ class activity extends \core_search\base_activity {
      * @return array
      */
     public function get_search_fileareas() {
-        $fileareas = array(
-            'intro',
-            DIARY_INTROATTACHMENT_FILEAREA); // Fileareas.
+        $fileareas =
+            [
+                'intro',
+                DIARY_INTROATTACHMENT_FILEAREA,
+            ]; // Fileareas.
         return $fileareas;
     }
 }

@@ -25,14 +25,14 @@
 
 defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
-$tasks = array(
-    array(
+$tasks = [
+    [
         'classname' => 'mod_diary\task\cron_task',
         'blocking' => 0,
         'minute' => '*',
         'hour' => '*',
         'day' => '*',
         'month' => '*',
-        'dayofweek' => '*'
-    )
-);
+        'dayofweek' => '*',
+    ],
+];

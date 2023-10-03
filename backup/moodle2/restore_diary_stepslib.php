@@ -39,7 +39,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      * @return restore_path_element $structure
      */
     protected function define_structure() {
-        $paths = array();
+        $paths = [];
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('diary', '/activity/diary');

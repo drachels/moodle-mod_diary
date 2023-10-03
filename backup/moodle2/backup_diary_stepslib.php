@@ -44,95 +44,125 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated.
-        $diary = new backup_nested_element('diary', array('id'),
-                                           array('name',
-                                                 'intro',
-                                                 'introformat',
-                                                 'alwaysshowdescription',
-                                                 'days',
-                                                 'scale',
-                                                 'assessed',
-                                                 'assesstimestart',
-                                                 'assesstimefinish',
-                                                 'timemodified',
-                                                 'timeopen',
-                                                 'timeclose',
-                                                 'editall',
-                                                 'editdates',
-                                                 'entrybgc',
-                                                 'entrytextbgc',
-                                                 'enablestats',
-                                                 'teacheremail',
-                                                 'studentemail',
-                                                 'mincharacterlimit',
-                                                 'maxcharacterlimit',
-                                                 'minmaxcharpercent',
-                                                 'minwordlimit',
-                                                 'maxwordlimit',
-                                                 'minmaxwordpercent',
-                                                 'minsentencelimit',
-                                                 'maxsentencelimit',
-                                                 'minmaxsentpercent',
-                                                 'minparagraphlimit',
-                                                 'maxparagraphlimit',
-                                                 'minmaxparapercent',
-                                                 'enableautorating',
-                                                 'showtextstats',
-                                                 'textstatitems',
-                                                 'errorcmid',
-                                                 'errorpercent',
-                                                 'errorfullmatch',
-                                                 'errorcasesensitive',
-                                                 'errorignorebreaks'));
+        $diary = new backup_nested_element('diary',
+            [
+                'id',
+            ],
+            [
+                'name',
+                'intro',
+                'introformat',
+                'alwaysshowdescription',
+                'days',
+                'scale',
+                'assessed',
+                'assesstimestart',
+                'assesstimefinish',
+                'timemodified',
+                'timeopen',
+                'timeclose',
+                'editall',
+                'editdates',
+                'entrybgc',
+                'entrytextbgc',
+                'enablestats',
+                'teacheremail',
+                'studentemail',
+                'mincharacterlimit',
+                'maxcharacterlimit',
+                'minmaxcharpercent',
+                'minwordlimit',
+                'maxwordlimit',
+                'minmaxwordpercent',
+                'minsentencelimit',
+                'maxsentencelimit',
+                'minmaxsentpercent',
+                'minparagraphlimit',
+                'maxparagraphlimit',
+                'minmaxparapercent',
+                'enableautorating',
+                'showtextstats',
+                'textstatitems',
+                'errorcmid',
+                'errorpercent',
+                'errorfullmatch',
+                'errorcasesensitive',
+                'errorignorebreaks',
+            ]
+        );
 
         $prompts = new backup_nested_element('prompts');
-        $prompt = new backup_nested_element('prompt', array('id'),
-                                           array('diaryid',
-                                                 'datestart',
-                                                 'datestop',
-                                                 'text',
-                                                 'format',
-                                                 'minchar',
-                                                 'maxchar',
-                                                 'minmaxcharpercent',
-                                                 'minword',
-                                                 'maxword',
-                                                 'minmaxwordpercent',
-                                                 'minsentence',
-                                                 'maxsentence',
-                                                 'minmaxsentencepercent',
-                                                 'minparagraph',
-                                                 'maxparagraph',
-                                                 'minmaxparagraphpercent'));
+        $prompt = new backup_nested_element('prompt',
+            [
+                'id',
+            ],
+            [
+                'diaryid',
+                'datestart',
+                'datestop',
+                'text',
+                'format',
+                'minchar',
+                'maxchar',
+                'minmaxcharpercent',
+                'minword',
+                'maxword',
+                'minmaxwordpercent',
+                'minsentence',
+                'maxsentence',
+                'minmaxsentencepercent',
+                'minparagraph',
+                'maxparagraph',
+                'minmaxparagraphpercent',
+            ]
+        );
 
         $entries = new backup_nested_element('entries');
-        $entry = new backup_nested_element('entry', array('id'),
-                                           array('promptid',
-                                                 'userid',
-                                                 'timecreated',
-                                                 'timemodified',
-                                                 'text',
-                                                 'format',
-                                                 'rating',
-                                                 'entrycomment',
-                                                 'teacher',
-                                                 'timemarked',
-                                                 'mailed'));
+        $entry = new backup_nested_element('entry',
+            [
+                'id',
+            ],
+            [
+                'promptid',
+                'userid',
+                'timecreated',
+                'timemodified',
+                'text',
+                'format',
+                'rating',
+                'entrycomment',
+                'teacher',
+                'timemarked',
+                'mailed',
+            ]
+        );
 
         $tags = new backup_nested_element('entriestags');
-        $tag = new backup_nested_element('tag', array('id'),
-                                         array('itemid',
-                                               'rawname'));
+        $tag = new backup_nested_element('tag',
+            [
+                'id',
+            ],
+            [
+                'itemid',
+                'rawname',
+            ]
+        );
 
         $ratings = new backup_nested_element('ratings');
-        $rating = new backup_nested_element('rating', array('id'),
-                                            array('component',
-                                                  'ratingarea',
-                                                  'scaleid',
-                                                  'value',
-                                                  'userid',
-                                                  'timecreated',
-                                                  'timemodified'));
+        $rating = new backup_nested_element('rating',
+            [
+                'id',
+            ],
+            [
+                'component',
+                'ratingarea',
+                'scaleid',
+                'value',
+                'userid',
+                'timecreated',
+                'timemodified',
+            ]
+        );
 
         // Build the tree.
         $diary->add_child($prompts);
@@ -148,17 +178,18 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $tags->add_child($tag);
 
         // Define sources.
-        $diary->set_source_table('diary', array('id' => backup::VAR_ACTIVITYID));
-        $prompt->set_source_table('diary_prompts', array('diaryid' => backup::VAR_ACTIVITYID));
+        $diary->set_source_table('diary', ['id' => backup::VAR_ACTIVITYID]);
+        $prompt->set_source_table('diary_prompts', ['diaryid' => backup::VAR_ACTIVITYID]);
 
         // All the rest of elements only happen if we are including user info.
         if ($this->get_setting_value('userinfo')) {
-            $entry->set_source_table('diary_entries', array('diary' => backup::VAR_PARENTID));
+            $entry->set_source_table('diary_entries', ['diary' => backup::VAR_PARENTID]);
 
-            $rating->set_source_table('rating', array('contextid' => backup::VAR_CONTEXTID,
-                                                      'itemid' => backup::VAR_PARENTID,
-                                                      'component' => backup_helper::is_sqlparam('mod_diary'),
-                                                      'ratingarea' => backup_helper::is_sqlparam('entry')));
+            $rating->set_source_table('rating', ['contextid' => backup::VAR_CONTEXTID,
+                                                    'itemid' => backup::VAR_PARENTID,
+                                                    'component' => backup_helper::is_sqlparam('mod_diary'),
+                                                    'ratingarea' => backup_helper::is_sqlparam('entry'),
+                                                ]);
 
             $rating->set_source_alias('rating', 'value');
 
@@ -169,10 +200,13 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                                           ON ti.tagid = t.id
                                        WHERE ti.itemtype = ?
                                          AND ti.component = ?
-                                         AND ti.contextid = ?', array(
-                    backup_helper::is_sqlparam('diary_entries'),
-                    backup_helper::is_sqlparam('mod_diary'),
-                    backup::VAR_CONTEXTID));
+                                         AND ti.contextid = ?',
+                    [
+                        backup_helper::is_sqlparam('diary_entries'),
+                        backup_helper::is_sqlparam('mod_diary'),
+                        backup::VAR_CONTEXTID,
+                    ]
+                );
             }
         }
 

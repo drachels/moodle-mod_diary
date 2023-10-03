@@ -41,33 +41,37 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configselect('mod_diary/showrecentactivity',
         get_string('showrecentactivity', 'diary'),
-        get_string('showrecentactivity', 'diary'), 1, array(
-        '0' => get_string('no'),
-        '1' => get_string('yes')
-    )));
+        get_string('showrecentactivity', 'diary'), 1, [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
 
     $settings->add(new admin_setting_configselect('mod_diary/overview',
         get_string('showoverview', 'diary'),
-        get_string('showoverview', 'diary'), 1, array(
-        '0' => get_string('no'),
-        '1' => get_string('yes')
-    )));
+        get_string('showoverview', 'diary'), 1, [
+             '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
 
     // 20201015 Default edit all entries setting.
     $settings->add(new admin_setting_configselect('mod_diary/editall',
         get_string('editall', 'diary'),
-        get_string('editall_help', 'diary'), 1, array(
-        '0' => get_string('no'),
-        '1' => get_string('yes')
-    )));
+        get_string('editall_help', 'diary'), 1, [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
 
     // 20201119 Default edit the date of any entry setting.
     $settings->add(new admin_setting_configselect('mod_diary/editdates',
         get_string('editdates', 'diary'),
-        get_string('editdates_help', 'diary'), 1, array(
-        '0' => get_string('no'),
-        '1' => get_string('yes')
-    )));
+        get_string('editdates_help', 'diary'), 1, [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
 
     // Appearance settings.
     $settings->add(new admin_setting_heading('mod_diary/appearance',
@@ -101,14 +105,12 @@ if ($ADMIN->fulltree) {
     $title = get_string('enablestats_title', 'diary');
     $description = get_string('enablestats_descr', 'diary');
     $default = 1;
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        array(
-        '0' => get_string('no'),
-        '1' => get_string('yes')
-    )));
+    $settings->add(new admin_setting_configselect($name, $title, $description, $default,
+        [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
 
     // 20210704 Added heading for autorating options section.
     $name = 'autorating';
@@ -121,14 +123,12 @@ if ($ADMIN->fulltree) {
     $title = get_string('autorating_title', 'diary');
     $description = get_string('autorating_descr', 'diary');
     $default = 1;
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        array(
-        '0' => get_string('no'),
-        '1' => get_string('yes')
-    )));
+    $settings->add(new admin_setting_configselect($name, $title, $description, $default,
+        [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
 
     // 20210712 Added heading for min/max options section.
     $name = 'minmaxhdr';
@@ -152,7 +152,7 @@ if ($ADMIN->fulltree) {
     $title = get_string('minmaxcharpercent', 'diary');
     $description = get_string('minmaxcharpercent_help', 'diary');
     $default = 0;
-    $options = array();
+    $options = [];
     $options = diarystats::get_rating_options($plugin);
     $settings->add(new admin_setting_configselect($name,
         $title,
@@ -176,13 +176,9 @@ if ($ADMIN->fulltree) {
     $title = get_string('minmaxwordpercent', 'diary');
     $description = get_string('minmaxwordpercent_help', 'diary');
     $default = 0;
-    $options = array();
+    $options = [];
     $options = diarystats::get_rating_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
+    $settings->add(new admin_setting_configselect($name, $title, $description, $default, $options, 10));
 
     // 20211006 Diary minimum sentence setting.
     $settings->add(new admin_setting_configtext('mod_diary/minsentencelimit',
@@ -200,13 +196,9 @@ if ($ADMIN->fulltree) {
     $title = get_string('minmaxsentpercent', 'diary');
     $description = get_string('minmaxsentpercent_help', 'diary');
     $default = 0;
-    $options = array();
+    $options = [];
     $options = diarystats::get_rating_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
+    $settings->add(new admin_setting_configselect($name, $title, $description, $default, $options, 10));
 
     // 20211006 Diary minimum paragraph setting.
     $settings->add(new admin_setting_configtext('mod_diary/minparagraphlimit',
@@ -224,13 +216,9 @@ if ($ADMIN->fulltree) {
     $title = get_string('minmaxparagraphpercent', 'diary');
     $description = get_string('minmaxparapercent_help', 'diary');
     $default = 0;
-    $options = array();
+    $options = [];
     $options = diarystats::get_rating_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
+    $settings->add(new admin_setting_configselect($name, $title, $description, $default, $options, 10));
 
     // 20210712 Added heading for text stats options section.
     $name = 'statshdr';
@@ -244,19 +232,13 @@ if ($ADMIN->fulltree) {
     $title = get_string('showtextstats', 'diary');
     $description = get_string('showtextstats_help', 'diary');
     $default = 0;
-    $options = array();
+    $options = [];
     $options = diarystats::get_showhide_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
-        $title,
-        $description,
-        $default,
-        $options, 10));
+    $settings->add(new admin_setting_configselect($name, $title, $description, $default, $options, 10));
 
     $settings->add(new admin_setting_configselect('mod_diary/teacheremail', get_string('teacheremail', 'diary'),
-                                                  get_string('teacheremail', 'diary'), 0,
-                                                  array('0' => get_string('no'), '1' => get_string('yes'))));
+        get_string('teacheremail', 'diary'), 0, ['0' => get_string('no'), '1' => get_string('yes')]));
 
     $settings->add(new admin_setting_configselect('mod_diary/studentemail', get_string('studentemail', 'diary'),
-                                                  get_string('studentemail', 'diary'), 0,
-                                                  array('0' => get_string('no'), '1' => get_string('yes'))));
+        get_string('studentemail', 'diary'), 0, ['0' => get_string('no'), '1' => get_string('yes')]));
 }

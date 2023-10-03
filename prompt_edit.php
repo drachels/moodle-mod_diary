@@ -24,8 +24,8 @@
 use mod_diary\local\results;
 use mod_diary\local\diarystats;
 use mod_diary\local\prompts;
-use \mod_diary\event\invalid_access_attempt;
-use \mod_diary\event\prompt_edited;
+use mod_diary\event\invalid_access_attempt;
+use mod_diary\event\prompt_edited;
 
 require_once("../../config.php");
 require_once('lib.php'); // May not need this.
@@ -40,7 +40,7 @@ $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
-if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
+if (! $course = $DB->get_record("course", ["id" => $cm->course])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -48,12 +48,12 @@ $context = context_module::instance($cm->id);
 require_login($course, false, $cm);
 require_capability('mod/diary:addinstance', $context);
 
-if (! $diary = $DB->get_record("diary", array("id" => $cm->instance))) {
+if (! $diary = $DB->get_record("diary", ["id" => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 // Header.
-$PAGE->set_url('/mod/diary/prompt_edit.php', array('id' => $id));
+$PAGE->set_url('/mod/diary/prompt_edit.php', ['id' => $id]);
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
@@ -61,7 +61,7 @@ $PAGE->set_heading($course->fullname);
 $data = new stdClass();
 
 // 20221002 Added sort for ticket Diary_926.
-$prompts = $DB->get_records('diary_prompts', array('diaryid' => $diary->id), $sort = 'datestart, datestop');
+$prompts = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart, datestop');
 
 if (!empty($action)) {
     switch ($action) {
@@ -83,17 +83,20 @@ if (!empty($action)) {
             if (has_capability('mod/diary:manageentries', $context)) {
                 $promptid = required_param('promptid',  PARAM_INT); // Prompt ID to edit.
                 $action = optional_param('action', 'edit', PARAM_ACTION); // Action(promt).
-                $data = $DB->get_record('diary_prompts', array('id' => $promptid));
-                $prompts = $DB->get_records('diary_prompts', array('id' => $promptid), $sort = 'id ASC');
+                $data = $DB->get_record('diary_prompts', ['id' => $promptid]);
+                $prompts = $DB->get_records('diary_prompts', ['id' => $promptid], $sort = 'id ASC');
 
                 // Trigger prompt edited event.
-                $event = \mod_diary\event\prompt_edited::create(array(
-                    'objectid' => $cm->id,
-                    'context' => $context,
-                    'other' => array(
-                        'promptid' => $promptid,
-                        'diaryid' => $diary->id
-                )));
+                $event = \mod_diary\event\prompt_edited::create(
+                    [
+                        'objectid' => $cm->id,
+                        'context' => $context,
+                        'other' => [
+                            'promptid' => $promptid,
+                            'diaryid' => $diary->id,
+                        ],
+                    ]
+                );
                 $event->add_record_snapshot('course_modules', $cm);
                 $event->add_record_snapshot('course', $course);
                 $event->add_record_snapshot('diary', $diary);
@@ -103,21 +106,24 @@ if (!empty($action)) {
         case 'create':
             if (has_capability('mod/diary:manageentries', $context)) {
                 $action = optional_param('action', 'create', PARAM_ACTION); // Action(promt).
-                $temp = $DB->insert_record('diary_prompts', array('diaryid' => $diary->id));
+                $temp = $DB->insert_record('diary_prompts', ['diaryid' => $diary->id]);
                 // Pretty sure I do not need the next line of code. Need to verify.
-                $data = $DB->get_record('diary_prompts', array('id' => $temp));
-                $prompts = $DB->get_records('diary_prompts', array('diaryid' => $diary->id), $sort = 'id ASC');
+                $data = $DB->get_record('diary_prompts', ['id' => $temp]);
+                $prompts = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'id ASC');
                 foreach ($prompts as $prompt => $temp) {
                     break;
                 }
                 // Trigger prompt created event.
-                $event = \mod_diary\event\prompt_created::create(array(
-                    'objectid' => $cm->id,
-                    'context' => $context,
-                    'other' => array(
-                        'promptid' => $data->id,
-                        'diaryid' => $diary->id
-                )));
+                $event = \mod_diary\event\prompt_created::create(
+                    [
+                        'objectid' => $cm->id,
+                        'context' => $context,
+                        'other' => [
+                            'promptid' => $data->id,
+                            'diaryid' => $diary->id,
+                        ],
+                    ]
+                );
                 $event->add_record_snapshot('course_modules', $cm);
                 $event->add_record_snapshot('course', $course);
                 $event->add_record_snapshot('diary', $diary);
@@ -135,7 +141,7 @@ $table->cellpadding = 5;
 $table->class = 'generaltable';
 
 // Add column headings to the table list of prompts.
-$table->head = array(
+$table->head = [
     get_string('tablecolumnstatus', 'diary'),
     get_string('tablecolumnprompts', 'diary'),
     get_string('tablecolumnstart', 'diary'),
@@ -145,10 +151,10 @@ $table->head = array(
     get_string('tablecolumnsentences', 'diary'),
     get_string('tablecolumnparagraphs', 'diary'),
     get_string('tablecolumnedit', 'diary'),
-);
+];
 
 $output = '';
-$line = array();
+$line = [];
 $counter = 0;
 
 // If there are any prompts for this diary, create a list of them.
@@ -183,7 +189,7 @@ if ($prompts) {
 
         // If user can edit, create a delete link to the current prompt.
         // 20230810 Changed based on pull request #29.
-        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'delete', 'promptid' => $prompt->id));
+        $url = new moodle_url('prompt_edit.php', ['id' => $id, 'action' => 'delete', 'promptid' => $prompt->id]);
         $jlink1 = '&nbsp;<a onclick="return confirm(\''
                   .get_string('deleteexconfirm', 'diary')
                   .$data->entryid
@@ -194,7 +200,7 @@ if ($prompts) {
         // If user can edit, create an edit link to the current prompt.
         // Use prompt ID so we can come back to the Prompt Editor we came from.
         // 20230810 Changed based on pull request #29.
-        $url = new moodle_url('prompt_edit.php', array('id' => $id, 'action' => 'edit', 'promptid' => $data->entryid));
+        $url = new moodle_url('prompt_edit.php', ['id' => $id, 'action' => 'edit', 'promptid' => $data->entryid]);
         $jlink2 = '<a href="'.$url->out(false).'"><img src="pix/edit.png" alt='
                   .get_string('eeditlabel', 'diary').'></a>';
         $counter++;
@@ -230,7 +236,7 @@ if ($prompts) {
     $output = html_writer::table($table);
     $counter = 0;
 } else {
-    $line = array();
+    $line = [];
     $data->entryid = null;
     $data->text = '';
     $data->format = FORMAT_HTML;
@@ -246,7 +252,7 @@ $data->textformat = FORMAT_HTML;
 
 $maxfiles = 99; // TODO: add some setting.
 $maxbytes = $course->maxbytes; // TODO: add some setting.
-$editoroptions = array(
+$editoroptions = [
     'promptid' => $data->entryid,
     'format' => $data->textformat,
     'timeopen' => $diary->timeopen,
@@ -259,14 +265,14 @@ $editoroptions = array(
     'maxfiles' => EDITOR_UNLIMITED_FILES,
     'context' => $context,
     'subdirs' => false,
-    'enable_filemanagement' => true
-);
+    'enable_filemanagement' => true,
+];
 
-$attachmentoptions = array(
+$attachmentoptions = [
     'subdirs' => false,
     'maxfiles' => $maxfiles,
-    'maxbytes' => $maxbytes
-);
+    'maxbytes' => $maxbytes,
+];
 
 $data = file_prepare_standard_editor($data,
                                      'text',
@@ -276,12 +282,15 @@ $data = file_prepare_standard_editor($data,
                                      'prompt',
                                      $data->entryid);
 
-$form = new mod_diary_prompt_form(null, array(
-                                 'current' => $data,
-                                 'cm' => $cm,
-                                 'diary' => $diary->editdates,
-                                 'entryid' => $data->entryid,
-                                 'editoroptions' => $editoroptions));
+$form = new mod_diary_prompt_form(null,
+    [
+        'current' => $data,
+        'cm' => $cm,
+        'diary' => $diary->editdates,
+        'entryid' => $data->entryid,
+        'editoroptions' => $editoroptions,
+    ]
+);
 $form->set_data($data);
 
 if ($form->is_cancelled()) {
@@ -343,7 +352,7 @@ if ($form->is_cancelled()) {
 
     $DB->update_record('diary_prompts', $newentry);
     // 20230810 Changed based on pull request #29.
-    redirect(new moodle_url('/mod/diary/prompt_edit.php', array('id' => $cm->id, 'promptid' => $newentry->id)));
+    redirect(new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'promptid' => $newentry->id]));
 }
 
 echo $OUTPUT->header();
@@ -356,8 +365,8 @@ $intro = format_module_intro('diary', $diary, $cm->id);
 $form->display();
 
 // 20230810 Changed based on pull request #29.
-$url1 = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', array('id' => $id));
-$url2 = new moodle_url($CFG->wwwroot.'/mod/diary/prompt_edit.php', array('id' => $cm->id, 'action' => 'create', 'promptid' => 0));
+$url1 = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', ['id' => $id]);
+$url2 = new moodle_url($CFG->wwwroot.'/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'create', 'promptid' => 0]);
 // 20220920 Add a Create button and a return button. 20230810 Changed due to pull request #29.
 echo '<br><a href="'.$url2->out(false).'"
     class="btn btn-warning"
@@ -369,12 +378,15 @@ echo get_string('createnewprompt', 'diary').'</a> <a href="'.$url1->out(false)
     .'</a> ';
 
 // Trigger prompts viewed event.
-$event = \mod_diary\event\prompts_viewed::create(array(
-    'objectid' => $cm->id,
-    'context' => $context,
-    'other' => array(
-        'diaryid' => $diary->id
-)));
+$event = \mod_diary\event\prompts_viewed::create(
+    [
+        'objectid' => $cm->id,
+        'context' => $context,
+        'other' => [
+            'diaryid' => $diary->id,
+        ],
+    ]
+);
 $event->add_record_snapshot('course_modules', $cm);
 $event->add_record_snapshot('course', $course);
 $event->add_record_snapshot('diary', $diary);

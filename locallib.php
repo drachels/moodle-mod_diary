@@ -63,8 +63,12 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
                  AND cm.deletioninprogress = 0
                  AND de.id %ITEMFILTER% AND c.id %COURSEFILTER%";
 
-    $params = array('itemtype' => 'diary_entries', 'tagid' => $tag->id, 'component' => 'mod_diary',
-                    'coursemodulecontextlevel' => CONTEXT_MODULE);
+    $params = [
+        'itemtype' => 'diary_entries',
+        'tagid' => $tag->id,
+        'component' => 'mod_diary',
+        'coursemodulecontextlevel' => CONTEXT_MODULE,
+    ];
 
     if ($ctx) {
         $context = $ctx ? context::instance_by_id($ctx) : context_system::instance();
@@ -135,13 +139,15 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
                 $cm = $modinfo->get_cm($item->cmid);
                 // 20230325 Student go to their view page and teachers, etc. go to reportsingle for the applicable user.
                 if ($canmanage) {
-                    $pageurl = new moodle_url('/mod/diary/reportsingle.php', array(
-                        'id' => $item->cmid,
-                        'action' => 'allentries',
-                        'user' => $item->userid
-                        ));
+                    $pageurl = new moodle_url('/mod/diary/reportsingle.php',
+                        [
+                            'id' => $item->cmid,
+                            'action' => 'allentries',
+                            'user' => $item->userid,
+                        ]
+                    );
                 } else {
-                    $pageurl = new moodle_url('/mod/diary/view.php', array('id' => $item->cmid));
+                    $pageurl = new moodle_url('/mod/diary/view.php', ['id' => $item->cmid]);
                 }
                 // 20230308 Added this code to limit the amount of an entries text that is shown.
                 $strtocut = $item->text;
@@ -150,13 +156,13 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
                     $strtocut = substr($strtocut, 0, 200).'...';
                 }
 
-                $pagename = format_string($strtocut, true, array('context' => context_module::instance($item->cmid)));
+                $pagename = format_string($strtocut, true, ['context' => context_module::instance($item->cmid)]);
                 $pagename = html_writer::link($pageurl, $pagename);
                 $courseurl = course_get_url($item->courseid, $cm->sectionnum);
                 $cmname = html_writer::link($cm->url, $cm->get_formatted_name());
-                $coursename = format_string($item->fullname, true, array('context' => context_course::instance($item->courseid)));
+                $coursename = format_string($item->fullname, true, ['context' => context_course::instance($item->courseid)]);
                 $coursename = html_writer::link($courseurl, $coursename);
-                $icon = html_writer::link($pageurl, html_writer::empty_tag('img', array('src' => $cm->get_icon_url())));
+                $icon = html_writer::link($pageurl, html_writer::empty_tag('img', ['src' => $cm->get_icon_url()]));
                 $tagfeed->add($icon, $item->id.' '.$pagename, $cmname.'<br>'.$coursename);
             }
         }

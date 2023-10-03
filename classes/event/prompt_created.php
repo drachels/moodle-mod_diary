@@ -68,6 +68,10 @@ class prompt_created extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/diary/prompts_view.php', array('id' => $this->contextinstanceid));
+        return new \moodle_url('/mod/diary/prompts_view.php',
+            [
+                'id' => $this->contextinstanceid,
+            ]
+        );
     }
 }

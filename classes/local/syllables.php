@@ -44,65 +44,67 @@ class syllables {
     // - Trailing 'e' is pronounced.
     // - Portmanteaus.
     /** @var array */
-    static public $arrproblemwords = array(
-        'abalone' => 4,
-        'abare' => 3,
-        'abed' => 2,
-        'abruzzese' => 4,
-        'abbruzzese' => 4,
-        'aborigine' => 5,
-        'acreage' => 3,
-        'adame' => 3,
-        'adieu' => 2,
-        'adobe' => 3,
-        'anemone' => 4,
-        'apache' => 3,
-        'aphrodite' => 4,
-        'apostrophe' => 4,
-        'ariadne' => 4,
-        'cafe' => 2,
-        'calliope' => 4,
-        'catastrophe' => 4,
-        'chile' => 2,
-        'chloe' => 2,
-        'circe' => 2,
-        'coyote' => 3,
-        'doing' => 2,
-        'epitome' => 4,
-        'forever' => 3,
-        'gethsemane' => 4,
-        'going' => 2,
-        'guacamole' => 4,
-        'hyperbole' => 4,
-        'jesse' => 2,
-        'jukebox' => 2,
-        'karate' => 3,
-        'machete' => 3,
-        'maybe' => 2,
-        'people' => 2,
-        'recipe' => 3,
-        'sesame' => 3,
-        'shoreline' => 2,
-        'sided' => 2,
-        'simile' => 3,
-        'squelches' => 2,
-        'syncope' => 3,
-        'tamale' => 3,
-        'yosemite' => 4,
-        'daphne' => 2,
-        'eurydice' => 4,
-        'euterpe' => 3,
-        'hermione' => 4,
-        'penelope' => 4,
-        'persephone' => 4,
-        'phoebe' => 2,
-        'zoe' => 2,
-        'version' => 2
-        );
+    static public $arrproblemwords =
+        [
+            'abalone' => 4,
+            'abare' => 3,
+            'abed' => 2,
+            'abruzzese' => 4,
+            'abbruzzese' => 4,
+            'aborigine' => 5,
+            'acreage' => 3,
+            'adame' => 3,
+            'adieu' => 2,
+            'adobe' => 3,
+            'anemone' => 4,
+            'apache' => 3,
+            'aphrodite' => 4,
+            'apostrophe' => 4,
+            'ariadne' => 4,
+            'cafe' => 2,
+            'calliope' => 4,
+            'catastrophe' => 4,
+            'chile' => 2,
+            'chloe' => 2,
+            'circe' => 2,
+            'coyote' => 3,
+            'doing' => 2,
+            'epitome' => 4,
+            'forever' => 3,
+            'gethsemane' => 4,
+            'going' => 2,
+            'guacamole' => 4,
+            'hyperbole' => 4,
+            'jesse' => 2,
+            'jukebox' => 2,
+            'karate' => 3,
+            'machete' => 3,
+            'maybe' => 2,
+            'people' => 2,
+            'recipe' => 3,
+            'sesame' => 3,
+            'shoreline' => 2,
+            'sided' => 2,
+            'simile' => 3,
+            'squelches' => 2,
+            'syncope' => 3,
+            'tamale' => 3,
+            'yosemite' => 4,
+            'daphne' => 2,
+            'eurydice' => 4,
+            'euterpe' => 3,
+            'hermione' => 4,
+            'penelope' => 4,
+            'persephone' => 4,
+            'phoebe' => 2,
+            'zoe' => 2,
+            'version' => 2,
+        ];
 
     // These syllables would be counted as two but should be one.
     /** @var array */
-    static public $arrsubsyllables = array(
+    static public $arrsubsyllables =
+        [
             'cia(l|$)', // Use in words such as glacial, acacia.
             'tia',
             'cius',
@@ -189,111 +191,115 @@ class syllables {
             // - squelches
             */
             '[aeiouy](b|ch|d|f|gh|gn|k|l|lch|ll|lv|m|mm|n|nch|nn|p|r|rn|rs|rv|s|sc|sk|sl|squ|ss|st|t|th|v|y)es$',
-            '^busi$'
-        );
+            '^busi$',
+        ];
 
     // These syllables would be counted as one but should be two.
     /** @var array */
-    static public $arraddsyllables = array(
-        '([^s]|^)ia',
-        'riet',
-        'dien', // ...audience.
-        'iu',
-        'io',
-        'eo($|[b-df-hj-np-tv-z])',
-        'ii',
-        '[ou]a$',
-        '[aeiouym]bl$',
-        '[aeiou]{3}',
-        '[aeiou]y[aeiou]',
-        '^mc',
-        'ism$',
-        'asm$',
-        'thm$',
-        '([^aeiouy])\1l$',
-        '[^l]lien',
-        '^coa[dglx].',
-        '[^gq]ua[^auieo]',
-        'dnt$',
-        'uity$',
-        '[^aeiouy]ie(r|st|t)$',
-        'eings?$',
-        '[aeiouy]sh?e[rsd]$',
-        'iell',
-        'dea$',
-        'real', // ...real, cereal.
-        '[^aeiou]y[ae]', // ...bryan, byerley.
-        'gean$', // ...aegean.
-        'uen' // ...influence, affluence.
-    );
+    static public $arraddsyllables =
+        [
+            '([^s]|^)ia',
+            'riet',
+            'dien', // ...audience.
+            'iu',
+            'io',
+            'eo($|[b-df-hj-np-tv-z])',
+            'ii',
+            '[ou]a$',
+            '[aeiouym]bl$',
+            '[aeiou]{3}',
+            '[aeiou]y[aeiou]',
+            '^mc',
+            'ism$',
+            'asm$',
+            'thm$',
+            '([^aeiouy])\1l$',
+            '[^l]lien',
+            '^coa[dglx].',
+            '[^gq]ua[^auieo]',
+            'dnt$',
+            'uity$',
+            '[^aeiouy]ie(r|st|t)$',
+            'eings?$',
+            '[aeiouy]sh?e[rsd]$',
+            'iell',
+            'dea$',
+            'real', // ...real, cereal.
+            '[^aeiou]y[ae]', // ...bryan, byerley.
+            'gean$', // ...aegean.
+            'uen', // ...influence, affluence.
+        ];
 
     // Single syllable prefixes and suffixes.
     /** @var array */
-    static public $arraffix = array(
-        '`^un`',        // @codingStandardsIgnoreLine
-        '`^fore`',      // @codingStandardsIgnoreLine
-        '`^ware`',      // @codingStandardsIgnoreLine
-        '`^none?`',     // @codingStandardsIgnoreLine
-        '`^out`',       // @codingStandardsIgnoreLine
-        '`^post`',      // @codingStandardsIgnoreLine
-        '`^sub`',       // @codingStandardsIgnoreLine
-        '`^pre`',       // @codingStandardsIgnoreLine
-        '`^pro`',       // @codingStandardsIgnoreLine
-        '`^dis`',       // @codingStandardsIgnoreLine
-        '`^side`',      // @codingStandardsIgnoreLine
-        '`ly$`',        // @codingStandardsIgnoreLine
-        '`less$`',      // @codingStandardsIgnoreLine
-        '`some$`',      // @codingStandardsIgnoreLine
-        '`ful$`',       // @codingStandardsIgnoreLine
-        '`ers?$`',      // @codingStandardsIgnoreLine
-        '`ness$`',      // @codingStandardsIgnoreLine
-        '`cians?$`',    // @codingStandardsIgnoreLine
-        '`ments?$`',    // @codingStandardsIgnoreLine
-        '`ettes?$`',    // @codingStandardsIgnoreLine
-        '`villes?$`',   // @codingStandardsIgnoreLine
-        '`ships?$`',    // @codingStandardsIgnoreLine
-        '`sides?$`',    // @codingStandardsIgnoreLine
-        '`ports?$`',    // @codingStandardsIgnoreLine
-        '`shires?$`',   // @codingStandardsIgnoreLine
-        '`tion(ed)?$`'  // @codingStandardsIgnoreLine
-    );
+    static public $arraffix =
+        [
+            '`^un`',        // @codingStandardsIgnoreLine
+            '`^fore`',      // @codingStandardsIgnoreLine
+            '`^ware`',      // @codingStandardsIgnoreLine
+            '`^none?`',     // @codingStandardsIgnoreLine
+            '`^out`',       // @codingStandardsIgnoreLine
+            '`^post`',      // @codingStandardsIgnoreLine
+            '`^sub`',       // @codingStandardsIgnoreLine
+            '`^pre`',       // @codingStandardsIgnoreLine
+            '`^pro`',       // @codingStandardsIgnoreLine
+            '`^dis`',       // @codingStandardsIgnoreLine
+            '`^side`',      // @codingStandardsIgnoreLine
+            '`ly$`',        // @codingStandardsIgnoreLine
+            '`less$`',      // @codingStandardsIgnoreLine
+            '`some$`',      // @codingStandardsIgnoreLine
+            '`ful$`',       // @codingStandardsIgnoreLine
+            '`ers?$`',      // @codingStandardsIgnoreLine
+            '`ness$`',      // @codingStandardsIgnoreLine
+            '`cians?$`',    // @codingStandardsIgnoreLine
+            '`ments?$`',    // @codingStandardsIgnoreLine
+            '`ettes?$`',    // @codingStandardsIgnoreLine
+            '`villes?$`',   // @codingStandardsIgnoreLine
+            '`ships?$`',    // @codingStandardsIgnoreLine
+            '`sides?$`',    // @codingStandardsIgnoreLine
+            '`ports?$`',    // @codingStandardsIgnoreLine
+            '`shires?$`',   // @codingStandardsIgnoreLine
+            '`tion(ed)?$`', // @codingStandardsIgnoreLine
+        ];
 
     // Double syllable prefixes and suffixes.
     /** @var array */
-    static public $arrdoubleaffix = array(
-        '`^above`',     // @codingStandardsIgnoreLine
-        '`^ant[ie]`',   // @codingStandardsIgnoreLine
-        '`^counter`',   // @codingStandardsIgnoreLine
-        '`^hyper`',     // @codingStandardsIgnoreLine
-        '`^afore`',     // @codingStandardsIgnoreLine
-        '`^agri`',      // @codingStandardsIgnoreLine
-        '`^in[ft]ra`',  // @codingStandardsIgnoreLine
-        '`^inter`',     // @codingStandardsIgnoreLine
-        '`^over`',      // @codingStandardsIgnoreLine
-        '`^semi`',      // @codingStandardsIgnoreLine
-        '`^ultra`',     // @codingStandardsIgnoreLine
-        '`^under`',     // @codingStandardsIgnoreLine
-        '`^extra`',     // @codingStandardsIgnoreLine
-        '`^dia`',       // @codingStandardsIgnoreLine
-        '`^micro`',     // @codingStandardsIgnoreLine
-        '`^mega`',      // @codingStandardsIgnoreLine
-        '`^kilo`',      // @codingStandardsIgnoreLine
-        '`^pico`',      // @codingStandardsIgnoreLine
-        '`^nano`',      // @codingStandardsIgnoreLine
-        '`^macro`',     // @codingStandardsIgnoreLine
-        '`berry$`',     // @codingStandardsIgnoreLine
-        '`woman$`',     // @codingStandardsIgnoreLine
-        '`women$`'      // @codingStandardsIgnoreLine
-    );
+    static public $arrdoubleaffix =
+        [
+            '`^above`',     // @codingStandardsIgnoreLine
+            '`^ant[ie]`',   // @codingStandardsIgnoreLine
+            '`^counter`',   // @codingStandardsIgnoreLine
+            '`^hyper`',     // @codingStandardsIgnoreLine
+            '`^afore`',     // @codingStandardsIgnoreLine
+            '`^agri`',      // @codingStandardsIgnoreLine
+            '`^in[ft]ra`',  // @codingStandardsIgnoreLine
+            '`^inter`',     // @codingStandardsIgnoreLine
+            '`^over`',      // @codingStandardsIgnoreLine
+            '`^semi`',      // @codingStandardsIgnoreLine
+            '`^ultra`',     // @codingStandardsIgnoreLine
+            '`^under`',     // @codingStandardsIgnoreLine
+            '`^extra`',     // @codingStandardsIgnoreLine
+            '`^dia`',       // @codingStandardsIgnoreLine
+            '`^micro`',     // @codingStandardsIgnoreLine
+            '`^mega`',      // @codingStandardsIgnoreLine
+            '`^kilo`',      // @codingStandardsIgnoreLine
+            '`^pico`',      // @codingStandardsIgnoreLine
+            '`^nano`',      // @codingStandardsIgnoreLine
+            '`^macro`',     // @codingStandardsIgnoreLine
+            '`berry$`',     // @codingStandardsIgnoreLine
+            '`woman$`',     // @codingStandardsIgnoreLine
+            '`women$`',     // @codingStandardsIgnoreLine
+        ];
 
     // Triple syllable prefixes and suffixes.
     /** @var array */
-    static public $arrtripleaffix = array(
-         '`ology$`',    // @codingStandardsIgnoreLine
-         '`ologist$`',  // @codingStandardsIgnoreLine
-         '`onomy$`',    // @codingStandardsIgnoreLine
-         '`onomist$`'   // @codingStandardsIgnoreLine
-    );
+    static public $arrtripleaffix =
+        [
+            '`ology$`',    // @codingStandardsIgnoreLine
+            '`ologist$`',  // @codingStandardsIgnoreLine
+            '`onomy$`',    // @codingStandardsIgnoreLine
+            '`onomist$`',   // @codingStandardsIgnoreLine
+        ];
 
     /**
      * Returns the number of syllables in the word.
