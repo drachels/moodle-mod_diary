@@ -617,6 +617,8 @@ function diary_reset_userdata($data) {
 /**
  * Returns gradebook data in module.
  *
+ * @param  object $courseid
+ * @param  object $type
  * @return array
  */
 function diary_reset_gradebook($courseid, $type = '') {
@@ -639,7 +641,7 @@ function diary_reset_gradebook($courseid, $type = '') {
  * @param object $courses
  * @param array $htmlarray
  */
-function diary_print_overview($courses, &$htmlarray) {
+function diary_print_overview($courses, $htmlarray) {
     global $USER, $CFG, $DB;
 
     if (! get_config('diary', 'overview')) {
