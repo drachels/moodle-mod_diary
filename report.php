@@ -66,6 +66,8 @@ if (! empty($action)) {
         case 'download':
             if (has_capability('mod/diary:manageentries', $context)) {
                 // Call download entries function in lib.php.
+                // 20231007 Added set_url to fix error.
+                $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]);
                 results::download_entries($context, $course, $diary);
             }
             break;

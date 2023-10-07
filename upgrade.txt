@@ -15,7 +15,17 @@ This files describes API changes and other work in the diary code.
 
 === 3.7.6 === Pending
 20230925 Diary_1075 - Some defaults are missing from the mod_form.php page. Added site
-    defaults for editall and editdates to the mod_form.php file. Pending daysavailable. 
+    defaults for editall and editdates to the mod_form.php file. Pending daysavailable.
+20231002 Diary_1087 - Latest codechecker says "Import statements must not begin with a
+    leading backslash". Made code changes as needed. See ticket for details.
+20231002 Diary_1088 - Latest codechecker requires convert from long array(), to short
+    array []. Made code changes as needed. See ticket for details.
+20231005 Diary_1089 - CSV Download from view.php is generating debug error. Added
+    $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]); which seems to fix
+    the problem with the download.
+20231005 Diary_1090 - CSV Download from report.php is generating debug error. Added
+    $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]); which seems to fix
+    the problem with the download.
 
 === 3.7.5 === 20230809 STABLE
 20230511 Diary_1041v - View completion does not seem to be implemented. Added the needed,
