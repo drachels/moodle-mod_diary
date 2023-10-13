@@ -1,8 +1,8 @@
 @mod @mod_diary1
-Feature: Basic diary use
-  In order to complete diary entries
+Feature: Multiple entries with edit entry dates yes
+  In order to complete multiple diary entries and edit the dates
   As a teacher or student
-  I need to make diary entries
+  I need to make multiple diary entries and edit the dates
 
   Background:
     Given the following "courses" exist:
@@ -58,5 +58,3 @@ Feature: Basic diary use
     And I press "Save changes"
     And I should see "Test diary"
     And I log out
-
-
