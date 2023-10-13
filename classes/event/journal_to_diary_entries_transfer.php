@@ -73,7 +73,7 @@ class journal_to_diary_entries_transfer extends \core\event\base {
         return new \moodle_url('/mod/diary/journaltodiaryxfr.php',
             [
                 'id' => $this->contextinstanceid,
-            )
+            ]
         );
     }
 }
