@@ -12,23 +12,31 @@ This files describes API changes and other work in the diary code.
 20230419 Diary_1036 - Modify Prompts to fire up based on resticted access or completion.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
+20230831 Diary_1069 - Would be nice if current prompt info was added to the description. 
+20231010 Diary_1093 - Toggle emails to, Email now, does not seem to eliminate the edit
+    time delay for non-editing teachers.
 
-=== 3.7.6+ ===
-20231013 Diary_1098 - The journal_to_diary_entries_transfer.php file is missing a closing
+=== 3.7.7 === Pending
+20230609 Diary_1053 - Request to not show empty entries. Added code to create a user
+    preference for each Diary activity that can be set or changed by the teacher.
+
+
+
+=== 3.7.6+ === (Build: 2023092501) (2023092501)
+20231013 Diary_1098v - The journal_to_diary_entries_transfer.php file is missing a closing
     bracket in line 76. Changed character from ) to ] on line 76 of the file.
 
-
 === 3.7.6 === 2023100800 STABLE (Build date: 2023092500)
-20230925 Diary_1075 - Some defaults are missing from the mod_form.php page. Added site
+20230925 Diary_1075v - Some defaults are missing from the mod_form.php page. Added site
     defaults for editall and editdates to the mod_form.php file. Pending daysavailable.
-20231002 Diary_1087 - Latest codechecker says "Import statements must not begin with a
+20231002 Diary_1087v - Latest codechecker says "Import statements must not begin with a
     leading backslash". Made code changes as needed. See ticket for details.
-20231002 Diary_1088 - Latest codechecker requires convert from long array(), to short
+20231002 Diary_1088v - Latest codechecker requires convert from long array(), to short
     array []. Made code changes as needed. See ticket for details.
-20231005 Diary_1089 - CSV Download from view.php is generating debug error. Added
+20231005 Diary_1089v - CSV Download from view.php is generating debug error. Added
     $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]); which seems to fix
     the problem with the download.
-20231005 Diary_1090 - CSV Download from report.php is generating debug error. Added
+20231005 Diary_1090v - CSV Download from report.php is generating debug error. Added
     $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]); which seems to fix
     the problem with the download.
 
