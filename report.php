@@ -60,6 +60,10 @@ if ($sortoption = get_user_preferences('sortoption')) {
     $sortoption = get_user_preferences('sortoption');
 }
 
+$oldlistpreference = get_user_preferences('diary_listpreference_'.$diary->id, null);
+$listpreference = optional_param('listpreference', $oldlistpreference, PARAM_INT);
+$entryrater = has_capability('mod/diary:rate', $context);
+
 // Handle toolbar capabilities.
 if (! empty($action)) {
     switch ($action) {
@@ -324,7 +328,7 @@ if (! $users) {
     $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
-                      .get_string("saveallfeedback", "diary").'" />';
+        .get_string("saveallfeedback", "diary").'" />';
     // 20200421 Added a return button.
     // 20230810 Changed based on pull request #29.
     $url = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', ['id' => $id]);
@@ -348,12 +352,12 @@ if (! $users) {
 
             // Based on toolbutton and on list of users with at least one entry, print the entries on screen.
             echo results::diary_print_user_entry($context,
-                                                 $course,
-                                                 $diary,
-                                                 $user,
-                                                 $entrybyuser[$user->id],
-                                                 $teachers,
-                                                 $grades);
+                $course,
+                $diary,
+                $user,
+                $entrybyuser[$user->id],
+                $teachers,
+                $grades);
             echo '</div>';
 
             // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
@@ -364,24 +368,51 @@ if (! $users) {
         }
     }
 
-    // List remaining users with no entries.
-    foreach ($users as $user) {
-        // 20210511 Changed to class.
-        echo '<div class="entry" style="background: '.$dcolor3.'">';
+    // 20231103 Extend form and add selector for prefered list delivery.
+    // Need to check if user is an entry rater.
+    //if (($entryrater) && (($diary->teacherlist == 1))) {
+    if ($entryrater) {
+        if ($listpreference != $oldlistpreference) {
+            set_user_preference('diary_listpreference_'.$diary->id, $listpreference);
+        }
 
-        echo results::diary_print_user_entry($context,
-                                             $course,
-                                             $diary,
-                                             $user,
-                                             null,
-                                             $teachers,
-                                             $grades);
-        echo '</div><br>';
+        $listoptions = [
+            1 => get_string('showlistyes', 'diary'),
+            2 => get_string('showlistno', 'diary'),
+        ];
+        // This creates the dropdown list for list preference on the report page above the first empty entry.
+        $selection = html_writer::select($listoptions, 'listpreference', $listpreference, false,
+            ['id' => 'pref_lists', 'class' => 'custom-select']
+        );
+
+        echo get_string('showlistpreference', 'diary').': <select onchange="this.form.submit()" name="listpreference">';
+        echo '<option selected="true" value="'.$selection.'</option>';
+        echo '</select>';
     }
-    // 20210609 Check for empty list to prevent two sets of buttons at bottom of the report page.
-    if ($users) {
-        // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
-        echo $saveallbutton;
+
+    // 20231103 If user preference is 1 then show users without an entry.
+    if ($listpreference == 1) {
+        // List remaining users with no entries.
+        foreach ($users as $user) {
+            // 20210511 Changed to class.
+            echo '<div class="entry" style="background: '.$dcolor3.'">';
+
+            echo results::diary_print_user_entry($context,
+                $course,
+                $diary,
+                $user,
+                null,
+                $teachers,
+                $grades);
+            echo '</div><br>';
+        }
+
+
+        // 20210609 Check for empty list to prevent two sets of buttons at bottom of the report page.
+        if ($users) {
+            // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
+            echo $saveallbutton;
+        }
     }
 
     // End the page area where feedback and grades are added and will need to be saved.
