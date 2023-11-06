@@ -13,13 +13,16 @@ This files describes API changes and other work in the diary code.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
 20230831 Diary_1069 - Would be nice if current prompt info was added to the description. 
-20231010 Diary_1093 - Toggle emails to, Email now, does not seem to eliminate the edit
-    time delay for non-editing teachers.
+
 
 === 3.7.7 === Pending
+20230609 Diary_1052 - Diary - Request for possible CSS to hide empty entries. This does
+    the same as the next ticker and I prefer the method I used there, so this is done.
 20230609 Diary_1053 - Request to not show empty entries. Added code to create a user
     preference for each Diary activity that can be set or changed by the teacher.
-
+20231010 Diary_1093 - Toggle emails to, Email now, does not seem to eliminate the edit
+    time delay for non-editing teachers. Added missing code to edit.php to send emails
+    to course non-editing teachers, which was entirely missing.
 
 
 === 3.7.6+ === (Build: 2023092501) (2023092501)
