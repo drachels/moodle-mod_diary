@@ -105,6 +105,7 @@ $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $f
 if ($action == 'currententry' && $entry) {
     $data->entryid = $entry->id;
     $data->timecreated = $entry->timecreated;
+    $data->title = $entry->title;
     $data->text = $entry->text;
     $data->textformat = $entry->format;
 
@@ -114,12 +115,14 @@ if ($action == 'currententry' && $entry) {
         $entry = '';
         $data->entryid = null;
         $data->timecreated = time();
+        $data->title = '';
         $data->text = '';
         $data->textformat = FORMAT_HTML;
     }
 } else if ($action == 'editentry' && $entry) {
     $data->entryid = $entry->id;
     $data->timecreated = $entry->timecreated;
+    $data->title = $entry->title;
     $data->text = $entry->text;
     $data->textformat = $entry->format;
     // Think I might need to add a check for currententry && !entry to justify starting a new entry, else error.
@@ -127,6 +130,7 @@ if ($action == 'currententry' && $entry) {
     // There are no entries for this user, so start the first one.
     $data->entryid = null;
     $data->timecreated = time();
+    $data->title = '';
     $data->text = '';
     $data->textformat = FORMAT_HTML;
 } else {
@@ -183,6 +187,7 @@ if ($form->is_cancelled()) {
     $newentry = new stdClass();
     $newentry->timecreated = $fromform->timecreated;
     $newentry->timemodified = $timenow;
+    $newentry->title = $fromform->title;
     $newentry->text = $fromform->text_editor['text'];
     $newentry->format = $fromform->text_editor['format'];
 
@@ -255,6 +260,7 @@ if ($form->is_cancelled()) {
                                                 'entry',
                                                 $newentry->id);
     $newentry->promptid = $promptid;
+    $newentry->title = $fromform->title;
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
     $newentry->timecreated = $fromform->timecreated;

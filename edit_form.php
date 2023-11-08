@@ -109,6 +109,16 @@ class mod_diary_entry_form extends moodleform {
             );
         }
 
+        $mform->addElement('text', 'title', get_string('diarytitle', 'diary'), ['size' => '64']);
+        if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('title', PARAM_TEXT);
+        } else {
+            $mform->setType('title', PARAM_CLEAN);
+        }
+        $mform->addRule('title', get_string('maximumchars', '', 100), 'maxlength', 100, 'client');
+        $mform->addHelpButton('title', 'diarytitle', 'diary');
+
+        // Add the entry text editor.
         $mform->addElement(
             'editor',
             'text_editor',

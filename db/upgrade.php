@@ -507,5 +507,19 @@ function xmldb_diary_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2023040200, 'diary');
     }
 
+    if ($oldversion < 2023110800) {
+
+        // Define field title to be added to diary_entries.
+        $table = new xmldb_table('diary_entries');
+        $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'timemodified');
+
+        // Conditionally launch add field title.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2023110800, 'diary');
+    }
     return true;
 }

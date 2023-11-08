@@ -370,7 +370,6 @@ if (! $users) {
 
     // 20231103 Extend form and add selector for prefered list delivery.
     // Need to check if user is an entry rater.
-    //if (($entryrater) && (($diary->teacherlist == 1))) {
     if ($entryrater) {
         if ($listpreference != $oldlistpreference) {
             set_user_preference('diary_listpreference_'.$diary->id, $listpreference);

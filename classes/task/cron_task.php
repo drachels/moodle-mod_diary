@@ -45,8 +45,7 @@ class cron_task extends \core\task\scheduled_task {
      */
     public function execute() {
         global $CFG, $USER, $DB;
-//print_object('I am in the cron and halting.');
-//die;
+
         $cutofftime = time();
         $cutofftime2 = time() - $CFG->maxeditingtime;
 
@@ -127,7 +126,6 @@ class cron_task extends \core\task\scheduled_task {
                     // This is already cached internally.
                     $context = context_module::instance($mod->id);
                     $canadd = has_capability('mod/diary:addentries', $context, $user);
-                    //$entriesmanager = has_capability('mod/diary:manageentries', $context, $user);
                     $entriesmanager = has_capability('mod/diary:rate', $context, $user);
 
                     if (!$canadd && $entriesmanager) {

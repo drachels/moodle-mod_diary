@@ -503,8 +503,12 @@ if ($timenow > $timestart) {
                     $editthisentry = ' ';
                 }
 
+                // 20231108 If there is a title for the entry add it as a heading.
+                echo $OUTPUT->heading($entry->title);
+
                 // Add, Entry, then date time group heading for each entry on the page.
-                echo $OUTPUT->heading(get_string('entry', 'diary').': '.userdate($entry->timecreated).'  '.$editthisentry);
+                // 20231108 Add the old heading version as a sub-heading.
+                echo ('<h5>'.get_string('entry', 'diary').': '.userdate($entry->timecreated).' '.$editthisentry.'</h5>');
 
                 // 20230314 If one exists, display the apllicable prompt.
                 if ($entry->promptid > 0) {

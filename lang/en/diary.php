@@ -111,6 +111,11 @@ Note: You may need to provide feedback or update the status of the entry in orde
 $string['diaryname'] = 'Diary name';
 $string['diaryopentime_help'] = 'If enabled, you can set a date for the diary to be opened for use.';
 $string['diaryopentime'] = 'Open time';
+
+
+$string['diarytitle'] = 'Title';
+$string['diarytitle_help'] = 'You can add an optional title/description.';
+
 $string['editall_help'] = 'When enabled, users can edit any entry.';
 $string['editall'] = 'Edit all entries';
 $string['editdates_help'] = 'When enabled, users can edit the date of any entry.';

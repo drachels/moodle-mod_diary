@@ -30,7 +30,8 @@ This files describes API changes and other work in the diary code.
 20231010 Diary_1093 - Toggle emails to, Email now, does not seem to eliminate the edit
     time delay for non-editing teachers. Added missing code to edit.php to send emails
     to course non-editing teachers, which was entirely missing.
-
+20231108 Diary_1113 - There has been a new capability requested for a title/description
+    for each entry. Now have titles working. Refer to the ticket for details.
 
 === 3.7.6+ === (Build: 2023092501) (2023092501)
 20231013 Diary_1098v - The journal_to_diary_entries_transfer.php file is missing a closing
