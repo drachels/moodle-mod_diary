@@ -1090,6 +1090,8 @@ class diarystats {
         // into one text blob, before trying to count sentences. This method
         // seems pretty good at NOT counting something like, edit.php as the
         // ending and starting of a new sentence, but as one word.
+        // 20231107 It also seems to not count recordings as a sentence, unless
+        // the recording is the only thing in the entry.
         $items = self::multipleexplode(["<p", "<p>", "\n", "\r\n"], $entry);
         $items = array_filter($items);
         $results = '';
