@@ -42,6 +42,7 @@ class mod_diary_entry_form extends moodleform {
         global $CFG, $DB;
 
         $mform = $this->_form;
+        $diaryconfig = get_config('mod_diary');
 
         // 20201119 Get the, Edit entry dates, setting for this Diary activity.
         $mform->addElement(
@@ -58,6 +59,7 @@ class mod_diary_entry_form extends moodleform {
         );
 
         // 20210613 Retrieve Diary info for use.
+        $enabletitles = $this->_customdata['editoroptions']['enabletitles'];
         $timeclose = $this->_customdata['editoroptions']['timeclose'];
         $editall = $this->_customdata['editoroptions']['editall'];
         $editdates = $this->_customdata['editoroptions']['editdates'];
@@ -109,11 +111,16 @@ class mod_diary_entry_form extends moodleform {
             );
         }
 
+        // 20231108 Added new place for a title for each entry.
         $mform->addElement('text', 'title', get_string('diarytitle', 'diary'), ['size' => '64']);
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('title', PARAM_TEXT);
         } else {
             $mform->setType('title', PARAM_CLEAN);
+        }
+        // 20231109 Check to see if titles are required or optional for this Diary.
+        if ($enabletitles) {
+            $mform->addRule('title', null, 'required', null, 'client');
         }
         $mform->addRule('title', get_string('maximumchars', '', 100), 'maxlength', 100, 'client');
         $mform->addHelpButton('title', 'diarytitle', 'diary');

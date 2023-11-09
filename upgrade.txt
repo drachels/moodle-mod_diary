@@ -32,6 +32,12 @@ This files describes API changes and other work in the diary code.
     to course non-editing teachers, which was entirely missing.
 20231108 Diary_1113 - There has been a new capability requested for a title/description
     for each entry. Now have titles working. Refer to the ticket for details.
+20231109 Diary_1114 - Add further capability to the new title for each Diary and it's
+    entries. All the needed code and strings have been added and the setting works.
+    Refer to the ticket for all the details, as it is a bunch.
+
+
+
 
 === 3.7.6+ === (Build: 2023092501) (2023092501)
 20231013 Diary_1098v - The journal_to_diary_entries_transfer.php file is missing a closing

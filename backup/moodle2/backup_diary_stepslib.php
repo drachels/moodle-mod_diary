@@ -66,6 +66,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'entrybgc',
                 'entrytextbgc',
                 'enablestats',
+                'enabletitles',
                 'teacheremail',
                 'studentemail',
                 'mincharacterlimit',

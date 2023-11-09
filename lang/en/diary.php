@@ -111,11 +111,8 @@ Note: You may need to provide feedback or update the status of the entry in orde
 $string['diaryname'] = 'Diary name';
 $string['diaryopentime_help'] = 'If enabled, you can set a date for the diary to be opened for use.';
 $string['diaryopentime'] = 'Open time';
-
-
 $string['diarytitle'] = 'Title';
 $string['diarytitle_help'] = 'You can add an optional title/description.';
-
 $string['editall_help'] = 'When enabled, users can edit any entry.';
 $string['editall'] = 'Edit all entries';
 $string['editdates_help'] = 'When enabled, users can edit the date of any entry.';
@@ -134,6 +131,12 @@ $string['enablestats_descr'] = 'If enabled, the statistics for each entry will b
 $string['enablestats_help'] = 'Enable, or disable, viewing statistics for each entry.';
 $string['enablestats_title'] = 'Enable statistics';
 $string['enablestats'] = 'Enable statistics';
+
+$string['enabletitles_descr'] = 'If enabled, the titles for each entry will be required and shown.';
+$string['enabletitles_help'] = 'Enable, or disable, requiring titles for each entry.';
+$string['enabletitles_title'] = 'Enable titles';
+$string['enabletitles'] = 'Enable titles';
+
 $string['entries'] = 'Entries';
 $string['entry'] = 'Entry';
 $string['entrybgc_colour'] = '#93FC84';

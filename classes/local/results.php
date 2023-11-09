@@ -878,6 +878,7 @@ class results {
             'timeclose' => $diary->timeclose,
             'editall' => $diary->editall,
             'editdates' => $diary->editdates,
+            'enabletitles' => $diary->enabletitles,
             'action' => $action,
             'firstkey' => $firstkey,
             'trusttext' => true,
