@@ -35,6 +35,9 @@ This files describes API changes and other work in the diary code.
 20231109 Diary_1114 - Add further capability to the new title for each Diary and it's
     entries. All the needed code and strings have been added and the setting works.
     Refer to the ticket for all the details, as it is a bunch.
+20231110 Diary_1115 - Need to add titles to each report entry. Added the needed code
+    in the classes/local/results.php page in the, function diary_print_user_entry.
+    Putting the code there fixed the views for both the, report and reportsingle, pages.
 
 
 

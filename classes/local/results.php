@@ -524,6 +524,15 @@ class results {
             $param1 = optional_param('button1'.$entry->id, '', PARAM_TEXT); // Transfer entry.
             $param2 = optional_param('button2'.$entry->id, '', PARAM_TEXT); // Clear entry.
 
+            // 20231110 Add a title for the entry, only if there is one.
+            if ($entry->title) {
+                echo '<tr>';
+                echo '<td style="width:35px;"><h6>'.get_string('diarytitle', 'diary').':</h6></td>';
+                echo '<td><h6>'.$entry->title.'</h6></td>';
+                echo '<td></td>';
+                echo '</tr>';
+            }
+
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
