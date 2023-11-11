@@ -304,6 +304,7 @@ class results {
             get_string('teacher', 'diary'),
             get_string('timemarked', 'diary'),
             get_string('mailed', 'diary'),
+            get_string('diarytitle', 'diary'),
             get_string('entry', 'diary'),
         ];
 
@@ -317,6 +318,7 @@ class results {
                            de.userid AS userid,
                            to_char(to_timestamp(de.timecreated), 'YYYY-MM-DD HH24:MI:SS') AS timecreated,
                            to_char(to_timestamp(de.timemodified), 'YYYY-MM-DD HH24:MI:SS') AS timemodified,
+                           de.title AS title,
                            de.text AS text,
                            de.format AS format,
                            de.rating AS rating,
@@ -339,6 +341,7 @@ class results {
                            de.userid AS userid,
                            FROM_UNIXTIME(de.timecreated) AS TIMECREATED,
                            FROM_UNIXTIME(de.timemodified) AS TIMEMODIFIED,
+                           de.title AS title,
                            de.text AS text,
                            de.format AS format,
                            de.rating AS rating,
@@ -385,6 +388,7 @@ class results {
                     $d->teacher,
                     $d->timemarked,
                     $d->mailed,
+                    $d->title,
                     strip_tags($d->text),
                 ];
 
@@ -484,7 +488,7 @@ class results {
 
                 $output = [$d->firstname, $d->lastname, $d->diary, $d->promptid, $d->userid,
                     $d->timecreated, $d->timemodified, $d->format, $d->rating, $cleanedentrycomment,
-                    $d->teacher, $d->timemarked, $d->mailed, $cleanedentry,
+                    $d->teacher, $d->timemarked, $d->mailed, $d->title, $cleanedentry,
                 ];
 
                 $csv->add_data($output);

@@ -38,6 +38,12 @@ This files describes API changes and other work in the diary code.
 20231110 Diary_1115 - Need to add titles to each report entry. Added the needed code
     in the classes/local/results.php page in the, function diary_print_user_entry.
     Putting the code there fixed the views for both the, report and reportsingle, pages.
+20231111 Diary_1116 - Need to add Titles to downloads. Added the needed code, performed
+    a download, and the titles have been added just before the entries, in the CSV
+    download. Do need to investigate using another download format.
+20231111 Diary_1117 - The provider.php file needs to also handle titles. Created two
+    new lines of code at line 70 and line 240, so that titles are included in the
+    metadata and in the export.
 
 
 
