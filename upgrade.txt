@@ -15,7 +15,7 @@ This files describes API changes and other work in the diary code.
 20230831 Diary_1069 - Would be nice if current prompt info was added to the description. 
 
 
-=== 3.7.7 === Pending
+=== 3.7.7 === (Build: 2023111100)
 20220124 Diary_813 - Audio files are being counted as sentences. Only counted if it
     is the only thing in an entry. If there is any other text that starts with a
     paragraph tag, line feed tag, or carriage return with new line tag, the sentence
@@ -43,7 +43,7 @@ This files describes API changes and other work in the diary code.
     download. Do need to investigate using another download format.
 20231111 Diary_1117 - The provider.php file needs to also handle titles. Created two
     new lines of code at line 70 and line 240, so that titles are included in the
-    metadata and in the export.
+    metadata and in the export. Request for personal data download works as expected.
 
 
 
