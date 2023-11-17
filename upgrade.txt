@@ -12,36 +12,38 @@ This files describes API changes and other work in the diary code.
 20230419 Diary_1036 - Modify Prompts to fire up based on resticted access or completion.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
-20230831 Diary_1069 - Would be nice if current prompt info was added to the description. 
+20230831 Diary_1069 - Would be nice if current prompt info was added to the description.
+
+=== 3.7.8 === Pending
 
 
 === 3.7.7 === (Build: 2023111100)
-20220124 Diary_813 - Audio files are being counted as sentences. Only counted if it
+20220124 Diary_813v - Audio files are being counted as sentences. Only counted if it
     is the only thing in an entry. If there is any other text that starts with a
     paragraph tag, line feed tag, or carriage return with new line tag, the sentence
     count is correct, so the one mode for the error, will not be fixed.
-20230523 Diary_1049 - Seem to be using wrong string source in diary/lib.php in line 604.
+20230523 Diary_1049v - Seem to be using wrong string source in diary/lib.php in line 604.
     Created missing string and changed Diary code to use it. System logs now show entries
     when tags are added, removed, and delted.
-20230609 Diary_1052 - Diary - Request for possible CSS to hide empty entries. This does
+20230609 Diary_1052v - Diary - Request for possible CSS to hide empty entries. This does
     the same as the next ticker and I prefer the method I used there, so this is done.
-20230609 Diary_1053 - Request to not show empty entries. Added code to create a user
+20230609 Diary_1053v - Request to not show empty entries. Added code to create a user
     preference for each Diary activity that can be set or changed by the teacher.
-20231010 Diary_1093 - Toggle emails to, Email now, does not seem to eliminate the edit
+20231010 Diary_1093v - Toggle emails to, Email now, does not seem to eliminate the edit
     time delay for non-editing teachers. Added missing code to edit.php to send emails
     to course non-editing teachers, which was entirely missing.
-20231108 Diary_1113 - There has been a new capability requested for a title/description
+20231108 Diary_1113v - There has been a new capability requested for a title/description
     for each entry. Now have titles working. Refer to the ticket for details.
-20231109 Diary_1114 - Add further capability to the new title for each Diary and it's
+20231109 Diary_1114v - Add further capability to the new title for each Diary and it's
     entries. All the needed code and strings have been added and the setting works.
     Refer to the ticket for all the details, as it is a bunch.
-20231110 Diary_1115 - Need to add titles to each report entry. Added the needed code
+20231110 Diary_1115v - Need to add titles to each report entry. Added the needed code
     in the classes/local/results.php page in the, function diary_print_user_entry.
     Putting the code there fixed the views for both the, report and reportsingle, pages.
-20231111 Diary_1116 - Need to add Titles to downloads. Added the needed code, performed
+20231111 Diary_1116v - Need to add Titles to downloads. Added the needed code, performed
     a download, and the titles have been added just before the entries, in the CSV
     download. Do need to investigate using another download format.
-20231111 Diary_1117 - The provider.php file needs to also handle titles. Created two
+20231111 Diary_1117v - The provider.php file needs to also handle titles. Created two
     new lines of code at line 70 and line 240, so that titles are included in the
     metadata and in the export. Request for personal data download works as expected.
 
