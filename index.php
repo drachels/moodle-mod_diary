@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page lists all the instances of diary in a particular course
+ * This page lists all the instances of diary in a particular course.
  *
  * @package   mod_diary
  * @copyright 2019 AL Rachels (drachels@drachels.com)

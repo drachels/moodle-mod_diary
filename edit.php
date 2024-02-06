@@ -203,7 +203,7 @@ if ($form->is_cancelled()) {
     }
 
     // 20210619 If user tries to change timecreated, prevent it.
-    // TODO: Need to move new code to up to just after getting $entry, to make a nested if.
+    // Need to move new code to up to just after getting $entry, to make a nested if.
     // Currently not taking effect on the overall user grade unless the teacher rates it.
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;

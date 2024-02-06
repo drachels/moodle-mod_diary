@@ -178,3 +178,11 @@
     margin: 5px;
     text-align: center;
 }
+
+.promptentry {
+    text-align: left;
+    font-size: 1em;
+    padding: 5px;
+    border-style: double;
+    border-radius: 16px;
+}

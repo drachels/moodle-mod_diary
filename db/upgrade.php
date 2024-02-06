@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Upgrade code for install
+ * Upgrade code for install.
  *
  * @package   mod_diary
  * @copyright 2019 AL Rachels drachels@drachels.com
@@ -529,6 +529,22 @@ function xmldb_diary_upgrade($oldversion = 0) {
 
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2023110900, 'diary');
+    }
+
+    // New field for prompt background color in version 3.7.8.
+    if ($oldversion < 2024020200) {
+
+        // Define field promptbgc to be added to diary_prompts.
+        $table = new xmldb_table('diary_prompts');
+        $field = new xmldb_field('promptbgc', XMLDB_TYPE_CHAR, '25', null, XMLDB_NOTNULL, null, '#93FC84', 'format');
+
+        // Conditionally launch add field promptbgc.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2024020200, 'diary');
     }
     return true;
 }

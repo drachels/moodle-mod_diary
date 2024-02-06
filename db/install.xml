@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/diary/db" VERSION="20231109" COMMENT="XMLDB file for Moodle mod/diary"
+<XMLDB PATH="mod/diary/db" VERSION="20240116" COMMENT="XMLDB file for Moodle mod/diary"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -90,6 +90,7 @@
         <FIELD NAME="datestop" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Date for this prompt to end."/>
         <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Text of this prompt."/>
         <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="promptbgc" TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="#93FC84" SEQUENCE="false"/>
         <FIELD NAME="minchar" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Minimum required character count."/>
         <FIELD NAME="maxchar" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum allowed character count."/>
         <FIELD NAME="minmaxcharpercent" TYPE="int" LENGTH="6" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Each character error percentage off."/>

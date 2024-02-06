@@ -68,9 +68,6 @@ foreach ($diarys as $temp) {
         // 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
         $color3 = $diary->entrybgc;
         $color4 = $diary->entrytextbgc;
-        // 20230324 Added a background color for prompts used with any individual diary entries.
-        // Will need to convert this to a setting.
-        $promptbgc = 'yellow';
     }
 }
 
@@ -246,6 +243,7 @@ if ($CFG->branch > 31) {
 }
 
 echo $OUTPUT->header();
+
 // 20220123 Added if check for an intro and also checks for Moodle 4.0 code. Was showing twice on last update.
 if (($diary->intro) && ($CFG->branch < 400)) {
     echo $OUTPUT->heading($diaryname);
@@ -514,9 +512,10 @@ if ($timenow > $timestart) {
                 if ($entry->promptid > 0) {
                     $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
                     $prompt = $DB->get_record('diary_prompts', ['id' => $entry->promptid, 'diaryid' => $diary->id]);
-                    // 20230321 Use contrasting color for the prompt used background.
-                    echo '<div class="entry" style="background: '.$promptbgc.';">';
-
+                    // 20230321 Added capability to use contrasting color for the prompt background.
+                    // 20240116 Added code to use a prompt background color.
+                    // 20240117 Gave promptentry it's own class name to enable
+                    echo '<div class="promptentry" style="background: '.$prompt->promptbgc.';">';
                     echo '<strong>'.get_string('prompttext', 'diary').'</strong>: '.$prompt->text.'</div>';
                 }
 

@@ -553,8 +553,8 @@ class prompts {
      * @return array $attachmentoptions Array containing the editor and attachment options.
      */
     public static function diary_get_editor_and_attachment_options($course, $context, $diary, $entry, $action, $firstkey) {
-        $maxfiles = 99; // TODO: add some setting.
-        $maxbytes = $course->maxbytes; // TODO: add some setting.
+        $maxfiles = 99; // Need to add some setting.
+        $maxbytes = $course->maxbytes; // Need to add some setting.
 
         // 20210613 Added more custom data to use in edit_form.php to prevent illegal access.
         $editoroptions = [
@@ -726,6 +726,7 @@ class prompts {
                     $data->datestop = $prompts->datestop;
                     $data->text = $prompts->text;
                     $data->format = FORMAT_HTML;
+                    $data->promptbgc = $prompts->promptbgc;
                     $data->minchar = $prompts->minchar;
                     $data->maxchar = $prompts->maxchar;
                     $data->minmaxcharpercent = $prompts->minmaxcharpercent;
@@ -742,7 +743,7 @@ class prompts {
                     $start = '<td>'.userdate($data->datestart).'</td>';
                     $stop = '<td>'.userdate($data->datestop).'</td>';
 
-                    $prompttext = '<b><td>'.
+                    $prompttext = '<div class="promptentry" style="background: '.$data->promptbgc.';"><b><td>'.
                                   get_string('writingpromptlable', 'diary',
                                   ['counter' => $counter,
                                   'entryid' => $data->entryid,
@@ -766,7 +767,7 @@ class prompts {
                     $paragraphs = '<td>'.get_string('paragraphs', 'diary')
                                   .get_string('minc', 'diary').$data->minparagraph
                                   .get_string('maxc', 'diary').$data->maxparagraph
-                                  .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td>';
+                                  .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td></div>';
                     $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
                     if ($status) {
                         $diary->intro .= $status.'</b><hr>';

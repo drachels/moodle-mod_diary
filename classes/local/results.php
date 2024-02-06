@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 define('DIARY_EVENT_TYPE_OPEN', 'open');
 define('DIARY_EVENT_TYPE_CLOSE', 'close');
 use mod_diary\local\results;
+use mod_diary\local\prompts;
 use stdClass;
 use csv_export_writer;
 use html_writer;
@@ -537,6 +538,21 @@ class results {
                 echo '</tr>';
             }
 
+            // 20240206 Somehow, I lost this block of code and have just recreated it.
+            // 20230314 If one exists, display the apllicable prompt.
+            if ($entry->promptid > 0) {
+                $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
+                $prompt = $DB->get_record('diary_prompts', ['id' => $entry->promptid, 'diaryid' => $diary->id]);
+                // 20230321 Added capability to use contrasting color for the prompt background.
+                // 20240116 Added code to use a prompt background color.
+                // 20240117 Gave promptentry it's own class name to enable
+                echo '<tr>';
+                echo '<td style="width:35px;"><h6>'.get_string('prompttext', 'diary').':</h6></td>';
+                echo '<td><div class="promptentry" style="background: '.$prompt->promptbgc.';">'.$prompt->text.'</div></td>';
+                echo '<td></td>';
+                echo '</tr>';
+            }
+
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
@@ -601,7 +617,19 @@ class results {
             );
 
         } else {
-            print_string("noentry", "diary");
+            // 20231209 changed from print_string to echo get_string.
+            // ...echo get_string('noentry', 'diary');...
+            // 20231209 This is a good place to add code that checks for an end date and then
+            // automatically create an entry for the student and mark it as a zero rating.
+            if (prompts::diary_available($diary)) {
+                echo get_string('noentry', 'diary').
+                    'The student can still write because the diary activity is available.';
+            } else {
+                echo get_string('noentry', 'diary').
+                'The student did not complete the writing assignment and this diary activity is no longer
+                 available because the activity is currently closed.';
+            }
+
             // 20210701 Moved copy 2 of 2 here due to new stats.
             echo '</div></td><td style="width:55px;"></td></tr>';
         }
@@ -883,8 +911,8 @@ class results {
      * @return array $attachmentoptions Array containing the editor and attachment options.
      */
     public static function diary_get_editor_and_attachment_options($course, $context, $diary, $entry, $action, $firstkey) {
-        $maxfiles = 99; // TODO: add some setting.
-        $maxbytes = $course->maxbytes; // TODO: add some setting.
+        $maxfiles = 99; // Need to add some setting.
+        $maxbytes = $course->maxbytes; // Need to add some setting.
 
         // 20210613 Added more custom data to use in edit_form.php to prevent illegal access.
         $editoroptions = [

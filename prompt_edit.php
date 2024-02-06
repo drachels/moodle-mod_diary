@@ -144,6 +144,7 @@ $table->class = 'generaltable';
 $table->head = [
     get_string('tablecolumnstatus', 'diary'),
     get_string('tablecolumnprompts', 'diary'),
+    get_string('tablecolumnpromptsbgc', 'diary'),
     get_string('tablecolumnstart', 'diary'),
     get_string('tablecolumnstop', 'diary'),
     get_string('tablecolumncharacters', 'diary'),
@@ -174,6 +175,7 @@ if ($prompts) {
         $data->datestop = $prompt->datestop;
         $data->text = $prompt->text;
         $data->format = FORMAT_HTML;
+        $data->promptbgc = $prompt->promptbgc;
         $data->minchar = $prompt->minchar;
         $data->maxchar = $prompt->maxchar;
         $data->minmaxcharpercent = $prompt->minmaxcharpercent;
@@ -204,10 +206,12 @@ if ($prompts) {
         $jlink2 = '<a href="'.$url->out(false).'"><img src="pix/edit.png" alt='
                   .get_string('eeditlabel', 'diary').'></a>';
         $counter++;
-        $prompttext = '<td>'.get_string('writingpromptlable2', 'diary')
+        $prompttext = '<td bgcolor="'.$data->promptbgc.'">'
+                      .get_string('writingpromptlable2', 'diary')
                       .$counter
                       .get_string('idlable', 'diary', $data->entryid)
                       .'<br>'.$data->text.'</td>';
+        $promptbgc = '<td>'.$data->promptbgc.'</td>';
         $start = '<td>'.userdate($data->datestart).'</td>';
         $stop = '<td>'.userdate($data->datestop).'</td>';
         $characters = '<td>'.get_string('chars', 'diary').'<br>'
@@ -228,7 +232,7 @@ if ($prompts) {
                       .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td>';
         $edit = '<td>'.$jlink2.' | '.$jlink1.'</td></tr>';
         // Create a line containing the data for our current prompt.
-        $line[] = $status.$prompttext.$start.$stop.$characters.$words.$sentences.$paragraphs.$edit;
+        $line[] = $status.$prompttext.$promptbgc.$start.$stop.$characters.$words.$sentences.$paragraphs.$edit;
     }
 
     // Now print out all the prompts for this diary.
@@ -250,11 +254,12 @@ if ($prompts) {
 $data->id = $cm->id;
 $data->textformat = FORMAT_HTML;
 
-$maxfiles = 99; // TODO: add some setting.
-$maxbytes = $course->maxbytes; // TODO: add some setting.
+$maxfiles = 99; // Need to add some setting.
+$maxbytes = $course->maxbytes; // Need to add some setting.
 $editoroptions = [
     'promptid' => $data->entryid,
     'format' => $data->textformat,
+    'promptbgc' => $data->promptbgc,
     'timeopen' => $diary->timeopen,
     'timeclose' => $diary->timeclose,
     'editall' => $diary->editall,
@@ -303,6 +308,7 @@ if ($form->is_cancelled()) {
     $newentry->datestop = $fromform->datestop;
     $newentry->text = $fromform->text_editor['text'];
     $newentry->format = $fromform->text_editor['format'];
+    $newentry->promptbgc = $fromform->promptbgc;
     $newentry->minchar = $fromform->minchar;
     $newentry->maxchar = $fromform->maxchar;
     $newentry->minmaxcharpercent = $fromform->minmaxcharpercent;
@@ -337,6 +343,7 @@ if ($form->is_cancelled()) {
     $newentry->datestop = $fromform->datestop;
     $newentry->text = $fromform->text;
     $newentry->format = FORMAT_HTML;
+    $newentry->promptbgc = $fromform->promptbgc;
     $newentry->minchar = $fromform->minchar;
     $newentry->maxchar = $fromform->maxchar;
     $newentry->minmaxcharpercent = $fromform->minmaxcharpercent;

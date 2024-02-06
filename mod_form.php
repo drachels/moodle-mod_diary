@@ -541,6 +541,13 @@ class mod_diary_prompt_form extends moodleform {
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 
+        // Diary prompt background colour setting.
+        $name = 'promptbgc';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_NOTAGS);
+
         // 20220923 Added minimum character count setting.
         $name = 'minchar';
         $label = get_string($name, $plugin);
@@ -683,6 +690,13 @@ class mod_diary_prompt_edit_form extends moodleform {
                            'wrap="virtual" rows="3"');
         $mform->setType($name, PARAM_RAW);
         $mform->addRule($name, null, 'required', null, 'client');
+
+        // Diary prompt background colour setting.
+        $name = 'promptbgc';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $ratingoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_NOTAGS);
 
         // 20220923 Added minimum character count setting.
         $name = 'minchar';

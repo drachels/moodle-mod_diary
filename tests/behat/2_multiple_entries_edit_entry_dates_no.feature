@@ -1,8 +1,8 @@
 @mod @mod_diary1
-Feature: Basic diary use
-  In order to complete diary entries
+Feature: Multiple entries with edit entry dates no
+  In order to complete diary entries without editing dates
   As a teacher or student
-  I need to make diary entries
+  I need to make multiple diary entries and not be able to edit the dates
 
   Background:
     Given the following "courses" exist:
@@ -20,6 +20,8 @@ Feature: Basic diary use
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
 
+# Note that for this feature, the settings for the activty will need to be modified
+# so that users can make multiple entries.
   @javascript
   Scenario: A student creates multiple entries in one diary (old journal mode)
     When I am on the "Test diary" "diary activity" page logged in as "student1"

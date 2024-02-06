@@ -1,6 +1,9 @@
 This files describes API changes and other work in the diary code.
 === Deferred until fixed. ===
 20201006 Diary_627 - Included files are not restored correctly.
+20200601 Diary_526r - Make toggle to allow grade and feedback for users with no entry.
+    Making changes in the results.php file. Currently the code is just, text, based on
+    the diary activity availability.
 20210515 Diary_719 - Media files are NOT there after a restore.
 20210815 Diary_736 - Need a way to slectively turn off autosave. It is not
     needed when starting a totally new entry. Note: Same for tags.
@@ -9,12 +12,29 @@ This files describes API changes and other work in the diary code.
 
 20211130 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
-20230419 Diary_1036 - Modify Prompts to fire up based on resticted access or completion.
+20220228 Diary_824 - The Moodle Mobile app is not supported.
+20230419 Diary_1036 - Diary - Modify Prompts to use Modes to fire up based on resticted
+    access or completion.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
 20230831 Diary_1069 - Would be nice if current prompt info was added to the description.
 
+
+
 === 3.7.8 === Pending
+
+20230523 Diary_1050v - When editing or creating an entry, there are two tag headers. At
+    some time, or another, this seems to have resolved itself, so closing this ticket
+    and marked as being included in this version.
+20231208 Diary_1128bt - Need to add a field for prompt background color. Added code and
+    settings to the files, as needed. See ticket for details.
+20240116 Diary_1172bt - Prompts are missing from the report.php and reportsingle.php
+    pages. Created new .promptentry, in the style.css file and used in the two report
+    files as needed along with new code in results.php to render in report and reportsingle.
+20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
+    code from the report.php file over into the reportsingle.php file. I then commented
+    out the sort by ascending and descending last name tool button.
+
 
 
 === 3.7.7 === (Build: 2023111100)
@@ -26,7 +46,7 @@ This files describes API changes and other work in the diary code.
     Created missing string and changed Diary code to use it. System logs now show entries
     when tags are added, removed, and delted.
 20230609 Diary_1052v - Diary - Request for possible CSS to hide empty entries. This does
-    the same as the next ticker and I prefer the method I used there, so this is done.
+    the same as the next ticket and I prefer the method I used there, so this is done.
 20230609 Diary_1053v - Request to not show empty entries. Added code to create a user
     preference for each Diary activity that can be set or changed by the teacher.
 20231010 Diary_1093v - Toggle emails to, Email now, does not seem to eliminate the edit

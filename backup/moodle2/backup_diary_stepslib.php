@@ -131,6 +131,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'title',
                 'text',
                 'format',
+                'promptbgc',
                 'rating',
                 'entrycomment',
                 'teacher',

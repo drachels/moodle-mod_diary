@@ -1,5 +1,5 @@
 @mod @mod_diary1
-Feature: Basic diary use
+Feature: Basic diary entry use
   In order to complete diary entries
   As a teacher or student
   I need to make a diary entry
