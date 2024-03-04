@@ -37,6 +37,10 @@ $cm = get_coursemodule_from_id('diary', $id);
 $action = optional_param('action', '', PARAM_ACTION); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
 
+// Future code.
+// $des = optional_param('desc', -1, PARAM_INT); // @codingStandardsIgnoreLine
+// $orderby = optional_param('orderby', -1, PARAM_INT); // @codingStandardsIgnoreLine
+
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
