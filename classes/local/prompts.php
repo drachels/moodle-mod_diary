@@ -215,7 +215,7 @@ class prompts {
         echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
         if ($entry) {
 
-            // 20211109 needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
+            // 20211109 Needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
             $param1 = optional_param('button1'.$entry->id, '', PARAM_TEXT); // Transfer entry.
             $param2 = optional_param('button2'.$entry->id, '', PARAM_TEXT); // Clear entry.
 
@@ -235,10 +235,8 @@ class prompts {
         echo '<tr>';
         echo '<td class="userpix" rowspan="2">';
         echo $OUTPUT->user_picture($user,
-            [
-                'courseid' => $course->id,
-                'alttext' => true,
-            ]
+            ['courseid' => $course->id,
+            'alttext' => true, ]
         );
         echo '</td>';
         echo '<td class="userfullname">'.fullname($user).'<br>';
@@ -290,9 +288,7 @@ class prompts {
             }
             if (empty($teachers[$entry->teacher])) {
                 $teachers[$entry->teacher] = $DB->get_record('user',
-                    [
-                        'id' => $entry->teacher,
-                    ]
+                    ['id' => $entry->teacher]
                 );
             }
             // 20200816 Get the current rating for this user!
