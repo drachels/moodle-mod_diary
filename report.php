@@ -134,6 +134,26 @@ if (! empty($action)) {
                 $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'timemodified ASC');
             }
             break;
+        case 'timemodifiedasc':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                $stringlable = 'timemodifiedasc';
+                // 20240207 Set sort order for use later when seeing who is done.
+                set_user_preference('sortoption', 'de.timemodified ASC, u.lastname ASC, u.firstname ASC');
+                $sortoption = get_user_preferences('sortoption');
+                // 20240207 Get each users most recent diary entry sorted in timemodified ascending order.
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'timemodified ASC');
+            }
+            break;
+        case 'timemodifieddesc':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                $stringlable = 'timemodifieddesc';
+                // 20240207 Set sort order for use later when seeing who is done.
+                set_user_preference('sortoption', 'de.timemodified DESC, u.lastname ASC, u.firstname ASC');
+                $sortoption = get_user_preferences('sortoption');
+                // 20240207 Get each users most recent diary entry sorted in timemodified descending order.
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'timemodified DESC');
+            }
+            break;
         default:
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'currententry';
@@ -224,6 +244,7 @@ if (! $users) {
     // Create download, reload, current, oldest, lowest, highest, and most recent tool buttons for all entries.
     if (has_capability('mod/diary:manageentries', $context)) {
         // 20201003 Changed toolbar code to $output instead of html_writer::alist.
+        // Create a list of options to add to the URL.
         $options = [];
         $options['id'] = $id;
         $options['diary'] = $diary->id;
@@ -299,6 +320,24 @@ if (! $users) {
         $options['action'] = 'latestmodifiedentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
+
+        // 20240207 Add sort order based on entry time modified, in ascending order.
+        $options['action'] = 'timemodifiedasc';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/uplong', get_string('timemodifiedasc', 'diary')),
+            [
+                'class' => 'toolbutton',
+            ]
+        );
+
+        // 20240207 Add sort order based on entry time modified, in descending order.
+        $options['action'] = 'timemodifieddesc';
+        $url = new moodle_url('/mod/diary/report.php', $options);
+        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/downlong', get_string('timemodifieddesc', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
