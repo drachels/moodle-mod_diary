@@ -819,7 +819,7 @@ function diary_get_users_done($diary, $currentgroup, $sortoption) {
         $params[] = $currentgroup;
     }
     // 20201014 Changed to a sort option preference to sort lastname ascending or descending.
-    $sql .= " WHERE de.diary = ? ORDER BY " . $sortoption;
+    $sql .= " WHERE de.diary = ? ORDER BY ".$sortoption;
 
     $params[] = $diary->id;
 
