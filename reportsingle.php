@@ -78,8 +78,6 @@ if (! empty($action)) {
                 results::download_entries($context, $course, $diary);
             }
             break;
-        // The following two cases are not needed for the reportsingle.php page.
-        /* // @codingStandardsIgnoreLine
         case 'lastnameasc':
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'lastnameasc';
@@ -89,8 +87,6 @@ if (! empty($action)) {
                 $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
             }
             break;
-        */
-        /* // @codingStandardsIgnoreLine
         case 'lastnamedesc':
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'lastnamedesc';
@@ -100,7 +96,6 @@ if (! empty($action)) {
                 $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
             }
             break;
-        */
         case 'currententry':
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'currententry';
