@@ -531,8 +531,8 @@ function xmldb_diary_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2023110900, 'diary');
     }
 
-    // New field for prompt background color in version 3.7.8.
-    if ($oldversion < 2024020200) {
+    // New field for prompt background color and change field name for titles in version 3.7.8.
+    if ($oldversion < 2024041000) {
 
         // Define field promptbgc to be added to diary_prompts.
         $table = new xmldb_table('diary_prompts');
@@ -543,8 +543,16 @@ function xmldb_diary_upgrade($oldversion = 0) {
             $dbman->add_field($table, $field);
         }
 
+        // Rename field titleson on table diary to enabletitles.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('titleson', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enablestats');
+
+        // Conditionally launch rename field enabletitles.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'enabletitles');
+        }
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2024020200, 'diary');
+        upgrade_mod_savepoint(true, 2024041000, 'diary');
     }
     return true;
 }
