@@ -18,13 +18,13 @@ This files describes API changes and other work in the diary code.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
 20230831 Diary_1069 - Would be nice if current prompt info was added to the description.
+20240221 Diary_1211 - Feature request - Would be nice to be able to use a grading rubric.
 
 
 === 3.7.8+ === (Build: 2024020203)
 20240409  Diary_1232v - Wrong column name 'titleson'/'enabletitles' in table mdl_diary #37.
     Renamed field and saved new version of install.xml. Made code changes in upgrade.php
     that renames the field if it finds it as titleson so that it becomes enabletitles. 
-
 
 === 3.7.8 === (Build:2024020202)
 20230523 Diary_1050v - When editing or creating an entry, there are two tag headers. At
@@ -38,6 +38,11 @@ This files describes API changes and other work in the diary code.
 20240206 Diary_1196v - Toolbar is missing on the reportsingle.php page. Copied the toolbar
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button.
+
+20240408 Diary_1231 - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
+    Changed the code, see ticket for details. Deprecation warning no longer occurs.
+
+
 
 === 3.7.7 === (Build: 2023111100)
 20220124 Diary_813v - Audio files are being counted as sentences. Only counted if it
