@@ -928,6 +928,7 @@ class results {
             'context' => $context,
             'subdirs' => false,
         ];
+
         $attachmentoptions = [
             'subdirs' => false,
             'maxfiles' => $maxfiles,
