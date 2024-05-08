@@ -36,6 +36,7 @@ $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST); // Complete details about this course.
 $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+$promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
 
 if (!$cm) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -87,7 +88,6 @@ $diaryname = format_string($diary->name, true, ['context' => $context]);
 
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
-$output->init($cm);
 
 // Handle toolbar capabilities.
 if (!empty($action)) {
@@ -253,7 +253,7 @@ if (($diary->intro) && ($CFG->branch < 400)) {
 // 20221008 Hide the prompts info if the Diary activity is not available.
 // 20221027 Halt and force a fix if too many current prompts.
 if (prompts::diary_available($diary)) {
-    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
+    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary, $promptid);
     if ($current > 1) {
         // 20230810 Changed via pull request #29.
         $url1 = new moodle_url($CFG->wwwroot.'/mod/diary/prompt_edit.php', ['id' => $cm->id]);
@@ -263,7 +263,7 @@ if (prompts::diary_available($diary)) {
             .'</a> ';
         die;
     } else {
-        $status = prompts::prompts_viewcurrent($diary);
+        $status = prompts::prompts_viewcurrent($diary, $action, $promptid);
         // Show the current prompt.
         echo '<b>'.$diary->intro.'</b>';
     }
@@ -292,7 +292,7 @@ if ($entriesmanager) {
     echo '<a class="reportlink" href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
 }
 
-// 20200901 Visual separator between activity info and entries.
+// 20200901 Visual separator between activity info and entries, right below Visible group selector.
 echo '<hr>';
 
 // Check to see if diary is currently available.
@@ -371,7 +371,8 @@ if ($timenow > $timestart) {
             // Print user toolbar icons only if there is at least one entry for this user.
             if ($entrys) {
                 echo '<span style="float: right;">'.get_string('usertoolbar', 'diary');
-                echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey).'</span>';
+                echo $output->toolbar(has_capability('mod/diary:addentries', $context),
+                    $course, $id, $diary, $firstkey, $cm).'</span>';
             }
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
@@ -490,7 +491,7 @@ if ($timenow > $timestart) {
                 $options['id'] = $cm->id;
                 $options['action'] = 'editentry';
                 $options['firstkey'] = $entry->id;
-                $options['promptid'] = $promptid;
+                $options['promptid'] = $entry->promptid;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
@@ -501,14 +502,7 @@ if ($timenow > $timestart) {
                     $editthisentry = ' ';
                 }
 
-                // 20231108 If there is a title for the entry add it as a heading.
-                echo $OUTPUT->heading($entry->title);
-
-                // Add, Entry, then date time group heading for each entry on the page.
-                // 20231108 Add the old heading version as a sub-heading.
-                echo ('<h5>'.get_string('entry', 'diary').': '.userdate($entry->timecreated).' '.$editthisentry.'</h5>');
-
-                // 20230314 If one exists, display the apllicable prompt.
+                // 20230314 If one exists, display the aplicable prompt.
                 if ($entry->promptid > 0) {
                     $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
                     $prompt = $DB->get_record('diary_prompts', ['id' => $entry->promptid, 'diaryid' => $diary->id]);
@@ -516,8 +510,17 @@ if ($timenow > $timestart) {
                     // 20240116 Added code to use a prompt background color.
                     // 20240117 Gave promptentry it's own class name to enable
                     echo '<div class="promptentry" style="background: '.$prompt->promptbgc.';">';
-                    echo '<strong>'.get_string('prompttext', 'diary').'</strong>: '.$prompt->text.'</div>';
+                    echo '<strong>Prompt ID-'.$prompt->id.', '.get_string('prompttext', 'diary')
+                        .'</strong>: '.$prompt->text.'</div>';
                 }
+
+                // 20231108 If there is a title for the entry add it as a heading.
+                echo $OUTPUT->heading($entry->title);
+
+                // Add, Entry, then date time group heading for each entry on the page.
+                // 20231108 Add the old heading version as a sub-heading.
+                echo ('<h5>'.get_string('entry', 'diary').': ID-'.$entry->id.', '
+                    .userdate($entry->timecreated).' '.$editthisentry.'</h5>');
 
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
@@ -548,7 +551,7 @@ if ($timenow > $timestart) {
                             echo $autoratingdata;
                         }
                     } else {
-                        print_string("noentry", "diary");
+                        print_string('noentry', 'diary');
                         // 20210701 Moved copy 2 of 2 here due to new stats.
                         echo '</div></td><td style="width:55px;"></td></tr>';
                     }
