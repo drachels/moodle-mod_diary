@@ -17,7 +17,8 @@ This files describes API changes and other work in the diary code.
     access or completion.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
-20230831 Diary_1069 - Would be nice if current prompt info was added to the description.
+20230831 Diary_1069 - Would be nice if current prompt info was added to the activity
+    description in the course topic.
 20240221 Diary_1211 - Feature request - Would be nice to be able to use a grading rubric.
 20240426 Diary_1237 - New feature request - show individual names for selection in the,
     Visible groups dropdown.
@@ -25,7 +26,10 @@ This files describes API changes and other work in the diary code.
 
 
 === 3.8.0 === pending
-20240408 Diary_1231r - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
+20240304 Diary_1223bt - Major bug - Editing an OLD entry with a current timed prompt showing,
+    the current prompt over writes the OLD and becomes required. Fixed and due to the amount
+	of changes, see the ticket for details.
+20240408 Diary_1231bt - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
     Changed the code, see ticket for details. Deprecation warning no longer occurs.
     2024042901 I have reverted to the previous code that gets the deprecated message.
     Otherwise, when anyone is on the view page, they get undefined id in line 80 of the
