@@ -81,14 +81,14 @@ if (! empty($action)) {
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'currententry';
                 // Get ALL diary entries in an order that will result in showing the users most current entry.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user]);
             }
             break;
         case 'firstentry':
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'firstentry';
                 // Get ALL diary entries in an order that will result in showing the users very first entry.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'timecreated DESC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'timecreated ASC');
             }
             break;
         case 'lowestgradeentry':
@@ -98,7 +98,7 @@ if (! empty($action)) {
                 // oldest, ungraded entry. Once all ungraded entries have a grade, the entry
                 // with the lowest grade is shown. For duplicate low grades, the entry that
                 // is oldest, is shown.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'rating DESC, timemodified DESC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'rating ASC, timemodified DESC');
             }
             break;
         case 'highestgradeentry':
@@ -106,7 +106,7 @@ if (! empty($action)) {
                 $stringlable = 'highestgradeentry';
                 // Get ALL diary entries in an order that will result in showing the users highest
                 // graded entry. Duplicates high grades result in showing the most recent entry.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'rating ASC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'rating DESC');
             }
             break;
         case 'latestmodifiedentry':
@@ -115,7 +115,7 @@ if (! empty($action)) {
                 // Get ALL diary entries in an order that will result in showing the users
                 // most recently modified entry. At the moment, this is no different from current entry.
                 // May be needed for future version if editing old entries is allowed.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'timemodified ASC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'timemodified DESC');
             }
             break;
         default:
