@@ -19,7 +19,28 @@ This files describes API changes and other work in the diary code.
     in restore_diary_activity_task.class is missing.
 20230831 Diary_1069 - Would be nice if current prompt info was added to the description.
 20240221 Diary_1211 - Feature request - Would be nice to be able to use a grading rubric.
+20240426 Diary_1237 - New feature request - show individual names for selection in the,
+    Visible groups dropdown.
 
+
+
+=== 3.8.0 === pending
+20240408 Diary_1231r - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
+    Changed the code, see ticket for details. Deprecation warning no longer occurs.
+    2024042901 I have reverted to the previous code that gets the deprecated message.
+    Otherwise, when anyone is on the view page, they get undefined id in line 80 of the
+    renderer.php file.
+20240429 Diary_1238bt - My mdl_diary_entries table defines promptid as null but needs to
+    be not null. Made a copy of the table, mdl_diary_entries2. Exported the tables and
+    saved both in today's development folder. I then dropped the original table, edited
+    the sql file so the field gets created as not null 0, then imported the table back
+    into the moodledev database.
+    
+    
+    
+=== 3.7.9 === (Build: 2024042100)
+2024042400 Diary_1235v - Bug fix release for github issue #38 Module will update and produce
+    error. Made changes as needed in the version.php file.
 
 === 3.7.8+ === (Build: 2024020203)
 20240409  Diary_1232v - Wrong column name 'titleson'/'enabletitles' in table mdl_diary #37.
@@ -39,8 +60,7 @@ This files describes API changes and other work in the diary code.
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button.
 
-20240408 Diary_1231 - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
-    Changed the code, see ticket for details. Deprecation warning no longer occurs.
+
 
 
 
