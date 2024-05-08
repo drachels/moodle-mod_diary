@@ -1241,13 +1241,18 @@ class diarystats {
      * @param string $diary The diary containing the min/maxes.
      * @return nothing
      */
-    public static function get_minmaxes($diary) {
+    public static function get_minmaxes($diary, $action, $promptid) {
         // 20210710 Add checks and description additions for mins and maxes.
         // This is temporary and probably needs to be moved to somewhere else so
         // it can be shown on the edit.php page, too. Maybe move to results.php.
+        $id = required_param('id', PARAM_INT); // Course Module ID.
+        $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+        $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
+        $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
 
         // 20221018 Added prompt info and counts above the note entries.
-        $diary->intro .= prompts::prompts_viewcurrent($diary);
+        $diary->intro .= prompts::prompts_viewcurrent($diary, $action, $promptid);
+
         list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
         $diary->intro .= get_string('tcount', 'diary', $tcount);
         $diary->intro .= get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
