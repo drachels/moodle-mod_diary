@@ -26,6 +26,10 @@ This files describes API changes and other work in the diary code.
 
 
 === 3.8.0 === pending
+20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
+    code from the report.php file over into the reportsingle.php file. I then commented
+    out the sort by ascending and descending last name tool button. Had to reopen due to
+	not getting records based on current userid.
 20240304 Diary_1223bt - Major bug - Editing an OLD entry with a current timed prompt showing,
     the current prompt over writes the OLD and becomes required. Fixed and due to the amount
 	of changes, see the ticket for details.
@@ -60,13 +64,9 @@ This files describes API changes and other work in the diary code.
 20240116 Diary_1172v - Prompts are missing from the report.php and reportsingle.php
     pages. Created new .promptentry, in the style.css file and used in the two report
     files as needed along with new code in results.php to render in report and reportsingle.
-20240206 Diary_1196v - Toolbar is missing on the reportsingle.php page. Copied the toolbar
-    code from the report.php file over into the reportsingle.php file. I then commented
-    out the sort by ascending and descending last name tool button.
-
-
-
-
+20240206 Diary_1196-reopened in Diary 3.8.0 - Toolbar is missing on the reportsingle.php page.
+    Copied the toolbar code from the report.php file over into the reportsingle.php file.
+    I then commented out the sort by ascending and descending last name tool button.
 
 === 3.7.7 === (Build: 2023111100)
 20220124 Diary_813v - Audio files are being counted as sentences. Only counted if it
