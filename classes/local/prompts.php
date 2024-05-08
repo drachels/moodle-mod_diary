@@ -271,7 +271,7 @@ class prompts {
             // 20211212 Added list function to get and print the autorating data here.
             echo $autoratingdata;
         } else {
-            print_string("noentry", "diary");
+            print_string('noentry', 'diary');
             // 20210701 Moved copy 2 of 2 here due to new stats.
             echo '</div></td><td style="width:55px;"></td></tr>';
         }
@@ -692,8 +692,13 @@ class prompts {
      * @param array $diary The settings for this diary activity.
      * @return object
      */
-    public static function prompts_viewcurrent($diary) {
+    public static function prompts_viewcurrent($diary, $action, $promptid) {
         global $CFG, $DB;
+        // 20240507 Added for testing.
+        $id = required_param('id', PARAM_INT); // Course Module ID.
+        $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+        $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
+        $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
 
         $data = new stdClass();
         $output = '';
@@ -702,7 +707,13 @@ class prompts {
         $past = 0;
         $current = 0;
         $future = 0;
+
+        $entry = $DB->get_record('diary_entries', ['id' => $firstkey, 'diary' => $diary->id], );
+        $debug['CP5 for $entry: '] = $entry;
+
         $promptsall = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart ASC, datestop ASC');
+        $promptsone = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id], );
+
         $diary->intro = '';
         // If there are any prompts for this diary, create a list of them.
         if ($promptsall) {
@@ -718,7 +729,9 @@ class prompts {
                     $future++;
                 }
 
-                if (($prompts->datestart < time()) && $prompts->datestop > time()) {
+                if ((($prompts->datestart < time()) && $prompts->datestop > time()) && ($action <> 'editentry')) {
+                    $debug['CP6-'.$counter.' for $promptsone->datestart: '] = 'doing the time checks';
+
                     $data->entryid = $prompts->id;
                     $data->id = $prompts->id;
                     $data->diaryid = $prompts->diaryid;
@@ -768,6 +781,67 @@ class prompts {
                                   .get_string('minc', 'diary').$data->minparagraph
                                   .get_string('maxc', 'diary').$data->maxparagraph
                                   .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td></div>';
+
+                    $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
+                    if ($status) {
+                        $diary->intro .= $status.'</b><hr>';
+                    }
+                } else if ((($action == 'editentry') && ($prompts->id == $promptid))
+                    || (($action == 'editentry') && ($prompts->id == $promptid))) {
+                    // To get the last use case to work, I think I will also need to include $firstkey
+                    // so that I can check to see what the $entry->promptid is and use it to
+                    // compare to $promptid.
+
+                    $data->entryid = $prompts->id;
+                    $data->id = $prompts->id;
+                    $data->diaryid = $prompts->diaryid;
+                    $data->datestart = $prompts->datestart;
+                    $data->datestop = $prompts->datestop;
+                    $data->text = $prompts->text;
+                    $data->format = FORMAT_HTML;
+                    $data->promptbgc = $prompts->promptbgc;
+                    $data->minchar = $prompts->minchar;
+                    $data->maxchar = $prompts->maxchar;
+                    $data->minmaxcharpercent = $prompts->minmaxcharpercent;
+                    $data->minword = $prompts->minword;
+                    $data->maxword = $prompts->maxword;
+                    $data->minmaxwordpercent = $prompts->minmaxwordpercent;
+                    $data->minsentence = $prompts->minsentence;
+                    $data->maxsentence = $prompts->maxsentence;
+                    $data->minmaxsentencepercent = $prompts->minmaxsentencepercent;
+                    $data->minparagraph = $prompts->minparagraph;
+                    $data->maxparagraph = $prompts->maxparagraph;
+                    $data->minmaxparagraphpercent = $prompts->minmaxparagraphpercent;
+
+                    $start = '<td>'.userdate($data->datestart).'</td>';
+                    $stop = '<td>'.userdate($data->datestop).'</td>';
+
+                    $prompttext = '<div class="promptentry" style="background: '.$data->promptbgc.';"><b><td>'.
+                                  get_string('writingpromptlable', 'diary',
+                                  ['counter' => $counter,
+                                  'entryid' => $data->entryid,
+                                  'starton' => $start,
+                                  'endon' => $stop,
+                                  'datatext' => $data->text,
+                                  ]).
+                                  '</td>';
+                    $characters = '<td>'.get_string('chars', 'diary')
+                                  .get_string('minc', 'diary').$data->minchar
+                                  .get_string('maxc', 'diary').$data->maxchar
+                                  .get_string('errp', 'diary').$data->minmaxcharpercent.', </td>';
+                    $words = '<td>'.get_string('words', 'diary')
+                             .get_string('minc', 'diary').$data->minword
+                             .get_string('maxc', 'diary').$data->maxword
+                             .get_string('errp', 'diary').$data->minmaxwordpercent.', </td>';
+                    $sentences = '<td>'.get_string('sentences', 'diary')
+                                 .get_string('minc', 'diary').$data->minsentence
+                                 .get_string('maxc', 'diary').$data->maxsentence
+                                  .get_string('errp', 'diary').$data->minmaxsentencepercent.', </td>';
+                    $paragraphs = '<td>'.get_string('paragraphs', 'diary')
+                                  .get_string('minc', 'diary').$data->minparagraph
+                                  .get_string('maxc', 'diary').$data->maxparagraph
+                                  .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td></div>';
+
                     $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
                     if ($status) {
                         $diary->intro .= $status.'</b><hr>';
