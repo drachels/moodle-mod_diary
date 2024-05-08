@@ -66,7 +66,6 @@ if (has_capability('mod/diary:manageentries', $context)) {
     $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'timecreated DESC');
 }
 
-
 // Handle toolbar capabilities.
 if (! empty($action)) {
     switch ($action) {
@@ -76,24 +75,6 @@ if (! empty($action)) {
                 // 20231007 Added set_url to fix error.
                 $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]);
                 results::download_entries($context, $course, $diary);
-            }
-            break;
-        case 'lastnameasc':
-            if (has_capability('mod/diary:manageentries', $context)) {
-                $stringlable = 'lastnameasc';
-                // 20201014 Set order and get ALL diary entries in lastname ascending order.
-                set_user_preference('sortoption', 'u.lastname ASC, u.firstname ASC');
-                $sortoption = get_user_preferences('sortoption');
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
-            }
-            break;
-        case 'lastnamedesc':
-            if (has_capability('mod/diary:manageentries', $context)) {
-                $stringlable = 'lastnamedesc';
-                // 20201014 Set order and get ALL diary entries in lastname descending order.
-                set_user_preference('sortoption', 'u.lastname DESC, u.firstname DESC');
-                $sortoption = get_user_preferences('sortoption');
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
             }
             break;
         case 'currententry':
@@ -170,6 +151,7 @@ echo '<span style="float: right;"><a href="index.php?id='.$course->id.'">'
 
 // Save our current user id and also get his details. CHECK - might not need this.
 $users = $user;
+
 $user = $DB->get_record('user', ['id' => $user]);
 
 if ($eee) {
@@ -226,10 +208,11 @@ if (! $users) {
         $options = [];
         $options['id'] = $id;
         $options['diary'] = $diary->id;
+        $options['user'] = $users;
 
         // Add download button.
         $options['action'] = 'download';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('i/export', get_string('csvexport', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -238,7 +221,7 @@ if (! $users) {
 
         // Add reload toolbutton.
         $options['action'] = $stringlable;
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/reload', get_string('reload', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -246,7 +229,7 @@ if (! $users) {
         );
 
         $options['action'] = 'currententry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('i/edit', get_string('currententry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -254,7 +237,7 @@ if (! $users) {
         );
 
         $options['action'] = 'firstentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/left', get_string('firstentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -262,7 +245,7 @@ if (! $users) {
         );
 
         $options['action'] = 'lowestgradeentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -270,7 +253,7 @@ if (! $users) {
         );
 
         $options['action'] = 'highestgradeentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -278,7 +261,7 @@ if (! $users) {
         );
 
         $options['action'] = 'latestmodifiedentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -286,7 +269,7 @@ if (! $users) {
         );
 
         // 20210511 Reorganized group and toolbar output. 20220102 Added action.
-        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/report.php?id=$cm->id&action=currententry")
+        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/reportsingle.php?id=$cm->id&action=currententry")
             .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
     }
 
