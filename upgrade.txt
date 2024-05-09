@@ -29,10 +29,10 @@ This file describes changes and other work in the diary code.
 20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button. Had to reopen due to
-	not getting records based on current userid.
+    not getting records based on current userid.
 20240304 Diary_1223bt - Major bug - Editing an OLD entry with a current timed prompt showing,
     the current prompt over writes the OLD and becomes required. Fixed and due to the amount
-	of changes, see the ticket for details.
+    of changes, see the ticket for details.
 20240408 Diary_1231bt - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
     Changed the code, see ticket for details. Deprecation warning no longer occurs.
     2024042901 I have reverted to the previous code that gets the deprecated message.

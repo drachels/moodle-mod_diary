@@ -98,7 +98,8 @@ if (! empty($action)) {
                 // oldest, ungraded entry. Once all ungraded entries have a grade, the entry
                 // with the lowest grade is shown. For duplicate low grades, the entry that
                 // is oldest, is shown.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'rating ASC, timemodified DESC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user],
+                    $sort = 'rating ASC, timemodified DESC');
             }
             break;
         case 'highestgradeentry':

@@ -1251,7 +1251,7 @@ class diarystats {
         $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
         $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
         $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
-        If ($promptid > 0) {
+        if ($promptid > 0) {
             $prompt = $DB->get_record('diary_prompts', ['id' => $promptid]);
         }
         // 20221018 Added prompt info and counts above the note entries.
