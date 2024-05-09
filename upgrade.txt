@@ -1,4 +1,4 @@
-This files describes API changes and other work in the diary code.
+This file describes changes and other work in the diary code.
 === Deferred until fixed. ===
 20201006 Diary_627 - Included files are not restored correctly.
 20200601 Diary_526r - Make toggle to allow grade and feedback for users with no entry.
@@ -25,7 +25,7 @@ This files describes API changes and other work in the diary code.
 
 
 
-=== 3.8.0 === pending
+=== 3.8.0 === pending (Build: 2024042900)
 20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button. Had to reopen due to
@@ -38,6 +38,8 @@ This files describes API changes and other work in the diary code.
     2024042901 I have reverted to the previous code that gets the deprecated message.
     Otherwise, when anyone is on the view page, they get undefined id in line 80 of the
     renderer.php file.
+20240410 Diary_1233bt - Numbers do not match between prompt and description. Modified
+    diarystats.php file to use the data from the diary_prompts table. See ticket for details. 
 20240429 Diary_1238bt - My mdl_diary_entries table defines promptid as null but needs to
     be not null. Made a copy of the table, mdl_diary_entries2. Exported the tables and
     saved both in today's development folder. I then dropped the original table, edited
