@@ -345,6 +345,7 @@ $string['privacy:metadata:diary_entries:promptdatestop'] = 'The date the automat
 $string['privacy:metadata:diary_entries:prompttext'] = 'The text of the writing prompt used for auto-rating and feedback.';
 $string['privacy:metadata:diary_entries:rating'] = 'The numerical grade for this diary entry. Can be determined by scales/advancedgradingforms etc., but will always be converted back to a floating point number.';
 $string['privacy:metadata:diary_entries:teacher'] = 'The user ID of the person rating the entry.';
+$string['privacy:metadata:diary_entries:title'] = 'The title or description of this entry.';
 $string['privacy:metadata:diary_entries:text'] = 'The content of this entry.';
 $string['privacy:metadata:diary_entries:timecreated'] = 'Time the entry was created.';
 $string['privacy:metadata:diary_entries:timemarked'] = 'Time the entry was rated.';
