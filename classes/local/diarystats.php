@@ -1262,49 +1262,49 @@ class diarystats {
         $diary->intro .= get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
 
         // 20240509 Modified all min/maxes below here to use data from diray_prompts table if there is a promptid in use.
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= '<br>'.get_string('mincharacterlimit_desc', 'diary', ($prompt->minchar)).'<br>';
         } else if ($diary->mincharacterlimit > 0) {
             $diary->intro .= '<br>'.get_string('mincharacterlimit_desc', 'diary', ($diary->mincharacterlimit)).'<br>';
         }
 
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= get_string('maxcharacterlimit_desc', 'diary', ($prompt->maxchar)).'<br>';
         } else if ($diary->maxcharacterlimit > 0) {
             $diary->intro .= get_string('maxcharacterlimit_desc', 'diary', ($diary->maxcharacterlimit)).'<br>';
         }
 
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= get_string('minwordlimit_desc', 'diary', ($prompt->minword)).'<br>';
         } else if ($diary->minwordlimit > 0) {
             $diary->intro .= get_string('minwordlimit_desc', 'diary', ($diary->minwordlimit)).'<br>';
         }
 
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= get_string('maxwordlimit_desc', 'diary', ($prompt->maxword)).'<br>';
         } else if ($diary->maxwordlimit > 0) {
             $diary->intro .= get_string('maxwordlimit_desc', 'diary', ($diary->maxwordlimit)).'<br>';
         }
 
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= get_string('minsentencelimit_desc', 'diary', ($prompt->minsentence)).'<br>';
         } else if ($diary->minsentencelimit > 0) {
             $diary->intro .= get_string('minsentencelimit_desc', 'diary', ($diary->minsentencelimit)).'<br>';
         }
 
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= get_string('maxsentencelimit_desc', 'diary', ($prompt->maxsentence)).'<br>';
         } else if ($diary->maxsentencelimit > 0) {
             $diary->intro .= get_string('maxsentencelimit_desc', 'diary', ($diary->maxsentencelimit)).'<br>';
         }
 
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= get_string('minparagraphlimit_desc', 'diary', ($prompt->minparagraph)).'<br>';
         } else if ($diary->minparagraphlimit > 0) {
             $diary->intro .= get_string('minparagraphlimit_desc', 'diary', ($diary->minparagraphlimit)).'<br>';
         }
 
-        if ($promptid > 0) {
+        if (($promptid > 0) && ($action == 'editentry')) {
             $diary->intro .= get_string('maxparagraphlimit_desc', 'diary', ($prompt->maxparagraph)).'<br>';
         } else if ($diary->maxparagraphlimit > 0) {
             $diary->intro .= get_string('maxparagraphlimit_desc', 'diary', ($diary->maxparagraphlimit)).'<br>';
