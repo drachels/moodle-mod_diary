@@ -354,10 +354,12 @@ if ($timenow > $timestart) {
             echo $output->box_start();
 
             if ($diary->editdates) {
-                // 20210425 Add button for starting a new entry.
+                // 20210425 Add button for starting a new entry, before the toolbar and right above the, Entries per page:, selector.
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
-                    .'&action=currententry', get_string('startnewentry', 'diary'), 'get',
+                    .'&action=currententry'
+                    .'&promptid='.$promptid,
+                    get_string('startnewentry', 'diary'), 'get',
                     ["class" => "singlebutton diarystart"]
                 );
             } else {
