@@ -473,7 +473,7 @@ $string['writingpromptused'] = 'Writing prompt ID: {$a} was used for this entry\
 $string['xfrresults'] = 'There were {$a->one} entry\'s processed, and {$a->two} of them transferred.';
 
 // Deprecated since Moodle 4.3.
-$string['grade,mod_diary'] = 'Grade';
+$string['grade'] = 'Grade';
 $string['itemcount_help'] = 'The minimum number of countable items that must be in the essay text
     in order to achieve the maximum rating for this entry.
 
