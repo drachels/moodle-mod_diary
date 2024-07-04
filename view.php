@@ -363,10 +363,12 @@ if ($timenow > $timestart) {
                     ["class" => "singlebutton diarystart"]
                 );
             } else {
-                // Add button for editing current entry or starting a new entry.
+                // Add second button version for editing current entry or starting a new entry.
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
-                    .'&action=currententry', get_string('startoredit', 'diary'), 'get',
+                    .'&action=currententry'
+                    .'&promptid='.$promptid,
+                    get_string('startoredit', 'diary'), 'get',
                     ["class" => "singlebutton diarystart"]
                 );
             }
@@ -495,11 +497,33 @@ if ($timenow > $timestart) {
                 $options['firstkey'] = $entry->id;
                 $options['promptid'] = $entry->promptid;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
+
+                // 20201015 Create delete entry toolbutton link to use for each individual entry.
+                $deloptions['id'] = $cm->id;
+                $deloptions['action'] = 'deleteentry';
+                $deloptions['firstkey'] = $entry->id;
+                $deloptions['promptid'] = $entry->promptid;
+                $deleteurl = new moodle_url('/mod/diary/view.php', $deloptions);
+                //$deleteurl = results::diary_delete_entry($entry);
+                
+                //$deleteurl = '<a onclick="return confirm(\''
+                //    .get_string('deleteentryconfirm', 'diary')
+                //    .$entry->id.'\')"></a>';
+                    // .$entry->id.'\')" href="results::diary_delete_entry($entry)'
+                    //.$entry->id
+                    //.'"><img src="pix/delete.png" alt="'
+                    //.'"></a>';
+                    //.get_string('deleteentry', 'diary').'"></a>';
+                    
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
                 if ($timenow < $timefinish && $diary->editall) {
                     $editthisentry = html_writer::link($url, $output->pix_icon('i/edit', get_string('editthisentry', 'diary')),
                         ['class' => 'toolbutton']);
+                    // 20240605 Added entry delete code.
+                    $editthisentry .= html_writer::link($deleteurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
+                        ['class' => 'toolbutton']);
+                        
                 } else {
                     $editthisentry = ' ';
                 }
@@ -547,9 +571,7 @@ if ($timenow > $timestart) {
                             $comerrdata = diarystats::get_common_error_stats($temp, $diary);
                             echo $comerrdata;
                             // 20211212 Added separate function to get the autorating data here.
-                            list($autoratingdata,
-                                $currentratingdata)
-                                = diarystats::get_auto_rating_stats($temp, $diary);
+                            list($autoratingdata, $currentratingdata) = diarystats::get_auto_rating_stats($temp, $diary);
                             echo $autoratingdata;
                         }
                     } else {

@@ -912,7 +912,7 @@ class results {
      */
     public static function diary_get_editor_and_attachment_options($course, $context, $diary, $entry, $action, $firstkey) {
         $maxfiles = 99; // Need to add some setting.
-        $maxbytes = $course->maxbytes; // Need to add some setting.
+//        $maxbytes = $course->maxbytes; // Need to add some setting.
 
         // 20210613 Added more custom data to use in edit_form.php to prevent illegal access.
         $editoroptions = [
@@ -922,17 +922,17 @@ class results {
             'enabletitles' => $diary->enabletitles,
             'action' => $action,
             'firstkey' => $firstkey,
-            'trusttext' => true,
-            'maxfiles' => $maxfiles,
-            'maxbytes' => $maxbytes,
+//            'trusttext' => true,
+//            'maxfiles' => $maxfiles,
+//            'maxbytes' => $maxbytes,
             'context' => $context,
-            'subdirs' => false,
+//            'subdirs' => false,
         ];
 
         $attachmentoptions = [
-            'subdirs' => false,
-            'maxfiles' => $maxfiles,
-            'maxbytes' => $maxbytes,
+//            'subdirs' => false,
+//            'maxfiles' => $maxfiles,
+//            'maxbytes' => $maxbytes,
         ];
 
         return [

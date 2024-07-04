@@ -394,13 +394,14 @@ class prompts {
 
             // 20210510 Modified Grade selector to check for Moodle version.
             $attrs['id'] = 'r'.$entry->id;
-            if ($CFG->branch < 311) {
-                echo html_writer::label(fullname($user)." ".get_string('grade'),
-                    'r'.$entry->id, true, ['class' => 'accesshide']);
-            } else {
+            // 20240513 Checking to see if removal is okay.
+            //if ($CFG->branch < 311) {
+            //    echo html_writer::label(fullname($user)." ".get_string('grade'),
+            //        'r'.$entry->id, true, ['class' => 'accesshide']);
+            //} else {
                 echo html_writer::label(fullname($user)." ".get_string('gradenoun'),
                     'r'.$entry->id, true, ['class' => 'accesshide']);
-            }
+            //}
 
             if ($diary->assessed > 0) {
                 echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
@@ -756,15 +757,15 @@ class prompts {
                     $start = '<td>'.userdate($data->datestart).'</td>';
                     $stop = '<td>'.userdate($data->datestop).'</td>';
 
-                    $prompttext = '<div class="promptentry" style="background: '.$data->promptbgc.';"><b><td>'.
+                    $prompttext = '<div class="promptentry" style="background: '.$data->promptbgc.';"><td>'.
                                   get_string('writingpromptlable', 'diary',
                                   ['counter' => $counter,
                                   'entryid' => $data->entryid,
                                   'starton' => $start,
                                   'endon' => $stop,
-                                  'datatext' => $data->text,
+                                  'datatext' => '<b>'.$data->text.'</b>',
                                   ]).
-                                  '</td>';
+                                  '<br><br></td>';
                     $characters = '<td>'.get_string('chars', 'diary')
                                   .get_string('minc', 'diary').$data->minchar
                                   .get_string('maxc', 'diary').$data->maxchar
@@ -784,7 +785,7 @@ class prompts {
 
                     $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
                     if ($status) {
-                        $diary->intro .= $status.'</b><hr>';
+                        $diary->intro .= $status.'<hr>';
                     }
                 } else if ((($action == 'editentry') && ($prompts->id == $promptid))
                     || (($action == 'editentry') && ($prompts->id == $promptid))) {
@@ -822,9 +823,9 @@ class prompts {
                                   'entryid' => $data->entryid,
                                   'starton' => $start,
                                   'endon' => $stop,
-                                  'datatext' => $data->text,
+                                  'datatext' => '</b>'.$data->text,
                                   ]).
-                                  '</td>';
+                                  '<br><br></td>';
                     $characters = '<td>'.get_string('chars', 'diary')
                                   .get_string('minc', 'diary').$data->minchar
                                   .get_string('maxc', 'diary').$data->maxchar
@@ -844,7 +845,7 @@ class prompts {
 
                     $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
                     if ($status) {
-                        $diary->intro .= $status.'</b><hr>';
+                        $diary->intro .= $status.'<hr>';
                     }
                 }
             }

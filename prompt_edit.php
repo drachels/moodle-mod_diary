@@ -1,3 +1,4 @@
+<!doctype html>
 <?php
 // This file is part of Moodle - http://moodle.org/
 //
@@ -36,6 +37,8 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
 $action = optional_param('action', '', PARAM_ACTION); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
+$viewby = optional_param('viewby', -1, PARAM_INT);
+$view = optional_param('viewp', -1, PARAM_INT);
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -135,14 +138,33 @@ if (!empty($action)) {
     }
 }
 
+if ($view == -1) {
+    $view = 0;
+}
+    
 // Set up a general table to hold the list of prompts.
 $table = new html_table();
 $table->cellpadding = 5;
 $table->class = 'generaltable';
 
+// 20240603 View prompt list view/hide.
+if ($view == -1 || $view == 1) {
+    $lnkadd = "&viewp=0";
+} else {
+    $lnkadd = "&viewp=1";
+}
+
+$arrtextadds = [];
+$arrtextadds[1] = '<span class="arrow-s" style="font-size:1em;"></span>';
+$arrtextadds[2] = '<span class="arrow-s" style="font-size:1em;"></span>';
+$arrtextadds[3] = '<span class="arrow-s" style="font-size:1em;"></span>';
+//$arrtextadds[$orderby] = $des == -1 || $des == 1 ? '<span class="arrow-s" style="font-size:1em;">
+$arrtextadds[$viewby] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
+    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
+
 // Add column headings to the table list of prompts.
 $table->head = [
-    get_string('tablecolumnstatus', 'diary'),
+    '<a href="?id='.$id.'&viewby=1'.$lnkadd.'">'.get_string('tablecolumnstatus', 'diary').$arrtextadds[1].'</a>',
     get_string('tablecolumnprompts', 'diary'),
     get_string('tablecolumnpromptsbgc', 'diary'),
     get_string('tablecolumnstart', 'diary'),
@@ -159,15 +181,15 @@ $line = [];
 $counter = 0;
 
 // If there are any prompts for this diary, create a list of them.
-if ($prompts) {
+if ($prompts && $view == 0) {
     foreach ($prompts as $prompt) {
         $status = '';
         if ($prompt->datestop < time()) {
-            $status = 'Past';
+            $status = get_string('promptsp', 'diary').$arrtextadds[2];
         } else if (($prompt->datestart < time()) && $prompt->datestop > time()) {
-            $status = 'Current';
+            $status = get_string('promptsc', 'diary').$arrtextadds[2];
         } else if ($prompt->datestart > time()) {
-            $status = 'Future';
+            $status = get_string('promptsf', 'diary').$arrtextadds[2];
         }
         $data->entryid = $prompt->id;
         $data->diaryid = $prompt->diaryid;
@@ -364,11 +386,8 @@ if ($form->is_cancelled()) {
 
 echo $OUTPUT->header();
 echo $output;
-// Need to change this to a string.
 echo $OUTPUT->heading(get_string('writingpromptlable3', 'diary'));
-
 $intro = format_module_intro('diary', $diary, $cm->id);
-
 $form->display();
 
 // 20230810 Changed based on pull request #29.
@@ -400,3 +419,5 @@ $event->add_record_snapshot('diary', $diary);
 $event->trigger();
 
 echo $OUTPUT->footer();
+?>
+</html>
