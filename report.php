@@ -48,7 +48,7 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('invalidid', 'diary'));
 }
 $diaryid = optional_param('diary', $diary->id, PARAM_INT);
-$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 // 20201016 Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, ['context' => $context]);
 

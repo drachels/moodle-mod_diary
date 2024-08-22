@@ -36,11 +36,13 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
-//print_object('Spacer in edit.php at line 39.');
-//print_object('Spacer in edit.php at line 40.');
-//print_object('Spacer in edit.php at line 41.');
-//print_object('Spacer in edit.php at line 42.');
-//print_object('Spacer in edit.php at line 43.');
+print_object('Spacer in edit.php at line 39.');
+print_object('Spacer in edit.php at line 40.');
+print_object('Spacer in edit.php at line 41.');
+print_object('Spacer in edit.php at line 42.');
+print_object('Spacer in edit.php at line 43.');
+print_object('Checkpoint 1 is okay.');
+//die; //20240819 To here works.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -55,6 +57,9 @@ $context = context_module::instance($cm->id);
 require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
+
+print_object('Checkpoint 2 is okay.');
+//die; //20240819 To here works.
 
 if (! $diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
@@ -76,6 +81,9 @@ if ((!$promptid) && ($diary->timeopen < time())) {
 // 20210817 Add min/max info to the description so user can see them while editing an entry.
 // 20240414 This also adds the prompt text to the $diary->intro.
 diarystats::get_minmaxes($diary, $action, $promptid);
+
+print_object('Checkpoint 3 is okay.');
+//die; //20240819 To here works.
 
 // 20210613 Added check to prevent direct access to create new entry when activity is closed.
 if (($diary->timeclose) && (time() > $diary->timeclose)) {
@@ -106,6 +114,9 @@ $parameters = [
     'action' => $action,
     'firstkey' => $firstkey,
 ];
+
+print_object('Checkpoint 4 is okay.');
+//die; //20240819 To here works.
 
 // Get the single record specified by firstkey.
 $entry = $DB->get_record('diary_entries',
@@ -157,6 +168,9 @@ if ($action == 'currententry' && $entry) {
     $data->textformat = $entry->format;
 
     $debug['CP11-176 just set $data based on ($action == editentry && $entry): '] = $data;
+    
+print_object('Checkpoint 5 is okay.');
+die; //20240819 To here works.
 
     // Think I might need to add a check for currententry && !entry to justify starting a new entry, else error.
 } else if ($action == 'currententry' && ! $entry) {
@@ -169,7 +183,21 @@ if ($action == 'currententry' && $entry) {
 
     $debug['CP12-180 just set $data based on ($action == currententry && ! $entry): '] = $data;
 
+} else if ($action == 'deleteentry' && $entry) {
+    $data->entryid = $entry->id;
+    // 20240426 Trying to add old promptid here.
+    $data->promptid = $entry->promptid;
+    $data->timecreated = $entry->timecreated;
+    $data->title = $entry->title;
+    $data->text = $entry->text;
+    $data->textformat = $entry->format;
+    $debug['CP11-187 jest detected request to delete an entry ($action == deleteentry && $entry): '] = $data;
+
+    print_object($debug);
+    //die;
 } else {
+    print_object($debug);
+    die;
     throw new moodle_exception(get_string('generalerror', 'diary'));
 }
 

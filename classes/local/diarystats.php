@@ -28,7 +28,7 @@
  */
 namespace mod_diary\local;
 
-defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
+defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 
 use mod_diary\local\diarystats;
 use mod_diary\local\pluralise;
@@ -1202,7 +1202,7 @@ class diarystats {
         $itemtypes['2'] = get_string('words', 'diary');
         $itemtypes['3'] = get_string('sentences', 'diary');
         $itemtypes['4'] = get_string('paragraphs', 'diary');
-        // $itemtypes['5'] = get_string('files', 'diary'); // @codingStandardsIgnoreLine
+        // $itemtypes['5'] = get_string('files', 'diary'); // phpcs:ignore
         return $itemtypes;
     }
 
@@ -1248,7 +1248,7 @@ class diarystats {
         // This is temporary and probably needs to be moved to somewhere else so
         // it can be shown on the edit.php page, too. Maybe move to results.php.
         $id = required_param('id', PARAM_INT); // Course Module ID.
-        $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+        $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
         $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
         $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
         if ($promptid > 0) {

@@ -74,6 +74,9 @@ $string['daysavailable_help'] = 'If using Weekly format, you can set how many da
 $string['daysavailable'] = 'Days available';
 $string['deadline'] = 'Days Open';
 $string['delete'] = 'Delete';
+$string['deleteentry'] = 'Delete this entry';
+$string['deleteentryconfirm'] = 'Confirm you are about to delete this entry ID ';
+
 $string['deleteallratings'] = 'Delete all ratings';
 $string['deletenotenrolled'] = 'Delete entries by users not enrolled';
 $string['deleteexconfirm'] = 'Confirm you are about to delete writing prompt ID ';
@@ -320,6 +323,7 @@ $string['outof'] = ' out of {$a} entries.';
 $string['overallrating'] = 'Overall rating';
 $string['pagesize'] = 'Entries per page';
 $string['paragraphs'] = 'Paragraphs:';
+
 $string['percentofentryrating'] = '{$a}% of the entry rating.';
 $string['phrasecasesensitiveno'] = 'Match is case-insensitive.';
 $string['phrasecasesensitiveyes'] = 'Match is case-sensitive.';
@@ -371,6 +375,9 @@ $string['promptminmaxsp'] = 'Sent %';
 $string['promptminmaxwp'] = 'Word %';
 $string['promptremovefailure'] = 'This prompt, ID {$a}, is in use and cannot be removed.';
 $string['promptremovesuccess'] = 'You have successfully removed prompt, ID {$a}.';
+$string['promptsc'] = 'Current';
+$string['promptsf'] = 'Future';
+$string['promptsp'] = 'Past';
 $string['promptstart'] = 'Prompt start';
 $string['promptstitle'] = 'Diary writing prompts';
 $string['promptstop'] = 'Prompt stop';

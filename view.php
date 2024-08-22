@@ -24,7 +24,7 @@
 use mod_diary\local\diarystats;
 use mod_diary\local\prompts;
 use mod_diary\local\results;
-// @codingStandardsIgnoreLine
+// phpcs:ignore
 // use core_text;
 
 // 20210605 Changed to this format.
@@ -35,7 +35,7 @@ require_once(__DIR__ .'/../../lib/gradelib.php');
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST); // Complete details about this course.
-$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
 
 if (!$cm) {
@@ -496,24 +496,34 @@ if ($timenow > $timestart) {
                 $options['action'] = 'editentry';
                 $options['firstkey'] = $entry->id;
                 $options['promptid'] = $entry->promptid;
+
+                print_object($options);
+
                 $url = new moodle_url('/mod/diary/edit.php', $options);
 
+                //print_object('print url '.$url);
+                print_object($url);
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // 20201015 Create delete entry toolbutton link to use for each individual entry.
                 $deloptions['id'] = $cm->id;
                 $deloptions['action'] = 'deleteentry';
                 $deloptions['firstkey'] = $entry->id;
                 $deloptions['promptid'] = $entry->promptid;
-                $deleteurl = new moodle_url('/mod/diary/view.php', $deloptions);
-                //$deleteurl = results::diary_delete_entry($entry);
                 
-                //$deleteurl = '<a onclick="return confirm(\''
-                //    .get_string('deleteentryconfirm', 'diary')
-                //    .$entry->id.'\')"></a>';
-                    // .$entry->id.'\')" href="results::diary_delete_entry($entry)'
-                    //.$entry->id
-                    //.'"><img src="pix/delete.png" alt="'
-                    //.'"></a>';
-                    //.get_string('deleteentry', 'diary').'"></a>';
+                print_object($deloptions);
+                
+                //$url2 = new moodle_url('/mod/diary/entrydelete.php', $options);
+                $url2 = new moodle_url('/mod/diary/entrydelete.php', $deloptions);
+
+                //print_object('print url2 '.$url2);
+                print_object($url2);
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
                     
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
@@ -521,11 +531,16 @@ if ($timenow > $timestart) {
                     $editthisentry = html_writer::link($url, $output->pix_icon('i/edit', get_string('editthisentry', 'diary')),
                         ['class' => 'toolbutton']);
                     // 20240605 Added entry delete code.
-                    $editthisentry .= html_writer::link($deleteurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
-                        ['class' => 'toolbutton']);
+                    //$editthisentry .= html_writer::link($deleteurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
+                    //    ['class' => 'toolbutton']);
+                    //$testingurl .= html_writer::link($testingurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
+                    //    ['class' => 'toolbutton']);
                         
+                    $deletethisentry = html_writer::link($url2, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
+                        ['class' => 'toolbutton']);
                 } else {
                     $editthisentry = ' ';
+                    $deletethisentry = ' ';
                 }
 
                 // 20230314 If one exists, display the aplicable prompt.
@@ -546,7 +561,8 @@ if ($timenow > $timestart) {
                 // Add, Entry, then date time group heading for each entry on the page.
                 // 20231108 Add the old heading version as a sub-heading.
                 echo ('<h5>'.get_string('entry', 'diary').': ID-'.$entry->id.', '
-                    .userdate($entry->timecreated).' '.$editthisentry.'</h5>');
+                    //.userdate($entry->timecreated).' '.$editthisentry.' '.$testingurl.'</h5>');
+                    .userdate($entry->timecreated).' '.$editthisentry.' '.$deletethisentry.'</h5>');
 
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.

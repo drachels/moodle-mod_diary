@@ -56,7 +56,11 @@ This file describes changes and other work in the diary code.
     Created three new strings, promptsc, promptsf, and promptsp, for Current, Future, and Past. 
 20240604 Diary_1251 - TinyMCE Editor problem in prompt_edit.php page - fails to show the
     toolbar. Was missing <!DOCTYPE HTML> at start and </html> at end of the page.
-
+20240806 Diary_1258 - Need to change all occurences of, // @codingStandardsIgnoreLine, over to,
+    // phpcs:ignore. There are a bunch of places that needed changing. See the ticket for details.
+20240806 Diary_1294 - Got browser debug message regarding multiple invalid options when trying
+    to edit prompts. Made modifications in the prompt_edit.php and mod_form.php files. See the
+    ticket for details of the changes.
 
 
 === 3.7.9 === (Build: 2024042100)

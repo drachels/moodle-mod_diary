@@ -21,7 +21,7 @@
  * @copyright 2019 onwards AL Rachels drachels@drachels.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
+defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 
 /**
  * A custom renderer class that extends the plugin_renderer_base and is used by the diary module.

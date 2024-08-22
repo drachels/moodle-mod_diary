@@ -25,7 +25,7 @@
  */
 namespace mod_diary\local;
 
-defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
+defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 // define('DIARY_EVENT_TYPE_OPEN', 'open');
 // define('DIARY_EVENT_TYPE_CLOSE', 'close');
 use mod_diary\local\results;
@@ -697,7 +697,7 @@ class prompts {
         global $CFG, $DB;
         // 20240507 Added for testing.
         $id = required_param('id', PARAM_INT); // Course Module ID.
-        $action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+        $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
         $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
         $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
 

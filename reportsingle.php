@@ -28,7 +28,7 @@ require_once("lib.php");
 require_once($CFG->dirroot.'/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
-$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $user = required_param('user', PARAM_INT); // User ID.
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
@@ -296,7 +296,7 @@ if (! $users) {
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
                       .get_string('saveallfeedback', 'diary').'" />';
 
-    // @codingStandardsIgnoreLine
+    // phpcs:ignore
     /*
     $url = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries';
     // 20211210 Cleaned up unnecessary escaped double quotes.

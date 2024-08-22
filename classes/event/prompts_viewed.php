@@ -23,7 +23,7 @@
  */
 
 namespace mod_diary\event;
-defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
+defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 
 /**
  * The mod_diary prompts viewed class.

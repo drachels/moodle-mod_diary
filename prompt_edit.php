@@ -35,7 +35,7 @@ global $DB;
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
-$action = optional_param('action', '', PARAM_ACTION); // Action(promt).
+$action = optional_param('action', '', PARAM_ALPHANUMEXT); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
 $viewby = optional_param('viewby', -1, PARAM_INT);
 $view = optional_param('viewp', -1, PARAM_INT);
@@ -278,21 +278,22 @@ $data->textformat = FORMAT_HTML;
 
 $maxfiles = 99; // Need to add some setting.
 $maxbytes = $course->maxbytes; // Need to add some setting.
+// 20240806 Moved variables from here down to the $form.
 $editoroptions = [
-    'promptid' => $data->entryid,
+    //'promptid' => $data->entryid,
     'format' => $data->textformat,
-    'promptbgc' => $data->promptbgc,
-    'timeopen' => $diary->timeopen,
-    'timeclose' => $diary->timeclose,
-    'editall' => $diary->editall,
-    'editdates' => $diary->editdates,
-    'action' => $action,
-    'texttrust' => true,
-    'maxbytes' => $maxbytes,
-    'maxfiles' => EDITOR_UNLIMITED_FILES,
+    //'promptbgc' => $data->promptbgc,
+    //'timeopen' => $diary->timeopen,
+    //'timeclose' => $diary->timeclose,
+    //'editall' => $diary->editall,
+    //'editdates' => $diary->editdates,
+    //'action' => $action,
+    //'texttrust' => true,
+    //'maxbytes' => $maxbytes,
+    //'maxfiles' => EDITOR_UNLIMITED_FILES,
     'context' => $context,
-    'subdirs' => false,
-    'enable_filemanagement' => true,
+    //'subdirs' => false,
+    //'enable_filemanagement' => true,
 ];
 
 $attachmentoptions = [
@@ -308,7 +309,7 @@ $data = file_prepare_standard_editor($data,
                                      'mod_diary',
                                      'prompt',
                                      $data->entryid);
-
+// 20240806 Moved 12 variables from $editoroptions to here.
 $form = new mod_diary_prompt_form(null,
     [
         'current' => $data,
@@ -316,6 +317,18 @@ $form = new mod_diary_prompt_form(null,
         'diary' => $diary->editdates,
         'entryid' => $data->entryid,
         'editoroptions' => $editoroptions,
+        'promptid' => $data->entryid,
+        'promptbgc' => $data->promptbgc,
+        'timeopen' => $diary->timeopen,
+        'timeclose' => $diary->timeclose,
+        'editall' => $diary->editall,
+        'editdates' => $diary->editdates,
+        'action' => $action,
+        'texttrust' => true,
+        'maxbytes' => $maxbytes,
+        'maxfiles' => EDITOR_UNLIMITED_FILES,
+        'subdirs' => false,
+        'enable_filemanagement' => true,
     ]
 );
 $form->set_data($data);
