@@ -37,6 +37,7 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
 $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
+$promptbgc = optional_param('promptbgc', 'red', PARAM_INT); // Prompt background color default to fix undefined error down around line 322.
 $viewby = optional_param('viewby', -1, PARAM_INT);
 $view = optional_param('viewp', -1, PARAM_INT);
 
@@ -178,9 +179,10 @@ $table->head = [
 
 $output = '';
 $line = [];
+// Initialize a prompt counter.
 $counter = 0;
 
-// If there are any prompts for this diary, create a list of them.
+// If there are any prompts for this diary, create a descending list of them.
 if ($prompts && $view == 0) {
     foreach ($prompts as $prompt) {
         $status = '';
@@ -262,11 +264,16 @@ if ($prompts && $view == 0) {
     $output = html_writer::table($table);
     $counter = 0;
 } else {
+    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
     $line = [];
     $data->entryid = null;
     $data->text = '';
     $data->format = FORMAT_HTML;
-    $prompttext = get_string('promptzerocount', 'diary', $counter);
+    if ($tcount > 0) {
+        $prompttext = get_string('promptzerocount', 'diary', $tcount);
+    } else {
+        $prompttext = get_string('promptzerocount', 'diary', $counter);
+    }
     $line[] = $prompttext.'';
     $table->data[] = $line;
     $output = html_writer::table($table);
@@ -309,6 +316,7 @@ $data = file_prepare_standard_editor($data,
                                      'mod_diary',
                                      'prompt',
                                      $data->entryid);
+
 // 20240806 Moved 12 variables from $editoroptions to here.
 $form = new mod_diary_prompt_form(null,
     [
@@ -318,7 +326,8 @@ $form = new mod_diary_prompt_form(null,
         'entryid' => $data->entryid,
         'editoroptions' => $editoroptions,
         'promptid' => $data->entryid,
-        'promptbgc' => $data->promptbgc,
+        //'promptbgc' => $data->promptbgc,
+        'promptbgc' => $promptbgc,
         'timeopen' => $diary->timeopen,
         'timeclose' => $diary->timeclose,
         'editall' => $diary->editall,
