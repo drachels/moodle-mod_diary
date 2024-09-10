@@ -329,6 +329,7 @@ if ($diary->assessed != 0) {
 
 $aggregatestr = results::get_diary_aggregation($diary->assessed);
 
+// Check to see if this diary is open.
 if ($timenow > $timestart) {
     // Initialize now so it doesn't break if cannot edit.
     $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
@@ -497,12 +498,12 @@ if ($timenow > $timestart) {
                 $options['firstkey'] = $entry->id;
                 $options['promptid'] = $entry->promptid;
 
-                print_object($options);
+                //print_object($options);
 
                 $url = new moodle_url('/mod/diary/edit.php', $options);
 
                 //print_object('print url '.$url);
-                print_object($url);
+                //print_object($url);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -512,13 +513,13 @@ if ($timenow > $timestart) {
                 $deloptions['firstkey'] = $entry->id;
                 $deloptions['promptid'] = $entry->promptid;
                 
-                print_object($deloptions);
+                //print_object($deloptions);
                 
-                //$url2 = new moodle_url('/mod/diary/entrydelete.php', $options);
-                $url2 = new moodle_url('/mod/diary/entrydelete.php', $deloptions);
+                //$url2 = new moodle_url('/mod/diary/deleteentry.php', $options);
+                $url2 = new moodle_url('/mod/diary/deleteentry.php', $deloptions);
 
                 //print_object('print url2 '.$url2);
-                print_object($url2);
+                //print_object($url2);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
