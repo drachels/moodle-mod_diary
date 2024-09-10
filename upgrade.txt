@@ -23,7 +23,6 @@ This file describes changes and other work in the diary code.
 20240426 Diary_1237 - New feature request - show individual names for selection in the,
     Visible groups dropdown.
     
-20240520 Diary_1246 - There is no place for default $promptbgc to be set.
 20240520 Diary_1247 - Need a setting to allow for deleting an entry.
 
 === 3.8.0 === pending (Build: 2024042900)
@@ -54,6 +53,8 @@ This file describes changes and other work in the diary code.
 20240519 Diary_1243bt - Diary - The following options are not valid: promptid, promptbgc, timeopen,
     timeclose, editall, editdates, action, texttrust, maxbytes, maxfiles, subdirs, enable_filemanagement.
     Moved them all from editoroptions to form.
+20240520 Diary_1246bt - There is no place for default $promptbgc to be set. Added code for a default
+    $promptbgc setting in the prompt_edit.php file. See the ticket for details.
 20240527 Diary_1249bt - core\string_manager_standard_test::test_validate_deprecated_strings_files
     is failing #42. I had created the deprecated.txt file in the wrong format and did not
     have all the needed strings in the correct section of the diary.php language file.
