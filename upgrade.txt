@@ -34,6 +34,8 @@ This file describes changes and other work in the diary code.
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button. Had to reopen due to
     not getting records based on current userid.
+20240206 Diary_1197bt - Diary - Feature request - Toggle hide/view and sort prompts. Added
+    arrow toggle code similar to MooTyper owngrades.php to hide the whole list of prompts.
 20240304 Diary_1223bt - Major bug - Editing an OLD entry with a current timed prompt showing,
     the current prompt over writes the OLD and becomes required. Fixed and due to the amount
     of changes, see the ticket for details.
@@ -49,6 +51,9 @@ This file describes changes and other work in the diary code.
     saved both in today's development folder. I then dropped the original table, edited
     the sql file so the field gets created as not null 0, then imported the table back
     into the moodledev database.
+20240519 Diary_1243bt - Diary - The following options are not valid: promptid, promptbgc, timeopen,
+    timeclose, editall, editdates, action, texttrust, maxbytes, maxfiles, subdirs, enable_filemanagement.
+    Moved them all from editoroptions to form.
 20240527 Diary_1249bt - core\string_manager_standard_test::test_validate_deprecated_strings_files
     is failing #42. I had created the deprecated.txt file in the wrong format and did not
     have all the needed strings in the correct section of the diary.php language file.
