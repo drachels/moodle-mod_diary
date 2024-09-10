@@ -264,6 +264,7 @@ if ($prompts && $view == 0) {
     $output = html_writer::table($table);
     $counter = 0;
 } else {
+    // Double check for prompts when view is 1.
     list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
     $line = [];
     $data->entryid = null;
