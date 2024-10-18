@@ -163,11 +163,7 @@ function diary_delete_instance($id) {
  */
 function diary_supports($feature) {
     global $CFG;
-    if ((int)$CFG->branch > 311) {
-        if ($feature === FEATURE_MOD_PURPOSE) {
-            return MOD_PURPOSE_COLLABORATION;
-        }
-    }
+
     switch ($feature) {
         case FEATURE_BACKUP_MOODLE2:
             return true;
@@ -189,6 +185,8 @@ function diary_supports($feature) {
             return true;
         case FEATURE_SHOW_DESCRIPTION:
             return true;
+        case FEATURE_MOD_PURPOSE:
+            return MOD_PURPOSE_COLLABORATION;
 
         default:
         return null;
