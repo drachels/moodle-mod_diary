@@ -514,7 +514,14 @@ class results {
         global $CFG, $DB, $OUTPUT, $USER;
         $id = required_param('id', PARAM_INT); // Course module.
         $diaryid = optional_param('diary', $diary->id, PARAM_INT); // Diaryid.
-        $action = required_param('action', PARAM_TEXT); // Current sort Action.
+        $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Current sort Action.
+
+        $debug;
+        $debug['Resultsa in print user entry printing $id'] = $id;
+        $debug['Resultsb in print user entry printing $diaryid'] = $diaryid;
+        $debug['Resultsc in print user entry printing action'] = $action;
+        //print_object($debug);
+        //die;
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
@@ -523,11 +530,11 @@ class results {
         $dcolor4 = $diary->entrytextbgc;
 
         // Create a table for the current users entry with area for teacher feedback.
-        echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
+        echo '<table id="entry-'.$user->id.'" class="diaryuserentry">';
         if ($entry) {
             // 20211109 needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
-            $param1 = optional_param('button1'.$entry->id, '', PARAM_TEXT); // Transfer entry.
-            $param2 = optional_param('button2'.$entry->id, '', PARAM_TEXT); // Clear entry.
+            $param1 = optional_param('button1'.$entry->id, '', PARAM_ALPHANUMEXT); // Transfer entry.
+            $param2 = optional_param('button2'.$entry->id, '', PARAM_ALPHANUMEXT); // Clear entry.
 
             // 20231110 Add a title for the entry, only if there is one.
             if ($entry->title) {
@@ -555,8 +562,8 @@ class results {
 
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
-            echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
-            echo userdate($entry->timecreated);
+            echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td>';
+            echo '<td>ID '.$entry->id.',  '.userdate($entry->timecreated);
             // 20201202 Added link to show all entries for a single user.
             // 20230810 Changed based on pull request #29. Also had to add, use moodle_url at the head of the file.
             $url = new moodle_url('reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
@@ -674,7 +681,8 @@ class results {
             );
             echo '</td>';
             // 20210707 Added teachers name to go with their picture.
-            // 20211027 Added button to add/delete auto grade stats and rating to feedback.
+            // 20211027 Added button to insert auto grade stats and rating to feedback.
+            // Also added button to remove anything in the feedback text area.
             echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
 
                  ' <input class="btn btn-warning btn-sm"
@@ -704,16 +712,27 @@ class results {
             $gradebookgradestr = '';
             $feedbackdisabledstr = '';
             $feedbacktext = $entry->entrycomment;
+            $debug['Results2a $param1: '] = $param1;
+            $debug['Results2b $param2: '] = $param2;
+            print_object($debug);
             // 20220107 If the, Add to feedback, button is clicked process it here.
-            if (isset($param1) && get_string('addtofeedback', 'diary') == $param1) {
+            if (isset($param1) && ($param1 == get_string('addtofeedback', 'diary'))) {
+                print_object('Made it to the update feedback update.');
+                print_object('The current entry is:');
+                print_object($entry);
+                print_object('');
+                die;
                 // 20220105 Do an immediate update here.
                 $entry->rating = $currentratingdata;
+                // Update feedback to show statistics, common errors, autorating.
                 $feedbacktext .= $statsdata.$comerrdata.$autoratingdata;
+                // Add the statistics, common errors, and autorating to the current entrycomment field.
                 $entry->entrycomment = $statsdata.$comerrdata.$autoratingdata;
+                // Save the changes to the current user entry.
                 $DB->update_record('diary_entries', $entry, $bulk = false);
             }
             // 20220107 If the, Clear feedback, button is clicked process it here.
-            if (isset($param2) && get_string('clearfeedback', 'diary') == $param2) {
+            if (isset($param2) && ($param2 == get_string('clearfeedback', 'diary'))) {
                 // 20220105 Reset the entry rating and entry comment to null.
                 $entry->rating = null;
                 $feedbacktext = null;
@@ -912,7 +931,6 @@ class results {
      */
     public static function diary_get_editor_and_attachment_options($course, $context, $diary, $entry, $action, $firstkey) {
         $maxfiles = 99; // Need to add some setting.
-//        $maxbytes = $course->maxbytes; // Need to add some setting.
 
         // 20210613 Added more custom data to use in edit_form.php to prevent illegal access.
         $editoroptions = [
@@ -922,17 +940,10 @@ class results {
             'enabletitles' => $diary->enabletitles,
             'action' => $action,
             'firstkey' => $firstkey,
-//            'trusttext' => true,
-//            'maxfiles' => $maxfiles,
-//            'maxbytes' => $maxbytes,
             'context' => $context,
-//            'subdirs' => false,
         ];
 
         $attachmentoptions = [
-//            'subdirs' => false,
-//            'maxfiles' => $maxfiles,
-//            'maxbytes' => $maxbytes,
         ];
 
         return [
@@ -1107,6 +1118,7 @@ class results {
      * Update diary entries feedback(optionally in a given group).
      * Called from report.php and reportsingle.php.
      * 20220105 Moved here from report.php and reportsingle.php.
+     * 20240930 Now also used from reportone.php.
      * @param array $cm
      * @param array $context
      * @param array $diary
@@ -1117,7 +1129,21 @@ class results {
      */
     public static function diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry) {
         global $DB, $CFG, $OUTPUT, $USER;
-
+        $debug;
+        
+        $debug['FBupdate in the results.php file'] = 'printing incoming variables';
+        //$debug['printing $eee'] = $eee;
+        //print_object($eee);
+        $debug['FBupdate $cm'] = $cm;
+        $debug['FBupdate $context'] = $context;
+        $debug['FBupdate $diary'] = $diary;
+        $debug['FBupdate $data'] = $data;
+        $debug['FBupdate $entrybyuser'] = $entrybyuser;
+        $debug['FBupdate $entrybyentry'] = $entrybyentry;
+        print_object($debug);
+        die;
+        
+        
         confirm_sesskey();
         $feedback = [];
         $data = (array) $data;
@@ -1219,18 +1245,75 @@ class results {
      * @param array $entrybyentry
      * @return int count($diarys) Count of diary entries.
      */
-    //public static function diary_delete_entry($cm, $context, $diary, $data, $entrybyuser, $entrybyentry) {
     public static function diary_delete_entry($entry) {
         global $DB, $CFG, $OUTPUT, $USER;
-        print_object('made it to new function');
-        die;
         $deleteurl = '<a onclick="return confirm(\''
             .get_string('deleteentryconfirm', 'diary')
             .$entry->id
 
             .'>'
             .'</a>';
-        // $DB->delete_records('diary_entries', ['id' => $entry->id]);
+        // Commented out to keep from actually deleting the entry, at the moment during development.
+        // ...$DB->delete_records('diary_entries', ['id' => $entry->id]);...
         return $deleteurl;
+    }
+
+    /**
+     * 20240924 Created to check permissions before deleting an entry
+     *
+     * Check if current user can delete and the timeclose has not expired.
+     *
+     * @param int $usr
+     * @param int $id
+     * @param int $entry
+     * @return boolean
+     */
+    //public static function is_editable_by_me($usr, $id, $entry) {
+    public static function is_deleteable_by_me($usr, $id, $entry, $course) {
+    //public static function is_deleteable_by_me($usr, $id) {
+        global $DB;
+        $context = context_module::instance($id);
+        $diary = $DB->get_record('diary',
+            [
+                'id' => $entry->diary,
+            ]
+        );
+        // Started on it, but this function will need a lot of work!
+        // It will need to verify within the limits of timeopen and timeclose.
+        // use line 166, public static function diary_available($diary) {
+        // It will need to verify within the limits of edit all and editdates.
+        // Use line 125 of view.php if (has_capability('mod/diary:addentries', $context)) {
+        // If the limits above are all okay, can use the function just above here, for the actual delete.
+        
+        //$entry = $DB->get_record('diary_entries', ['id' => $entry]);
+        $entry = $DB->get_record('diary_entries', ['id' => $id]);
+        if (is_null($course)) {
+            $crs = 0;
+        } else {
+            $crs = $course->id;
+        }
+
+        // 20241004 At this point, we need to check if can manageentries and can addentries.
+        // For someone with manageentries let them always delete.
+        // For someone with ONLY addentries let them delete if dates allow.
+        $entriesmanager = has_capability('mod/diary:manageentries', $context);
+        $canadd = has_capability('mod/diary:addentries', $context);
+
+        if ($entriesmanager && $canadd) {
+        //if (($entry->editable == 0)
+        //    || (($entry->editable == 1) && (self::is_user_enrolled($usr, $id)) && ($crs == $course->id))
+        //    || (($entry->editable == 2) && ($entry->authorid == $usr))
+        //    || (self::can_view_edit_all($usr, $crs))) {
+            print_object('in the if');
+            //die;
+            return true;
+            
+        //} else if ($canadd && $diary){
+        } else if ($canadd && self::diary_available($diary)) {
+            // Student wind up here, but need to change from $diary to use isavailable check results.
+            print_object('in the else');
+            //die;
+            return false;
+        }
     }
 }
