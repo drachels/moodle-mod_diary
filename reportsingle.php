@@ -161,6 +161,8 @@ if ($eee) {
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id] = $ee;
         $entrybyuserentry[$ee->userid][$ee->id] = $ee;
+
+        // ...print_object($entrybyuserentry);...
     }
 } else {
     $entrybyuser = [];
