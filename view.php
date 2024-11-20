@@ -355,7 +355,7 @@ if ($timenow > $timestart) {
             echo $output->box_start();
 
             if ($diary->editdates) {
-                // 20210425 Add button for starting a new entry, before the toolbar and right above the, Entries per page:, selector.
+                // 20210425 Add button to start a new entry, before the toolbar and right above the, Entries per page:, selector.
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
                     .'&action=currententry'
@@ -498,12 +498,12 @@ if ($timenow > $timestart) {
                 $options['firstkey'] = $entry->id;
                 $options['promptid'] = $entry->promptid;
 
-                //print_object($options);
+                // ...print_object($options);...
 
                 $url = new moodle_url('/mod/diary/edit.php', $options);
 
-                //print_object('print url '.$url);
-                //print_object($url);
+                // ...print_object('print url '.$url);...
+                // ...print_object($url);...
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -512,33 +512,32 @@ if ($timenow > $timestart) {
                 $deloptions['action'] = 'deleteentry';
                 $deloptions['firstkey'] = $entry->id;
                 $deloptions['promptid'] = $entry->promptid;
-                
-                //print_object($deloptions);
-                
-                //$url2 = new moodle_url('/mod/diary/deleteentry.php', $options);
+
+                // ...print_object($deloptions);...
                 $url2 = new moodle_url('/mod/diary/deleteentry.php', $deloptions);
 
-                //print_object('print url2 '.$url2);
-                //print_object($url2);
-
+                // ...print_object('print url2 '.$url2);...
+                // ...print_object($url2);...
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-                    
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
                 if ($timenow < $timefinish && $diary->editall) {
                     $editthisentry = html_writer::link($url, $output->pix_icon('i/edit', get_string('editthisentry', 'diary')),
                         ['class' => 'toolbutton']);
                     // 20240605 Added entry delete code.
-                    //$editthisentry .= html_writer::link($deleteurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
+                    // $editthisentry .= html_writer::link($deleteurl,
+                    //    $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
                     //    ['class' => 'toolbutton']);
-                    //$testingurl .= html_writer::link($testingurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
+                    // $testingurl .= html_writer::link($testingurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
                     //    ['class' => 'toolbutton']);
-                        
-                    $deletethisentry = html_writer::link($url2, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
-                        ['class' => 'toolbutton']);
+                    if ($diary->deleteentry) {
+                        $deletethisentry = html_writer::link($url2, $output->pix_icon('i/delete', get_string('deleteentry', 'diary').'t'),
+                            ['class' => 'toolbutton']);
+                    } else {
+                        $deletethisentry = ' ';
+                    }
                 } else {
                     $editthisentry = ' ';
                     $deletethisentry = ' ';
@@ -562,7 +561,6 @@ if ($timenow > $timestart) {
                 // Add, Entry, then date time group heading for each entry on the page.
                 // 20231108 Add the old heading version as a sub-heading.
                 echo ('<h5>'.get_string('entry', 'diary').': ID-'.$entry->id.', '
-                    //.userdate($entry->timecreated).' '.$editthisentry.' '.$testingurl.'</h5>');
                     .userdate($entry->timecreated).' '.$editthisentry.' '.$deletethisentry.'</h5>');
 
                 // 20210511 Start an inner division for the user's text entry container.
