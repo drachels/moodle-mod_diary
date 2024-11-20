@@ -26,8 +26,10 @@
 namespace mod_diary\local;
 
 defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
-// define('DIARY_EVENT_TYPE_OPEN', 'open');
-// define('DIARY_EVENT_TYPE_CLOSE', 'close');
+// phpcs:ignore
+// ...define('DIARY_EVENT_TYPE_OPEN', 'open');...
+// phpcs:ignore
+// ...define('DIARY_EVENT_TYPE_CLOSE', 'close');...
 use mod_diary\local\results;
 use mod_diary\local\prompts;
 use stdClass;
@@ -394,14 +396,8 @@ class prompts {
 
             // 20210510 Modified Grade selector to check for Moodle version.
             $attrs['id'] = 'r'.$entry->id;
-            // 20240513 Checking to see if removal is okay.
-            //if ($CFG->branch < 311) {
-            //    echo html_writer::label(fullname($user)." ".get_string('grade'),
-            //        'r'.$entry->id, true, ['class' => 'accesshide']);
-            //} else {
-                echo html_writer::label(fullname($user)." ".get_string('gradenoun'),
-                    'r'.$entry->id, true, ['class' => 'accesshide']);
-            //}
+            echo html_writer::label(fullname($user)." ".get_string('gradenoun'),
+                'r'.$entry->id, true, ['class' => 'accesshide']);
 
             if ($diary->assessed > 0) {
                 echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
