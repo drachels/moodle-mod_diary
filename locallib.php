@@ -131,6 +131,7 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
         foreach ($items as $item) {
             $context = context_module::instance($item->cmid);
             $canmanage = has_capability('mod/diary:manageentries', $context);
+            $canaddentries = has_capability('mod/diary:addentries', $context);
             // 20230325 Show tagged item only if allowed to see it.
             // if (($item->userid == $USER->id) || has_capability('mod/diary:manageentries', $context)) {
             if (($item->userid == $USER->id) || $canmanage) {
