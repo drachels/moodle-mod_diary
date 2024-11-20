@@ -29,7 +29,7 @@ This file describes changes and other work in the diary code.
 20210515  Diary_720bt - I am getting the String [grade, core] is deprecated debug message in
     multiple locations. Made changes to deprecated.txt and diary.php files but most
     notable change occured when I switch to TinyMCE editor. No More error.
-    20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
+20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button. Had to reopen due to
     not getting records based on current userid.
