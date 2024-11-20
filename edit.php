@@ -35,12 +35,13 @@ global $DB;
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
-$promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
-//print_object('Spacer in edit.php at line 39.');
-//print_object('Spacer in edit.php at line 40.');
-//print_object('Spacer in edit.php at line 41.');
-//print_object('Spacer in edit.php at line 42.');
-//print_object('Spacer in edit.php at line 43.');
+$promptid = optional_param('promptid', '', PARAM_INT); // The current one.
+
+// ...print_object('Spacer in edit.php at line 39.');...
+// ...print_object('Spacer in edit.php at line 40.');...
+// ...print_object('Spacer in edit.php at line 41.');...
+// ...print_object('Spacer in edit.php at line 42.');...
+// ...print_object('Spacer in edit.php at line 43.');...
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -174,7 +175,7 @@ if ($action == 'currententry' && $entry) {
 }
 
 $data->id = $cm->id;
-//print_object('In edit.php at line 177.');
+// ...print_object('In edit.php at line 177.');...
 list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
                                                                                              $context,
                                                                                              $diary,
@@ -207,9 +208,9 @@ $form = new mod_diary_entry_form(null,
         'attachmentoptions' => $attachmentoptions,
     ]
 );
-//print_object('In edit.php at line 210.');
-//print_object($editoroptions);
-//print_object($attachmentoptions);
+// ...print_object('In edit.php at line 210.');...
+// ...print_object($editoroptions);...
+// ///print_object($attachmentoptions);...
 
 // Set existing data loaded from the database for this entry.
 $form->set_data($data);
@@ -436,7 +437,7 @@ if (($diary->intro) && ($CFG->branch < 400)) {
     $intro = format_module_intro('diary', $diary, $cm->id);
 }
 echo $OUTPUT->box($intro);
-//print_object($form);
+// ...print_object($form);...
 // Otherwise fill and print the form.
 $form->display();
 
