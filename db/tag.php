@@ -33,4 +33,3 @@ $tagareas = [
         'callbackfile' => '/mod/diary/locallib.php',
     ],
 ];
-
