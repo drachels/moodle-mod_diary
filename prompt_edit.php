@@ -37,10 +37,12 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
 $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
-$promptbgc = optional_param('promptbgc', 'red', PARAM_INT); // Prompt background color default to fix undefined error down around line 322.
+$promptbgc = optional_param('promptbgc', 'red', PARAM_INT); // Prompt bgc default to fix undefined error down around line 322.
 $viewby = optional_param('viewby', -1, PARAM_INT);
 $view = optional_param('viewp', -1, PARAM_INT);
-
+$viewbyp = optional_param('viewbyp', -1, PARAM_INT);
+$viewbyc = optional_param('viewbyc', -1, PARAM_INT);
+$viewbyf = optional_param('viewbyf', -1, PARAM_INT);
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
@@ -142,7 +144,7 @@ if (!empty($action)) {
 if ($view == -1) {
     $view = 0;
 }
-    
+
 // Set up a general table to hold the list of prompts.
 $table = new html_table();
 $table->cellpadding = 5;
@@ -159,8 +161,14 @@ $arrtextadds = [];
 $arrtextadds[1] = '<span class="arrow-s" style="font-size:1em;"></span>';
 $arrtextadds[2] = '<span class="arrow-s" style="font-size:1em;"></span>';
 $arrtextadds[3] = '<span class="arrow-s" style="font-size:1em;"></span>';
-//$arrtextadds[$orderby] = $des == -1 || $des == 1 ? '<span class="arrow-s" style="font-size:1em;">
+
 $arrtextadds[$viewby] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
+    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
+$arrtextadds[$viewbyp] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
+    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
+$arrtextadds[$viewbyc] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
+    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
+$arrtextadds[$viewbyf] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
     </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
 
 // Add column headings to the table list of prompts.
@@ -186,13 +194,14 @@ $counter = 0;
 if ($prompts && $view == 0) {
     foreach ($prompts as $prompt) {
         $status = '';
-        if ($prompt->datestop < time()) {
-            $status = get_string('promptsp', 'diary').$arrtextadds[2];
-        } else if (($prompt->datestart < time()) && $prompt->datestop > time()) {
-            $status = get_string('promptsc', 'diary').$arrtextadds[2];
-        } else if ($prompt->datestart > time()) {
-            $status = get_string('promptsf', 'diary').$arrtextadds[2];
+        if (($prompt->datestop < time()) && ($viewbyp = 1)) {
+            $status .= '<a href="?id='.$id.'&viewbyp=0'.$lnkadd.'">'.get_string('promptsp', 'diary').$arrtextadds[2];
+        } else if (($prompt->datestart < time()) && ($prompt->datestop > time()) && ($viewbyc = 1)) {
+            $status .= '<a href="?id='.$id.'&viewbyc=0'.$lnkadd.'">'.get_string('promptsc', 'diary').$arrtextadds[2];
+        } else if (($prompt->datestart > time()) && ($viewbyf = 1)) {
+            $status .= '<a href="?id='.$id.'&viewbyf=0'.$lnkadd.'">'.get_string('promptsf', 'diary').$arrtextadds[2];
         }
+
         $data->entryid = $prompt->id;
         $data->diaryid = $prompt->diaryid;
         $data->datestart = $prompt->datestart;
@@ -288,20 +297,8 @@ $maxfiles = 99; // Need to add some setting.
 $maxbytes = $course->maxbytes; // Need to add some setting.
 // 20240806 Moved variables from here down to the $form.
 $editoroptions = [
-    //'promptid' => $data->entryid,
     'format' => $data->textformat,
-    //'promptbgc' => $data->promptbgc,
-    //'timeopen' => $diary->timeopen,
-    //'timeclose' => $diary->timeclose,
-    //'editall' => $diary->editall,
-    //'editdates' => $diary->editdates,
-    //'action' => $action,
-    //'texttrust' => true,
-    //'maxbytes' => $maxbytes,
-    //'maxfiles' => EDITOR_UNLIMITED_FILES,
     'context' => $context,
-    //'subdirs' => false,
-    //'enable_filemanagement' => true,
 ];
 
 $attachmentoptions = [
@@ -327,7 +324,6 @@ $form = new mod_diary_prompt_form(null,
         'entryid' => $data->entryid,
         'editoroptions' => $editoroptions,
         'promptid' => $data->entryid,
-        //'promptbgc' => $data->promptbgc,
         'promptbgc' => $promptbgc,
         'timeopen' => $diary->timeopen,
         'timeclose' => $diary->timeclose,
