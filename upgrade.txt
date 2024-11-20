@@ -23,7 +23,7 @@ This file describes changes and other work in the diary code.
 20240426 Diary_1237 - New feature request - show individual names for selection in the,
     Visible groups dropdown.
     
-20240520 Diary_1247 - Need a setting to allow for deleting an entry.
+20240520 Diary_1247 - Need a setting to allow for deleting an entry. RESOLVING!
 
 === 3.8.0 === pending (Build: 2024042900)
 20210515  Diary_720bt - I am getting the String [grade, core] is deprecated debug message in
@@ -67,6 +67,10 @@ This file describes changes and other work in the diary code.
 20240806 Diary_1294 - Got browser debug message regarding multiple invalid options when trying
     to edit prompts. Made modifications in the prompt_edit.php and mod_form.php files. See the
     ticket for details of the changes.
+20241119 Diary_1338 - Removes unneccessary version check in *_supports() callback. #49. Completed
+    merge request that changes the collaboration case and removes the Moodle version check.
+
+
 
 
 === 3.7.9 === (Build: 2024042100)

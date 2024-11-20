@@ -191,6 +191,14 @@
     border-radius: 16px;
 }
 
+.entry {
+    text-align: left;
+    font-size: 1em;
+    padding: 5px;
+    border-style: double;
+    border-radius: 16px;
+}
+
 /* View prompt indcators. */
 .arrow-n,
 .arrow-e,

@@ -183,100 +183,69 @@ if (($diary->intro) && ($CFG->branch < 400)) {
     $intro = format_module_intro('diary', $diary, $cm->id);
 }
 echo $OUTPUT->box($intro);
-//print_object($data);
 
-//echo $OUTPUT->box('<b>Entry ID to delete: </b>'.$data->entryid);
-// The current user should NOT be able to delete a prompt. Only a teacher should be able to do that from the prompt_edit.php file.
-//echo $OUTPUT->box('<b>Entry Prompt IDs to delete: </b>'.$data->promptid);
-// The time created needs to be formatted for easy reading.
-//echo $OUTPUT->box('<b>Entry Time Created to delete: </b>'.$data->timecreated);
-
-
-//echo '<b>Date this entry was created: </b>'.(date("Y-m-d", $data->timecreated));
-
-
-
-
-
-
-//echo (date("Y-m-d", $data->timecreated));
 $color3 = $data->entrybgc;
 
 $color4 = $data->entrytextbgc;
 
-/*
-// Create a table for the entry to delete, with area for teacher feedback.
-echo '<table id="entry-'.$data->entryid.'" class="entry">';
-// 20241114 Add a title for the entry, only if there is one.
-if ($data->title) {
-    echo '<tr>';
-    echo '<td style="width:35px;"><h6>'.get_string('diarytitle', 'diary').':</h6></td>';
-    echo '<td><h6>'.$data->title.'</h6></td>';
-    echo '<td></td>';
-    echo '</tr>';
-}
+//////after this should be the prompt and entry///////////////////////////////////////////////////
 
-// Add an entry label followed by the date of the entry.
-echo '<tr>';
-echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td>';
-echo '<td>ID '.$data->entryid.',  '.userdate($data->timecreated);
-// 20230810 Changed based on pull request #29. Also had to add, use moodle_url at the head of the file.
-//$url = new moodle_url('reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
-//echo '  <a href="'.$url->out(false).'">'.get_string('reportsingle', 'diary')
-//    .'</a>'
-echo '</td><td></td>';
-echo '</tr>';
+echo '<div class="entry" style="background: '.$color3.'; border-style: double; border-radius: 16px;">';
+
+    // 20241120 If one exists, display the aplicable prompt.
+    if ($data->promptid > 0) {
+        //echo '<br><b>This prompt was used for this entry. It will NOT be deleted.</b><br>';
+        $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
+        echo '<b>'.$promptused.' It will NOT be deleted!</b>';
+        $prompt = $DB->get_record('diary_prompts', ['id' => $entry->promptid, 'diaryid' => $diary->id]);
+        // 20241120 Added capability to use contrasting color for the prompt background.
+        // 20241120 Added code to use a prompt background color.
+        // 20241120 Gave promptentry it's own class name to enable
+        echo '<div class="promptentry" style="background: '.$prompt->promptbgc.';">';
+        echo '<strong>Prompt ID-'.$prompt->id.', '.get_string('prompttext', 'diary')
+            .'</strong>: '.$prompt->text.'</div>';
+    }
 
 
 
-echo '</table>';
-*/
+    echo $OUTPUT->box_start();
 
+    //echo '<table id="entry-'.$data->entryid.'" class="entry" style="width100%;">';
 
-echo $OUTPUT->box_start();
-
-echo '<table id="entry-'.$data->entryid.'" class="entry" style="width100%;">';
-
-//echo '<div class="entry" style="background: '.$color4.';">';
-
-//$data->entrytextbgc
-echo $OUTPUT->box('<h2>'.$data->title.'</h2><h5>Entry: ID'.$data->entryid.', '.userdate($data->timecreated).'</h5>');
-//echo $OUTPUT->box('<div class="entry" style="background: '.$color4.';">'.format_text($data->text).'</div>');
-                //echo '<div class="entry" style="background: '.$color4.';">'.format_text($data->text).'</div>';
-
-
-
+    echo $OUTPUT->box('<h2>'.$data->title.'</h2><h5>Entry: ID'.$data->entryid.', '.userdate($data->timecreated).'</h5>');
     
-
-echo '<tr><td><div class="entry" style="width: 100%; background: '.$color3.';">';
-echo '<td><div class="entry" style="text-align: left; font-size: 1em; padding: 5px; background: '.$color4.'; border-style: double; border-radius: 16px;">';
-// 20241114 This adds the actual entry text division close tag for each entry listed on the page.
-echo results::diary_format_entry_text($entry, $course, $cm).'</div></td></div></td></tr>';
-echo '</table>';
-
-
-// I do not think that the student even needs to know about the textformat setting, or even know that he is deleting the one for the ccurrent entry.
-//echo $OUTPUT->box('<b>Entry Text Format to delete: </b>'.$data->textformat);
-
-// IMPORTANT! Will also need code to show the tags and delete them too!
-// Trying to output the tags like this, creates an error, Array to string conversion, due to having multiple tags for the entry.
-//echo $OUTPUT->box('<b>Tags to delete: </b>');
-// 20241004 Added tags to the entry, if there are any.
-echo $OUTPUT->tag_list(
-    core_tag_tag::get_item_tags(
-        'mod_diary',
-        'diary_entries',
-        $entry->id
-    ),
-    null,
-    'diary-tags'
-);
+    //echo '<tr><td><div class="entry" style="width: 100%; background: '.$color3.';">';
+    echo '<tr><td><div class="entry" style="width: 100%; background: '.$color4.';">';
+    //echo '<td><div class="entry" style="text-align: left; font-size: 1em; padding: 5px; background: '.$color4.'; border-style: double; border-radius: 16px;">';
+    // 20241114 This adds the actual entry text division close tag for each entry listed on the page.
+    //echo results::diary_format_entry_text($entry, $course, $cm).'</div></td></div></td></tr>';
+    echo results::diary_format_entry_text($entry, $course, $cm).'</div></td></tr>';
+    //echo '</table>';
 
 
+    // I do not think that the student even needs to know about the textformat setting, or even know that he is deleting the one for the ccurrent entry.
+    //echo $OUTPUT->box('<b>Entry Text Format to delete: </b>'.$data->textformat);
 
-echo $OUTPUT->box_end();
+    // IMPORTANT! Will also need code to show the tags and delete them too!
+    // Trying to output the tags like this, creates an error, Array to string conversion, due to having multiple tags for the entry.
+    //echo $OUTPUT->box('<b>Tags to delete: </b>');
+    // 20241004 Added tags to the entry, if there are any.
+    echo $OUTPUT->tag_list(
+        core_tag_tag::get_item_tags(
+            'mod_diary',
+            'diary_entries',
+            $entry->id
+        ),
+        null,
+        'diary-tags'
+    );
 
 
+
+    echo $OUTPUT->box_end();
+
+echo '</div>';
+//////this last echo should finish the entry display/////////////////////////////
 
 
 /////////////////////////////////////Need to print if this entry is available for deletion!///////////////////////////////////////////
