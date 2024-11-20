@@ -45,10 +45,10 @@ $promptid = optional_param('promptid', '', PARAM_INT); // Current entries prompt
 //print_object('Checkpoint 1 is okay.');
 //die; //20240819 To here works.
 $debug = [];
-$debug['CP1 In the deleteentry.php file printing $id:'] = $id;
-$debug['CP1 printing $action:'] = $action;
-$debug['CP1 printing $firstkey:'] = $firstkey;
-$debug['CP1 printing $promptid:'] = $promptid;
+//$debug['CP1 In the deleteentry.php file printing $id:'] = $id;
+//$debug['CP1 printing $action:'] = $action;
+//$debug['CP1 printing $firstkey:'] = $firstkey;
+//$debug['CP1 printing $promptid:'] = $promptid;
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -64,7 +64,7 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-$debug['To checkpoint 2 is okay.'] = 'Nothing to report';
+//$debug['To checkpoint 2 is okay.'] = 'Nothing to report';
 //die; //20240819 To here works.
 
 if (! $diary = $DB->get_record('diary', ['id' => $cm->instance])) {
@@ -88,7 +88,7 @@ if ((!$promptid) && ($diary->timeopen < time())) {
 // 20240414 This also adds the prompt text to the $diary->intro.
 diarystats::get_minmaxes($diary, $action, $promptid);
 
-$debug['To checkpoint 3 is okay.'] = 'Just got diarystats::get_minmaxes';
+//$debug['To checkpoint 3 is okay.'] = 'Just got diarystats::get_minmaxes';
 //die; //20240819 To here works.
 
 // 20210613 Added check to prevent direct access to create new entry when activity is closed.
@@ -121,7 +121,7 @@ $parameters = [
     'firstkey' => $firstkey,
 ];
 
-$debug['To checkpoint 4 is okay.'] = 'Just set four $PAGE items, initialized $data, and set parameters for userid, diary, action, and firstkey.';
+//$debug['To checkpoint 4 is okay.'] = 'Just set four $PAGE items, initialized $data, and set parameters for userid, diary, action, and firstkey.';
 //print_object($debug);
 //die; //20240819 To here works.
 
@@ -134,7 +134,7 @@ $entry = $DB->get_record('diary_entries',
 );
 
 // This shows up upon save.
-$debug['CP8-137 just got $entry from the mdl_diary_entries table: '] = $entry;
+//$debug['CP8-137 just got $entry from the mdl_diary_entries table: '] = $entry;
 
 // 20230306 Added code that lists the tags on the edit_form page.
 //$data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
@@ -150,11 +150,7 @@ if ($action == 'deleteentry' && $entry) {
     $data->textformat = $entry->format;
     $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
 
-    $debug['CP11-187 jest detected request to delete an entry ($action == deleteentry && $entry): '] = $data;
-
-
-
- 
+    $debug['CP11-153 delreq detected ($action == deleteentry && $entry): '] = $data;
 
 } else {
     print_object($debug);
@@ -167,14 +163,14 @@ if ($action == 'deleteentry' && $entry) {
 // Might want to see about printing out the $data via use of a mustache template.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-$debug['In deleteentry.php at line 214.'] = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+//$debug['In deleteentry.php at line 166.'] = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 //print_object($editoroptions);
 //print_object($attachmentoptions);
 
-print_object($debug);
+//print_object($debug);
 //die;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////Output the entry to delete here!///////////////////////////////////////
 
 
 echo $OUTPUT->header();
@@ -187,7 +183,7 @@ if (($diary->intro) && ($CFG->branch < 400)) {
 echo $OUTPUT->box($intro);
 //print_object($data);
 echo $OUTPUT->box('<b>Entry ID to delete: </b>'.$data->entryid);
-// The current should NOT be able to delete a prompt. Only a teacher should be able to do that from the prompt_edit.php file.
+// The current user should NOT be able to delete a prompt. Only a teacher should be able to do that from the prompt_edit.php file.
 //echo $OUTPUT->box('<b>Entry Prompt IDs to delete: </b>'.$data->promptid);
 // The time created needs to be formatted for easy reading.
 //echo $OUTPUT->box('<b>Entry Time Created to delete: </b>'.$data->timecreated);
@@ -202,8 +198,65 @@ echo $OUTPUT->box('<b>Entry Text to delete: </b>'.$data->text);
 // IMPORTANT! Will also need code to show the tags and delete them too!
 // Trying to output the tags like this, creates an error, Array to string conversion, due to having multiple tags for the entry.
 //echo $OUTPUT->box($data->tags);
+// 20241004 Added tags to the entry, if there are any.
+echo $OUTPUT->tag_list(
+    core_tag_tag::get_item_tags(
+        'mod_diary',
+        'diary_entries',
+        $entry->id
+    ),
+    null,
+    'diary-tags'
+);
+
+/////////////////////////////////////Need to print if this entry is available for deletion!///////////////////////////////////////////
+// Probably need to add check for $diary->editdates
+if (results::diary_available($diary)) {
+    print_object('this entry can be deleted');
+
+
+} else {
+    // No one can reach this if the entry is not available for editing.
+    print_object('this entry CANNOT be deleted');
+
+
+}
 
 // Otherwise fill and print the form.
-echo '<b>This is the place to add the actual Delete and Cancel buttons.</b>';
+echo '<br><b>This is the place to add the actual Delete and Cancel buttons.</b>';
+//$this->add_action_buttons();
 
+//if (lessons::is_editable_by_me($USER->id, $id, $lessonpo)) {
+//if (results::is_deleteable_by_me($USER->id, $id, $lessonpo)) {
+
+$debug['testing items before going to results.php'] = 'getting ready';
+$debug['$USER->id'] = $USER->id;
+$debug['$id'] = $id;
+$debug['$entry'] = $entry;
+$debug['$course'] = $course;
+//print_object($debug);
+//die;
+$deleteurl = $CFG->wwwroot.'/mod/diary/view.php?id='.$id;
+if (results::is_deleteable_by_me($USER->id, $id, $entry, $course)) {
+    // 20200613 Added a, Delete this entry, button.
+    echo ' <a onclick="return confirm(\''.get_string('deleteentryconfirm', 'diary').$entry->id.
+        '\')" href="'.$deleteurl.'" class="btn btn-danger" style="border-radius: 8px">'
+        .get_string('deleteentry', 'diary').' - '. $entry->id.'</a>'.'</form>';
+    // 20240924 Added a cancel button with round corners.
+    echo '<a href="'.$CFG->wwwroot . '/mod/diary/view.php?id='.$cm->id
+        .'"class="btn btn-primary" style="border-radius: 8px">'
+        .get_string('cancel')
+        .'</a>';
+} else {
+    // 20200613 Added a, Delete this entry, button.
+    echo ' <a onclick="return confirm(\''.get_string('deleteentryconfirm', 'diary').$entry->id.
+        '\')" href="'.$deleteurl.'" class="btn btn-danger" style="border-radius: 8px">'
+        .get_string('deleteentry', 'diary').' - '. $entry->id.'</a>'.'</form>';
+    // 20240924 Added a cancel button with round corners.
+    echo '<a href="'.$CFG->wwwroot . '/mod/diary/view.php?id='.$cm->id
+        .'"class="btn btn-primary" style="border-radius: 8px">'
+        .get_string('cancel')
+        .'</a>';
+}
+echo '</form>';
 echo $OUTPUT->footer();
