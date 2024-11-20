@@ -21,7 +21,7 @@
  * @copyright 2019 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 namespace mod_diary\search;
 defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 
@@ -53,7 +53,8 @@ class activity extends \core_search\base_activity {
         $fileareas =
             [
                 'intro',
-  //              DIARY_INTROATTACHMENT_FILEAREA,
+                // phpcs:ignore
+                // ...DIARY_INTROATTACHMENT_FILEAREA,...
                 'content',
             ]; // Fileareas.
         return $fileareas;
