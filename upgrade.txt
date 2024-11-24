@@ -29,6 +29,20 @@ This file describes changes and other work in the diary code.
 20210515  Diary_720bt - I am getting the String [grade, core] is deprecated debug message in
     multiple locations. Made changes to deprecated.txt and diary.php files but most
     notable change occured when I switch to TinyMCE editor. No More error.
+
+20230306 Diary_1016 - Need to see about creating a view single entry page especially going
+    from a tag item or tag list. I have created a page, reportone.php, that seems to be
+    working the way I want it to.
+
+
+20240117 Diary_1173 - Prompts are NOT restored after a backup and restore operation.
+
+20240209 Diary_1201 - Feature request - Need a reportone.php page for single user entry from
+    a Grade Me link. The fix for ticket Diary_1016 fixes this ticket also.
+
+20240209 Diary_1202 - Feature request - Need new by name link to go to proposed reportone.php
+    page.
+ 
 20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button. Had to reopen due to
