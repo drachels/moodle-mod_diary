@@ -105,6 +105,8 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         unset($diaryprompt->id);
 
         $diaryprompt->diaryid = $this->get_new_parentid('diary'); // Get the ID of the diary activity this prompt belongs to.
+        $diaryentry->datestart = $this->apply_date_offset($diaryprompt->datestart);
+        $diaryentry->datestop = $this->apply_date_offset($diaryprompt->datestop);
 
         $newid = $DB->insert_record('diary_prompts', $diaryprompt); // Create a new prompt record ID.
         $this->set_mapping('diary_prompt', $oldid, $newid); // Map the new prompt ID to the old prompt ID.
