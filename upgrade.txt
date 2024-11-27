@@ -32,10 +32,11 @@ This file describes changes and other work in the diary code.
 
 20230306 Diary_1016 - Need to see about creating a view single entry page especially going
     from a tag item or tag list. I have created a page, reportone.php, that seems to be
-    working the way I want it to.
+    working the way I want it to, but the feedback is only partially working, so far.
 
 
-20240117 Diary_1173 - Prompts are NOT restored after a backup and restore operation.
+20240117 Diary_1173 - Prompts are NOT restored after a backup and restore operation. Fixed
+    errors in backup files.
 
 20240209 Diary_1201 - Feature request - Need a reportone.php page for single user entry from
     a Grade Me link. The fix for ticket Diary_1016 fixes this ticket also.
