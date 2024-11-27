@@ -532,11 +532,12 @@ if ($timenow > $timestart) {
                     //    ['class' => 'toolbutton']);
                     // $testingurl .= html_writer::link($testingurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
                     //    ['class' => 'toolbutton']);
-                    if ($diary->deleteentry) {
+                    if (!$diary->deleteentry) {
+                        $deletethisentry = ' ';
+
+                    } else {
                         $deletethisentry = html_writer::link($url2, $output->pix_icon('i/delete', get_string('deleteentry', 'diary').'t'),
                             ['class' => 'toolbutton']);
-                    } else {
-                        $deletethisentry = ' ';
                     }
                 } else {
                     $editthisentry = ' ';
