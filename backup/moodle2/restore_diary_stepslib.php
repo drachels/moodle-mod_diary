@@ -44,11 +44,12 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $paths[] = new restore_path_element('diary', '/activity/diary');
 
+        $paths[] = new restore_path_element('diary_prompt', '/activity/diary/prompts/prompt');
+
         if ($userinfo) {
             $paths[] = new restore_path_element('diary_entry', '/activity/diary/entries/entry');
             $paths[] = new restore_path_element('diary_entry_rating', '/activity/diary/entries/entry/ratings/rating');
             $paths[] = new restore_path_element('diary_entry_tag', '/activity/diary/entriestags/tag');
-            $paths[] = new restore_path_element('diary_prompt', '/activity/diary/prompts/prompt');
         }
 
         // Return the paths wrapped into standard activity structure.
