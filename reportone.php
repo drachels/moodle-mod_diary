@@ -29,7 +29,7 @@ require_once($CFG->dirroot.'/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
-$entryid = optional_param('entryid', '', PARAM_ALPHANUMEXT); // Current entry ID).
+$entryid = optional_param('entryid', '', PARAM_INT); // Current entry ID).
 $user = required_param('user', PARAM_INT); // User ID.
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
@@ -65,7 +65,6 @@ if (has_capability('mod/diary:manageentries', $context)) {
     $stringlable = 'reportsingle';
     // Get ALL diary entries from this diary, for this user, from newest to oldest.
     $eee = $DB->get_record('diary_entries', ['id' => $entryid, 'userid' => $user]);
-
 }
 
 // 20211214 Header with additional info in the url.
@@ -90,15 +89,13 @@ echo '<span style="float: right;"><a href="index.php?id='.$course->id.'">'
 
 // Save our current user id and also get his details. CHECK - might not need this.
 $users = $user;
-
 $user = $DB->get_record('user', ['id' => $user]);
 
 if ($eee) {
-    // Now, filter down to get entry by any user who has made at least one entry.
+    // Now, filter down to get the one entry.
     $entrybyuser[$eee->userid] = $eee;
     $entrybyentry[$eee->id] = $eee;
     $entrybyuserentry[$eee->userid][$eee->id] = $eee;
-
 } else {
     $entrybyuser = [];
     $entrybyentry = [];
@@ -145,12 +142,14 @@ if (! $users) {
     if (! $teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
         throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
     }
+
     // 20211213 Start the page area where feedback and grades are added and will need to be saved.
     // 20230810 Changed due to pull request #29.
-    $url = new moodle_url('reportone.php', ['id' => $id, 'user' => $user->id, 'action' => 'currententry']);
+    $url = new moodle_url('reportone.php', ['id' => $id, 'user' => $user->id, 'action' => 'currententry', 'entryid' => $entryid]);
     echo '<form action="'.$url->out(false).'" method="post">';
+
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
-    // 20211210 Cleaned up unnecessary escaped double quotes.
+    // 20241127 This is the, Save all my feedback, button.
     $saveallbutton = '';
     $saveallbutton = '<p class="feedbacksavereturn">';
     $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
@@ -158,9 +157,7 @@ if (! $users) {
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
                       .get_string('saveallfeedback', 'diary').'" />';
 
-    // 20211230 Tacked on an action for the return URL.
-    // 20201222 Added a return to report.php button if you do not want to save feedback.
-    // 20230810 Made changes based on pull request#29.
+    // 20241127 This is the, Return to Diary - diary name, button.
     $url2 = new moodle_url($CFG->wwwroot.'/mod/diary/report.php', ['id' => $id, 'action' => 'currententry']);
     $saveallbutton .= ' <a href="'.$url2->out(true)
                      .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
