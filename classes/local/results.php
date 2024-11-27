@@ -714,14 +714,14 @@ class results {
             $feedbacktext = $entry->entrycomment;
             $debug['Results2a $param1: '] = $param1;
             $debug['Results2b $param2: '] = $param2;
-            print_object($debug);
+            //print_object($debug);
             // 20220107 If the, Add to feedback, button is clicked process it here.
             if (isset($param1) && ($param1 == get_string('addtofeedback', 'diary'))) {
-                print_object('Made it to the update feedback update.');
-                print_object('The current entry is:');
-                print_object($entry);
-                print_object('');
-                die;
+                //print_object('Made it to the update feedback update.');
+                //print_object('The current entry is:');
+                //print_object($entry);
+                //print_object('');
+                //die;
                 // 20220105 Do an immediate update here.
                 $entry->rating = $currentratingdata;
                 // Update feedback to show statistics, common errors, autorating.
@@ -1129,21 +1129,7 @@ class results {
      */
     public static function diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry) {
         global $DB, $CFG, $OUTPUT, $USER;
-        $debug;
-        
-        $debug['FBupdate in the results.php file'] = 'printing incoming variables';
-        //$debug['printing $eee'] = $eee;
-        //print_object($eee);
-        $debug['FBupdate $cm'] = $cm;
-        $debug['FBupdate $context'] = $context;
-        $debug['FBupdate $diary'] = $diary;
-        $debug['FBupdate $data'] = $data;
-        $debug['FBupdate $entrybyuser'] = $entrybyuser;
-        $debug['FBupdate $entrybyentry'] = $entrybyentry;
-        print_object($debug);
-        die;
-        
-        
+
         confirm_sesskey();
         $feedback = [];
         $data = (array) $data;
@@ -1304,14 +1290,14 @@ class results {
         //    || (($entry->editable == 1) && (self::is_user_enrolled($usr, $id)) && ($crs == $course->id))
         //    || (($entry->editable == 2) && ($entry->authorid == $usr))
         //    || (self::can_view_edit_all($usr, $crs))) {
-            print_object('in the if');
+            //print_object('in the if');
             //die;
             return true;
             
         //} else if ($canadd && $diary){
         } else if ($canadd && self::diary_available($diary)) {
             // Student wind up here, but need to change from $diary to use isavailable check results.
-            print_object('in the else');
+            //print_object('in the else');
             //die;
             return false;
         }
