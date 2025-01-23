@@ -25,6 +25,8 @@
 use mod_diary\local\results;
 use mod_diary\local\diarystats;
 use mod_diary\local\prompts;
+use mod_diary\event\entry_deleted;
+use mod_diary\event\entry_tags_deleted;
 use mod_diary\event\invalid_access_attempt;
 
 require_once("../../config.php");
@@ -36,19 +38,6 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
-
-//print_object('Spacer in edit.php at line 39.');
-//print_object('Spacer in edit.php at line 40.');
-//print_object('Spacer in edit.php at line 41.');
-//print_object('Spacer in edit.php at line 42.');
-//print_object('Spacer in edit.php at line 43.');
-//print_object('Checkpoint 1 is okay.');
-//die; //20240819 To here works.
-$debug = [];
-//$debug['CP1 In the deleteentry.php file printing $id:'] = $id;
-//$debug['CP1 printing $action:'] = $action;
-//$debug['CP1 printing $firstkey:'] = $firstkey;
-//$debug['CP1 printing $promptid:'] = $promptid;
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -64,238 +53,62 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-//$debug['To checkpoint 2 is okay.'] = 'Nothing to report';
-//die; //20240819 To here works.
+// 20241204 Added for capability check later.
+$entriesmanager = has_capability('mod/diary:manageentries', $context);
+$canadd = has_capability('mod/diary:addentries', $context);
 
-if (! $diary = $DB->get_record('diary', ['id' => $cm->instance])) {
+if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
-// 20221107 The $diary->intro gets overwritten by the current prompt and Notes, so keep a copy for later down in this file.
-$tempintro = $diary->intro;
-
-// 20240413 Check for existing promptid. DO NOT get current if editing entry already has one.
-// Need to add - DO NOT get current if editing entry does not have a prompt id and it does not meet the time criteria.
-if ((!$promptid) && ($diary->timeopen < time())) {
-    // 20240507 Added for testing and it appears to work for existing entry without a prompt.
-    if ($promptid > 0) {
-        // Need to call a prompt function that returns the current promptid, if there is one that is current.
-        $promptid = prompts::get_current_promptid($diary);
-    }
+if (!$entry = $DB->get_record('diary_entries', ['id' => $firstkey])) {
+    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
-
-// 20210817 Add min/max info to the description so user can see them while editing an entry.
-// 20240414 This also adds the prompt text to the $diary->intro.
-diarystats::get_minmaxes($diary, $action, $promptid);
-
-//$debug['To checkpoint 3 is okay.'] = 'Just got diarystats::get_minmaxes';
-//die; //20240819 To here works.
-
-// 20210613 Added check to prevent direct access to create new entry when activity is closed.
-if (($diary->timeclose) && (time() > $diary->timeclose)) {
-    // Trigger invalid_access_attempt with redirect to the view page.
-    $params = [
-        'objectid' => $id,
-        'context' => $context,
-        'other' => [
-            'file' => 'entrydelete.php',
-        ],
-    ];
-    $event = invalid_access_attempt::create($params);
-    $event->trigger();
-    redirect('view.php?id='.$id, get_string('invalidaccessexp', 'diary'));
-}
-
 // Header.
-$PAGE->set_url('/mod/diary/entrydelete.php', ['id' => $id]);
-$PAGE->navbar->add(get_string('deleteentry', 'diary'));
-$PAGE->set_title(format_string($diary->name));
+$PAGE->set_url('/mod/diary/view.php', ['id' => $id]);
+$PAGE->navbar->add(get_string("viewentries", "diary"));
 $PAGE->set_heading($course->fullname);
 
-$data = new stdClass();
+$taginststodel = $DB->get_records('tag_instance', ['itemid' => $firstkey]);
 
-$parameters = [
-    'userid' => $USER->id,
-    'diary' => $diary->id,
-    'action' => $action,
-    'firstkey' => $firstkey,
-];
+$count = 0;
+foreach ($taginststodel as $inst) {
+    $count++;
+    $tagstodel = $DB->get_records('tag', ['id' => $inst->tagid, 'userid' => $entry->userid]);
+    $debug[$count.' In deleteentry for each loop printing $tagstodel'] = $tagstodel;
+}
 
-//$debug['To checkpoint 4 is okay.'] = 'Just set four $PAGE items, initialized $data, and set parameters for userid, diary, action, and firstkey.';
-//print_object($debug);
-//die; //20240819 To here works.
+$deleteurl = 'view.php?id='.$id;
 
-// Get the single record specified by firstkey.
-$entry = $DB->get_record('diary_entries',
-    [
-        'userid' => $USER->id,
-        'id' => $firstkey,
-    ]
-);
+// Commented out to keep from actually deleting the entry, at the moment during development.
+// 20250123 This deletes the user entry.
+$DB->delete_records('diary_entries', ['id' => $entry->id]);
 
-// This shows up upon save.
-//$debug['CP8-137 just got $entry from the mdl_diary_entries table: '] = $entry;
+if ($taginststodel) {
+    // 20250123 This deletes one or more tags associated with this entry.
+    $DB->delete_records('tag_instance', ['itemid' => $firstkey]);
+    // 20250123 Added to trigger module entry_tags_deleted event.
+    $params = [
+        'objectid' => $course->id,
+        'context' => $context,
+        'other' => [
+            'entry' => $entry->id,
+            'tags' => $taginststodel,
+        ],
+    ];
 
-// 20230306 Added code that lists the tags on the edit_form page.
-//$data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
-
-if ($action == 'deleteentry' && $entry) {
-    $data->entryid = $entry->id;
-    // 20240426 Trying to add the promptid here.
-    // 20240426 This lcation works for old promptid's but not for entries with NO promptid assigned. i.e. Does not work for 0.
-    $data->promptid = $entry->promptid;
-    $data->timecreated = $entry->timecreated;
-    $data->title = $entry->title;
-    $data->text = $entry->text;
-    $data->textformat = $entry->format;
-    $data->entrybgc = $diary->entrybgc;
-    $data->entrytextbgc = $diary->entrytextbgc;
-    $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
-
-    $debug['CP11-153 delreq detected ($action == deleteentry && $entry): '] = $data;
-
+    $event = entry_tags_deleted::create($params);
+    $event->trigger();
 } else {
-    print_object($debug);
-    die;
-    throw new moodle_exception(get_string('generalerror', 'diary'));
+    // 20250123 Added to trigger module entry_deleted event.
+    $params = [
+        'objectid' => $course->id,
+        'context' => $context,
+        'other' => $taginststodel,
+    ];
+    $event = entry_deleted::create($params);
+    $event->trigger();
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// I think everything needed for a delete entry has be retrieved at this point.
-// Might want to see about printing out the $data via use of a mustache template.
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//$debug['In deleteentry.php at line 166.'] = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
-//print_object($editoroptions);
-//print_object($attachmentoptions);
-
-//print_object($debug);
-//die;
-
-///////////////////////////////////////Output the entry to delete here!///////////////////////////////////////
-
-
-echo $OUTPUT->header();
-if (($diary->intro) && ($CFG->branch < 400)) {
-    echo $OUTPUT->heading(format_string($diary->name));
-    $intro = $tempintro.'<br>'.format_module_intro('diary', $diary, $cm->id);
-} else {
-    $intro = format_module_intro('diary', $diary, $cm->id);
-}
-echo $OUTPUT->box($intro);
-
-$color3 = $data->entrybgc;
-
-$color4 = $data->entrytextbgc;
-
-//////after this should be the prompt and entry///////////////////////////////////////////////////
-
-echo '<div class="entry" style="background: '.$color3.'; border-style: double; border-radius: 16px;">';
-
-    // 20241120 If one exists, display the aplicable prompt.
-    if ($data->promptid > 0) {
-        //echo '<br><b>This prompt was used for this entry. It will NOT be deleted.</b><br>';
-        $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
-        echo '<b>'.$promptused.' It will NOT be deleted!</b>';
-        $prompt = $DB->get_record('diary_prompts', ['id' => $entry->promptid, 'diaryid' => $diary->id]);
-        // 20241120 Added capability to use contrasting color for the prompt background.
-        // 20241120 Added code to use a prompt background color.
-        // 20241120 Gave promptentry it's own class name to enable
-        echo '<div class="promptentry" style="background: '.$prompt->promptbgc.';">';
-        echo '<strong>Prompt ID-'.$prompt->id.', '.get_string('prompttext', 'diary')
-            .'</strong>: '.$prompt->text.'</div>';
-    }
-
-
-
-    echo $OUTPUT->box_start();
-
-    //echo '<table id="entry-'.$data->entryid.'" class="entry" style="width100%;">';
-
-    echo $OUTPUT->box('<h2>'.$data->title.'</h2><h5>Entry: ID'.$data->entryid.', '.userdate($data->timecreated).'</h5>');
-    
-    //echo '<tr><td><div class="entry" style="width: 100%; background: '.$color3.';">';
-    echo '<tr><td><div class="entry" style="width: 100%; background: '.$color4.';">';
-    //echo '<td><div class="entry" style="text-align: left; font-size: 1em; padding: 5px; background: '.$color4.'; border-style: double; border-radius: 16px;">';
-    // 20241114 This adds the actual entry text division close tag for each entry listed on the page.
-    //echo results::diary_format_entry_text($entry, $course, $cm).'</div></td></div></td></tr>';
-    echo results::diary_format_entry_text($entry, $course, $cm).'</div></td></tr>';
-    //echo '</table>';
-
-
-    // I do not think that the student even needs to know about the textformat setting, or even know that he is deleting the one for the ccurrent entry.
-    //echo $OUTPUT->box('<b>Entry Text Format to delete: </b>'.$data->textformat);
-
-    // IMPORTANT! Will also need code to show the tags and delete them too!
-    // Trying to output the tags like this, creates an error, Array to string conversion, due to having multiple tags for the entry.
-    //echo $OUTPUT->box('<b>Tags to delete: </b>');
-    // 20241004 Added tags to the entry, if there are any.
-    echo $OUTPUT->tag_list(
-        core_tag_tag::get_item_tags(
-            'mod_diary',
-            'diary_entries',
-            $entry->id
-        ),
-        null,
-        'diary-tags'
-    );
-
-
-
-    echo $OUTPUT->box_end();
-
-echo '</div>';
-//////this last echo should finish the entry display/////////////////////////////
-
-
-/////////////////////////////////////Need to print if this entry is available for deletion!///////////////////////////////////////////
-// Probably need to add check for $diary->editdates
-if (results::diary_available($diary)) {
-    print_object('this entry can be deleted');
-
-
-} else {
-    // No one can reach this if the entry is not available for editing.
-    print_object('this entry CANNOT be deleted');
-
-
-}
-
-// Otherwise fill and print the form.
-echo '<br><b>This is the place to add the actual Delete and Cancel buttons.</b>';
-//$this->add_action_buttons();
-
-//if (lessons::is_editable_by_me($USER->id, $id, $lessonpo)) {
-//if (results::is_deleteable_by_me($USER->id, $id, $lessonpo)) {
-
-$debug['testing items before going to results.php'] = 'getting ready';
-$debug['$USER->id'] = $USER->id;
-$debug['$id'] = $id;
-$debug['$entry'] = $entry;
-$debug['$course'] = $course;
-//print_object($debug);
-//die;
-$deleteurl = $CFG->wwwroot.'/mod/diary/view.php?id='.$id;
-if (results::is_deleteable_by_me($USER->id, $id, $entry, $course)) {
-    // 20200613 Added a, Delete this entry, button.
-    echo ' <a onclick="return confirm(\''.get_string('deleteentryconfirm', 'diary').$entry->id.
-        '\')" href="'.$deleteurl.'" class="btn btn-danger" style="border-radius: 8px">'
-        .get_string('deleteentry', 'diary').' - '. $entry->id.'</a>'.'</form>';
-    // 20240924 Added a cancel button with round corners.
-    echo '<a href="'.$CFG->wwwroot . '/mod/diary/view.php?id='.$cm->id
-        .'"class="btn btn-primary" style="border-radius: 8px">'
-        .get_string('cancel')
-        .'</a>';
-//} else {
-//    // 20200613 Added a, Delete this entry, button.
-//    echo ' <a onclick="return confirm(\''.get_string('deleteentryconfirm', 'diary').$entry->id.
-//        '\')" href="'.$deleteurl.'" class="btn btn-danger" style="border-radius: 8px">'
-//        .get_string('deleteentry', 'diary').' - '. $entry->id.'</a>'.'</form>';
-//    // 20240924 Added a cancel button with round corners.
-//    echo '<a href="'.$CFG->wwwroot . '/mod/diary/view.php?id='.$cm->id
-//        .'"class="btn btn-primary" style="border-radius: 8px">'
-//        .get_string('cancel')
-//        .'</a>';
-}
-echo '</form>';
-echo $OUTPUT->footer();
+// 20250122 This returns toview.php after click on the javascript OK or Cancel button.
+header("Location: $deleteurl");
+exit();
