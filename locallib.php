@@ -140,15 +140,6 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
                 $cm = $modinfo->get_cm($item->cmid);
                 // 20230325 Student go to their view page and teachers, etc. go to reportsingle for the applicable user.
                 if ($canmanage) {
-/*
-                    $pageurl = new moodle_url('/mod/diary/reportsingle.php',
-                        [
-                            'id' => $item->cmid,
-                            'action' => 'allentries',
-                            'user' => $item->userid,
-                        ]
-                    );
-*/
                     $pageurl = new moodle_url('/mod/diary/reportone.php',
                         [
                             'id' => $item->cmid,
