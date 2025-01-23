@@ -513,15 +513,10 @@ class results {
     public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
         global $CFG, $DB, $OUTPUT, $USER;
         $id = required_param('id', PARAM_INT); // Course module.
+        // 20241204 Added $cm for delete entry code.
+        $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
         $diaryid = optional_param('diary', $diary->id, PARAM_INT); // Diaryid.
         $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Current sort Action.
-
-        $debug;
-        $debug['Resultsa in print user entry printing $id'] = $id;
-        $debug['Resultsb in print user entry printing $diaryid'] = $diaryid;
-        $debug['Resultsc in print user entry printing action'] = $action;
-        //print_object($debug);
-        //die;
 
         // 20210605 Changed to this format.
         require_once(__DIR__ .'/../../../../lib/gradelib.php');
@@ -532,9 +527,17 @@ class results {
         // Create a table for the current users entry with area for teacher feedback.
         echo '<table id="entry-'.$user->id.'" class="diaryuserentry">';
         if ($entry) {
-            // 20211109 needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
+            // 20211109 Needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
+            // 20241203 Modified and not set unless one of the buttons is clicked.
             $param1 = optional_param('button1'.$entry->id, '', PARAM_ALPHANUMEXT); // Transfer entry.
             $param2 = optional_param('button2'.$entry->id, '', PARAM_ALPHANUMEXT); // Clear entry.
+
+            // 20241201 To make the parameters compatible with a foreign language.
+            if ($param1) {
+                $param1 = get_string('addtofeedback', 'diary');
+            } else if ($param2) {
+                $param2 = get_string('clearfeedback', 'diary');
+            }
 
             // 20231110 Add a title for the entry, only if there is one.
             if ($entry->title) {
@@ -560,10 +563,24 @@ class results {
                 echo '</tr>';
             }
 
+            // 20241204 Create delete entry toolbutton link to use for each individual entry.
+            $deloptions['id'] = $cm->id;
+            $deloptions['action'] = 'deleteentry';
+            $deloptions['firstkey'] = $entry->id;
+            $deloptions['promptid'] = $entry->promptid;
+            $url2 = new moodle_url('/mod/diary/deleteentry.php', $deloptions);
+
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
             echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td>';
-            echo '<td>ID '.$entry->id.',  '.userdate($entry->timecreated);
+
+            if (has_capability('mod/diary:manageentries', $context)) {
+                // 20241204 Added delete entry check enabled code.
+                $deletethisentry = html_writer::link($url2, $OUTPUT->pix_icon('i/delete',
+                    get_string('deleteentry', 'diary')), ['class' => 'toolbutton']);
+            }
+            echo '<td>ID '.$entry->id.',  '.userdate($entry->timecreated).$deletethisentry;
+
             // 20201202 Added link to show all entries for a single user.
             // 20230810 Changed based on pull request #29. Also had to add, use moodle_url at the head of the file.
             $url = new moodle_url('reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
@@ -606,9 +623,7 @@ class results {
             $comerrdata = diarystats::get_common_error_stats($temp, $diary);
             echo $comerrdata;
             // 20211212 List all the auto rating data.
-            list($autoratingdata,
-                 $currentratingdata)
-                 = diarystats::get_auto_rating_stats($temp, $diary);
+            list($autoratingdata, $currentratingdata) = diarystats::get_auto_rating_stats($temp, $diary);
             // 20211212 Added list function to get and print the autorating data here.
             echo $autoratingdata;
 
@@ -622,7 +637,6 @@ class results {
                 null,
                 'diary-tags'
             );
-
         } else {
             // 20231209 changed from print_string to echo get_string.
             // ...echo get_string('noentry', 'diary');...
@@ -660,7 +674,7 @@ class results {
                     ]
                 );
             }
-            // 20200816 Get the current rating for this user!
+            // 20200816 Get the current rating for this user.
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
                 $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
                 $gradeitemgrademax = $gradinginfo->items[0]->grademax;
@@ -685,20 +699,20 @@ class results {
             // Also added button to remove anything in the feedback text area.
             echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
 
-                 ' <input class="btn btn-warning btn-sm"
-                         role="button"
-                         style="border-radius: 8px"
-                         name="button1'.$entry->id.'"
-                         onClick="return clClick()"
-                         type="submit"
-                         value="'.get_string('addtofeedback', 'diary').'"></input> '.
+                ' <input class="btn btn-warning btn-sm"
+                        role="button"
+                        style="border-radius: 8px"
+                        name="button1'.$entry->id.'"
+                        onClick="return clClick(this.name)"
+                        type="submit"
+                        value="'.get_string('addtofeedback', 'diary').'"></input> '.
 
-                 '<input class="btn btn-warning  btn-sm"
-                         style="border-radius: 8px"
-                         name="button2'.$entry->id.'"
-                         onClick="return clClick()"
-                         type="submit"
-                         value="'.get_string('clearfeedback', 'diary').'"></input>';
+                '<input class="btn btn-warning  btn-sm"
+                        style="border-radius: 8px"
+                        name="button2'.$entry->id.'"
+                        onClick="return clClick(this.name)"
+                        type="submit"
+                        value="'.get_string('clearfeedback', 'diary').'"></input>';
 
             // 20211228 Create a test anchor link for testing.
             // echo '<a href="#'.$entry->id.'">xxxxx</a>';
@@ -712,27 +726,26 @@ class results {
             $gradebookgradestr = '';
             $feedbackdisabledstr = '';
             $feedbacktext = $entry->entrycomment;
-            $debug['Results2a $param1: '] = $param1;
-            $debug['Results2b $param2: '] = $param2;
-            //print_object($debug);
+
             // 20220107 If the, Add to feedback, button is clicked process it here.
-            if (isset($param1) && ($param1 == get_string('addtofeedback', 'diary'))) {
-                //print_object('Made it to the update feedback update.');
-                //print_object('The current entry is:');
-                //print_object($entry);
-                //print_object('');
-                //die;
+            // 20241203 Modified to work for the three report pages.
+            if ($param1 == get_string('addtofeedback', 'diary')) {
                 // 20220105 Do an immediate update here.
                 $entry->rating = $currentratingdata;
                 // Update feedback to show statistics, common errors, autorating.
                 $feedbacktext .= $statsdata.$comerrdata.$autoratingdata;
                 // Add the statistics, common errors, and autorating to the current entrycomment field.
-                $entry->entrycomment = $statsdata.$comerrdata.$autoratingdata;
+                // 20250114 Modified code to this.Works if you click, Save all my feedback, then click, Add to feedback.
+                $entry->entrycomment .= $feedbacktext.$statsdata.$comerrdata.$autoratingdata;
                 // Save the changes to the current user entry.
                 $DB->update_record('diary_entries', $entry, $bulk = false);
+                // 20250114 Added for testing.
+                diary_update_grades($diary, $entry->userid);
+
             }
             // 20220107 If the, Clear feedback, button is clicked process it here.
-            if (isset($param2) && ($param2 == get_string('clearfeedback', 'diary'))) {
+            // 20241203 Modified to work for the three report pages.
+            if ($param2 == get_string('clearfeedback', 'diary')) {
                 // 20220105 Reset the entry rating and entry comment to null.
                 $entry->rating = null;
                 $feedbacktext = null;
@@ -817,6 +830,15 @@ class results {
             echo '</td></tr>';
         }
         echo '</table>';
+
+        ?>
+        <script type="text/javascript" defer>
+            function clClick(clicked) {
+                console.log("The Button 1 was clicked!");
+                return true;
+            }
+        </script>
+        <?php // phpcs:ignore
     }
 
     /**
@@ -868,7 +890,7 @@ class results {
         );
 
         // 20210609 Added branch check for string compatibility.
-        if (! empty($entry->rating)) {
+        if (!empty($entry->rating)) {
             if ($CFG->branch > 310) {
                 echo get_string('gradenoun') . ': ';
             } else {
@@ -876,7 +898,8 @@ class results {
             }
             echo $entry->rating.'/' . number_format($gradinginfo->items[0]->grademax, 2);
         } else {
-            print_string('nograde');
+            echo get_string('gradenoun') . ': ';
+            echo $entry->rating.'/' . number_format($gradinginfo->items[0]->grademax, 2);
         }
         echo '</div>';
 
@@ -1144,7 +1167,9 @@ class results {
         }
 
         $timenow = time();
-        $count = 0;
+        // 20241129 Changed from 0 to 1. 20250113 Changed from 0 to 1, again.
+        // 20211203 Changed back to 0.
+        $count = 1;
         foreach ($feedback as $num => $vals) {
             $entry = $entrybyentry[$num];
             // Only update entries where feedback has actually changed.
@@ -1158,90 +1183,65 @@ class results {
 
             if ($studentrating != $entry->rating && ! ($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;
-            }
 
-            if ($ratingchanged || $studentcomment != $entry->entrycomment) {
-                $newentry = new StdClass();
-                $newentry->rating = $studentrating;
-                $newentry->entrycomment = $studentcomment;
-                $newentry->teacher = $USER->id;
-                $newentry->timemarked = $timenow;
-                $newentry->mailed = 0; // Make sure mail goes out (again, even).
-                $newentry->id = $num;
-                if (! $DB->update_record("diary_entries", $newentry)) {
-                    notify("Failed to update the diary feedback for user $entry->userid");
-                } else {
-                    $count ++;
-                }
-                $entrybyuser[$entry->userid]->rating = $studentrating;
-                $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
-                $entrybyuser[$entry->userid]->teacher = $USER->id;
-                $entrybyuser[$entry->userid]->timemarked = $timenow;
-
-                $records[$entry->id] = $entrybyuser[$entry->userid];
-
-                // Compare to database view.php line 465.
-                if ($diary->assessed != RATING_AGGREGATE_NONE) {
-                    // 20200812 Added rating code and got it working.
-                    $ratingoptions = new stdClass();
-                    $ratingoptions->contextid = $context->id;
-                    $ratingoptions->component = 'mod_diary';
-                    $ratingoptions->ratingarea = 'entry';
-                    $ratingoptions->itemid = $entry->id;
-                    $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
-                    $ratingoptions->scaleid = $diary->scale;
-                    $ratingoptions->rating = $studentrating;
-                    $ratingoptions->userid = $entry->userid;
-                    $ratingoptions->timecreated = $entry->timecreated;
-                    $ratingoptions->timemodified = $entry->timemodified;
-                    $ratingoptions->returnurl = $CFG->wwwroot . '/mod/diary/report.php?id' . $cm->id;
-                    $ratingoptions->assesstimestart = $diary->assesstimestart;
-                    $ratingoptions->assesstimefinish = $diary->assesstimefinish;
-                    // 20200813 Check if there is already a rating, and if so, just update it.
-                    if ($rec = self::check_rating_entry($ratingoptions)) {
-                        $ratingoptions->id = $rec->id;
-                        $DB->update_record('rating', $ratingoptions, false);
+                if ($ratingchanged || $studentcomment != $entry->entrycomment) {
+                    $newentry = new StdClass();
+                    $newentry->rating = $studentrating;
+                    $newentry->entrycomment = $studentcomment;
+                    $newentry->teacher = $USER->id;
+                    $newentry->timemarked = $timenow;
+                    $newentry->mailed = 0; // Make sure mail goes out (again, even).
+                    $newentry->id = $num;
+                    if (! $DB->update_record("diary_entries", $newentry)) {
+                        notify("Failed to update the diary feedback for user $entry->userid");
                     } else {
-                        $DB->insert_record('rating', $ratingoptions, false);
+                        $count ++;
                     }
+                    $entrybyuser[$entry->userid]->rating = $studentrating;
+                    $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
+                    $entrybyuser[$entry->userid]->teacher = $USER->id;
+                    $entrybyuser[$entry->userid]->timemarked = $timenow;
+
+                    $records[$entry->id] = $entrybyuser[$entry->userid];
+
+                    // Compare to database view.php line 465.
+                    if ($diary->assessed != RATING_AGGREGATE_NONE) {
+                        // 20200812 Added rating code and got it working.
+                        $ratingoptions = new stdClass();
+                        $ratingoptions->contextid = $context->id;
+                        $ratingoptions->component = 'mod_diary';
+                        $ratingoptions->ratingarea = 'entry';
+                        $ratingoptions->itemid = $entry->id;
+                        $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
+                        $ratingoptions->scaleid = $diary->scale;
+                        $ratingoptions->rating = $studentrating;
+                        $ratingoptions->userid = $entry->userid;
+                        $ratingoptions->timecreated = $entry->timecreated;
+                        $ratingoptions->timemodified = $entry->timemodified;
+                        $ratingoptions->returnurl = $CFG->wwwroot . '/mod/diary/report.php?id' . $cm->id;
+                        $ratingoptions->assesstimestart = $diary->assesstimestart;
+                        $ratingoptions->assesstimefinish = $diary->assesstimefinish;
+                        // 20200813 Check if there is already a rating, and if so, just update it.
+                        if ($rec = self::check_rating_entry($ratingoptions)) {
+                            $ratingoptions->id = $rec->id;
+                            $DB->update_record('rating', $ratingoptions, false);
+                        } else {
+                            $DB->insert_record('rating', $ratingoptions, false);
+                        }
+                    }
+
+                    $diary = $DB->get_record("diary",
+                        [
+                            "id" => $entrybyuser[$entry->userid]->diary,
+                        ]
+                    );
+                    $diary->cmidnumber = $cm->idnumber;
+
+                    diary_update_grades($diary, $entry->userid);
                 }
-
-                $diary = $DB->get_record("diary",
-                    [
-                        "id" => $entrybyuser[$entry->userid]->diary,
-                    ]
-                );
-                $diary->cmidnumber = $cm->idnumber;
-
-                diary_update_grades($diary, $entry->userid);
             }
-
+            echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
         }
-        echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
-    }
-
-    /**
-     * Delete current diary entry.
-     * Called from view.php.
-     * @param array $cm
-     * @param array $context
-     * @param array $diary
-     * @param array $data
-     * @param array $entrybyuser
-     * @param array $entrybyentry
-     * @return int count($diarys) Count of diary entries.
-     */
-    public static function diary_delete_entry($entry) {
-        global $DB, $CFG, $OUTPUT, $USER;
-        $deleteurl = '<a onclick="return confirm(\''
-            .get_string('deleteentryconfirm', 'diary')
-            .$entry->id
-
-            .'>'
-            .'</a>';
-        // Commented out to keep from actually deleting the entry, at the moment during development.
-        // ...$DB->delete_records('diary_entries', ['id' => $entry->id]);...
-        return $deleteurl;
     }
 
     /**
@@ -1254,9 +1254,7 @@ class results {
      * @param int $entry
      * @return boolean
      */
-    //public static function is_editable_by_me($usr, $id, $entry) {
     public static function is_deleteable_by_me($usr, $id, $entry, $course) {
-    //public static function is_deleteable_by_me($usr, $id) {
         global $DB;
         $context = context_module::instance($id);
         $diary = $DB->get_record('diary',
@@ -1264,14 +1262,9 @@ class results {
                 'id' => $entry->diary,
             ]
         );
-        // Started on it, but this function will need a lot of work!
-        // It will need to verify within the limits of timeopen and timeclose.
-        // use line 166, public static function diary_available($diary) {
-        // It will need to verify within the limits of edit all and editdates.
-        // Use line 125 of view.php if (has_capability('mod/diary:addentries', $context)) {
+
         // If the limits above are all okay, can use the function just above here, for the actual delete.
-        
-        //$entry = $DB->get_record('diary_entries', ['id' => $entry]);
+
         $entry = $DB->get_record('diary_entries', ['id' => $id]);
         if (is_null($course)) {
             $crs = 0;
@@ -1283,23 +1276,14 @@ class results {
         // For someone with manageentries let them always delete.
         // For someone with ONLY addentries let them delete if dates allow.
         $entriesmanager = has_capability('mod/diary:manageentries', $context);
+        $diarymanager = has_capability('mod/diary:addinstance', $context);
         $canadd = has_capability('mod/diary:addentries', $context);
 
-        if ($entriesmanager && $canadd) {
-        //if (($entry->editable == 0)
-        //    || (($entry->editable == 1) && (self::is_user_enrolled($usr, $id)) && ($crs == $course->id))
-        //    || (($entry->editable == 2) && ($entry->authorid == $usr))
-        //    || (self::can_view_edit_all($usr, $crs))) {
-            //print_object('in the if');
-            //die;
+        if ($entriesmanager && $diarymanager && $canadd) {
             return true;
-            
-        //} else if ($canadd && $diary){
         } else if ($canadd && self::diary_available($diary)) {
-            // Student wind up here, but need to change from $diary to use isavailable check results.
-            //print_object('in the else');
-            //die;
-            return false;
+            // Students wind up here, only if deleteentry is enabled.
+            return true;
         }
     }
 }
