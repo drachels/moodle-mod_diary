@@ -375,9 +375,14 @@ if ($timenow > $timestart) {
             }
             // Print user toolbar icons only if there is at least one entry for this user.
             if ($entrys) {
+                // 20250110 Create options list to pass to the toolbar.
+                $options['id'] = $cm->id;
+                $options['action'] = 'editentry';
+                $options['firstkey'] = $firstkey;
+                $options['promptid'] = $promptid;
                 echo '<span style="float: right;">'.get_string('usertoolbar', 'diary');
                 echo $output->toolbar(has_capability('mod/diary:addentries', $context),
-                    $course, $id, $diary, $firstkey, $cm).'</span>';
+                    $options).'</span>';
             }
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
@@ -498,28 +503,15 @@ if ($timenow > $timestart) {
                 $options['firstkey'] = $entry->id;
                 $options['promptid'] = $entry->promptid;
 
-                // ...print_object($options);...
-
                 $url = new moodle_url('/mod/diary/edit.php', $options);
 
-                // ...print_object('print url '.$url);...
-                // ...print_object($url);...
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // 20201015 Create delete entry toolbutton link to use for each individual entry.
                 $deloptions['id'] = $cm->id;
                 $deloptions['action'] = 'deleteentry';
                 $deloptions['firstkey'] = $entry->id;
                 $deloptions['promptid'] = $entry->promptid;
 
-                // ...print_object($deloptions);...
                 $url2 = new moodle_url('/mod/diary/deleteentry.php', $deloptions);
-
-                // ...print_object('print url2 '.$url2);...
-                // ...print_object($url2);...
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
@@ -527,17 +519,32 @@ if ($timenow > $timestart) {
                     $editthisentry = html_writer::link($url, $output->pix_icon('i/edit', get_string('editthisentry', 'diary')),
                         ['class' => 'toolbutton']);
                     // 20240605 Added entry delete code.
-                    // $editthisentry .= html_writer::link($deleteurl,
-                    //    $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
-                    //    ['class' => 'toolbutton']);
-                    // $testingurl .= html_writer::link($testingurl, $output->pix_icon('i/delete', get_string('deleteentry', 'diary')),
-                    //    ['class' => 'toolbutton']);
-                    if (!$diary->deleteentry) {
+                    if (!$diary->deleteentry && !$entriesmanager) {
                         $deletethisentry = ' ';
 
                     } else {
-                        $deletethisentry = html_writer::link($url2, $output->pix_icon('i/delete', get_string('deleteentry', 'diary').'t'),
-                            ['class' => 'toolbutton']);
+                        // 20250122 This works.
+                        $deleteurl = $CFG->wwwroot.'/mod/diary/view.php?id='.$id;
+
+                        // WORKS! But I forgot to add a date and other into.
+                        $params = [
+                            'id' => $cm->id,
+                            'action' => 'deleteentry',
+                            'firstkey' => $entry->id,
+                            'promptid' => $entry->promptid,
+                        ];
+                        $updateurl = new moodle_url('/mod/diary/deleteentry.php', $params);
+                        $alt = get_string('deleteentry', 'diary').' - '. $entry->id.'?';
+                        $pix = $OUTPUT->pix_icon('i/delete', $alt, 'core');
+
+                        // 20250122 Getting tag count for deleteentry use.
+                        $tagcount = count(core_tag_tag::get_item_tags('mod_diary', 'diary_entries', $entry->id));
+
+                        // 20250122 I think this might be what I need!
+                        $deletethisentry = ' <a onclick="return confirm(\''
+                            .get_string('deleteentryconfirm', 'diary').$entry->id.' and '.$tagcount.' tags'.
+                            '\')" href="'.$updateurl.'" title="'.$alt.'">'.$pix.'</a>';
+
                     }
                 } else {
                     $editthisentry = ' ';
@@ -568,8 +575,21 @@ if ($timenow > $timestart) {
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
                 echo '<div class="entry" style="background: '.$color4.';">';
 
-                // This adds the actual entry text division close tag for each entry listed on the page.
-                echo results::diary_format_entry_text($entry, $course, $cm).'</div>';
+                // 20250122 Modified the entry text division to add tags right at the end of the entry.
+                echo results::diary_format_entry_text($entry, $course, $cm);
+                // 20250122 Moved tags to here at the end of the actual entry.
+                // 20230302 Added tags to each entry.
+                echo $OUTPUT->tag_list(
+                    core_tag_tag::get_item_tags(
+                        'mod_diary',
+                        'diary_entries',
+                        $entry->id
+                    ),
+                    null,
+                    'diary-tags'
+                );
+                // 20250122 This is the close div for each entry listed on the page.
+                echo '</div>';
 
                 // Info regarding entry details with stats, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
@@ -614,17 +634,6 @@ if ($timenow > $timestart) {
                     echo '<div class="editend"><strong>'.get_string('editingended', 'diary').': </strong> ';
                     echo userdate($timefinish).'</div>';
                 }
-
-                // 20230302 Added tags to each entry.
-                echo $OUTPUT->tag_list(
-                    core_tag_tag::get_item_tags(
-                        'mod_diary',
-                        'diary_entries',
-                        $entry->id
-                    ),
-                    null,
-                    'diary-tags'
-                );
 
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) || !empty($entry->rating)) {
