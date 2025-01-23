@@ -615,7 +615,7 @@ function diary_reset_userdata($data) {
                 'timeopen',
                 'timeclose',
                 'assesstimestart',
-                'assesstimefinish'
+                'assesstimefinish',
             ],
             $data->timeshift,
             $data->courseid,
