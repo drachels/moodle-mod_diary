@@ -183,7 +183,6 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
 
         // Define sources.
         $diary->set_source_table('diary', ['id' => backup::VAR_ACTIVITYID]);
-        //$prompt->set_source_table('diary_prompts', ['diaryid' => backup::VAR_ACTIVITYID]);
         $prompt->set_source_table('diary_prompts', ['diaryid' => backup::VAR_PARENTID]);
 
         // All the rest of elements only happen if we are including user info.
@@ -231,9 +230,6 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
 
         $entry->annotate_files('mod_diary_entries', 'entry', 'id');
         $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
-
-        //$entry->annotate_files('mod_diary_prompts', 'entry', 'id');
-        //$entry->annotate_files('mod_diary_prompts', 'attachment', 'id');
 
         return $this->prepare_activity_structure($diary);
     }
