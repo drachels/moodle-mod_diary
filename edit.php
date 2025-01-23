@@ -37,12 +37,6 @@ $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 $promptid = optional_param('promptid', '', PARAM_INT); // The current one.
 
-// ...print_object('Spacer in edit.php at line 39.');...
-// ...print_object('Spacer in edit.php at line 40.');...
-// ...print_object('Spacer in edit.php at line 41.');...
-// ...print_object('Spacer in edit.php at line 42.');...
-// ...print_object('Spacer in edit.php at line 43.');...
-
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
@@ -116,9 +110,6 @@ $entry = $DB->get_record('diary_entries',
     ]
 );
 
-// This shows up upon save.
-$debug['CP8-137 just got $entry from the mdl_diary_entries table: '] = $entry;
-
 // 20230306 Added code that lists the tags on the edit_form page.
 $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
 
@@ -132,8 +123,6 @@ if ($action == 'currententry' && $entry) {
     $data->text = $entry->text;
     $data->textformat = $entry->format;
 
-    $debug['CP9-146 just set $data based on ($action == currententry && $entry): '] = $data;
-
     // Check the timecreated of the current entry to see if now is a new calendar day .
     // 20210425 If can edit dates, just start a new entry.
     if ((strtotime('today midnight') > $entry->timecreated) || ($action == 'currententry' && $diary->editdates)) {
@@ -143,9 +132,6 @@ if ($action == 'currententry' && $entry) {
         $data->title = '';
         $data->text = '';
         $data->textformat = FORMAT_HTML;
-
-        $debug['CP10-158 just set more $data based on time and ($action == currententry && $entry): '] = $data;
-
     }
 } else if ($action == 'editentry' && $entry) {
 
@@ -157,25 +143,21 @@ if ($action == 'currententry' && $entry) {
     $data->text = $entry->text;
     $data->textformat = $entry->format;
 
-    $debug['CP11-176 just set $data based on ($action == editentry && $entry): '] = $data;
-
     // Think I might need to add a check for currententry && !entry to justify starting a new entry, else error.
 } else if ($action == 'currententry' && ! $entry) {
     // There are no entries for this user, so start the first one.
     $data->entryid = null;
+    // 20250112 Testing promptid for new entry with a current prompt.
+    $data->promptid = prompts::get_current_promptid($diary);
     $data->timecreated = time();
     $data->title = '';
     $data->text = '';
     $data->textformat = FORMAT_HTML;
-
-    $debug['CP12-180 just set $data based on ($action == currententry && ! $entry): '] = $data;
-
 } else {
     throw new moodle_exception(get_string('generalerror', 'diary'));
 }
 
 $data->id = $cm->id;
-// ...print_object('In edit.php at line 177.');...
 list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
                                                                                              $context,
                                                                                              $diary,
@@ -208,9 +190,6 @@ $form = new mod_diary_entry_form(null,
         'attachmentoptions' => $attachmentoptions,
     ]
 );
-// ...print_object('In edit.php at line 210.');...
-// ...print_object($editoroptions);...
-// ///print_object($attachmentoptions);...
 
 // Set existing data loaded from the database for this entry.
 $form->set_data($data);
@@ -226,7 +205,7 @@ if ($form->is_cancelled()) {
     // This will be overwritten after we have the entryid.
     $newentry = new stdClass();
     // 20240426 Will try getting an old promptid inserted here.
-    $newentry->promptid = $fromform->promptid;
+    $newentry->promptid = prompts::get_current_promptid($diary);
     $newentry->timecreated = $fromform->timecreated;
     $newentry->timemodified = $timenow;
     $newentry->title = $fromform->title;
@@ -249,15 +228,10 @@ if ($form->is_cancelled()) {
     // Currently not taking effect on the overall user grade unless the teacher rates it.
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
-        $debug['CP-274 just got $fromform->entryid just before checking for fake timecreated: '] = $fromform->entryid;
         // 20240426 When I save the entry, this is undefined!
         $newentry->promptid = $fromform->promptid;
-        $debug['CP-277 just got $fromform->promptid just before checking for fake timecreated: '] = $fromform->promptid;
 
         if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
-
-            $debug['CP-281 checking $entry just before doing a bunch of newentry stuff: '] = $entry;
-
             // 20210620 New code to prevent attempts to change timecreated.
             $newentry->entrycomment = get_string('invalidtimechange', 'diary');
             $newentry->entrycomment .= get_string('invalidtimechangeoriginal', 'diary', ['one' => userdate($entry->timecreated)]);
@@ -272,10 +246,6 @@ if ($form->is_cancelled()) {
             $newentry->timecreated = $entry->timecreated;
             $fromform->timecreated = $entry->timecreated;
             $newentry->entrycomment .= get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
-
-            $debug['CP-298 checking $newentry just before doing a DB update_record: '] = $newentry;
-
-
             $DB->update_record("diary_entries", $newentry);
 
             // Trigger module entry updated event.
@@ -289,12 +259,9 @@ if ($form->is_cancelled()) {
             $event->add_record_snapshot('course', $course);
             $event->add_record_snapshot('diary', $diary);
             $event->trigger();
-
             redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
             die();
         }
-
-        $debug['CP-319 checking $newentry after completing the timecreated breakin attempt: '] = $newentry;
 
         if (! $DB->update_record("diary_entries", $newentry)) {
             throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
@@ -302,10 +269,9 @@ if ($form->is_cancelled()) {
     } else {
         $newentry->userid = $USER->id;
         $newentry->diary = $diary->id;
-
-        $debug['CP-328 checking $newentry just before inserting a new DB insert_record: '] = $newentry;
-
-        if (! $newentry->id = $DB->insert_record("diary_entries", $newentry)) {
+        // 20250112 Added to get correct promptid.
+        $newentry->promptid = prompts::get_current_promptid($diary);
+        if (! $newentry->id = $DB->insert_record('diary_entries', $newentry)) {
             throw new moodle_exception(get_string('generalerrorinsert', 'diary'));
         }
     }
@@ -437,8 +403,6 @@ if (($diary->intro) && ($CFG->branch < 400)) {
     $intro = format_module_intro('diary', $diary, $cm->id);
 }
 echo $OUTPUT->box($intro);
-// ...print_object($form);...
 // Otherwise fill and print the form.
 $form->display();
-
 echo $OUTPUT->footer();
