@@ -706,8 +706,6 @@ class prompts {
         $future = 0;
 
         $entry = $DB->get_record('diary_entries', ['id' => $firstkey, 'diary' => $diary->id], );
-        $debug['CP5 for $entry: '] = $entry;
-
         $promptsall = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart ASC, datestop ASC');
         $promptsone = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id], );
 
@@ -727,8 +725,6 @@ class prompts {
                 }
 
                 if ((($prompts->datestart < time()) && $prompts->datestop > time()) && ($action <> 'editentry')) {
-                    $debug['CP6-'.$counter.' for $promptsone->datestart: '] = 'doing the time checks';
-
                     $data->entryid = $prompts->id;
                     $data->id = $prompts->id;
                     $data->diaryid = $prompts->diaryid;
