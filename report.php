@@ -159,9 +159,6 @@ echo $OUTPUT->heading($diaryname);
 
 // 20240927 Working on new filter for user firstname and lastname. This from moodle/user/index.php file line 103.
 $participanttable = new \core_user\table\participants("user-index-participants-{$course->id}");
-//print_object($participanttable);
-//die;
-
 
 // 20210511 Changed to using div and span.
 echo '<div class="sortandaggregate">';
@@ -182,7 +179,6 @@ if ($currentgroup) {
 
 // Get a sorted list of users in the current group to use for processing the report.
 $users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort = 'lastname ASC, firstname ASC', '', '', $groups);
-//$users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort = 'lastname DESC, firstname DESC', '', '', $groups);
 
 if ($eee) {
     // Now, filter down to get entry by any user who has made at least one entry.
@@ -197,10 +193,7 @@ if ($eee) {
 }
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
-    //print_object($data);
-
     results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
-
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(
         [
