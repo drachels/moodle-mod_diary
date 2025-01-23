@@ -152,29 +152,16 @@ echo '<span style="float: right;"><a href="index.php?id='.$course->id.'">'
 
 // Save our current user id and also get his details. CHECK - might not need this.
 $users = $user;
-
 $user = $DB->get_record('user', ['id' => $user]);
-
-        $debug = [];
-        $countnum = 0;
+$countnum = 0;
 
 if ($eee) {
     // Now, filter down to get entry by any user who has made at least one entry.
     foreach ($eee as $ee) {
-
         $countnum++;
-
-        $debug[$countnum.' printing $user'] = $user;
-        $debug[$countnum.' printing $eee'] = $eee;
-        $debug[$countnum.' printing $ee'] = $ee;
-        print_object($debug);
-        //die;
-
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id] = $ee;
         $entrybyuserentry[$ee->userid][$ee->id] = $ee;
-
-        // ...print_object($entrybyuserentry);...
     }
 } else {
     $entrybyuser = [];
