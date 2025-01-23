@@ -24,6 +24,19 @@ This file describes changes and other work in the diary code.
     Visible groups dropdown.
     
 20240520 Diary_1247 - Need a setting to allow for deleting an entry. RESOLVING!
+20241203 Diary_1343 - When the, Add to feedback, button is clicked, the feedback textarea info
+    icons are VERY large! 20250112 I think this is going to be one of those that I cannot fix
+    and will therefore switch it's status to, Waiting. The problem is editor related. The icons
+    are rendered 16x16 when using the Atto editor, even though the intrinsic size is 150x150.
+    However, when using the TinyMCE editor, the icons size automatically contracts/expands to
+    fill the table cell.
+
+20250113 Diary_1351 - Feature Request - Need to have new entry fields for feedback and text
+    background colors.
+
+
+
+
 
 === 3.8.0 === pending (Build: 2024042900)
 20210515  Diary_720bt - I am getting the String [grade, core] is deprecated debug message in
@@ -41,7 +54,7 @@ This file describes changes and other work in the diary code.
 20240209 Diary_1201 - Feature request - Need a reportone.php page for single user entry from
     a Grade Me link. The fix for ticket Diary_1016 fixes this ticket also.
 
-20240209 Diary_1202 - Feature request - Need new by name link to go to proposed reportone.php
+20240209 Diary_1202bt - Feature request - Need new by name link to go to proposed reportone.php
     page.
  
 20240206 Diary_1196bt - Toolbar is missing on the reportsingle.php page. Copied the toolbar
@@ -51,8 +64,8 @@ This file describes changes and other work in the diary code.
 20240206 Diary_1197bt - Diary - Feature request - Toggle hide/view and sort prompts. Added
     arrow toggle code similar to MooTyper owngrades.php to hide the whole list of prompts.
 20240304 Diary_1223bt - Major bug - Editing an OLD entry with a current timed prompt showing,
-    the current prompt over writes the OLD and becomes required. Fixed and due to the amount
-    of changes, see the ticket for details.
+    the current prompt over writes the OLD and becomes required. 20250113 Fixed, I think, but
+    due to the amount of changes, see the ticket for details.
 20240408 Diary_1231bt - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
     Changed the code, see ticket for details. Deprecation warning no longer occurs.
     2024042901 I have reverted to the previous code that gets the deprecated message.
@@ -84,6 +97,26 @@ This file describes changes and other work in the diary code.
     ticket for details of the changes.
 20241119 Diary_1338 - Removes unneccessary version check in *_supports() callback. #49. Completed
     merge request that changes the collaboration case and removes the Moodle version check.
+
+20241125 Diary_1341bt - Add to feedback button on new reportone.php page is broken. Fixed the
+    $param test and stats and auto rating now are added/cleared from the feedback textarea when
+    the, Add to feedback, or the, Clear feedback buttons are clicked.
+20241204 Diary_1344 - Need entry delete tool when teacher is using any report page. Added needed
+    code to the results.php page so that any report page now has the, Delete entry, icon.
+20250114 Diary_1352 - Auto-rating does not seem to update Diary student grades. Modified code
+    in results.php about line 745. See ticket for details of the code change.
+20250122 Diary_1353 - Feature request - Moved tags from below stats to end of the actual entry.
+    Moved the code from about line 664 in view.php up to about line 608 of the same view.php file.
+20250123 Diary_1354 - Feature needed - Need an event, class entry_deleted extends \core\event\base {.
+    Created event file and it's contents, entry_deleted.php. Added new string,
+    $string['evententrydeleted'] = 'Diary entry deleted';
+20250123 Diary_1355 - Feature needed - Need an event, class entry_tags_deleted extends \core\event\base {.
+    Created event file and it's contents, entry_tags_deleted.php. Also added,
+    $string['evententrytagsdeleted'] = 'Diary entry tags deleted';
+20250123 Diary_1356 - Feature needed - Might need an event, class invalid_access_attempt
+    extends \core\event\base {. The needed files and strings already exist, so will just
+    need to test and post my results. - Acces prevented, so far.
+
 
 
 
