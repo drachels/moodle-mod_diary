@@ -160,7 +160,6 @@ class mod_diary_mod_form extends moodleform_mod {
 
         // 20241113 Added Delete entry, enable/disable setting.
         $name = 'deleteentry';
-        //$label = get_string($name, $plugin);
         $label = get_string('deleteentries', $plugin);
         $mform->addElement('selectyesno', $name, $label);
         $mform->addHelpButton($name, $name, $plugin);
@@ -464,7 +463,6 @@ class mod_diary_mod_form extends moodleform_mod {
         $options['2'] = get_string('words', $plugin);
         $options['3'] = get_string('sentences', $plugin);
         $options['4'] = get_string('paragraphs', $plugin);
-        // $options['5'] = get_string('files', $plugin); // phpcs:ignore
         return $options;
     }
 
@@ -523,16 +521,12 @@ class mod_diary_prompt_form extends moodleform {
 
         // 20210613 Retrieve customdata info for use.
         // 20240806 Changed the way variable data is transfered.
-        // ...$promptid = $this->_customdata['editoroptions']['promptid'];...
         $mform->addElement('hidden', 'promptid');
         $mform->setType('promptid', PARAM_INT);
-        // ...$timeclose = $this->_customdata['editoroptions']['timeclose'];...
         $mform->addElement('hidden', 'timeclose');
         $mform->setType('timeclose', PARAM_INT);
-        // ...$editall = $this->_customdata['editoroptions']['editall'];...
         $mform->addElement('hidden', 'editall');
         $mform->setType('editall', PARAM_INT);
-        // ...$editdates = $this->_customdata['editoroptions']['editdates'];...
         $mform->addElement('hidden', 'editdates');
         $mform->setType('editdates', PARAM_INT);
 
@@ -543,13 +537,9 @@ class mod_diary_prompt_form extends moodleform {
         $mediumtextoptions = ['size' => 5, 'style' => 'width: auto'];
         $longtextoptions = ['size' => 10, 'style' => 'width: auto'];
         // 20240911 Options for the text editor textarea.
-        $textedoptions = ['wrap' => 'virtual','rows' => 15, 'style' => 'width: auto'];
-
-        //$mform->addElement('date_time_selector', 'datestart', get_string('datestart', 'mod_diary', $promptid));
+        $textedoptions = ['wrap' => 'virtual', 'rows' => 15, 'style' => 'width: auto'];
         $mform->addElement('date_time_selector', 'datestart', get_string('datestart', 'mod_diary', 'promptid'));
         $mform->setType('datestart', PARAM_INT);
-
-        //$mform->addElement('date_time_selector', 'datestop', get_string('datestop', 'mod_diary', $promptid));
         $mform->addElement('date_time_selector', 'datestop', get_string('datestop', 'mod_diary', 'promptid'));
         $mform->setType('stopdate', PARAM_INT);
 
@@ -562,7 +552,6 @@ class mod_diary_prompt_form extends moodleform {
                            null,
                            $this->_customdata['editoroptions']),
                            $textedoptions);
-                           //'wrap="virtual" rows="8"');
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 
@@ -659,9 +648,6 @@ class mod_diary_prompt_form extends moodleform {
         $mform->setType('firstkey', PARAM_INT);
         $mform->addElement('hidden', 'entryid');
         $mform->setType('entryid', PARAM_INT);
-
-        // $mform->addElement('hidden', 'promptid');
-        // $mform->setType('promptid', PARAM_INT);
 
         $this->add_action_buttons();
     }
