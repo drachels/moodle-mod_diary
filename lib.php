@@ -21,7 +21,7 @@
  * @copyright 2019 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 use mod_diary\local\results;
 
 /**
@@ -163,7 +163,11 @@ function diary_delete_instance($id) {
  */
 function diary_supports($feature) {
     global $CFG;
-
+    if ((int)$CFG->branch > 311) {
+        if ($feature === FEATURE_MOD_PURPOSE) {
+            return MOD_PURPOSE_COLLABORATION;
+        }
+    }
     switch ($feature) {
         case FEATURE_BACKUP_MOODLE2:
             return true;
@@ -185,8 +189,6 @@ function diary_supports($feature) {
             return true;
         case FEATURE_SHOW_DESCRIPTION:
             return true;
-        case FEATURE_MOD_PURPOSE:
-            return MOD_PURPOSE_COLLABORATION;
 
         default:
         return null;
@@ -271,7 +273,7 @@ function diary_user_outline($course, $user, $mod, $diary) {
 function diary_print_recent_activity($course, $viewfullnames, $timestart) {
     global $CFG, $USER, $DB, $OUTPUT;
 
-    if (!get_config('diary', 'showrecentactivity')) {
+    if (! get_config('diary', 'showrecentactivity')) {
         return false;
     }
 
@@ -304,12 +306,12 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
     $show = [];
 
     foreach ($newentries as $anentry) {
-        if (!array_key_exists($anentry->cmid, $modinfo->get_cms())) {
+        if (! array_key_exists($anentry->cmid, $modinfo->get_cms())) {
             continue;
         }
         $cm = $modinfo->get_cm($anentry->cmid);
 
-        if (!$cm->uservisible) {
+        if (! $cm->uservisible) {
             continue;
         }
         if ($anentry->userid == $USER->id) {
@@ -319,20 +321,20 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
         $context = context_module::instance($anentry->cmid);
 
         // Only teachers can see other students entries.
-        if (!has_capability('mod/diary:manageentries', $context)) {
+        if (! has_capability('mod/diary:manageentries', $context)) {
             continue;
         }
 
         $groupmode = groups_get_activity_groupmode($cm, $course);
 
-        if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $context)) {
+        if ($groupmode == SEPARATEGROUPS && ! has_capability('moodle/site:accessallgroups', $context)) {
             if (isguestuser()) {
                 // Shortcut - guest user does not belong into any group.
                 continue;
             }
 
             // This will be slow - show only users that share group with me in this cm.
-            if (!$modinfo->get_groups($cm->groupingid)) {
+            if (! $modinfo->get_groups($cm->groupingid)) {
                 continue;
             }
             $usersgroups = groups_get_all_groups($course->id, $anentry->userid, $cm->groupingid);
@@ -351,22 +353,17 @@ function diary_print_recent_activity($course, $viewfullnames, $timestart) {
         return false;
     }
 
-    echo $OUTPUT->heading(get_string('newdiaryentries', 'diary').':', 3);
+    echo $OUTPUT->heading(get_string('newdiaryentries', 'diary') . ':', 3);
 
     foreach ($show as $submission) {
         $cm = $modinfo->get_cm($submission->cmid);
         $context = context_module::instance($submission->cmid);
         if (has_capability('mod/diary:manageentries', $context)) {
-            $link = $CFG->wwwroot . '/mod/diary/report.php?id='.$cm->id;
+            $link = $CFG->wwwroot . '/mod/diary/report.php?id=' . $cm->id;
         } else {
-            $link = $CFG->wwwroot . '/mod/diary/view.php?id='.$cm->id;
+            $link = $CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id;
         }
-        print_recent_activity_note($submission->timemodified,
-                                   $submission,
-                                   $cm->name,
-                                   $link,
-                                   false,
-                                   $viewfullnames);
+        print_recent_activity_note($submission->timemodified, $submission, $cm->name, $link, false, $viewfullnames);
     }
     return true;
 }
@@ -610,16 +607,7 @@ function diary_reset_userdata($data) {
     if ($data->timeshift) {
         // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
         // See MDL-9367.
-        shift_course_mod_dates('diary',
-            [
-                'timeopen',
-                'timeclose',
-                'assesstimestart',
-                'assesstimefinish',
-            ],
-            $data->timeshift,
-            $data->courseid,
-        );
+        shift_course_mod_dates('diary', ['timeopen', 'timeclose'], $data->timeshift, $data->courseid);
         $status[] = ['component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false];
     }
 
@@ -875,6 +863,7 @@ function diary_get_coursemodule($diaryid) {
 
 /**
  * Serves the diary files.
+ * THIS FUNCTION MAY BE ORPHANED. APPEARS TO BE SO IN JOURNAL.
  *
  * @param stdClass $course Course object.
  * @param stdClass $cm Course module object.

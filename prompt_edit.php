@@ -1,4 +1,4 @@
-<!doctype html><?php // phpcs:ignore
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -34,14 +34,9 @@ global $DB;
 
 $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
-$action = optional_param('action', '', PARAM_ALPHANUMEXT); // Action(promt).
+$action = optional_param('action', '', PARAM_ACTION); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
-$promptbgc = optional_param('promptbgc', 'red', PARAM_INT); // Prompt bgc default to fix undefined error down around line 322.
-$viewby = optional_param('viewby', -1, PARAM_INT);
-$view = optional_param('viewp', -1, PARAM_INT);
-$viewbyp = optional_param('viewbyp', -1, PARAM_INT);
-$viewbyc = optional_param('viewbyc', -1, PARAM_INT);
-$viewbyf = optional_param('viewbyf', -1, PARAM_INT);
+
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
@@ -140,39 +135,14 @@ if (!empty($action)) {
     }
 }
 
-if ($view == -1) {
-    $view = 0;
-}
-
 // Set up a general table to hold the list of prompts.
 $table = new html_table();
 $table->cellpadding = 5;
 $table->class = 'generaltable';
 
-// 20240603 View prompt list view/hide.
-if ($view == -1 || $view == 1) {
-    $lnkadd = "&viewp=0";
-} else {
-    $lnkadd = "&viewp=1";
-}
-
-$arrtextadds = [];
-$arrtextadds[1] = '<span class="arrow-s" style="font-size:1em;"></span>';
-$arrtextadds[2] = '<span class="arrow-s" style="font-size:1em;"></span>';
-$arrtextadds[3] = '<span class="arrow-s" style="font-size:1em;"></span>';
-
-$arrtextadds[$viewby] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
-    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
-$arrtextadds[$viewbyp] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
-    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
-$arrtextadds[$viewbyc] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
-    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
-$arrtextadds[$viewbyf] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
-    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
-
 // Add column headings to the table list of prompts.
 $table->head = [
-    '<a href="?id='.$id.'&viewby=1'.$lnkadd.'">'.get_string('tablecolumnstatus', 'diary').$arrtextadds[1].'</a>',
+    get_string('tablecolumnstatus', 'diary'),
     get_string('tablecolumnprompts', 'diary'),
     get_string('tablecolumnpromptsbgc', 'diary'),
     get_string('tablecolumnstart', 'diary'),
@@ -186,21 +156,19 @@ $table->head = [
 
 $output = '';
 $line = [];
-// Initialize a prompt counter.
 $counter = 0;
 
-// If there are any prompts for this diary, create a descending list of them.
-if ($prompts && $view == 0) {
+// If there are any prompts for this diary, create a list of them.
+if ($prompts) {
     foreach ($prompts as $prompt) {
         $status = '';
-        if (($prompt->datestop < time()) && ($viewbyp = 1)) {
-            $status .= '<a href="?id='.$id.'&viewbyp=0'.$lnkadd.'">'.get_string('promptsp', 'diary').$arrtextadds[2];
-        } else if (($prompt->datestart < time()) && ($prompt->datestop > time()) && ($viewbyc = 1)) {
-            $status .= '<a href="?id='.$id.'&viewbyc=0'.$lnkadd.'">'.get_string('promptsc', 'diary').$arrtextadds[2];
-        } else if (($prompt->datestart > time()) && ($viewbyf = 1)) {
-            $status .= '<a href="?id='.$id.'&viewbyf=0'.$lnkadd.'">'.get_string('promptsf', 'diary').$arrtextadds[2];
+        if ($prompt->datestop < time()) {
+            $status = 'Past';
+        } else if (($prompt->datestart < time()) && $prompt->datestop > time()) {
+            $status = 'Current';
+        } else if ($prompt->datestart > time()) {
+            $status = 'Future';
         }
-
         $data->entryid = $prompt->id;
         $data->diaryid = $prompt->diaryid;
         $data->datestart = $prompt->datestart;
@@ -272,17 +240,11 @@ if ($prompts && $view == 0) {
     $output = html_writer::table($table);
     $counter = 0;
 } else {
-    // Double check for prompts when view is 1.
-    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
     $line = [];
     $data->entryid = null;
     $data->text = '';
     $data->format = FORMAT_HTML;
-    if ($tcount > 0) {
-        $prompttext = get_string('promptzerocount', 'diary', $tcount);
-    } else {
-        $prompttext = get_string('promptzerocount', 'diary', $counter);
-    }
+    $prompttext = get_string('promptzerocount', 'diary', $counter);
     $line[] = $prompttext.'';
     $table->data[] = $line;
     $output = html_writer::table($table);
@@ -294,10 +256,21 @@ $data->textformat = FORMAT_HTML;
 
 $maxfiles = 99; // Need to add some setting.
 $maxbytes = $course->maxbytes; // Need to add some setting.
-// 20240806 Moved variables from here down to the $form.
 $editoroptions = [
+    'promptid' => $data->entryid,
     'format' => $data->textformat,
+    'promptbgc' => $data->promptbgc,
+    'timeopen' => $diary->timeopen,
+    'timeclose' => $diary->timeclose,
+    'editall' => $diary->editall,
+    'editdates' => $diary->editdates,
+    'action' => $action,
+    'texttrust' => true,
+    'maxbytes' => $maxbytes,
+    'maxfiles' => EDITOR_UNLIMITED_FILES,
     'context' => $context,
+    'subdirs' => false,
+    'enable_filemanagement' => true,
 ];
 
 $attachmentoptions = [
@@ -314,7 +287,6 @@ $data = file_prepare_standard_editor($data,
                                      'prompt',
                                      $data->entryid);
 
-// 20240806 Moved 12 variables from $editoroptions to here.
 $form = new mod_diary_prompt_form(null,
     [
         'current' => $data,
@@ -322,18 +294,6 @@ $form = new mod_diary_prompt_form(null,
         'diary' => $diary->editdates,
         'entryid' => $data->entryid,
         'editoroptions' => $editoroptions,
-        'promptid' => $data->entryid,
-        'promptbgc' => $promptbgc,
-        'timeopen' => $diary->timeopen,
-        'timeclose' => $diary->timeclose,
-        'editall' => $diary->editall,
-        'editdates' => $diary->editdates,
-        'action' => $action,
-        'texttrust' => true,
-        'maxbytes' => $maxbytes,
-        'maxfiles' => EDITOR_UNLIMITED_FILES,
-        'subdirs' => false,
-        'enable_filemanagement' => true,
     ]
 );
 $form->set_data($data);
@@ -404,8 +364,11 @@ if ($form->is_cancelled()) {
 
 echo $OUTPUT->header();
 echo $output;
+// Need to change this to a string.
 echo $OUTPUT->heading(get_string('writingpromptlable3', 'diary'));
+
 $intro = format_module_intro('diary', $diary, $cm->id);
+
 $form->display();
 
 // 20230810 Changed based on pull request #29.
@@ -437,5 +400,3 @@ $event->add_record_snapshot('diary', $diary);
 $event->trigger();
 
 echo $OUTPUT->footer();
-?>
-</html>

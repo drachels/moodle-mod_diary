@@ -23,7 +23,7 @@
  */
 namespace mod_diary\privacy;
 
-defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 use context;
 use context_helper;

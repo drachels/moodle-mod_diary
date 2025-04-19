@@ -23,7 +23,7 @@
  */
 
 namespace mod_diary\event;
-defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * The mod_diary prompt in use class.
@@ -68,7 +68,7 @@ class prompt_in_use extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/diary/prompt_edit.php',
+        return new \moodle_url('/mod/diary/yyyprompt_edit.php',
             [
                 'id' => $this->contextinstanceid,
             ]

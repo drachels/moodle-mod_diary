@@ -21,7 +21,7 @@
  * @copyright 2019 AL Rachels drachels@drachels.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 require_once($CFG->dirroot . '/mod/diary/lib.php');
 
@@ -532,7 +532,7 @@ function xmldb_diary_upgrade($oldversion = 0) {
     }
 
     // New field for prompt background color and change field name for titles in version 3.7.8.
-    if ($oldversion < 2024041000) {
+    if ($oldversion < 2024042400) {
 
         // Define field promptbgc to be added to diary_prompts.
         $table = new xmldb_table('diary_prompts');
@@ -552,23 +552,7 @@ function xmldb_diary_upgrade($oldversion = 0) {
             $dbman->rename_field($table, $field, 'enabletitles');
         }
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2024041000, 'diary');
-    }
-
-    // New field to allow entries to be deleted by individual user.
-    if ($oldversion < 2024111300) {
-
-        // Define field deleteentry to be added to diary.
-        $table = new xmldb_table('diary');
-        $field = new xmldb_field('deleteentry', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'editdates');
-
-        // Conditionally launch add field deleteentry.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2024111300, 'diary');
+        upgrade_mod_savepoint(true, 2024042400, 'diary');
     }
     return true;
 }

@@ -31,11 +31,9 @@ require_once("../../config.php");
 require_once('locallib.php'); // May not need this.
 require_once('./edit_form.php');
 global $DB;
-
 $id = required_param('id', PARAM_INT); // Course Module ID.
-$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
+$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
-$promptid = optional_param('promptid', '', PARAM_INT); // The current one.
 
 if (! $cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -51,26 +49,15 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-if (! $diary = $DB->get_record('diary', ['id' => $cm->instance])) {
+if (! $diary = $DB->get_record("diary", ["id" => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
 // 20221107 The $diary->intro gets overwritten by the current prompt and Notes, so keep a copy for later down in this file.
 $tempintro = $diary->intro;
 
-// 20240413 Check for existing promptid. DO NOT get current if editing entry already has one.
-// Need to add - DO NOT get current if editing entry does not have a prompt id and it does not meet the time criteria.
-if ((!$promptid) && ($diary->timeopen < time())) {
-    // 20240507 Added for testing and it appears to work for existing entry without a prompt.
-    if ($promptid > 0) {
-        // Need to call a prompt function that returns the current promptid, if there is one that is current.
-        $promptid = prompts::get_current_promptid($diary);
-    }
-}
-
-// 20210817 Add min/max info to the description so user can see them while editing an entry.
-// 20240414 This also adds the prompt text to the $diary->intro.
-diarystats::get_minmaxes($diary, $action, $promptid);
+// Need to call a prompt function that returns the current promptid, if there is one that is current.
+$promptid = prompts::get_current_promptid($diary);
 
 // 20210613 Added check to prevent direct access to create new entry when activity is closed.
 if (($diary->timeclose) && (time() > $diary->timeclose)) {
@@ -86,6 +73,9 @@ if (($diary->timeclose) && (time() > $diary->timeclose)) {
     $event->trigger();
     redirect('view.php?id='.$id, get_string('invalidaccessexp', 'diary'));
 }
+
+// 20210817 Add min/max info to the description so user can see them while editing an entry.
+diarystats::get_minmaxes($diary);
 
 // Header.
 $PAGE->set_url('/mod/diary/edit.php', ['id' => $id]);
@@ -103,21 +93,17 @@ $parameters = [
 ];
 
 // Get the single record specified by firstkey.
-$entry = $DB->get_record('diary_entries',
+$entry = $DB->get_record("diary_entries",
     [
-        'userid' => $USER->id,
+        "userid" => $USER->id,
         'id' => $firstkey,
     ]
 );
-
 // 20230306 Added code that lists the tags on the edit_form page.
 $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
 
 if ($action == 'currententry' && $entry) {
     $data->entryid = $entry->id;
-    // 20240426 Trying to add the promptid here.
-    // 20240426 This lcation works for old promptid's but not for entries with NO promptid assigned. i.e. Does not work for 0.
-    $data->promptid = $entry->promptid;
     $data->timecreated = $entry->timecreated;
     $data->title = $entry->title;
     $data->text = $entry->text;
@@ -134,21 +120,15 @@ if ($action == 'currententry' && $entry) {
         $data->textformat = FORMAT_HTML;
     }
 } else if ($action == 'editentry' && $entry) {
-
     $data->entryid = $entry->id;
-    // 20240426 Trying to add old promptid here.
-    $data->promptid = $entry->promptid;
     $data->timecreated = $entry->timecreated;
     $data->title = $entry->title;
     $data->text = $entry->text;
     $data->textformat = $entry->format;
-
     // Think I might need to add a check for currententry && !entry to justify starting a new entry, else error.
 } else if ($action == 'currententry' && ! $entry) {
     // There are no entries for this user, so start the first one.
     $data->entryid = null;
-    // 20250112 Testing promptid for new entry with a current prompt.
-    $data->promptid = prompts::get_current_promptid($diary);
     $data->timecreated = time();
     $data->title = '';
     $data->text = '';
@@ -158,6 +138,7 @@ if ($action == 'currententry' && $entry) {
 }
 
 $data->id = $cm->id;
+
 list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
                                                                                              $context,
                                                                                              $diary,
@@ -204,8 +185,6 @@ if ($form->is_cancelled()) {
 
     // This will be overwritten after we have the entryid.
     $newentry = new stdClass();
-    // 20240426 Will try getting an old promptid inserted here.
-    $newentry->promptid = prompts::get_current_promptid($diary);
     $newentry->timecreated = $fromform->timecreated;
     $newentry->timemodified = $timenow;
     $newentry->title = $fromform->title;
@@ -228,9 +207,6 @@ if ($form->is_cancelled()) {
     // Currently not taking effect on the overall user grade unless the teacher rates it.
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
-        // 20240426 When I save the entry, this is undefined!
-        $newentry->promptid = $fromform->promptid;
-
         if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
             // 20210620 New code to prevent attempts to change timecreated.
             $newentry->entrycomment = get_string('invalidtimechange', 'diary');
@@ -238,7 +214,7 @@ if ($form->is_cancelled()) {
             $newentry->entrycomment .= get_string('invalidtimechangenewtime', 'diary', ['one' => userdate($newentry->timecreated)]);
             // Probably do not want to just arbitraily set a rating.
             // Should leave it up to the teacher, otherwise will need to ascertain rating settings for the activity.
-            // phpcs:ignore
+            // @codingStandardsIgnoreLine
             // $newentry->rating = 1;
             $newentry->teacher = 2;
             $newentry->timemodified = time();
@@ -259,19 +235,17 @@ if ($form->is_cancelled()) {
             $event->add_record_snapshot('course', $course);
             $event->add_record_snapshot('diary', $diary);
             $event->trigger();
+
             redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
             die();
         }
-
         if (! $DB->update_record("diary_entries", $newentry)) {
             throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
         }
     } else {
         $newentry->userid = $USER->id;
         $newentry->diary = $diary->id;
-        // 20250112 Added to get correct promptid.
-        $newentry->promptid = prompts::get_current_promptid($diary);
-        if (! $newentry->id = $DB->insert_record('diary_entries', $newentry)) {
+        if (! $newentry->id = $DB->insert_record("diary_entries", $newentry)) {
             throw new moodle_exception(get_string('generalerrorinsert', 'diary'));
         }
     }
@@ -403,6 +377,8 @@ if (($diary->intro) && ($CFG->branch < 400)) {
     $intro = format_module_intro('diary', $diary, $cm->id);
 }
 echo $OUTPUT->box($intro);
+
 // Otherwise fill and print the form.
 $form->display();
+
 echo $OUTPUT->footer();

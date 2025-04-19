@@ -24,7 +24,7 @@
 use mod_diary\local\diarystats;
 use mod_diary\local\prompts;
 use mod_diary\local\results;
-// phpcs:ignore
+// @codingStandardsIgnoreLine
 // use core_text;
 
 // 20210605 Changed to this format.
@@ -35,8 +35,7 @@ require_once(__DIR__ .'/../../lib/gradelib.php');
 $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST); // Complete details about this course.
-$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
-$promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
+$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 
 if (!$cm) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -88,6 +87,7 @@ $diaryname = format_string($diary->name, true, ['context' => $context]);
 
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
+$output->init($cm);
 
 // Handle toolbar capabilities.
 if (!empty($action)) {
@@ -253,7 +253,7 @@ if (($diary->intro) && ($CFG->branch < 400)) {
 // 20221008 Hide the prompts info if the Diary activity is not available.
 // 20221027 Halt and force a fix if too many current prompts.
 if (prompts::diary_available($diary)) {
-    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary, $promptid);
+    list($tcount, $past, $current, $future) = prompts::diary_count_prompts($diary);
     if ($current > 1) {
         // 20230810 Changed via pull request #29.
         $url1 = new moodle_url($CFG->wwwroot.'/mod/diary/prompt_edit.php', ['id' => $cm->id]);
@@ -263,7 +263,7 @@ if (prompts::diary_available($diary)) {
             .'</a> ';
         die;
     } else {
-        $status = prompts::prompts_viewcurrent($diary, $action, $promptid);
+        $status = prompts::prompts_viewcurrent($diary);
         // Show the current prompt.
         echo '<b>'.$diary->intro.'</b>';
     }
@@ -292,7 +292,7 @@ if ($entriesmanager) {
     echo '<a class="reportlink" href="index.php?id='.$course->id.'">'.get_string('viewalldiaries', 'diary').'</a>';
 }
 
-// 20200901 Visual separator between activity info and entries, right below Visible group selector.
+// 20200901 Visual separator between activity info and entries.
 echo '<hr>';
 
 // Check to see if diary is currently available.
@@ -329,7 +329,6 @@ if ($diary->assessed != 0) {
 
 $aggregatestr = results::get_diary_aggregation($diary->assessed);
 
-// Check to see if this diary is open.
 if ($timenow > $timestart) {
     // Initialize now so it doesn't break if cannot edit.
     $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
@@ -355,34 +354,24 @@ if ($timenow > $timestart) {
             echo $output->box_start();
 
             if ($diary->editdates) {
-                // 20210425 Add button to start a new entry, before the toolbar and right above the, Entries per page:, selector.
+                // 20210425 Add button for starting a new entry.
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
-                    .'&action=currententry'
-                    .'&promptid='.$promptid,
-                    get_string('startnewentry', 'diary'), 'get',
+                    .'&action=currententry', get_string('startnewentry', 'diary'), 'get',
                     ["class" => "singlebutton diarystart"]
                 );
             } else {
-                // Add second button version for editing current entry or starting a new entry.
+                // Add button for editing current entry or starting a new entry.
                 echo $OUTPUT->single_button('edit.php?id='.$cm->id
                     .'&firstkey='.$firstkey
-                    .'&action=currententry'
-                    .'&promptid='.$promptid,
-                    get_string('startoredit', 'diary'), 'get',
+                    .'&action=currententry', get_string('startoredit', 'diary'), 'get',
                     ["class" => "singlebutton diarystart"]
                 );
             }
             // Print user toolbar icons only if there is at least one entry for this user.
             if ($entrys) {
-                // 20250110 Create options list to pass to the toolbar.
-                $options['id'] = $cm->id;
-                $options['action'] = 'editentry';
-                $options['firstkey'] = $firstkey;
-                $options['promptid'] = $promptid;
                 echo '<span style="float: right;">'.get_string('usertoolbar', 'diary');
-                echo $output->toolbar(has_capability('mod/diary:addentries', $context),
-                    $options).'</span>';
+                echo $output->toolbar(has_capability('mod/diary:addentries', $context), $course, $id, $diary, $firstkey).'</span>';
             }
             // 20200709 Added selector for prefered number of entries per page. Default is 7.
             echo '<form method="post">';
@@ -501,66 +490,15 @@ if ($timenow > $timestart) {
                 $options['id'] = $cm->id;
                 $options['action'] = 'editentry';
                 $options['firstkey'] = $entry->id;
-                $options['promptid'] = $entry->promptid;
-
+                $options['promptid'] = $promptid;
                 $url = new moodle_url('/mod/diary/edit.php', $options);
-
-                // 20201015 Create delete entry toolbutton link to use for each individual entry.
-                $deloptions['id'] = $cm->id;
-                $deloptions['action'] = 'deleteentry';
-                $deloptions['firstkey'] = $entry->id;
-                $deloptions['promptid'] = $entry->promptid;
-
-                $url2 = new moodle_url('/mod/diary/deleteentry.php', $deloptions);
-
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
                 if ($timenow < $timefinish && $diary->editall) {
                     $editthisentry = html_writer::link($url, $output->pix_icon('i/edit', get_string('editthisentry', 'diary')),
                         ['class' => 'toolbutton']);
-                    // 20240605 Added entry delete code.
-                    if (!$diary->deleteentry && !$entriesmanager) {
-                        $deletethisentry = ' ';
-
-                    } else {
-                        // 20250122 This works.
-                        $deleteurl = $CFG->wwwroot.'/mod/diary/view.php?id='.$id;
-
-                        // WORKS! But I forgot to add a date and other into.
-                        $params = [
-                            'id' => $cm->id,
-                            'action' => 'deleteentry',
-                            'firstkey' => $entry->id,
-                            'promptid' => $entry->promptid,
-                        ];
-                        $updateurl = new moodle_url('/mod/diary/deleteentry.php', $params);
-                        $alt = get_string('deleteentry', 'diary').' - '. $entry->id.'?';
-                        $pix = $OUTPUT->pix_icon('i/delete', $alt, 'core');
-
-                        // 20250122 Getting tag count for deleteentry use.
-                        $tagcount = count(core_tag_tag::get_item_tags('mod_diary', 'diary_entries', $entry->id));
-
-                        // 20250122 I think this might be what I need!
-                        $deletethisentry = ' <a onclick="return confirm(\''
-                            .get_string('deleteentryconfirm', 'diary').$entry->id.' and '.$tagcount.' tags'.
-                            '\')" href="'.$updateurl.'" title="'.$alt.'">'.$pix.'</a>';
-
-                    }
                 } else {
                     $editthisentry = ' ';
-                    $deletethisentry = ' ';
-                }
-
-                // 20230314 If one exists, display the aplicable prompt.
-                if ($entry->promptid > 0) {
-                    $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
-                    $prompt = $DB->get_record('diary_prompts', ['id' => $entry->promptid, 'diaryid' => $diary->id]);
-                    // 20230321 Added capability to use contrasting color for the prompt background.
-                    // 20240116 Added code to use a prompt background color.
-                    // 20240117 Gave promptentry it's own class name to enable
-                    echo '<div class="promptentry" style="background: '.$prompt->promptbgc.';">';
-                    echo '<strong>Prompt ID-'.$prompt->id.', '.get_string('prompttext', 'diary')
-                        .'</strong>: '.$prompt->text.'</div>';
                 }
 
                 // 20231108 If there is a title for the entry add it as a heading.
@@ -568,28 +506,25 @@ if ($timenow > $timestart) {
 
                 // Add, Entry, then date time group heading for each entry on the page.
                 // 20231108 Add the old heading version as a sub-heading.
-                echo ('<h5>'.get_string('entry', 'diary').': ID-'.$entry->id.', '
-                    .userdate($entry->timecreated).' '.$editthisentry.' '.$deletethisentry.'</h5>');
+                echo ('<h5>'.get_string('entry', 'diary').': '.userdate($entry->timecreated).' '.$editthisentry.'</h5>');
+
+                // 20230314 If one exists, display the apllicable prompt.
+                if ($entry->promptid > 0) {
+                    $promptused = get_string('writingpromptused', 'diary', $entry->promptid);
+                    $prompt = $DB->get_record('diary_prompts', ['id' => $entry->promptid, 'diaryid' => $diary->id]);
+                    // 20230321 Added capability to use contrasting color for the prompt background.
+                    // 20240116 Added code to use a prompt background color.
+                    // 20240117 Gave promptentry it's own class name to enable
+                    echo '<div class="promptentry" style="background: '.$prompt->promptbgc.';">';
+                    echo '<strong>'.get_string('prompttext', 'diary').'</strong>: '.$prompt->text.'</div>';
+                }
 
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
                 echo '<div class="entry" style="background: '.$color4.';">';
 
-                // 20250122 Modified the entry text division to add tags right at the end of the entry.
-                echo results::diary_format_entry_text($entry, $course, $cm);
-                // 20250122 Moved tags to here at the end of the actual entry.
-                // 20230302 Added tags to each entry.
-                echo $OUTPUT->tag_list(
-                    core_tag_tag::get_item_tags(
-                        'mod_diary',
-                        'diary_entries',
-                        $entry->id
-                    ),
-                    null,
-                    'diary-tags'
-                );
-                // 20250122 This is the close div for each entry listed on the page.
-                echo '</div>';
+                // This adds the actual entry text division close tag for each entry listed on the page.
+                echo results::diary_format_entry_text($entry, $course, $cm).'</div>';
 
                 // Info regarding entry details with stats, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
@@ -607,11 +542,13 @@ if ($timenow > $timestart) {
                             $comerrdata = diarystats::get_common_error_stats($temp, $diary);
                             echo $comerrdata;
                             // 20211212 Added separate function to get the autorating data here.
-                            list($autoratingdata, $currentratingdata) = diarystats::get_auto_rating_stats($temp, $diary);
+                            list($autoratingdata,
+                                $currentratingdata)
+                                = diarystats::get_auto_rating_stats($temp, $diary);
                             echo $autoratingdata;
                         }
                     } else {
-                        print_string('noentry', 'diary');
+                        print_string("noentry", "diary");
                         // 20210701 Moved copy 2 of 2 here due to new stats.
                         echo '</div></td><td style="width:55px;"></td></tr>';
                     }
@@ -634,6 +571,17 @@ if ($timenow > $timestart) {
                     echo '<div class="editend"><strong>'.get_string('editingended', 'diary').': </strong> ';
                     echo userdate($timefinish).'</div>';
                 }
+
+                // 20230302 Added tags to each entry.
+                echo $OUTPUT->tag_list(
+                    core_tag_tag::get_item_tags(
+                        'mod_diary',
+                        'diary_entries',
+                        $entry->id
+                    ),
+                    null,
+                    'diary-tags'
+                );
 
                 // Print feedback from the teacher for the current entry.
                 if (!empty($entry->entrycomment) || !empty($entry->rating)) {

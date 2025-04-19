@@ -27,7 +27,7 @@
  */
 namespace mod_diary\local;
 
-defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * Syllables class for Diary stats.
@@ -234,71 +234,71 @@ class syllables {
     /** @var array */
     static public $arraffix =
         [
-            '`^un`',        // phpcs:ignore
-            '`^fore`',      // phpcs:ignore
-            '`^ware`',      // phpcs:ignore
-            '`^none?`',     // phpcs:ignore
-            '`^out`',       // phpcs:ignore
-            '`^post`',      // phpcs:ignore
-            '`^sub`',       // phpcs:ignore
-            '`^pre`',       // phpcs:ignore
-            '`^pro`',       // phpcs:ignore
-            '`^dis`',       // phpcs:ignore
-            '`^side`',      // phpcs:ignore
-            '`ly$`',        // phpcs:ignore
-            '`less$`',      // phpcs:ignore
-            '`some$`',      // phpcs:ignore
-            '`ful$`',       // phpcs:ignore
-            '`ers?$`',      // phpcs:ignore
-            '`ness$`',      // phpcs:ignore
-            '`cians?$`',    // phpcs:ignore
-            '`ments?$`',    // phpcs:ignore
-            '`ettes?$`',    // phpcs:ignore
-            '`villes?$`',   // phpcs:ignore
-            '`ships?$`',    // phpcs:ignore
-            '`sides?$`',    // phpcs:ignore
-            '`ports?$`',    // phpcs:ignore
-            '`shires?$`',   // phpcs:ignore
-            '`tion(ed)?$`', // phpcs:ignore
+            '`^un`',        // @codingStandardsIgnoreLine
+            '`^fore`',      // @codingStandardsIgnoreLine
+            '`^ware`',      // @codingStandardsIgnoreLine
+            '`^none?`',     // @codingStandardsIgnoreLine
+            '`^out`',       // @codingStandardsIgnoreLine
+            '`^post`',      // @codingStandardsIgnoreLine
+            '`^sub`',       // @codingStandardsIgnoreLine
+            '`^pre`',       // @codingStandardsIgnoreLine
+            '`^pro`',       // @codingStandardsIgnoreLine
+            '`^dis`',       // @codingStandardsIgnoreLine
+            '`^side`',      // @codingStandardsIgnoreLine
+            '`ly$`',        // @codingStandardsIgnoreLine
+            '`less$`',      // @codingStandardsIgnoreLine
+            '`some$`',      // @codingStandardsIgnoreLine
+            '`ful$`',       // @codingStandardsIgnoreLine
+            '`ers?$`',      // @codingStandardsIgnoreLine
+            '`ness$`',      // @codingStandardsIgnoreLine
+            '`cians?$`',    // @codingStandardsIgnoreLine
+            '`ments?$`',    // @codingStandardsIgnoreLine
+            '`ettes?$`',    // @codingStandardsIgnoreLine
+            '`villes?$`',   // @codingStandardsIgnoreLine
+            '`ships?$`',    // @codingStandardsIgnoreLine
+            '`sides?$`',    // @codingStandardsIgnoreLine
+            '`ports?$`',    // @codingStandardsIgnoreLine
+            '`shires?$`',   // @codingStandardsIgnoreLine
+            '`tion(ed)?$`', // @codingStandardsIgnoreLine
         ];
 
     // Double syllable prefixes and suffixes.
     /** @var array */
     static public $arrdoubleaffix =
         [
-            '`^above`',     // phpcs:ignore
-            '`^ant[ie]`',   // phpcs:ignore
-            '`^counter`',   // phpcs:ignore
-            '`^hyper`',     // phpcs:ignore
-            '`^afore`',     // phpcs:ignore
-            '`^agri`',      // phpcs:ignore
-            '`^in[ft]ra`',  // phpcs:ignore
-            '`^inter`',     // phpcs:ignore
-            '`^over`',      // phpcs:ignore
-            '`^semi`',      // phpcs:ignore
-            '`^ultra`',     // phpcs:ignore
-            '`^under`',     // phpcs:ignore
-            '`^extra`',     // phpcs:ignore
-            '`^dia`',       // phpcs:ignore
-            '`^micro`',     // phpcs:ignore
-            '`^mega`',      // phpcs:ignore
-            '`^kilo`',      // phpcs:ignore
-            '`^pico`',      // phpcs:ignore
-            '`^nano`',      // phpcs:ignore
-            '`^macro`',     // phpcs:ignore
-            '`berry$`',     // phpcs:ignore
-            '`woman$`',     // phpcs:ignore
-            '`women$`',     // phpcs:ignore
+            '`^above`',     // @codingStandardsIgnoreLine
+            '`^ant[ie]`',   // @codingStandardsIgnoreLine
+            '`^counter`',   // @codingStandardsIgnoreLine
+            '`^hyper`',     // @codingStandardsIgnoreLine
+            '`^afore`',     // @codingStandardsIgnoreLine
+            '`^agri`',      // @codingStandardsIgnoreLine
+            '`^in[ft]ra`',  // @codingStandardsIgnoreLine
+            '`^inter`',     // @codingStandardsIgnoreLine
+            '`^over`',      // @codingStandardsIgnoreLine
+            '`^semi`',      // @codingStandardsIgnoreLine
+            '`^ultra`',     // @codingStandardsIgnoreLine
+            '`^under`',     // @codingStandardsIgnoreLine
+            '`^extra`',     // @codingStandardsIgnoreLine
+            '`^dia`',       // @codingStandardsIgnoreLine
+            '`^micro`',     // @codingStandardsIgnoreLine
+            '`^mega`',      // @codingStandardsIgnoreLine
+            '`^kilo`',      // @codingStandardsIgnoreLine
+            '`^pico`',      // @codingStandardsIgnoreLine
+            '`^nano`',      // @codingStandardsIgnoreLine
+            '`^macro`',     // @codingStandardsIgnoreLine
+            '`berry$`',     // @codingStandardsIgnoreLine
+            '`woman$`',     // @codingStandardsIgnoreLine
+            '`women$`',     // @codingStandardsIgnoreLine
         ];
 
     // Triple syllable prefixes and suffixes.
     /** @var array */
     static public $arrtripleaffix =
         [
-            '`ology$`',    // phpcs:ignore
-            '`ologist$`',  // phpcs:ignore
-            '`onomy$`',    // phpcs:ignore
-            '`onomist$`',   // phpcs:ignore
+            '`ology$`',    // @codingStandardsIgnoreLine
+            '`ologist$`',  // @codingStandardsIgnoreLine
+            '`onomy$`',    // @codingStandardsIgnoreLine
+            '`onomist$`',   // @codingStandardsIgnoreLine
         ];
 
     /**
@@ -315,7 +315,7 @@ class syllables {
         $strword = trim($strword);
 
         // Should be no non-alpha characters and lower case.
-        $strword = preg_replace('`[^A-Za-z]`', '', $strword);  // phpcs:ignore
+        $strword = preg_replace('`[^A-Za-z]`', '', $strword);  // @codingStandardsIgnoreLine
         $strword = strtolower($strword);
 
         // Check for problem words.
@@ -336,7 +336,7 @@ class syllables {
         $strword = preg_replace(self::$arrtripleaffix, '', $strword, -1, $inttripleaffixcount);
 
         // Removed non-word characters from word.
-        $arrwordparts = preg_split('`[^aeiouy]+`', $strword); // phpcs:ignore
+        $arrwordparts = preg_split('`[^aeiouy]+`', $strword); // @codingStandardsIgnoreLine
         $intwordpartcount = 0;
         foreach ($arrwordparts as $strwordpart) {
             if ($strwordpart <> '') {
@@ -349,11 +349,11 @@ class syllables {
         $intsyllablecount = $intwordpartcount + $intaffixcount + (2 * $intdoubleaffixcount) + (3 * $inttripleaffixcount);
         foreach (self::$arrsubsyllables as $strsyllable) {
             $intsyllablecounttemp = $intsyllablecount;
-            $intsyllablecount -= preg_match('`'.$strsyllable.'`', $strword); // phpcs:ignore
+            $intsyllablecount -= preg_match('`'.$strsyllable.'`', $strword); // @codingStandardsIgnoreLine
         }
         foreach (self::$arraddsyllables as $strsyllable) {
             $intsyllablecounttemp = $intsyllablecount;
-            $intsyllablecount += preg_match('`' . $strsyllable . '`', $strword); // phpcs:ignore
+            $intsyllablecount += preg_match('`' . $strsyllable . '`', $strword); // @codingStandardsIgnoreLine
         }
         $intsyllablecount = ($intsyllablecount == 0) ? 1 : $intsyllablecount;
         return $intsyllablecount;

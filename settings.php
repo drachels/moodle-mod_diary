@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Administration setting definitions for the Diary module.
+ * Administration settings definitions for the Diary module.
  *
  * @package   mod_diary
  * @copyright 2019 AL Rachels (drachels@drachels.com)
@@ -59,15 +59,6 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('mod_diary/editall',
         get_string('editall', 'diary'),
         get_string('editall_help', 'diary'), 1, [
-            '0' => get_string('no'),
-            '1' => get_string('yes'),
-        ]
-    ));
-
-    // 20241113 Delete an entry setting.
-    $settings->add(new admin_setting_configselect('mod_diary/deleteentries',
-        get_string('deleteentries', 'diary'),
-        get_string('deleteentry_help', 'diary'), 0, [
             '0' => get_string('no'),
             '1' => get_string('yes'),
         ]

@@ -48,7 +48,7 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('invalidid', 'diary'));
 }
 $diaryid = optional_param('diary', $diary->id, PARAM_INT);
-$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
+$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
 // 20201016 Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, ['context' => $context]);
 
@@ -157,9 +157,6 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
-// 20240927 Working on new filter for user firstname and lastname. This from moodle/user/index.php file line 103.
-$participanttable = new \core_user\table\participants("user-index-participants-{$course->id}");
-
 // 20210511 Changed to using div and span.
 echo '<div class="sortandaggregate">';
 echo ('<span>'.get_string('sortorder', "diary"));
@@ -194,6 +191,7 @@ if ($eee) {
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
     results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
+
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(
         [

@@ -22,7 +22,7 @@
  * @copyright 2019 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
+defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
 /**
  * mod_diary data generator class.
@@ -58,7 +58,7 @@ class mod_diary_generator extends testing_module_generator {
      * @param array $options
      * @return stdClass mod_diary_structure
      */
-    public function create_instance($record = null, $options = null) {
+    public function create_instance($record = null, array $options = null) {
         $record = (object) (array) $record;
 
         if (! isset($record->name)) {
