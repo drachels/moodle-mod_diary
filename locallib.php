@@ -25,7 +25,7 @@
  */
 
 
-defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
+defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 
 /**
  * Returns diary entries tagged with a specified tag.
@@ -131,6 +131,7 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
         foreach ($items as $item) {
             $context = context_module::instance($item->cmid);
             $canmanage = has_capability('mod/diary:manageentries', $context);
+            $canaddentries = has_capability('mod/diary:addentries', $context);
             // 20230325 Show tagged item only if allowed to see it.
             // if (($item->userid == $USER->id) || has_capability('mod/diary:manageentries', $context)) {
             if (($item->userid == $USER->id) || $canmanage) {
@@ -139,13 +140,15 @@ function mod_diary_get_tagged_entries($tag, $exclusivemode = false, $fromctx = 0
                 $cm = $modinfo->get_cm($item->cmid);
                 // 20230325 Student go to their view page and teachers, etc. go to reportsingle for the applicable user.
                 if ($canmanage) {
-                    $pageurl = new moodle_url('/mod/diary/reportsingle.php',
+                    $pageurl = new moodle_url('/mod/diary/reportone.php',
                         [
                             'id' => $item->cmid,
-                            'action' => 'allentries',
+                            'action' => 'currententry',
+                            'entryid' => $item->id,
                             'user' => $item->userid,
                         ]
                     );
+
                 } else {
                     $pageurl = new moodle_url('/mod/diary/view.php', ['id' => $item->cmid]);
                 }
