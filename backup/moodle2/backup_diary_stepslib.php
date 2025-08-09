@@ -63,10 +63,12 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'timeclose',
                 'editall',
                 'editdates',
+                'deleteentry',
                 'entrybgc',
                 'entrytextbgc',
                 'enablestats',
                 'enabletitles',
+                'submissionemail',
                 'teacheremail',
                 'studentemail',
                 'mincharacterlimit',
@@ -103,6 +105,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'datestop',
                 'text',
                 'format',
+                'promptbgc',
                 'minchar',
                 'maxchar',
                 'minmaxcharpercent',
@@ -129,9 +132,9 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'timecreated',
                 'timemodified',
                 'title',
+                'entrynoticemailed',
                 'text',
                 'format',
-                'promptbgc',
                 'rating',
                 'entrycomment',
                 'teacher',
@@ -182,7 +185,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
 
         // Define sources.
         $diary->set_source_table('diary', ['id' => backup::VAR_ACTIVITYID]);
-        $prompt->set_source_table('diary_prompts', ['diaryid' => backup::VAR_ACTIVITYID]);
+        $prompt->set_source_table('diary_prompts', ['diaryid' => backup::VAR_PARENTID]);
 
         // All the rest of elements only happen if we are including user info.
         if ($this->get_setting_value('userinfo')) {
@@ -215,23 +218,20 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
 
         // Define id annotations.
         $diary->annotate_ids('scale', 'scale');
-
         $entry->annotate_ids('user', 'userid');
         $entry->annotate_ids('user', 'teacher'); // Not sure if this is needed.
         $entry->annotate_ids('promptid', 'promptid');
-
         $prompt->annotate_ids('diaryid', 'diaryid');
-
         $rating->annotate_ids('scale', 'scaleid');
         $rating->annotate_ids('user', 'userid');
 
         // Define file annotations.
         $diary->annotate_files('mod_diary', 'intro', null); // This file areas haven't itemid.
-        $entry->annotate_files('mod_diary_entries', 'entry', 'id');
-        $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
-
         $entry->annotate_files('mod_diary_prompts', 'entry', 'id');
         $entry->annotate_files('mod_diary_prompts', 'attachment', 'id');
+
+        $entry->annotate_files('mod_diary_entries', 'entry', 'id');
+        $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
 
         return $this->prepare_activity_structure($diary);
     }
