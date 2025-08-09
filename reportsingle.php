@@ -28,7 +28,7 @@ require_once("lib.php");
 require_once($CFG->dirroot.'/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
-$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $user = required_param('user', PARAM_INT); // User ID.
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
@@ -66,7 +66,6 @@ if (has_capability('mod/diary:manageentries', $context)) {
     $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'timecreated DESC');
 }
 
-
 // Handle toolbar capabilities.
 if (! empty($action)) {
     switch ($action) {
@@ -78,36 +77,18 @@ if (! empty($action)) {
                 results::download_entries($context, $course, $diary);
             }
             break;
-        case 'lastnameasc':
-            if (has_capability('mod/diary:manageentries', $context)) {
-                $stringlable = 'lastnameasc';
-                // 20201014 Set order and get ALL diary entries in lastname ascending order.
-                set_user_preference('sortoption', 'u.lastname ASC, u.firstname ASC');
-                $sortoption = get_user_preferences('sortoption');
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
-            }
-            break;
-        case 'lastnamedesc':
-            if (has_capability('mod/diary:manageentries', $context)) {
-                $stringlable = 'lastnamedesc';
-                // 20201014 Set order and get ALL diary entries in lastname descending order.
-                set_user_preference('sortoption', 'u.lastname DESC, u.firstname DESC');
-                $sortoption = get_user_preferences('sortoption');
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
-            }
-            break;
         case 'currententry':
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'currententry';
                 // Get ALL diary entries in an order that will result in showing the users most current entry.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user]);
             }
             break;
         case 'firstentry':
             if (has_capability('mod/diary:manageentries', $context)) {
                 $stringlable = 'firstentry';
                 // Get ALL diary entries in an order that will result in showing the users very first entry.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'timecreated DESC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'timecreated ASC');
             }
             break;
         case 'lowestgradeentry':
@@ -117,7 +98,8 @@ if (! empty($action)) {
                 // oldest, ungraded entry. Once all ungraded entries have a grade, the entry
                 // with the lowest grade is shown. For duplicate low grades, the entry that
                 // is oldest, is shown.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'rating DESC, timemodified DESC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user],
+                    $sort = 'rating ASC, timemodified DESC');
             }
             break;
         case 'highestgradeentry':
@@ -125,7 +107,7 @@ if (! empty($action)) {
                 $stringlable = 'highestgradeentry';
                 // Get ALL diary entries in an order that will result in showing the users highest
                 // graded entry. Duplicates high grades result in showing the most recent entry.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'rating ASC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'rating DESC');
             }
             break;
         case 'latestmodifiedentry':
@@ -134,7 +116,7 @@ if (! empty($action)) {
                 // Get ALL diary entries in an order that will result in showing the users
                 // most recently modified entry. At the moment, this is no different from current entry.
                 // May be needed for future version if editing old entries is allowed.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id], $sort = 'timemodified ASC');
+                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user], $sort = 'timemodified DESC');
             }
             break;
         default:
@@ -171,10 +153,12 @@ echo '<span style="float: right;"><a href="index.php?id='.$course->id.'">'
 // Save our current user id and also get his details. CHECK - might not need this.
 $users = $user;
 $user = $DB->get_record('user', ['id' => $user]);
+$countnum = 0;
 
 if ($eee) {
     // Now, filter down to get entry by any user who has made at least one entry.
     foreach ($eee as $ee) {
+        $countnum++;
         $entrybyuser[$ee->userid] = $ee;
         $entrybyentry[$ee->id] = $ee;
         $entrybyuserentry[$ee->userid][$ee->id] = $ee;
@@ -226,10 +210,11 @@ if (! $users) {
         $options = [];
         $options['id'] = $id;
         $options['diary'] = $diary->id;
+        $options['user'] = $users;
 
         // Add download button.
         $options['action'] = 'download';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('i/export', get_string('csvexport', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -238,7 +223,7 @@ if (! $users) {
 
         // Add reload toolbutton.
         $options['action'] = $stringlable;
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/reload', get_string('reload', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -246,7 +231,7 @@ if (! $users) {
         );
 
         $options['action'] = 'currententry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('i/edit', get_string('currententry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -254,7 +239,7 @@ if (! $users) {
         );
 
         $options['action'] = 'firstentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/left', get_string('firstentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -262,7 +247,7 @@ if (! $users) {
         );
 
         $options['action'] = 'lowestgradeentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -270,7 +255,7 @@ if (! $users) {
         );
 
         $options['action'] = 'highestgradeentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -278,7 +263,7 @@ if (! $users) {
         );
 
         $options['action'] = 'latestmodifiedentry';
-        $url = new moodle_url('/mod/diary/report.php', $options);
+        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
         $output .= html_writer::link($url, $OUTPUT->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
             [
                 'class' => 'toolbutton',
@@ -286,7 +271,7 @@ if (! $users) {
         );
 
         // 20210511 Reorganized group and toolbar output. 20220102 Added action.
-        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/report.php?id=$cm->id&action=currententry")
+        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/reportsingle.php?id=$cm->id&action=currententry")
             .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
     }
 
@@ -312,7 +297,7 @@ if (! $users) {
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
                       .get_string('saveallfeedback', 'diary').'" />';
 
-    // @codingStandardsIgnoreLine
+    // phpcs:ignore
     /*
     $url = $CFG->wwwroot.'/mod/diary/reportsingle.php?id='.$id.'&user='.$user->id.'&action=allentries';
     // 20211210 Cleaned up unnecessary escaped double quotes.
