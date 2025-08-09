@@ -22,6 +22,7 @@
  * @copyright  2019 AL Rachels (drachels@drachels.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
+
 /* 20210502 Added in view.php about line 278.*/
 #page-mod-diary-view .sortandaggregate,
 #page-mod-diary-report .sortandaggregate {
@@ -93,12 +94,16 @@
     font-size: 0.8em;
 }
 
+/* 20241114 Added in deleteentry.php about line 199.*/
 /* 20210501 Added in view.php about line 381.*/
-/* 20210505 Added in report.php about lines 427 and 455.*/
-/* 20210505 Added in reportsingle.php about line 266.*/
+/* 20210505 Added in report.php about lines 427 and 455 now 360 and 406.*/
+/* 20210505 Added in reportsingle.php about line 266 now 329.*/
+/* 20210505 Added in reportone.php about line 266 now 329.*/
+#page-mod-diary-deleteentry .entry,
 #page-mod-diary-view .entry,
 #page-mod-diary-report .entry,
-#page-mod-diary-reportsingle .entry {
+#page-mod-diary-reportsingle .entry,
+#page-mod-diary-reportone .entry {
     text-align: left;
     font-size: 1em;
     padding: 5px;
@@ -109,7 +114,6 @@
     -webkit-border-radius: 16px;
     -moz-border-radius: 16px;
     border-radius: 16px;
-
 }
 
 #page-mod-diary-view .feedbackbox .left,
@@ -185,4 +189,51 @@
     padding: 5px;
     border-style: double;
     border-radius: 16px;
+}
+
+.entry {
+    text-align: left;
+    font-size: 1em;
+    padding: 5px;
+    border-style: double;
+    border-radius: 16px;
+}
+
+/* View prompt indcators. */
+.arrow-n,
+.arrow-e,
+.arrow-s,
+.arrow-w {
+    border-style: dashed;
+    border-color: transparent;
+    border-width: 0.53em;
+    display: inline-block;
+    font-size: 100px;
+    height: 0;
+    line-height: 0;
+    position: relative;
+    vertical-align: middle;
+    left: 3px;
+    width: 0;
+}
+
+.arrow-n {
+    border-bottom-width: 0.7em;
+    border-bottom-style: solid;
+    border-bottom-color: #000;
+    bottom: 0.25em;
+}
+
+.arrow-s {
+    border-top-width: 0.7em;
+    border-top-style: solid;
+    border-top-color: #000;
+    top: 0.25em;
+}
+
+.arrow-e {
+    border-bottom-width: 0.7em;
+    border-bottom-style: solid;
+    border-bottom-color: #000;
+    bottom: 0.25em;
 }
