@@ -23,7 +23,7 @@
  */
 namespace mod_diary\search;
 
-defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
+defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 
 require_once($CFG->dirroot . '/mod/diary/lib.php');
 require_once($CFG->dirroot . '/lib/grouplib.php');
@@ -50,7 +50,7 @@ class entry extends \core_search\base_mod {
      * @param \context|null $context Optional context to restrict scope of returned results
      * @return moodle_recordset|null Recordset (or null if no results)
      */
-    public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
+    public function get_document_recordset($modifiedfrom = 0, $context = null) {
         global $DB;
 
         list ($contextjoin, $contextparams) = $this->get_context_restriction_sql($context, 'diary', 'd', SQL_PARAMS_NAMED);
