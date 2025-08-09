@@ -48,7 +48,7 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('invalidid', 'diary'));
 }
 $diaryid = optional_param('diary', $diary->id, PARAM_INT);
-$action = optional_param('action', 'currententry', PARAM_ACTION); // Action(default to current entry).
+$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 // 20201016 Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, ['context' => $context]);
 
@@ -157,6 +157,9 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
+// 20240927 Working on new filter for user firstname and lastname. This from moodle/user/index.php file line 103.
+$participanttable = new \core_user\table\participants("user-index-participants-{$course->id}");
+
 // 20210511 Changed to using div and span.
 echo '<div class="sortandaggregate">';
 echo ('<span>'.get_string('sortorder', "diary"));
@@ -191,7 +194,6 @@ if ($eee) {
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
     results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
-
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(
         [
@@ -217,7 +219,7 @@ if ($data = data_submitted()) {
     $event->trigger();
 }
 
-if (! $users) {
+if (!$users) {
     echo $OUTPUT->heading(get_string("nousersyet"));
 } else {
     $output = '';
@@ -309,7 +311,7 @@ if (! $users) {
             .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
     }
 
-    // Next line is different from Journal line 171.
+    // Next line is different from Journal line 171 202. Difference is $journal->grade.
     $grades = make_grades_menu($diary->scale);
 
     if (! $teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
@@ -405,7 +407,6 @@ if (! $users) {
                 $grades);
             echo '</div><br>';
         }
-
 
         // 20210609 Check for empty list to prevent two sets of buttons at bottom of the report page.
         if ($users) {
