@@ -28,6 +28,12 @@ defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 /**
  * The mod_diary entry deleted class.
  *
+ * @property-read array $other {
+ *      Extra information about event.
+ *
+ *      - int USER: the userid of the entry.
+ *      - int entryid: the id of the diary entry.
+ * }
  * @package   mod_diary
  * @since     Moodle 2.7
  * @copyright 2025 drachels@drachels.com
