@@ -69,22 +69,24 @@ $PAGE->set_url('/mod/diary/view.php', ['id' => $id]);
 $PAGE->navbar->add(get_string("viewentries", "diary"));
 $PAGE->set_heading($course->fullname);
 
+// 20250123 Are there any tag instances created by this user?
 $taginststodel = $DB->get_records('tag_instance', ['itemid' => $firstkey]);
 
 $count = 0;
 foreach ($taginststodel as $inst) {
     $count++;
     $tagstodel = $DB->get_records('tag', ['id' => $inst->tagid, 'userid' => $entry->userid]);
-    $debug[$count.' In deleteentry for each loop printing $tagstodel'] = $tagstodel;
 }
 
 $deleteurl = 'view.php?id='.$id;
 
-// Commented out to keep from actually deleting the entry, at the moment during development.
 // 20250123 This deletes the user entry.
 $DB->delete_records('diary_entries', ['id' => $entry->id]);
 
 if ($taginststodel) {
+    // 20250125 NOTE: Will need to search the mdl_tag table, for id's that match the tagid field in mdl_tag_instance table.
+    // Will then have to delete the entry in the mdl_tag table if the isstandard field is 0.
+
     // 20250123 This deletes one or more tags associated with this entry.
     $DB->delete_records('tag_instance', ['itemid' => $firstkey]);
     // 20250123 Added to trigger module entry_tags_deleted event.
