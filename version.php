@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Defines the version of Diary.
  *
@@ -24,10 +25,10 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2025041900; // The current module version (Date: YYYYMMDDXX).
-$plugin->requires = 2019052000; // Requires Moodle 3.7 version.
+$plugin->version = 2025080600; // The current module version (Date: YYYYMMDDXX).
+$plugin->requires = 2022051900; // Requires Moodle 4.0 version.
 $plugin->cron = 60; // Period for cron to check this module (secs).
 $plugin->component = 'mod_diary';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '4.0.0 (Build: 2025041900)'; // User-friendly version number.
-$plugin->supported = [37, 500];
+$plugin->release = '4.0.0 (Build: 2025080600)'; // User-friendly version number.
+$plugin->supported = [400, 405];
