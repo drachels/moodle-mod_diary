@@ -118,6 +118,7 @@ if (!empty($action)) {
                 foreach ($prompts as $prompt => $temp) {
                     break;
                 }
+
                 // Trigger prompt created event.
                 $event = \mod_diary\event\prompt_created::create(
                     [
