@@ -40,6 +40,7 @@ This file describes changes and other work in the diary code.
 20260108 Diary_1391 - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
     Modified lib.php now at about line 893 to 902, by checking existance of entryid.
 20260109 Diary_1392 - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
+    See ticket. Fixed 2 variable and 1 typo error in restore_diary_stepslib.php.
 20260109 Diary_1393 - Diary - Implicitly marking parameter $context as nullable is deprecated.
     Added a question mark before the \context part of line 53 of the search/entry.php page.
 20250804 Diary_1382bt - Help contents string does not exist: [submissionemail_help, mod_diary].
