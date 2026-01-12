@@ -1,0 +1,72 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+namespace mod_diary\courseformat;
+
+use cm_info;
+use core\url;
+use core\output\action_link;
+use core\output\local\properties\text_align;
+use core_courseformat\local\overview\overviewitem;
+use core\output\local\properties\button;
+
+/**
+ * Diary overview integration (for Moodle 5.1+)
+ *
+ * @package   mod_diary
+ * @copyright 2025 AL Rachels <drachels@drachels.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class overview extends \core_courseformat\activityoverviewbase {
+
+    /** @var \stdClass|null $forum The forum instance. */
+    private ?\stdClass $forum;
+
+    /** @var \stdClass|null $user The current user instance. */
+    private ?\stdClass $user;
+
+    /**
+     * Constructor.
+     *
+     * @param \cm_info $cm the course module instance.
+     * @param \core\output\renderer_helper $rendererhelper the renderer helper.
+     */
+    public function __construct(
+        \cm_info $cm,
+        \core\output\renderer_helper $rendererhelper
+    ) {
+        parent::__construct($cm);
+    }
+
+    #[\Override]
+    public function get_actions_overview(): ?overviewitem {
+        $url = new url(
+            '/mod/diary/view.php',
+            ['id' => $this->cm->id],
+        );
+
+        $text = get_string('view');
+        $bodyoutline = button::BODY_OUTLINE;
+
+        if (is_object($bodyoutline) && method_exists($bodyoutline, 'classes')) {
+            $buttonclass = $bodyoutline->classes();
+        } else {
+            $buttonclass = (string) $bodyoutline;
+        }
+        $content = new action_link($url, $text, null, ['class' => $buttonclass]);
+        return new overviewitem(get_string('actions'), $text, $content, text_align::CENTER);
+    }
+}
