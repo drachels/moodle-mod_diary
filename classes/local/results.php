@@ -1187,7 +1187,6 @@ class results {
 
             if ($studentrating != $entry->rating && ! ($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;
-
                 if ($ratingchanged || $studentcomment != $entry->entrycomment) {
                     $newentry = new StdClass();
                     $newentry->rating = $studentrating;
