@@ -35,8 +35,8 @@ This file describes changes and other work in the diary code.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
 
 === 5.0.0 === pending
-20250206 Diary_1368r - Diary - Delayed email, Email later, from student to teacher does not work.
-    Needs new code added to the cron_task.php file.
+20250206 Diary_1368bt - Diary - Delayed email, Email later, from student to teacher does not work.
+    Needs new code added to the cron_task.php file. Added code.
 20260108 Diary_1391 - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
     Modified lib.php now at about line 893 to 902, by checking existance of entryid.
 20260109 Diary_1392 - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
