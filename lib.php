@@ -900,6 +900,17 @@ function diary_pluginfile($course, $cm, $context, $filearea, $args, $forcedownlo
 
     // Args[0] should be the entry id.
     $entryid = intval(array_shift($args));
+
+    // 20260110 Fix for PostgreSQL "invalid input syntax for type bigint: ''" error:
+    // Ensure $entryid is a valid, non-empty integer before querying the DB.
+    if (empty($entryid) || !is_numeric($entryid)) {
+        // Handle the case where no valid ID was provided.
+        // Depending on the function's purpose, you might return false, throw an exception,
+        // or perhaps load a default state. For this error, returning false is likely safe
+        // and lets surrounding code handle the "no entry found" scenario gracefully.
+        return false;
+    }
+
     $entry = $DB->get_record('diary_entries', ['id' => $entryid], 'id, userid', MUST_EXIST);
 
     $canmanage = has_capability('mod/diary:manageentries', $context);
