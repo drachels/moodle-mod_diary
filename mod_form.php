@@ -562,6 +562,15 @@ class mod_diary_prompt_form extends moodleform {
         $longtextoptions = ['size' => 10, 'style' => 'width: auto'];
         // 20240911 Options for the text editor textarea.
         $textedoptions = ['wrap' => 'virtual', 'rows' => 15, 'style' => 'width: auto'];
+
+        // 20260111 Added for passing options to the listed variables for future use.
+        $maxbytes = $this->_customdata['maxbytes'];
+        $maxfiles = $this->_customdata['maxfiles'];
+        $subdirs  = $this->_customdata['subdirs'];
+        $texttrust = $this->_customdata['texttrust'];
+        $enable_filemanagement = $this->_customdata['enable_filemanagement'];
+        $context = $this->_customdata['editoroptions']['context']; // Access context correctly
+
         $mform->addElement('date_time_selector', 'datestart', get_string('datestart', 'mod_diary', 'promptid'));
         $mform->setType('datestart', PARAM_INT);
         $mform->addElement('date_time_selector', 'datestop', get_string('datestop', 'mod_diary', 'promptid'));
@@ -570,12 +579,10 @@ class mod_diary_prompt_form extends moodleform {
         // Text editor settings.
         $name = 'prompt';
         $label = get_string($name, $plugin);
+        // 2026110 Change the editor to use cleaned options.
         $mform->addElement('editor',
                            'text_editor',
-                           format_text(get_string('prompt', 'mod_diary'),
-                           null,
-                           $this->_customdata['editoroptions']),
-                           $textedoptions);
+                           get_string('prompt', 'mod_diary')); // <--- Use a plain string label here.
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 
@@ -672,7 +679,9 @@ class mod_diary_prompt_form extends moodleform {
         $mform->setType('firstkey', PARAM_INT);
         $mform->addElement('hidden', 'entryid');
         $mform->setType('entryid', PARAM_INT);
-
+        // 20260111 Prompt works on .org but not here on .com, which had this missing.
+        $mform->addElement('hidden', 'promptid');
+        $mform->setType('promptid', PARAM_INT);
         $this->add_action_buttons();
     }
 }
