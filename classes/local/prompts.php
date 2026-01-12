@@ -858,7 +858,7 @@ class prompts {
         $current = 0;
         $future = 0;
         $promptid = 0;
-        if (! $promptsall = $DB->get_records('diary_prompts',
+        if (!$promptsall = $DB->get_records('diary_prompts',
                                             ['diaryid' => $diary->id],
                                             $sort = 'datestart ASC, datestop ASC')) {
             $promptid = new stdClass();
