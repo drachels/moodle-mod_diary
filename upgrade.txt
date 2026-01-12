@@ -34,9 +34,18 @@ This file describes changes and other work in the diary code.
     background colors.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
 
+=== 5.0.0 === pending
+20250206 Diary_1368r - Diary - Delayed email, Email later, from student to teacher does not work.
+    Needs new code added to the cron_task.php file.
+20260108 Diary_1391 - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
+    Modified lib.php now at about line 893 to 902, by checking existance of entryid.
+20260109 Diary_1392 - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
+20260109 Diary_1393 - Diary - Implicitly marking parameter $context as nullable is deprecated.
+    Added a question mark before the \context part of line 53 of the search/entry.php page.
+20250804 Diary_1382bt - Help contents string does not exist: [submissionemail_help, mod_diary].
+    Added new string. Moved from v4.0.0 due to needing a correction. See ticket for details.
 
-
-=== 4.0.0 ===
+=== 4.0.0 === pending
 20241125 Diary_1341r - Add to feedback button on new reportone.php page is broken. Fixed the
     $param test and stats and auto rating now are added/cleared from the feedback textarea when
     the, Add to feedback, or the, Clear feedback buttons are clicked.
@@ -47,10 +56,6 @@ This file describes changes and other work in the diary code.
     for default $promptbgc to be set. Added setting about line 39 of prompt_edit.php file.
 20250714 Diary_1380 - Icon is clipped on the corners when using tiles course format.
     
-20250804 Diary_1382bt - Help contents string does not exist: [submissionemail_help, mod_diary].
-    Added new string.
-
-
 === 3.8.0 === pending (Build: 2024042900)
 20210515  Diary_720bt - I am getting the String [grade, core] is deprecated debug message in
     multiple locations. Made changes to deprecated.txt and diary.php files but most
@@ -58,14 +63,10 @@ This file describes changes and other work in the diary code.
 20230306 Diary_1016bt - Need to see about creating a view single entry page especially going
     from a tag item or tag list. I have created a page, reportone.php, that seems to be
     working the way I want it to, but the feedback is only partially working, so far.
-
-
 20240117 Diary_1173 - Prompts are NOT restored after a backup and restore operation. Fixed
     errors in backup files.
-
 20240209 Diary_1201bt - Feature request - Need a reportone.php page for single user entry from
     a Grade Me link. The fix for ticket Diary_1016 fixes this ticket also.
-
 20240209 Diary_1202bt - Feature request - Need new by name link to go to proposed reportone.php
     page.
  
@@ -102,10 +103,8 @@ This file describes changes and other work in the diary code.
     have all the needed strings in the correct section of the diary.php language file.
 20240603 Diary_1250bt - In prompt_edit.php, Past, Current, and Future need to have strings created.
     Created three new strings, promptsc, promptsf, and promptsp, for Current, Future, and Past. 
-
 20240604 Diary_1251rbt - TinyMCE Editor problem in prompt_edit.php page - fails to show the
     toolbar. Was missing <!DOCTYPE HTML> at start and </html> at end of the page.
-
 20240806 Diary_1258bt - Need to change all occurences of, // @codingStandardsIgnoreLine, over to,
     // phpcs:ignore. There are a bunch of places that needed changing. See the ticket for details.
 20240806 Diary_1294bt - Got browser debug message regarding multiple invalid options when trying
@@ -113,9 +112,9 @@ This file describes changes and other work in the diary code.
     ticket for details of the changes.
 20241119 Diary_1338bt - Removes unneccessary version check in *_supports() callback. #49. Completed
     merge request that changes the collaboration case and removes the Moodle version check.
-
-
-
+20241125 Diary_1341r - Add to feedback button on new reportone.php page is broken. Fixed the
+    $param test and stats and auto rating now are added/cleared from the feedback textarea when
+    the, Add to feedback, or the, Clear feedback buttons are clicked.
 20241204 Diary_1344bt - Need entry delete tool when teacher is using any report page. Added needed
     code to the results.php page so that any report page now has the, Delete entry, icon.
 20250114 Diary_1352bt - Auto-rating does not seem to update Diary student grades. Modified code
@@ -139,8 +138,7 @@ This file describes changes and other work in the diary code.
 20250204 Diary_1366r - Immediate email from student to teacher is broken. Another can of worms
     as I had to add new files for messages, new strings for the new messages, bump the version,
     plus testing! See the ticket for details.
-20250206 Diary_1368r - Diary - Delayed email, Email later, from student to teacher does not work.
-    Needs new code add to the cron_task.php file.
+
 20250211 Diary_1369bt - Diary - Report pages when clicking, Clear feedback, only removes the rating
     from the DB.
 
