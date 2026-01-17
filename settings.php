@@ -86,7 +86,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('mod_diary/appearance',
         get_string('appearance'), ''));
 
-    // Date format setting.
+    // Date format setting using abbreviations. Spell out days and months with 'l, F j, Y H:i:s' if wanted.
     $settings->add(new admin_setting_configtext('mod_diary/dateformat',
         get_string('dateformat', 'diary'),
         get_string('configdateformat', 'diary'), 'M d, Y G:i', PARAM_TEXT, 15));
