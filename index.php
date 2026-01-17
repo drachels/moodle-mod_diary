@@ -22,8 +22,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_diary\local\results;
+
 require_once(__DIR__ . "/../../config.php");
 require_once("lib.php");
+
+global $CFG;
 
 $id = required_param('id', PARAM_INT); // Course.
 $currentgroup = optional_param('currentgroup', 0, PARAM_INT); // Id of the current group(default to zero).
@@ -33,6 +36,10 @@ if (!$course = $DB->get_record('course', ['id' => $id])) {
 }
 
 require_course_login($course);
+
+if ($CFG->version > 2025041400) {
+    \core_courseformat\activityoverviewbase::redirect_to_overview_page($id, 'diary');
+}
 
 // Header.
 $PAGE->set_url('/mod/diary/index.php', ['id' => $id]);
