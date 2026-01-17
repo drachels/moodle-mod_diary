@@ -113,7 +113,7 @@ diary entry for \'<i>{$a->diary}</i>\'.<br /><br />
 You can see it appended to your <a href="{$a->url}">diary entry</a>.';
 
 // Email formatted with HTML used in edit.php file.
-$string['diarymailhtmluser'] = 'has posted a diary entry for \'<i>{$a->diary}</i>\'<br /><br />
+$string['diarymailhtmluser'] = 'has posted a diary entry for \'<i>{$a->diary}</i>\' Created {$a->timecreated} and modified {$a->timemodified}.<br /><br />
 You may view the <a href="{$a->url}">diary entry here</a>.<br /><br />Note: You may need to provide feedback or update the status of the entry in order for the activity to be set to complete.';
 
 // Plain text email used in edit.php file.
