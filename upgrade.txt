@@ -33,6 +33,8 @@ This file describes changes and other work in the diary code.
 20250113 Diary_1351 - Feature Request - Need to have new entry fields for feedback and text
     background colors.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
+20260113 Diary_1395 - Feature request - cron generated emails should have a date time/stamp.
+
 
 === 5.0.0 === pending
 20250206 Diary_1368bt - Diary - Delayed email, Email later, from student to teacher does not work.
@@ -45,6 +47,12 @@ This file describes changes and other work in the diary code.
     Added a question mark before the \context part of line 53 of the search/entry.php page.
 20250804 Diary_1382bt - Help contents string does not exist: [submissionemail_help, mod_diary].
     Added new string. Moved from v4.0.0 due to needing a correction. See ticket for details.
+20260112 Diary_1394 - Should support course overview. See ticket. Modified the code in index.php
+    to use the new overview.php file in any Moodle where, $CFG->version > 2025041400.
+20260116 Diary_1396 - The edit.php file, entry updated event, does not work. Found a first.js
+    Uncausght TypeError, that needed to be fixed.
+20260116 Diary_1397 - In whichever php file, the date format defined in settings should be used.
+    Added to code in edit.php. ?????
 
 === 4.0.0 === pending
 20241125 Diary_1341r - Add to feedback button on new reportone.php page is broken. Fixed the
