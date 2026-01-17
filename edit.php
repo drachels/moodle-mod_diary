@@ -55,6 +55,9 @@ if (! $diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
+// 20260116 Get the date and time configuration from settings for later use.
+$dateformat = get_config('mod_diary', 'dateformat');
+
 // 20221107 The $diary->intro gets overwritten by the current prompt and Notes, so keep a copy for later down in this file.
 $tempintro = $diary->intro;
 
@@ -292,6 +295,7 @@ if ($form->is_cancelled()) {
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
     $newentry->timecreated = $fromform->timecreated;
+    //$newentry->timemodified = $fromform->timemodified;
     $newentry->tags = $fromform->tags;
 
     $DB->update_record('diary_entries', $newentry);
@@ -333,6 +337,7 @@ if ($form->is_cancelled()) {
 
     // Add confirmation of record being saved.
     echo $OUTPUT->notification(get_string('entrysuccess', 'diary'), 'notifysuccess');
+
     // Start new code to send teachers email note when diary entry is made.
     // 20231105 Modified code so non-editing teachers get an email, too.
     $role1 = $DB->get_record('role', ['shortname' => 'editingteacher']);
@@ -362,6 +367,13 @@ if ($form->is_cancelled()) {
                 if (get_user_preferences('diary_emailpreference_'.$diary->id, null, $teacher->id) == 1) {
                     $diaryinfo = new stdClass();
                     $diaryinfo->diary = format_string($diary->name, true);
+                    // 20260114 Added the entry created time.
+                    $diaryinfo->timecreated = date("l, F j, Y H:i:s", $newentry->timecreated);
+                    if ($newentry->timemodified) {
+                        $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timemodified);
+                    } else {
+                        $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timecreated);
+                    }
                     //$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id&user=$USER->id&action=currententry";
                     //$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id&user=$USER->id&action=currententry";
                     $diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id&user=$USER->id&action=currententry&entryid=$newentry->id";
@@ -377,7 +389,7 @@ if ($form->is_cancelled()) {
                     $message->userfrom = $USER; // The message is 'from' a specific user and it is set here
                     $message->userto = $teacher->id;
                     // Needs the whole line changed to a string.
-                    $message->subject = fullname($USER)." has posted a diary entry in course '$course->shortname'";
+                    $message->subject = fullname($USER)." has posted a diary entry in course '$course->shortname' using the edit.php file.";
                     $message->fullmessage = 'Hi, \n';
                     $message->fullmessage .= "$course->shortname -> $modnamepl -> ".format_string($diary->name, true)."\n";
                     $message->fullmessage .= "---------------------------------------------------------------------\n";
@@ -400,11 +412,12 @@ if ($form->is_cancelled()) {
                     $message->notification = 1; // Because this is a notification generated from Moodle, not a user-to-user message
                     $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification
                     $message->contexturlname = 'Course list'; // Link title explaining where users get to for the contexturl
-                    // Extra content for specific processor
+                    // Extra content for specific processor.
+                    // 20260116 Added date and time using format defined by mod_diary configuration settings.
                     $content = [
                         '*' => [
-                            'header' => '<p>The '.$SITE->fullname.' Team</p>',
-                            'footer' => '<p>The '.$SITE->fullname.' Team</p>',
+                            'header' => '<p>The '.$SITE->fullname.' Team '.date(".$dateformat.").'</p>',
+                            'footer' => '<p>The '.$SITE->fullname.' Team '.date(".$dateformat.").'</p>',
                         ],
                     ];
                     $message->set_additional_content('email', $content);
@@ -425,7 +438,7 @@ if ($form->is_cancelled()) {
                     $message->attachment = $file;
 */
                     // Actually send the message
-                    // 2025042901 Student13 just submitted and entry and got two debug messages from the next line of code.
+                    // 2025042901 Student13 just submitted an entry and got two debug messages from the next line of code.
                     $messageid = message_send($message);
                 }
             }
