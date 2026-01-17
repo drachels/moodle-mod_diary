@@ -1143,7 +1143,7 @@ class results {
 
     /**
      * Update diary entries feedback(optionally in a given group).
-     * Called from report.php and reportsingle.php.
+     * Called from report.php, reportsingle.php, and reportone.php.
      * 20220105 Moved here from report.php and reportsingle.php.
      * 20240930 Now also used from reportone.php.
      * @param array $cm
@@ -1185,7 +1185,7 @@ class results {
             }
             $studentcomment = clean_text($vals['c'], FORMAT_PLAIN);
 
-            if ($studentrating != $entry->rating && ! ($studentrating == '' && $entry->rating == "0")) {
+            if ($studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;
                 if ($ratingchanged || $studentcomment != $entry->entrycomment) {
                     $newentry = new StdClass();
@@ -1195,7 +1195,7 @@ class results {
                     $newentry->timemarked = $timenow;
                     $newentry->mailed = 0; // Make sure mail goes out (again, even).
                     $newentry->id = $num;
-                    if (! $DB->update_record("diary_entries", $newentry)) {
+                    if (!$DB->update_record("diary_entries", $newentry)) {
                         notify("Failed to update the diary feedback for user $entry->userid");
                     } else {
                         $count ++;
