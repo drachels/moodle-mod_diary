@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$messageproviders = array (
+$messageproviders = [
 
     // Notify teacher that a user has submitted a diary entry.
     'diary_entry_notification' => [
@@ -74,4 +74,4 @@ $messageproviders = array (
             'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
-);
+];
