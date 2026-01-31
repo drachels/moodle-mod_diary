@@ -239,7 +239,6 @@ class mod_diary_mod_form extends moodleform_mod {
         // 20230204 Added enable/disable setting for teacheremail.
         $name = 'teacheremail';
         $label = get_string($name, $plugin);
-        //$mform->addElement('selectyesno', $name, $label);
         $mform->addElement('select', $name, $label, $options);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
@@ -249,13 +248,11 @@ class mod_diary_mod_form extends moodleform_mod {
         // 20230204 Added enable/disable setting for studentemail.
         $name = 'studentemail';
         $label = get_string($name, $plugin);
-        //$mform->addElement('selectyesno', $name, $label);
         $mform->addElement('select', $name, $label, $options);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->studentemail);
         $mform->disabledIf($name, 'submissionemail', 'eq', 0);
-
 
         // 20210704 Added heading for autorating options section.
         $name = 'autorating';
@@ -568,8 +565,8 @@ class mod_diary_prompt_form extends moodleform {
         $maxfiles = $this->_customdata['maxfiles'];
         $subdirs  = $this->_customdata['subdirs'];
         $texttrust = $this->_customdata['texttrust'];
-        $enable_filemanagement = $this->_customdata['enable_filemanagement'];
-        $context = $this->_customdata['editoroptions']['context']; // Access context correctly
+        $enablefilemanagement = $this->_customdata['enablefilemanagement'];
+        $context = $this->_customdata['editoroptions']['context']; // Access context correctly.
 
         $mform->addElement('date_time_selector', 'datestart', get_string('datestart', 'mod_diary', 'promptid'));
         $mform->setType('datestart', PARAM_INT);
@@ -582,7 +579,7 @@ class mod_diary_prompt_form extends moodleform {
         // 2026110 Change the editor to use cleaned options.
         $mform->addElement('editor',
                            'text_editor',
-                           get_string('prompt', 'mod_diary')); // <--- Use a plain string label here.
+                           get_string('prompt', 'mod_diary')); // Use a plain string label here.
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 

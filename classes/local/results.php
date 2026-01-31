@@ -677,13 +677,10 @@ class results {
             }
             // 20200816 Get the current rating for this user.
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
-                //$gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
                 $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
                 $gradeitemgrademax = $gradinginfo->items[0]->grademax;
                 $userfinalgrade = $gradinginfo->items[0]->grades[$user->id];
                 $currentuserrating = $userfinalgrade->str_long_grade;
-//var_dump($userfinalgrade);
-
             } else {
                 $currentuserrating = '';
             }

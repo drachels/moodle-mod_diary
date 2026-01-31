@@ -295,7 +295,7 @@ if ($form->is_cancelled()) {
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
     $newentry->timecreated = $fromform->timecreated;
-    //$newentry->timemodified = $fromform->timemodified;
+    // ...$newentry->timemodified = $fromform->timemodified;
     $newentry->tags = $fromform->tags;
 
     $DB->update_record('diary_entries', $newentry);
@@ -361,7 +361,8 @@ if ($form->is_cancelled()) {
         // If data has changed, then send the email(s).
         // 20230402 Since I added the two new fields to mdl_diary table, the following, if, check needs to be changed.
         // 20250302 Modified to check if $diary->submissionemail is enabled.
-        if ((get_config('mod_diary', 'teacheremail')) && ($diary->teacheremail || $diary->studentemail) && ($diary->submissionemail)) {
+        if ((get_config('mod_diary', 'teacheremail')) && ($diary->teacheremail || $diary->studentemail)
+            && ($diary->submissionemail)) {
             foreach ($teachers as $teacher) {
                 // 20250303 Check teacher email preference toggle,Email now or Email later after the normal edit delay.
                 if (get_user_preferences('diary_emailpreference_'.$diary->id, null, $teacher->id) == 1) {
@@ -374,8 +375,8 @@ if ($form->is_cancelled()) {
                     } else {
                         $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timecreated);
                     }
-                    //$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id&user=$USER->id&action=currententry";
-                    //$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id&user=$USER->id&action=currententry";
+                    // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id&user=$USER->id&action=currententry";
+                    // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id&user=$USER->id&action=currententry";
                     $diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id&user=$USER->id&action=currententry&entryid=$newentry->id";
                     $modnamesngl = get_string( 'modulename', 'diary' );
                     $modnamepl = get_string( 'modulenameplural', 'diary' );
@@ -385,8 +386,8 @@ if ($form->is_cancelled()) {
                     $message->courseid = $course->id; // ID of this course.
                     $message->modulename = $modnamesngl; // Name of this plugin.
                     $message->component = 'mod_diary'; // Diary plugin's name.
-                    $message->name = 'diary_entry_notification'; // The notification name from message.php
-                    $message->userfrom = $USER; // The message is 'from' a specific user and it is set here
+                    $message->name = 'diary_entry_notification'; // The notification name from message.php.
+                    $message->userfrom = $USER; // The message is 'from' a specific user and it is set here.
                     $message->userto = $teacher->id;
                     // Needs the whole line changed to a string.
                     $message->subject = fullname($USER)." has posted a diary entry in course '$course->shortname' using the edit.php file.";
@@ -408,20 +409,19 @@ if ($form->is_cancelled()) {
                             "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$cm->id\">".format_string($diary->name, true).
                             "</a></font></p>".
                             "</font><hr />";
-                    //$message->smallmessage = 'small message';
-                    $message->notification = 1; // Because this is a notification generated from Moodle, not a user-to-user message
-                    $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification
-                    $message->contexturlname = 'Course list'; // Link title explaining where users get to for the contexturl
+                    $message->notification = 1; // Because this is a notification generated from Moodle, not a user-to-user message.
+                    $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification.
+                    $message->contexturlname = 'Course list'; // Link title explaining where users get to for the contexturl.
                     // Extra content for specific processor.
                     // 20260116 Added date and time using format defined by mod_diary configuration settings.
                     $content = [
                         '*' => [
-                            'header' => '<p>The '.$SITE->fullname.' Team '.date(".$dateformat.").'</p>',
-                            'footer' => '<p>The '.$SITE->fullname.' Team '.date(".$dateformat.").'</p>',
+                            'header' => '<p>The ' . $SITE->fullname . ' Team ' . date("$dateformat") . '</p>',
+                            'footer' => '<p>The ' . $SITE->fullname . ' Team ' . date("$dateformat") . '</p>',
                         ],
                     ];
                     $message->set_additional_content('email', $content);
-/*
+                    /*
                     // You probably don't need attachments but if you do, here is how to add one
                     $usercontext = context_user::instance($teacher->id);
                     $file = new stdClass();
@@ -436,8 +436,8 @@ if ($form->is_cancelled()) {
                     $fs = get_file_storage();
                     $file = $fs->create_file_from_string($file, 'file1 content');
                     $message->attachment = $file;
-*/
-                    // Actually send the message
+                    */
+                    // Actually send the message.
                     // 2025042901 Student13 just submitted an entry and got two debug messages from the next line of code.
                     $messageid = message_send($message);
                 }

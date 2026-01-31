@@ -334,7 +334,7 @@ $form = new mod_diary_prompt_form(null,
         'maxbytes' => $maxbytes,
         'maxfiles' => EDITOR_UNLIMITED_FILES,
         'subdirs' => false,
-        'enable_filemanagement' => true,
+        'enablefilemanagement' => true,
     ]
 );
 $form->set_data($data);
@@ -438,4 +438,3 @@ $event->add_record_snapshot('diary', $diary);
 $event->trigger();
 
 echo $OUTPUT->footer();
-?>

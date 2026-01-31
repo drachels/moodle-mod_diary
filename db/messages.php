@@ -18,9 +18,10 @@
  * Defines message providers (types of messages being sent)
  *
  * @package mod_diary
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @copyright 2026 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 
 $messageproviders = [
 
@@ -32,14 +33,6 @@ $messageproviders = [
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
-
-    //1// Ordinary diary entry/edited entry submissions.
-    //'diary_entry_notification' => [
-    //    'defaults' => [
-    //        'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-    //        'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
-    //    ],
-    //],
 
     // Confirm a student's diary entry attempt.
     'diary_entry_confirmation' => [

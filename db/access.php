@@ -76,7 +76,7 @@ $capabilities = [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-        ]
+        ],
     ],
 
     // Confirm a student's diary entry submission.
@@ -88,6 +88,6 @@ $capabilities = [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-        ]
+        ],
     ],
 ];

@@ -87,16 +87,13 @@ $string['detectcommonerror'] = 'Detected at least {$a->one}, {$a->two}. They are
 <br>If allowed, you should fix and re-submit.';
 $string['diary:addentries'] = 'Add diary entries';
 $string['diary:addinstance'] = 'Add diary instances';
+$string['diary:emailconfirmsubmission'] = 'Confirm a student\'s diary entry submission.';
+$string['diary:emailnotifysubmission'] = 'Notify teacher that a user has submitted a diary entry.';
 $string['diary:manageentries'] = 'Manage diary entries';
 $string['diary:rate'] = 'Rate diary entries';
 $string['diaryclosetime'] = 'Close time';
 $string['diaryclosetime_help'] = 'If enabled, you can set a date for the diary to be closed and no longer open for use.';
 $string['diarydescription'] = 'Diary description';
-
-$string['diary:emailnotifysubmission'] = 'Notify teacher that a user has submitted a diary entry.';
-$string['diary:emailconfirmsubmission'] = 'Confirm a student\'s diary entry submission.';
-
-
 $string['diaryentrydate'] = 'Set date for this entry';
 $string['diaryid'] = 'diaryid to transfer to';
 // Plain text email.
@@ -276,11 +273,12 @@ $string['maxwordlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$
 $string['maxwordlimit_help'] = 'If a number is entered, the user must use less words than the maximum number listed.';
 $string['mediumwords'] = 'Unique medium words';
 $string['mediumwords_help'] = 'Medium words are words that have two syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
-
-$string['messageprovider:diary_entry_notification'] = 'Confirm your own Diary entry submissions';
-$string['messageprovider:diary_entries_due_soon'] = 'Your Diary entry is due soon';
-$string['messageprovider:diary_entries_overdue'] = 'Warning when your Diary attempt becomes overdue';
 $string['messageprovider:diary_entries_due'] = 'Diary is due in 7 days';
+$string['messageprovider:diary_entries_due_soon'] = 'Your Diary entry is due soon';
+
+$string['messageprovider:diary_entries_overdue'] = 'Warning when your Diary attempt becomes overdue';
+$string['messageprovider:diary_entry_notification'] = 'Confirm your own Diary entry submissions';
+
 
 $string['min'] = ' min';
 $string['minc'] = ' Min: ';
@@ -453,9 +451,9 @@ $string['statshide'] = 'Hide statistics';
 $string['statsshow'] = 'Show statistics';
 $string['studentemail'] = 'Send feedback email notifications to students';
 $string['studentemail_help'] = 'Enable or disable the capability to immediately send email notifications to students.';
-$string['submissionsettings'] = 'Submission settings';
 $string['submissionemail'] = 'Email teacher when submitting an entry';
 $string['submissionemail_help'] = 'If enabled in settings and the teacher preference is set to, Email now, the teacher receives an immediate email when a user submits an entry';
+$string['submissionsettings'] = 'Submission settings';
 $string['tablecolumncharacters'] = 'Characters';
 $string['tablecolumnedit'] = 'Edit&nbsp;&nbsp;&nbsp;&nbsp;';
 $string['tablecolumnparagraphs'] = 'Paragraphs';

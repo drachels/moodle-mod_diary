@@ -66,11 +66,11 @@ class entry_tags_deleted extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        // $entry = $this->other['entry'];
-        // $tags = $this->other['tags'];
-        // return "The user with id $this->userid has deleted an entry, '$entry' and it's tags '$tags', for the
-        // return "The user with id '$this->userid', deleted an entry and it's tags for the " .
-        // "diary activity with course module id '$this->contextinstanceid'.";
+        // ...$entry = $this->other['entry'];
+        // ...$tags = $this->other['tags'];
+        // ...return "The user with id $this->userid has deleted an entry, '$entry' and it's tags '$tags', for the
+        // ...return "The user with id '$this->userid', deleted an entry and it's tags for the " .
+        // .."diary activity with course module id '$this->contextinstanceid'.";
 
         $descriptionstring = "The user with id '$this->userid', deleted an entry " .
             "diary activity with course module id '$this->contextinstanceid'.";
