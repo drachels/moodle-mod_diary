@@ -192,17 +192,11 @@ die; //20240819 To here works.
     $data->text = $entry->text;
     $data->textformat = $entry->format;
     $debug['CP11-187 jest detected request to delete an entry ($action == deleteentry && $entry): '] = $data;
-
-    print_object($debug);
-    //die;
 } else {
-    print_object($debug);
-    die;
     throw new moodle_exception(get_string('generalerror', 'diary'));
 }
 
 $data->id = $cm->id;
-//print_object('In edit.php at line 177.');
 list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
                                                                                              $context,
                                                                                              $diary,
@@ -235,9 +229,6 @@ $form = new mod_diary_entry_form(null,
         'attachmentoptions' => $attachmentoptions,
     ]
 );
-//print_object('In edit.php at line 210.');
-//print_object($editoroptions);
-//print_object($attachmentoptions);
 
 // Set existing data loaded from the database for this entry.
 $form->set_data($data);
@@ -464,7 +455,6 @@ if (($diary->intro) && ($CFG->branch < 400)) {
     $intro = format_module_intro('diary', $diary, $cm->id);
 }
 echo $OUTPUT->box($intro);
-//print_object($form);
 // Otherwise fill and print the form.
 $form->display();
 
