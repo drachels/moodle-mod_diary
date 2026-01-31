@@ -12,7 +12,7 @@ This file describes changes and other work in the diary code.
 
 20211130 Diary_779 - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting.
-20220228 Diary_824 - The Moodle Mobile app is not supported.
+20220228 Diary_824 - The Moodle Mobile app is not supported. Link to Diary_1399.
 20230419 Diary_1036 - Diary - Modify Prompts to use Modes to fire up based on resticted
     access or completion.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
@@ -34,11 +34,25 @@ This file describes changes and other work in the diary code.
     background colors.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
 20260113 Diary_1395 - Feature request - cron generated emails should have a date time/stamp.
-
+20260124 Diary_1398 - Need to rebuild messages code and files used for Diary.
+20260124 Diary_1399 - Need to start developing mustache templates.
 
 === 5.0.0 === pending
+
+
+
+=== 4.0.0 === pending
+20241125 Diary_1341r - Add to feedback button on new reportone.php page is broken. Fixed the
+    $param test and stats and auto rating now are added/cleared from the feedback textarea when
+    the, Add to feedback, or the, Clear feedback buttons are clicked.
 20250206 Diary_1368bt - Diary - Delayed email, Email later, from student to teacher does not work.
     Needs new code added to the cron_task.php file. Added code.
+20250301 Diary_1372bt - Feature Request - Submission email enable/disable. Created new setting
+    that is in the Diary settings and then enabled for each teacher via user preference.
+20250512 Diary_1377bt - Undefined property $promptbgc in prompt_edit.php line 262.
+    I already have a fix for this in the works as part of, Diary_1246 - There is no place
+    for default $promptbgc to be set. Added setting about line 39 of prompt_edit.php file.
+20250714 Diary_1380 - Icon is clipped on the corners when using tiles course format.
 20260108 Diary_1391 - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
     Modified lib.php now at about line 893 to 902, by checking existance of entryid.
 20260109 Diary_1392 - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
@@ -54,17 +68,7 @@ This file describes changes and other work in the diary code.
 20260116 Diary_1397 - In whichever php file, the date format defined in settings should be used.
     Added to code in edit.php. ?????
 
-=== 4.0.0 === pending
-20241125 Diary_1341r - Add to feedback button on new reportone.php page is broken. Fixed the
-    $param test and stats and auto rating now are added/cleared from the feedback textarea when
-    the, Add to feedback, or the, Clear feedback buttons are clicked.
-20250301 Diary_1372bt - Feature Request - Submission email enable/disable. Created new setting
-    that is in the Diary settings and then enabled for each teacher via user preference.
-20250512 Diary_1377bt - Undefined property $promptbgc in prompt_edit.php line 262.
-    I already have a fix for this in the works as part of, Diary_1246 - There is no place
-    for default $promptbgc to be set. Added setting about line 39 of prompt_edit.php file.
-20250714 Diary_1380 - Icon is clipped on the corners when using tiles course format.
-    
+
 === 3.8.0 === pending (Build: 2024042900)
 20210515  Diary_720bt - I am getting the String [grade, core] is deprecated debug message in
     multiple locations. Made changes to deprecated.txt and diary.php files but most
