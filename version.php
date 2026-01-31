@@ -30,5 +30,5 @@ $plugin->requires = 2022051900; // Requires Moodle 4.0 version.
 $plugin->cron = 60; // Period for cron to check this module (secs).
 $plugin->component = 'mod_diary';
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '5.0.0 (Build: 2026011000)'; // User-friendly version number.
+$plugin->release = '4.0.0 (Build: 2026011000)'; // User-friendly version number.
 $plugin->supported = [400, 501];
