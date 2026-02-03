@@ -335,10 +335,10 @@ if ($timenow > $timestart) {
     $oldperpage = get_user_preferences('diary_perpage_'.$diary->id, 7);
     $perpage = optional_param('perpage', $oldperpage, PARAM_INT);
 
-    $oldstatspreference = get_user_preferences('diary_statspreference_'.$diary->id, null);
+    $oldstatspreference = get_user_preferences('diary_statspreference_'.$diary->id, 1);
     $statspreference = optional_param('statspreference', $oldstatspreference, PARAM_INT);
 
-    $oldemailpreference = get_user_preferences('diary_emailpreference_'.$diary->id, null);
+    $oldemailpreference = get_user_preferences('diary_emailpreference_'.$diary->id, 2);
     $emailpreference = optional_param('emailpreference', $oldemailpreference, PARAM_INT);
 
     echo $OUTPUT->box_start();
