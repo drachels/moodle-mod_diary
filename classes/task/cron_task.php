@@ -105,9 +105,9 @@ class cron_task extends \core\task\scheduled_task {
                 }
 
                 foreach ($teachers as $teacher) {
-                    // 1. Log who we are checking.
+                    // Log who we are checking.
                     $this->log(" - Checking teacher: " . fullname($teacher) . " (ID: {$teacher->id})");
-                    // 2. Check if the Diary instance has email notifications enabled
+                    // Check if the Diary instance has email notifications enabled
                     if (empty($entry->submissionemail)) {
                         $this->log("   - SKIPPED: This diary instance has submission emails disabled.".$entry->submissionemail);
                         continue; // Proceed with next diary.
@@ -117,7 +117,7 @@ class cron_task extends \core\task\scheduled_task {
                         continue; // Proceed with next teacher.
                     }
 
-                    // 5. Message Construction.
+                    // Message Construction.
                     $diaryinfo = new \stdClass();
                     $diaryinfo->diary = format_string($entry->diaryname); // Assumes diaryname is in SQL.
                     $diaryinfo->url = (new \moodle_url('/mod/diary/reportone.php', [
@@ -125,6 +125,8 @@ class cron_task extends \core\task\scheduled_task {
                         'user' => $student->id,
                         'action' => 'currententry',
                         'entryid' => $entry->id,
+                        'timecreated' => date("l, F j, Y H:i:s", $newentry->timecreated),
+                        'timemodified' => date("l, F j, Y H:i:s", $newentry->timemodified),
                     ]))->out(false);
 
                     $modnamesngl = get_string( 'modulename', 'diary' );
