@@ -207,8 +207,16 @@ if ($form->is_cancelled()) {
 
     // This will be overwritten after we have the entryid.
     $newentry = new stdClass();
+
     // 20240426 Will try getting an old promptid inserted here.
-    $newentry->promptid = prompts::get_current_promptid($diary);
+    // Use the prompt ID from the form if it exists, 
+    // otherwise fall back to the current active prompt for the diary.
+    if (!empty($fromform->promptid)) {
+        $newentry->promptid = $fromform->promptid;
+    } else {
+        $newentry->promptid = prompts::get_current_promptid($diary);
+    }
+
     $newentry->timecreated = $fromform->timecreated;
     $newentry->timemodified = $timenow;
     $newentry->title = $fromform->title;
@@ -310,29 +318,28 @@ if ($form->is_cancelled()) {
         $newentry->tags
     );
 
-    // Try adding autosave cleanup here.
-    // will need to search the mdl_editor_atto_autosave table
-    // will need to find a match with contextid and user id.
-    if ($entry) {
-        // Trigger module entry updated event.
-        $event = \mod_diary\event\entry_updated::create(
-            [
-                'objectid' => $diary->id,
-                'context' => $context,
-            ]
-        );
+    // Fetch the full, fresh record from the DB to ensure the snapshot is complete.
+    $finalrecord = $DB->get_record('diary_entries', ['id' => $newentry->id], '*', MUST_EXIST);
+
+    // Process event as created or updated.
+    if (!empty($fromform->entryid)) {
+        $event = \mod_diary\event\entry_updated::create([
+            'objectid' => $finalrecord->id,
+            'context' => $context,
+        ]);
     } else {
-        // Trigger module entry created event.
-        $event = \mod_diary\event\entry_created::create(
-            [
-                'objectid' => $diary->id,
-                'context' => $context,
-            ]
-        );
+        $event = \mod_diary\event\entry_created::create([
+            'objectid' => $finalrecord->id,
+            'context' => $context,
+        ]);
     }
+
     $event->add_record_snapshot('course_modules', $cm);
     $event->add_record_snapshot('course', $course);
     $event->add_record_snapshot('diary', $diary);
+    
+    // Use the $finalrecord here so all fields (rating, teacher, etc.) are present.
+    $event->add_record_snapshot('diary_entries', $finalrecord);
     $event->trigger();
 
     // Add confirmation of record being saved.
