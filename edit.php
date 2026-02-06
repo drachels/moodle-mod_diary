@@ -37,11 +37,11 @@ $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 $promptid = optional_param('promptid', '', PARAM_INT); // The current one.
 
-if (! $cm = get_coursemodule_from_id('diary', $id)) {
+if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
 
-if (! $course = $DB->get_record("course", ["id" => $cm->course])) {
+if (!$course = $DB->get_record("course", ["id" => $cm->course])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -51,7 +51,7 @@ require_login($course, false, $cm);
 
 require_capability('mod/diary:addentries', $context);
 
-if (! $diary = $DB->get_record('diary', ['id' => $cm->instance])) {
+if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
@@ -61,14 +61,11 @@ $dateformat = get_config('mod_diary', 'dateformat');
 // 20221107 The $diary->intro gets overwritten by the current prompt and Notes, so keep a copy for later down in this file.
 $tempintro = $diary->intro;
 
-// 20240413 Check for existing promptid. DO NOT get current if editing entry already has one.
-// Need to add - DO NOT get current if editing entry does not have a prompt id and it does not meet the time criteria.
-if ((!$promptid) && ($diary->timeopen < time())) {
-    // 20240507 Added for testing and it appears to work for existing entry without a prompt.
-    if ($promptid > 0) {
-        // Need to call a prompt function that returns the current promptid, if there is one that is current.
-        $promptid = prompts::get_current_promptid($diary);
-    }
+// 20240413 Check the promptid delivered in the URL. DO NOT get current if editing entry already has one.
+// 20240507 Added for testing and it appears to work for existing entry without a prompt.
+if (!($promptid > 0) && ($diary->timeopen < time())) {
+    // Need to call a prompt function that returns the current promptid, if there is one that is current.
+    $promptid = prompts::get_current_promptid($diary);
 }
 
 // 20210817 Add min/max info to the description so user can see them while editing an entry.
@@ -137,17 +134,16 @@ if ($action == 'currententry' && $entry) {
         $data->textformat = FORMAT_HTML;
     }
 } else if ($action == 'editentry' && $entry) {
-
     $data->entryid = $entry->id;
     // 20240426 Trying to add old promptid here.
     $data->promptid = $entry->promptid;
+    //$data->promptid = $promptid;
     $data->timecreated = $entry->timecreated;
     $data->title = $entry->title;
     $data->text = $entry->text;
     $data->textformat = $entry->format;
-
     // Think I might need to add a check for currententry && !entry to justify starting a new entry, else error.
-} else if ($action == 'currententry' && ! $entry) {
+} else if ($action == 'currententry' && !$entry) {
     // There are no entries for this user, so start the first one.
     $data->entryid = null;
     // 20250112 Testing promptid for new entry with a current prompt.
@@ -207,16 +203,27 @@ if ($form->is_cancelled()) {
 
     // This will be overwritten after we have the entryid.
     $newentry = new stdClass();
-
-    // 20240426 Will try getting an old promptid inserted here.
-    // Use the prompt ID from the form if it exists, 
-    // otherwise fall back to the current active prompt for the diary.
-    if (!empty($fromform->promptid)) {
+/*
+    // 20260205 Grok - Decide promptid: preserve original on edit, use current on new entry
+    if (!empty($fromform->entryid)) {
+        // Editing → keep the original promptid (came via hidden field from DB)
         $newentry->promptid = $fromform->promptid;
+    } else {
+        // New entry → use the currently active prompt
+        $newentry->promptid = prompts::get_current_promptid($diary);
+    }
+*/
+    // 20260205 Grok recommended safety check.
+    if (!empty($fromform->entryid)) {
+        $original_promptid = $DB->get_field('diary_entries', 'promptid', ['id' => $fromform->entryid], MUST_EXIST);
+        if ($fromform->promptid != $original_promptid) {
+            // Log suspicious activity or just silently enforce original
+            debugging("Prompt ID mismatch on edit - possible tampering? Using original.", DEBUG_DEVELOPER);
+        }
+        $newentry->promptid = $original_promptid;  // or $fromform->promptid if you allow changes someday
     } else {
         $newentry->promptid = prompts::get_current_promptid($diary);
     }
-
     $newentry->timecreated = $fromform->timecreated;
     $newentry->timemodified = $timenow;
     $newentry->title = $fromform->title;
@@ -241,8 +248,8 @@ if ($form->is_cancelled()) {
     // Currently not taking effect on the overall user grade unless the teacher rates it.
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
-        // 20240426 When I save the entry, this is undefined!
-        $newentry->promptid = $fromform->promptid;
+        // 20240426 When I save the entry, this is undefined! 20260205 Grok says to remove this line.
+        //$newentry->promptid = $fromform->promptid;
 
         if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
             // 20210620 New code to prevent attempts to change timecreated.
@@ -282,8 +289,11 @@ if ($form->is_cancelled()) {
     } else {
         $newentry->userid = $USER->id;
         $newentry->diary = $diary->id;
-        // 20250112 Added to get correct promptid.
-        $newentry->promptid = prompts::get_current_promptid($diary);
+        // 20260205 Grok says remove the whole if block.
+        //if (!$action == 'editentry') {
+        //    // 20250112 Added to get correct promptid.
+        //    $newentry->promptid = prompts::get_current_promptid($diary);
+        //}
         if (! $newentry->id = $DB->insert_record('diary_entries', $newentry)) {
             throw new moodle_exception(get_string('generalerrorinsert', 'diary'));
         }
@@ -298,7 +308,7 @@ if ($form->is_cancelled()) {
                                                 'mod_diary',
                                                 'entry',
                                                 $newentry->id);
-    $newentry->promptid = $promptid;
+    //$newentry->promptid = $promptid; // 20260205 Grok says to remove.
     $newentry->title = $fromform->title;
     $newentry->text = $fromform->text;
     $newentry->format = $fromform->textformat;
@@ -405,16 +415,16 @@ if ($form->is_cancelled()) {
                     $message->fullmessage .= "---------------------------------------------------------------------\n";
                     $message->fullmessageformat = FORMAT_MARKDOWN;
                     // Hardcoded text needs to be converted to strings, like the two already done.
-                    $message->fullmessagehtml = "<p><font face=\"sans-serif\">".
-                            "Hi there $teacher->firstname $teacher->lastname,<br>".
-                            "<p>".fullname($USER).'&nbsp;'.get_string("diarymailhtmluser", "diary", $diaryinfo)."</p>".
-                            "<p>The ".$SITE->shortname." Team</p>".
-                            "<br /><hr /><font face=\"sans-serif\">".
-                            "<p>".get_string("additionallinks", "diary")."</p>".
-                            "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
-                            "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
-                            "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$cm->id\">".format_string($diary->name, true).
-                            "</a></font></p>".
+                    $message->fullmessagehtml = "<p><font face=\"sans-serif\">" .
+                            get_string("messagegreeting", "diary") . "$teacher->firstname $teacher->lastname,</p>" .
+                            "<p>".fullname($USER).'&nbsp;' . get_string("diarymailhtmluser", "diary", $diaryinfo) . "</p>" .
+                            "<p>The ".$SITE->shortname." Team</p>" .
+                            "<br /><hr /><font face=\"sans-serif\">" .
+                            "<p>".get_string("additionallinks", "diary") . "</p>" .
+                            "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->" .
+                            "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">Diaries</a> ->" .
+                            "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$cm->id\">" . format_string($diary->name, true) .
+                            "</a></font>" .
                             "</font><hr />";
                     $message->notification = 1; // Because this is a notification generated from Moodle, not a user-to-user message.
                     $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification.
