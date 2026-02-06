@@ -166,11 +166,8 @@ class cron_task extends \core\task\scheduled_task {
                         "<p>" . get_string("additionallinks", "diary") . "</p>". 
                         "<a href=\"$CFG->wwwroot/course/view.php?id={$course->id}\">{$course->shortname}</a> → " .
                         "<a href=\"$CFG->wwwroot/mod/diary/index.php?id={$course->id}\">Diaries</a> → " .
-                        "<p><a href=\"$CFG->wwwroot/mod/diary/view.php?id={$entry->cmid}\">" .
-                        "<a href=\"$CFG->wwwroot/mod/diary/reportsingle.php?id={$entry->cmid}\">" .
-                        "<a href=\"$CFG->wwwroot/mod/diary/reportone.php?id={$entry->cmid}\">" .
-                            format_string($entry->diaryname, true) .
-                        "</a></font></p>" .
+                        "<a href=\"$CFG->wwwroot/mod/diary/view.php?id={$entry->cmid}\">" . format_string($entry->diaryname, true) .
+                        "</a></font>" .
                         "</font><hr />";
                     $message->notification = 1; // Because this is a notification generated from Moodle, not a user-to-user message.
                     $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification.
