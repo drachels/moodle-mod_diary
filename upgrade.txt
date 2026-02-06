@@ -32,6 +32,7 @@ This file describes changes and other work in the diary code.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
 
 20260124 Diary_1399 - Need to start developing mustache templates.
+20260206 Diary_1403 - Issue #51 - Feture request - Upgrade possible for Global Search Index #51.
 
 
 === 5.0.0 === pending
@@ -41,7 +42,8 @@ This file describes changes and other work in the diary code.
 === 4.0.0 === pending
 20241125 Diary_1341r - Add to feedback button on new reportone.php page is broken. Fixed the
     $param test and stats and auto rating now are added/cleared from the feedback textarea when
-    the, Add to feedback, or the, Clear feedback buttons are clicked.
+    the, Add to feedback, or the, Clear feedback buttons are clicked. 20260206 Still does NOT
+    correctly update the students grade/average.
 20250204 Diary_1366bt - Immediate email from student to teacher is broken. Another can of worms
     as I had to add new files for messages, new strings for the new messages, bump the version,
     plus testing! See the ticket for details.
@@ -160,12 +162,8 @@ This file describes changes and other work in the diary code.
     need to test and post my results. - Acces prevented, so far.
 20250124 Diary_1357bt - Diary - Feature needed - Need a new admin only capability to delete entries.
     Modified line 518 of the view.php to allow a site admin delete capability at any time.
-
-
-
 20250211 Diary_1369bt - Diary - Report pages when clicking, Clear feedback, only removes the rating
     from the DB.
-
 
 === 3.7.9 === (Build: 2024042100)
 2024042400 Diary_1235v - Bug fix release for github issue #38 Module will update and produce
