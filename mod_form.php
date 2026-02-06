@@ -585,10 +585,35 @@ class mod_diary_prompt_form extends moodleform {
 
         // Diary prompt background colour setting.
         $name = 'promptbgc';
-        $label = get_string($name, $plugin);
-        $mform->addElement('text', $name, $label, $ratingoptions);
-        $mform->addHelpButton($name, $name, $plugin);
-        $mform->setType($name, PARAM_NOTAGS);
+        $label = get_string('tablecolumnpromptsbgc', $plugin);
+        $mform->addElement('text', $name, $label, ['id' => 'diary_color_picker']);
+        $mform->setType($name, PARAM_TEXT);
+        $mform->setDefault($name, '#ffffff');
+        $mform->addHelpButton($name, 'tablecolumnpromptsbgc', $plugin);
+        $mform->addElement('html', "
+            <script>
+                 var cp = document.getElementById('diary_color_picker');
+                 if (cp) {
+                     // Simple map for legacy color words
+                     var colors = {
+                         'red': '#ff0000', 'blue': '#0000ff', 'green': '#008000',
+                         'yellow': '#ffff00', 'pink': '#ffc0cb', 'white': '#ffffff',
+                         'orange': '#ffa500', 'purple': '#800080'
+                     };
+        
+                     // If the current value is a word in our map, swap it for the Hex
+                     var currentVal = cp.value.toLowerCase();
+                     if (colors[currentVal]) {
+                         cp.value = colors[currentVal];
+                     }
+
+                     cp.type = 'color';
+                     cp.style.width = '60px';
+                     cp.style.height = '35px';
+                     cp.style.cursor = 'pointer';
+                 }
+             </script>
+        ");
 
         // 20220923 Added minimum character count setting.
         $name = 'minchar';
