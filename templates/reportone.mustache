@@ -1,0 +1,62 @@
+{{!
+    @template mod_diary/reportone
+
+    Displays a single diary entry for teacher feedback/grading.
+    Context: Diary activity, one user entry, form for saving feedback.
+}}
+
+<div class="mod-diary-reportone container-fluid">
+
+    {{#backlink}}
+        <div class="float-right mb-3">
+            <a href="{{backlink.url}}" class="btn btn-secondary">
+                {{#str}}viewalldiaries, diary{{/str}}
+            </a>
+        </div>
+    {{/backlink}}
+
+    {{#heading}}
+        <h2>{{heading}}</h2>
+    {{/heading}}
+
+    <form action="{{formaction}}" method="post" class="diary-single-entry-form">
+        <input type="hidden" name="id" value="{{cmid}}" />
+        <input type="hidden" name="sesskey" value="{{sesskey}}" />
+
+        {{#savebuttons}}
+            <p class="feedbacksavereturn">
+                <input type="submit" class="btn btn-primary" value="{{#str}}saveallfeedback, diary{{/str}}" />
+                {{#returnlink}}
+                    <a href="{{returnlink.url}}" class="btn btn-secondary ml-2" role="button">
+                        {{#str}}returntoreport, diary, {{diaryname}}{{/str}}
+                    </a>
+                {{/returnlink}}
+            </p>
+        {{/savebuttons}}
+
+        {{#hasentry}}
+            <div class="entry" style="background: {{entrybgc}};">
+                <!-- No card-body; Keeps original entry border. -->
+                <div class="card-body">
+                    {{{entryhtml}}}  {{! Raw HTML from diary_print_user_entry() }}
+                </div>
+            </div>
+        {{/hasentry}}
+        {{^hasentry}}
+            <div class="alert alert-info">
+                {{#str}}noentriesfound, diary{{/str}}
+            </div>
+        {{/hasentry}}
+
+        {{#savebuttons}}
+            <p class="feedbacksavereturn mt-4">
+                <input type="submit" class="btn btn-primary" value="{{#str}}saveallfeedback, diary{{/str}}" />
+                {{#returnlink}}
+                    <a href="{{returnlink.url}}" class="btn btn-secondary ml-2" role="button">
+                        {{#str}}returntoreport, diary, {{diaryname}}{{/str}}
+                    </a>
+                {{/returnlink}}
+            </p>
+        {{/savebuttons}}
+    </form>
+</div>
