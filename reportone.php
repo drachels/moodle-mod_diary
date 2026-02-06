@@ -27,10 +27,10 @@ require_once("../../config.php");
 require_once("lib.php");
 require_once($CFG->dirroot.'/rating/lib.php');
 
-$id = required_param('id', PARAM_INT); // Course module.
-$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
-$entryid = optional_param('entryid', '', PARAM_INT); // Current entry ID).
-$user = required_param('user', PARAM_INT); // User ID.
+$id = required_param('id', PARAM_INT);          // Course module.
+$action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT);
+$entryid = optional_param('entryid', '', PARAM_INT); // Current entry ID.
+$user = required_param('user', PARAM_INT);      // User ID.
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -50,80 +50,54 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('invalidid', 'diary'));
 }
 
-// 20201016 Get the name for this diary activity.
+// Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, ['context' => $context]);
 
-// 20201014 Set a default sorting order for entry retrieval.
-if ($sortoption = get_user_preferences('sortoption')) {
-    $sortoption = get_user_preferences('sortoption');
-} else {
+// Set a default sorting order for entry retrieval (kept but may not be used here).
+if (!$sortoption = get_user_preferences('sortoption')) {
     set_user_preference('sortoption', 'u.lastname ASC, u.firstname ASC');
     $sortoption = get_user_preferences('sortoption');
 }
 
-if (has_capability('mod/diary:manageentries', $context)) {
-    $stringlable = 'reportsingle';
-    // Get ALL diary entries from this diary, for this user, from newest to oldest.
-    $eee = $DB->get_record('diary_entries', ['id' => $entryid, 'userid' => $user]);
-}
+// Get the single entry.
+$entry = $DB->get_record('diary_entries', ['id' => $entryid, 'userid' => $user]);
 
-// 20211214 Header with additional info in the url.
-$PAGE->set_url('/mod/diary/reportsingle.php',
+// Header with additional info in the url.
+$PAGE->set_url('/mod/diary/reportone.php',
     [
-        'id' => $id,
-        'user' => $user,
+        'id'      => $id,
+        'user'    => $user,
         'entryid' => $entryid,
-        'action' => $action,
+        'action'  => $action,
     ]
 );
-$PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
+$PAGE->navbar->add(get_string("rate", "diary") . ' ' . get_string("entries", "diary"));
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($diaryname);
 
-// 20200827 Added link to index.php page.
-echo '<span style="float: right;"><a href="index.php?id='.$course->id.'">'
-    .get_string('viewalldiaries', 'diary').'</a></span></div>';
-
-// Save our current user id and also get his details. CHECK - might not need this.
-$users = $user;
-$user = $DB->get_record('user', ['id' => $user]);
-
-if ($eee) {
-    // Now, filter down to get the one entry.
-    $entrybyuser[$eee->userid] = $eee;
-    $entrybyentry[$eee->id] = $eee;
-    $entrybyuserentry[$eee->userid][$eee->id] = $eee;
-} else {
-    $entrybyuser = [];
-    $entrybyentry = [];
-}
-
-// Process incoming data if there is any.
+// Process incoming data if there is any (feedback/grade save).
 if ($data = data_submitted()) {
-    results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
+    results::diary_entries_feedback_update($cm, $context, $diary, $data, [$user => $entry], [$entryid => $entry]);
 
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(
         [
             'objectid' => $diary->id,
-            'context' => $context,
+            'context'  => $context,
         ]
     );
     $event->add_record_snapshot('course_modules', $cm);
     $event->add_record_snapshot('course', $course);
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
-
 } else {
-
     // Trigger module viewed event.
     $event = \mod_diary\event\entries_viewed::create(
         [
             'objectid' => $diary->id,
-            'context' => $context,
+            'context'  => $context,
         ]
     );
     $event->add_record_snapshot('course_modules', $cm);
@@ -132,60 +106,26 @@ if ($data = data_submitted()) {
     $event->trigger();
 }
 
-if (! $users) {
-    echo $OUTPUT->heading(get_string("nousersyet"));
-} else {
-
-    // Next line is different from Journal line 171.
-    $grades = make_grades_menu($diary->scale);
-
-    if (! $teachers = get_users_by_capability($context, 'mod/diary:manageentries')) {
-        throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
-    }
-
-    // 20211213 Start the page area where feedback and grades are added and will need to be saved.
-    // 20230810 Changed due to pull request #29.
-    $url = new moodle_url('reportone.php', ['id' => $id, 'user' => $user->id, 'action' => 'currententry', 'entryid' => $entryid]);
-    echo '<form action="'.$url->out(false).'" method="post">';
-
-    // Create a variable with all the info to save all my feedback, so it can be used multiple places.
-    // 20241127 This is the, Save all my feedback, button.
-    $saveallbutton = '';
-    $saveallbutton = '<p class="feedbacksavereturn">';
-    $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
-    $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
-    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
-                      .get_string('saveallfeedback', 'diary').'" />';
-
-    // 20241127 This is the, Return to Diary - diary name, button.
-    $url2 = new moodle_url($CFG->wwwroot.'/mod/diary/report.php', ['id' => $id, 'action' => 'currententry']);
-    $saveallbutton .= ' <a href="'.$url2->out(true)
-                     .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
-                     .get_string('returntoreport', 'diary', $diary->name)
-                     .'</a>';
-
-    $saveallbutton .= "</p>";
-
-    // Add save button at the top of the list of users with entries.
-    echo $saveallbutton;
-    // 20210705 Added new activity color setting. Only need to set the overall background color here.
-    $dcolor3 = $diary->entrybgc;
-    // 20210511 Changed to using class.
-    echo '<div class="entry" style="background: '.$dcolor3.'">';
-    // Based on the single selected user, print all their entries on screen.
-    echo results::diary_print_user_entry($context,
-                                         $course,
-                                         $diary,
-                                         $user,
-                                         $eee,
-                                         $teachers,
-                                         $grades);
-    echo '</div>';
-    // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
-    echo $saveallbutton;
-
-    // End the page area where feedback and grades are added and will need to be saved.
-    echo "</form>";
+// Get teachers and grades menu (needed for entry display).
+$teachers = get_users_by_capability($context, 'mod/diary:manageentries');
+if (!$teachers) {
+    throw new moodle_exception(get_string('noentriesmanagers', 'diary'));
 }
+$grades = make_grades_menu($diary->scale);
+
+// Prepare and render via Mustache template.
+$renderer = $PAGE->get_renderer('mod_diary');
+
+$templatecontext = $renderer->prepare_reportone_data(
+    $cm,
+    $course,
+    $diary,
+    $DB->get_record('user', ['id' => $user]), // full user record
+    $entry,
+    $teachers,
+    $grades
+);
+
+echo $renderer->render_reportone($templatecontext);
 
 echo $OUTPUT->footer();
