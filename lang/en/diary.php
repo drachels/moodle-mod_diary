@@ -273,6 +273,7 @@ $string['maxwordlimit_desc'] = 'Note: This entry can use a <strong>maximum of {$
 $string['maxwordlimit_help'] = 'If a number is entered, the user must use less words than the maximum number listed.';
 $string['mediumwords'] = 'Unique medium words';
 $string['mediumwords_help'] = 'Medium words are words that have two syllables. Note that the algorithm for determining the number of syllables yields only approximate results.';
+$string['messagegreeting'] = 'Hi there ';
 $string['messageprovider:diary_entries_due'] = 'Diary is due in 7 days';
 $string['messageprovider:diary_entries_due_soon'] = 'Your Diary entry is due soon';
 
@@ -376,6 +377,8 @@ $string['privacy:metadata:diary_entries:userid'] = 'ID of the user.';
 $string['prompt'] = 'Enter your writing prompt';
 $string['promptbgc'] = 'Background color for this prompt';
 $string['promptbgc_help'] = 'This sets the overall background color for this prompt.';
+$string['tablecolumnpromptsbgc'] = 'Prompt color';
+$string['tablecolumnpromptsbgc_help'] = 'Click the box to choose a background color for this specific prompt.';
 $string['promptid'] = 'Prompt id';
 $string['promptinfo'] = 'There are {$a->past} past prompts, {$a->current} current prompt, and {$a->future} future prompts for this diary activity.<br>';
 $string['promptmaxc'] = 'Char max';
