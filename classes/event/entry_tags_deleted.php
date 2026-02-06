@@ -15,40 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_diary entry tags deleted event.
+ * Event for deletion of a diary entry along with its associated tags.
  *
  * @package   mod_diary
  * @copyright 2025 drachels@drachels.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_diary\event;
 
-defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
+defined('MOODLE_INTERNAL') || die();
 
-/**
- * The mod_diary entry and tag instance deleted event class.
- *
- * @property-read array $other {
- *      Extra information about event.
- *
- *      - int USER: the userid of the entry.
- *      - int entryid: the id of the diary entry.
- *      - int tagid: the id of a tag instance, belonging to the entry.
- * }
- * @package   mod_diary
- * @since     Moodle 2.7
- * @copyright 2025 drachels@drachels.com
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class entry_tags_deleted extends \core\event\base {
 
     /**
      * Init method.
      */
     protected function init() {
-        $this->data['crud'] = 'u';
-        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
-        $this->data['objecttable'] = 'diary';
+        $this->data['crud']         = 'd';
+        $this->data['edulevel']     = self::LEVEL_PARTICIPATING;
+        $this->data['objecttable']  = 'diary_entries';
     }
 
     /**
@@ -61,27 +47,17 @@ class entry_tags_deleted extends \core\event\base {
     }
 
     /**
-     * Returns description of what happened.
+     * Returns non-localised description of what happened.
      *
      * @return string
      */
     public function get_description() {
-        // ...$entry = $this->other['entry'];
-        // ...$tags = $this->other['tags'];
-        // ...return "The user with id $this->userid has deleted an entry, '$entry' and it's tags '$tags', for the
-        // ...return "The user with id '$this->userid', deleted an entry and it's tags for the " .
-        // .."diary activity with course module id '$this->contextinstanceid'.";
+        $tagcount = isset($this->other['tagcount']) ? $this->other['tagcount'] : 0;
+        $tagsdesc = $tagcount > 0 ? " including $tagcount tag(s)" : '';
 
-        $descriptionstring = "The user with id '$this->userid', deleted an entry " .
-            "diary activity with course module id '$this->contextinstanceid'.";
-        if (!empty($this->other['tags'])) {
-            $entryowner = $this->other['entryowner'];
-            $tags = $this->other['tags'];
-            $descriptionstring .= "belonging to '$entryowner' with tags '$tags'.";
-        } else {
-            $descriptionstring .= "the user with id '$this->relateduserid'.";
-        }
-        return $descriptionstring;
+        return "The user with id '{$this->userid}' deleted diary entry '{$this->objectid}' "
+             . "belonging to user '{$this->relateduserid}'$tagsdesc in the Diary activity "
+             . "with course module id '{$this->contextinstanceid}'.";
     }
 
     /**
@@ -90,10 +66,23 @@ class entry_tags_deleted extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/diary/view.php',
-            [
-                'id' => $this->contextinstanceid,
-            ]
-        );
+        return new \moodle_url('/mod/diary/view.php', ['id' => $this->contextinstanceid]);
+    }
+
+    /**
+     * Custom validations.
+     *
+     * @throws \coding_exception
+     */
+    protected function validate_data() {
+        parent::validate_data();
+
+        if (!isset($this->relateduserid)) {
+            throw new \coding_exception('The \'relateduserid\' must be set.');
+        }
+        if (!isset($this->objectid)) {
+            throw new \coding_exception('The \'objectid\' must be set to the deleted entry ID.');
+        }
+        // Optional: check 'other' has expected keys if you want stricter validation.
     }
 }
