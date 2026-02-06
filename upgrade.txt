@@ -78,6 +78,10 @@ This file describes changes and other work in the diary code.
     needed as Diary only uses built in Moodle API Completion code.
 20260203 Diary_1401bt - Feature request - Change promptbgc to a color selector instead of text input.
     Used Gemini for suggestions and now have a working color selector. See ticket for details.
+20260205 Diary_1402bt - Dop down menu - More -> Logs generates a Warning. Rewrote the files,
+    entry_deleted.php and entry_tags_deleted.php to remove the warning.
+
+
 
 === 3.8.0 === pending (Build: 2024042900)
 20210515  Diary_720r - I am getting the String [grade, core] is deprecated debug message in
