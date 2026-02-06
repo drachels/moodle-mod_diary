@@ -330,6 +330,7 @@ $string['newdiaryentries'] = 'New diary entries';
 $string['nextentry'] = 'Next entry';
 $string['nodeadline'] = 'Always open';
 $string['noentriesmanagers'] = 'There are no teachers';
+$string['noentriesfound'] = 'No entry found for this user.';
 $string['noentry'] = 'No entry. ';
 $string['noratinggiven'] = 'No rating given';
 $string['notextdetected'] = '<b>No text detected!</b>';
