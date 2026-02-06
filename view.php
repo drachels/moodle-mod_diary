@@ -375,10 +375,10 @@ if ($timenow > $timestart) {
             }
             // Print user toolbar icons only if there is at least one entry for this user.
             if ($entrys) {
-                // 20250110 Create options list to pass to the toolbar.
+                // 20250110 Create options list to pass to the toolbar. 20260204 Changed options order to match above.
                 $options['id'] = $cm->id;
-                $options['action'] = 'editentry';
                 $options['firstkey'] = $firstkey;
+                $options['action'] = 'editentry';
                 $options['promptid'] = $promptid;
                 echo '<span style="float: right;">'.get_string('usertoolbar', 'diary');
                 echo $output->toolbar(has_capability('mod/diary:addentries', $context),
