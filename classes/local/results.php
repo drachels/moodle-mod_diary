@@ -1190,7 +1190,7 @@ class results {
                     $newentry->entrycomment = $studentcomment;
                     $newentry->teacher = $USER->id;
                     $newentry->timemarked = $timenow;
-                    $newentry->mailed = 0; // Make sure mail goes out (again, even).
+                    $newentry->mailed = 0; // Make sure mail goes out (again, even). This might need to be entrynoticemailed.
                     $newentry->id = $num;
                     if (!$DB->update_record("diary_entries", $newentry)) {
                         notify("Failed to update the diary feedback for user $entry->userid");
