@@ -91,10 +91,15 @@ class cron_task extends \core\task\scheduled_task {
                 }
                 $student = $users[$entry->userid];
 
-                // 4. Context & Teacher Retrieval.
+                // 4. 20260204 Rewritten based on Grok recommendation - Context & Teacher Retrieval.
                 // Using the module context is more precise than course context.
-                $context = \context_module::instance($entry->cmid); // Assumes cmid is in your SQL result.
+                $context = \context_module::instance($entry->cmid);
                 $teachers = get_enrolled_users($context, 'mod/diary:rate');
+
+                // 20260204 Changed on  Grok recommendation.
+                if (!$course = $DB->get_record("course", ["id" => $entry->course])) {
+                    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
+                }
 
                 if (!$teachers) {
                     $this->log("No teachers found for diary entry {$entry->id}. Skipping email.");
@@ -125,9 +130,15 @@ class cron_task extends \core\task\scheduled_task {
                         'user' => $student->id,
                         'action' => 'currententry',
                         'entryid' => $entry->id,
-                        'timecreated' => date("l, F j, Y H:i:s", $newentry->timecreated),
-                        'timemodified' => date("l, F j, Y H:i:s", $newentry->timemodified),
                     ]))->out(false);
+
+                    // 20260203 Added the entry created/modified time.
+                    $diaryinfo->timecreated = date("l, F j, Y H:i:s", $entry->timecreated);
+                    if ($entry->timemodified) {
+                        $diaryinfo->timemodified = date("l, F j, Y H:i:s", $entry->timemodified);
+                    } else {
+                        $diaryinfo->timemodified = date("l, F j, Y H:i:s", $entry->timecreated);
+                    }
 
                     $modnamesngl = get_string( 'modulename', 'diary' );
                     $modnamepl = get_string( 'modulenameplural', 'diary' );
@@ -144,19 +155,22 @@ class cron_task extends \core\task\scheduled_task {
                     $message->fullmessage       = "Hi,\n\n" . fullname($student) .
                         " has submitted a new entry. \nView: {$diaryinfo->url}";
                     $message->fullmessage      .= "$course->shortname -> $modnamepl -> " .
-                        format_string($diary->name, true)."\n";
+                        format_string($diaryinfo->diary, true)."\n";
 
                     $message->fullmessageformat = FORMAT_MARKDOWN;
-                    $message->fullmessagehtml = "<p><font face=\"sans-serif\">".
-                        "Hi there $teacher->firstname $teacher->lastname,<br>".
-                        "<p>".fullname($student).'&nbsp;'.get_string("diarymailhtmluser", "diary", $diaryinfo)."</p>".
-                        "<p>The ".$SITE->shortname." Team</p>".
-                        "<br /><hr /><font face=\"sans-serif\">".
-                        "<p>".get_string("additionallinks", "diary")."</p>".
-                        "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->".
-                        "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">diarys</a> ->".
-                        "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$cm->id\">".format_string($diary->name, true).
-                        "</a></font></p>".
+                    $message->fullmessagehtml = "<p><font face=\"sans-serif\">" .
+                        get_string("messagegreeting", "diary") . "$teacher->firstname $teacher->lastname,</p>".
+                        "<p>".fullname($student).'&nbsp;'.get_string("diarymailhtmluser", "diary", $diaryinfo) . "</p>".
+                        "<p>The " . $SITE->shortname . " Team</p>".
+                        "<br /><hr /><font face=\"sans-serif\">" .
+                        "<p>" . get_string("additionallinks", "diary") . "</p>". 
+                        "<a href=\"$CFG->wwwroot/course/view.php?id={$course->id}\">{$course->shortname}</a> → " .
+                        "<a href=\"$CFG->wwwroot/mod/diary/index.php?id={$course->id}\">Diaries</a> → " .
+                        "<p><a href=\"$CFG->wwwroot/mod/diary/view.php?id={$entry->cmid}\">" .
+                        "<a href=\"$CFG->wwwroot/mod/diary/reportsingle.php?id={$entry->cmid}\">" .
+                        "<a href=\"$CFG->wwwroot/mod/diary/reportone.php?id={$entry->cmid}\">" .
+                            format_string($entry->diaryname, true) .
+                        "</a></font></p>" .
                         "</font><hr />";
                     $message->notification = 1; // Because this is a notification generated from Moodle, not a user-to-user message.
                     $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification.
@@ -196,6 +210,7 @@ class cron_task extends \core\task\scheduled_task {
         $this->log_finish("Diary processing completed.");
         return true;
     }
+
     /**
      * Return entries with submissionemail notices that have not been emailed.
      *
