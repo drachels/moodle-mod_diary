@@ -84,7 +84,7 @@ if (($diary->timeclose) && (time() > $diary->timeclose)) {
     ];
     $event = invalid_access_attempt::create($params);
     $event->trigger();
-    redirect('view.php?id='.$id, get_string('invalidaccessexp', 'diary'));
+    redirect('view.php?id=' . $id, get_string('invalidaccessexp', 'diary'));
 }
 
 // Header.
@@ -103,12 +103,7 @@ $parameters = [
 ];
 
 // Get the single record specified by firstkey.
-$entry = $DB->get_record('diary_entries',
-    [
-        'userid' => $USER->id,
-        'id' => $firstkey,
-    ]
-);
+$entry = $DB->get_record('diary_entries', ['userid' => $USER->id, 'id' => $firstkey,]);
 
 // 20230306 Added code that lists the tags on the edit_form page.
 $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
