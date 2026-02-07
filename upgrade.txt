@@ -31,7 +31,6 @@ This file describes changes and other work in the diary code.
     background colors.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
 
-20260124 Diary_1399 - Need to start developing mustache templates.
 20260206 Diary_1403 - Issue #51 - Feture request - Upgrade possible for Global Search Index #51.
 
 
@@ -76,6 +75,8 @@ This file describes changes and other work in the diary code.
     Added to code in edit.php. ?????
 20260124 Diary_1398bt - Need to rebuild messages code and files used for Diary. Email now code
     is in edit.php and email later code is in cron_task.php file. 20260205 Added greeting string.
+20260124 Diary_1399bt - Need to start developing mustache templates - reportone.php first.
+    Reportone.php-DONE. Testing seems okay for everything I've checked.
 20260124 Diary_1400r - If needed, move completion rules/code to /diary/classes/completion. Not
     needed as Diary only uses built in Moodle API Completion code.
 20260203 Diary_1401bt - Feature request - Change promptbgc to a color selector instead of text input.
