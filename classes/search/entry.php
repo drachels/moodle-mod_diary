@@ -36,7 +36,6 @@ require_once($CFG->dirroot . '/lib/grouplib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class entry extends \core_search\base_mod {
-
     /**
      *
      * @var array Internal quick static cache.
@@ -53,7 +52,7 @@ class entry extends \core_search\base_mod {
     public function get_document_recordset($modifiedfrom = 0, ?\context $context = null) {
         global $DB;
 
-        list ($contextjoin, $contextparams) = $this->get_context_restriction_sql($context, 'diary', 'd', SQL_PARAMS_NAMED);
+         [$contextjoin, $contextparams] = $this->get_context_restriction_sql($context, 'diary', 'd', SQL_PARAMS_NAMED);
         if ($contextjoin === null) {
             return null;
         }
@@ -64,7 +63,8 @@ class entry extends \core_search\base_mod {
           $contextjoin
                  WHERE de.timemodified >= :timemodified
               ORDER BY de.timemodified ASC";
-        return $DB->get_recordset_sql($sql, array_merge($contextparams,
+        return $DB->get_recordset_sql($sql, array_merge(
+            $contextparams,
             [
                 'timemodified' => $modifiedfrom,
             ]
@@ -84,8 +84,8 @@ class entry extends \core_search\base_mod {
             $context = \context_module::instance($cm->id);
         } catch (\dml_missing_record_exception $ex) {
             // Notify it as we run here as admin, we should see everything.
-            debugging('Error retrieving mod_diary '.$entry->id.' document, not all required data is available: '
-                .$ex->getMessage(), DEBUG_DEVELOPER);
+            debugging('Error retrieving mod_diary ' . $entry->id . ' document, not all required data is available: '
+                . $ex->getMessage(), DEBUG_DEVELOPER);
             return false;
         } catch (\dml_exception $ex) {
             // Notify it as we run here as admin, we should see everything.
@@ -162,7 +162,8 @@ class entry extends \core_search\base_mod {
             // Teachers see student's entries in the report page.
             $url = '/mod/diary/report.php#entry-' . $entryuserid;
         }
-        return new \moodle_url($url,
+        return new \moodle_url(
+            $url,
             [
                 'id' => $contextmodule->instanceid,
             ]
@@ -177,7 +178,8 @@ class entry extends \core_search\base_mod {
      */
     public function get_context_url(\core_search\document $doc) {
         $contextmodule = \context::instance_by_id($doc->get('contextid'));
-        return new \moodle_url('/mod/diary/view.php',
+        return new \moodle_url(
+            '/mod/diary/view.php',
             [
                 'id' => $contextmodule->instanceid,
             ]
