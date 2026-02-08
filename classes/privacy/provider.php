@@ -45,10 +45,10 @@ require_once($CFG->dirroot . '/mod/diary/lib.php');
  * @copyright 2019 AL Rachels <drachels@drachels.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\provider,
-                          \core_privacy\local\request\plugin\provider,
-                          \core_privacy\local\request\core_userlist_provider {
-
+class provider implements
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
     /**
      * Provides meta data that is stored about a user with mod_diary.
      *
@@ -187,7 +187,7 @@ class provider implements \core_privacy\local\metadata\provider,
         }
 
         $user = $contextlist->get_user();
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
         $sql = "
             SELECT cm.id AS cmid,
@@ -322,7 +322,7 @@ class provider implements \core_privacy\local\metadata\provider,
             }
             $itemids = $DB->get_fieldset_select('diary_entries', 'id', 'diary = ?', [$cm->instance]);
             if ($itemids) {
-                list($isql, $params) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+                [$isql, $params] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
                 $params['userid'] = $userid;
                 $params = ['instanceid' => $cm->instance, 'userid' => $userid];
                 $DB->delete_records_select('diary_entries', 'diary = :instanceid AND userid = :userid', $params);
@@ -351,9 +351,9 @@ class provider implements \core_privacy\local\metadata\provider,
 
         // Prepare SQL to gather all completed IDs.
         $itemids = $DB->get_fieldset_select('diary_entries', 'id', 'diary = ?', [$cm->instance]);
-        list($itsql, $itparams) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+        [$itsql, $itparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
         $userids = $userlist->get_userids();
-        list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
 
         // Delete user-created personal diary entries items.
         $DB->delete_records_select(
