@@ -103,7 +103,7 @@ $parameters = [
 ];
 
 // Get the single record specified by firstkey.
-$entry = $DB->get_record('diary_entries', ['userid' => $USER->id, 'id' => $firstkey,]);
+$entry = $DB->get_record('diary_entries', ['userid' => $USER->id, 'id' => $firstkey]);
 
 // 20230306 Added code that lists the tags on the edit_form page.
 $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
@@ -132,7 +132,6 @@ if ($action == 'currententry' && $entry) {
     $data->entryid = $entry->id;
     // 20240426 Trying to add old promptid here.
     $data->promptid = $entry->promptid;
-    //$data->promptid = $promptid;
     $data->timecreated = $entry->timecreated;
     $data->title = $entry->title;
     $data->text = $entry->text;
@@ -152,323 +151,341 @@ if ($action == 'currententry' && $entry) {
 }
 
 $data->id = $cm->id;
-list ($editoroptions, $attachmentoptions) = results::diary_get_editor_and_attachment_options($course,
-                                                                                             $context,
-                                                                                             $diary,
-                                                                                             $entry,
-                                                                                             $action,
-                                                                                             $firstkey);
+    [$editoroptions, $attachmentoptions] = results::diary_get_editor_and_attachment_options(
+        $course,
+        $context,
+        $diary,
+        $entry,
+        $action,
+        $firstkey
+    );
 
-$data = file_prepare_standard_editor($data,
-                                     'text',
-                                     $editoroptions,
-                                     $context,
-                                     'mod_diary',
-                                     'entry',
-                                     $data->entryid);
-$data = file_prepare_standard_filemanager($data,
-                                          'attachment',
-                                          $attachmentoptions,
-                                          $context,
-                                          'mod_diary',
-                                          'attachment',
-                                          $data->entryid);
+    $data = file_prepare_standard_editor(
+        $data,
+        'text',
+        $editoroptions,
+        $context,
+        'mod_diary',
+        'entry',
+        $data->entryid
+    );
+    $data = file_prepare_standard_filemanager(
+        $data,
+        'attachment',
+        $attachmentoptions,
+        $context,
+        'mod_diary',
+        'attachment',
+        $data->entryid
+    );
 
-// 20201119 Added $diary->editdates setting.
-$form = new mod_diary_entry_form(null,
-    [
+    // 20201119 Added $diary->editdates setting.
+    $form = new mod_diary_entry_form(
+        null,
+        [
         'current' => $data,
         'cm' => $cm,
         'diary' => $diary->editdates,
         'editoroptions' => $editoroptions,
         'attachmentoptions' => $attachmentoptions,
-    ]
-);
-
-// Set existing data loaded from the database for this entry.
-$form->set_data($data);
-
-if ($form->is_cancelled()) {
-    redirect($CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id);
-} else if ($fromform = $form->get_data()) {
-    // If data submitted, then process and store, contains text, format, and itemid.
-    // Prevent CSFR.
-    confirm_sesskey();
-    $timenow = time();
-
-    // This will be overwritten after we have the entryid.
-    $newentry = new stdClass();
-/*
-    // 20260205 Grok - Decide promptid: preserve original on edit, use current on new entry
-    if (!empty($fromform->entryid)) {
-        // Editing → keep the original promptid (came via hidden field from DB)
-        $newentry->promptid = $fromform->promptid;
-    } else {
-        // New entry → use the currently active prompt
-        $newentry->promptid = prompts::get_current_promptid($diary);
-    }
-*/
-    // 20260205 Grok recommended safety check.
-    if (!empty($fromform->entryid)) {
-        $original_promptid = $DB->get_field('diary_entries', 'promptid', ['id' => $fromform->entryid], MUST_EXIST);
-        if ($fromform->promptid != $original_promptid) {
-            // Log suspicious activity or just silently enforce original
-            debugging("Prompt ID mismatch on edit - possible tampering? Using original.", DEBUG_DEVELOPER);
-        }
-        $newentry->promptid = $original_promptid;  // or $fromform->promptid if you allow changes someday
-    } else {
-        $newentry->promptid = prompts::get_current_promptid($diary);
-    }
-    $newentry->timecreated = $fromform->timecreated;
-    $newentry->timemodified = $timenow;
-    $newentry->title = $fromform->title;
-    $newentry->text = $fromform->text_editor['text'];
-    // 20250228 Added new field and setting status as no notice sent to the teacher, yet.
-    $newentry->entrynoticemailed = 0;
-    $newentry->format = $fromform->text_editor['format'];
-
-    if (! $diary->editdates) {
-        // If editdates is NOT enabled do attempted cheat testing here.
-        // 20210619 Before we update, see if there is an entry in database with the same entryid.
-        $entry = $DB->get_record("diary_entries",
-            [
-                "userid" => $USER->id,
-                'id' => $fromform->entryid,
-            ]
-        );
-    }
-
-    // 20210619 If user tries to change timecreated, prevent it.
-    // Need to move new code to up to just after getting $entry, to make a nested if.
-    // Currently not taking effect on the overall user grade unless the teacher rates it.
-    if ($fromform->entryid) {
-        $newentry->id = $fromform->entryid;
-        // 20240426 When I save the entry, this is undefined! 20260205 Grok says to remove this line.
-        //$newentry->promptid = $fromform->promptid;
-
-        if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
-            // 20210620 New code to prevent attempts to change timecreated.
-            $newentry->entrycomment = get_string('invalidtimechange', 'diary');
-            $newentry->entrycomment .= get_string('invalidtimechangeoriginal', 'diary', ['one' => userdate($entry->timecreated)]);
-            $newentry->entrycomment .= get_string('invalidtimechangenewtime', 'diary', ['one' => userdate($newentry->timecreated)]);
-            // Probably do not want to just arbitraily set a rating.
-            // Should leave it up to the teacher, otherwise will need to ascertain rating settings for the activity.
-            // phpcs:ignore
-            // $newentry->rating = 1;
-            $newentry->teacher = 2;
-            $newentry->timemodified = time();
-            $newentry->timemarked = time();
-            $newentry->timecreated = $entry->timecreated;
-            $fromform->timecreated = $entry->timecreated;
-            $newentry->entrycomment .= get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
-            $DB->update_record("diary_entries", $newentry);
-
-            // Trigger module entry updated event.
-            $event = \mod_diary\event\invalid_entry_attempt::create(
-                [
-                    'objectid' => $diary->id,
-                    'context' => $context,
-                ]
-            );
-            $event->add_record_snapshot('course_modules', $cm);
-            $event->add_record_snapshot('course', $course);
-            $event->add_record_snapshot('diary', $diary);
-            $event->trigger();
-            redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
-            die();
-        }
-
-        if (! $DB->update_record("diary_entries", $newentry)) {
-            throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
-        }
-    } else {
-        $newentry->userid = $USER->id;
-        $newentry->diary = $diary->id;
-        // 20260205 Grok says remove the whole if block.
-        //if (!$action == 'editentry') {
-        //    // 20250112 Added to get correct promptid.
-        //    $newentry->promptid = prompts::get_current_promptid($diary);
-        //}
-        if (! $newentry->id = $DB->insert_record('diary_entries', $newentry)) {
-            throw new moodle_exception(get_string('generalerrorinsert', 'diary'));
-        }
-    }
-
-    // Relink using the proper entryid.
-    // We need to do this as draft area didn't have an itemid associated when creating the entry.
-    $fromform = file_postupdate_standard_editor($fromform,
-                                                'text',
-                                                $editoroptions,
-                                                $editoroptions['context'],
-                                                'mod_diary',
-                                                'entry',
-                                                $newentry->id);
-    //$newentry->promptid = $promptid; // 20260205 Grok says to remove.
-    $newentry->title = $fromform->title;
-    $newentry->text = $fromform->text;
-    $newentry->format = $fromform->textformat;
-    $newentry->timecreated = $fromform->timecreated;
-    // ...$newentry->timemodified = $fromform->timemodified;
-    $newentry->tags = $fromform->tags;
-
-    $DB->update_record('diary_entries', $newentry);
-
-    // Do some other processing here,
-    // If this is a new page (entry) you need to insert it in the DB and obtain id.
-    core_tag_tag::set_item_tags(
-        'mod_diary',
-        'diary_entries',
-        $newentry->id,
-        $context,
-        $newentry->tags
+        ]
     );
 
-    // Fetch the full, fresh record from the DB to ensure the snapshot is complete.
-    $finalrecord = $DB->get_record('diary_entries', ['id' => $newentry->id], '*', MUST_EXIST);
+    // Set existing data loaded from the database for this entry.
+    $form->set_data($data);
 
-    // Process event as created or updated.
-    if (!empty($fromform->entryid)) {
-        $event = \mod_diary\event\entry_updated::create([
+    if ($form->is_cancelled()) {
+        redirect($CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id);
+    } else if ($fromform = $form->get_data()) {
+        // If data submitted, then process and store, contains text, format, and itemid.
+        // Prevent CSFR.
+        confirm_sesskey();
+        $timenow = time();
+
+        // This will be overwritten after we have the entryid.
+        $newentry = new stdClass();
+
+        // 20260205 Grok recommended safety check.
+        if (!empty($fromform->entryid)) {
+            $originalpromptid = $DB->get_field('diary_entries', 'promptid', ['id' => $fromform->entryid], MUST_EXIST);
+            if ($fromform->promptid != $originalpromptid) {
+                // Log suspicious activity or just silently enforce original.
+                debugging("Prompt ID mismatch on edit - possible tampering? Using original.", DEBUG_DEVELOPER);
+            }
+            $newentry->promptid = $originalpromptid;  // Or $fromform->promptid if you allow changes someday.
+        } else {
+            $newentry->promptid = prompts::get_current_promptid($diary);
+        }
+        $newentry->timecreated = $fromform->timecreated;
+        $newentry->timemodified = $timenow;
+        $newentry->title = $fromform->title;
+        $newentry->text = $fromform->text_editor['text'];
+        // 20250228 Added new field and setting status as no notice sent to the teacher, yet.
+        $newentry->entrynoticemailed = 0;
+        $newentry->format = $fromform->text_editor['format'];
+
+        if (! $diary->editdates) {
+            // If editdates is NOT enabled do attempted cheat testing here.
+            // 20210619 Before we update, see if there is an entry in database with the same entryid.
+            $entry = $DB->get_record(
+                "diary_entries",
+                [
+                "userid" => $USER->id,
+                'id' => $fromform->entryid,
+                ]
+            );
+        }
+
+        // 20210619 If user tries to change timecreated, prevent it.
+        // Need to move new code to up to just after getting $entry, to make a nested if.
+        // Currently not taking effect on the overall user grade unless the teacher rates it.
+        if ($fromform->entryid) {
+            $newentry->id = $fromform->entryid;
+            // 20240426 When I save the entry, this is undefined! 20260205 Grok says to remove this line.
+            // $newentry->promptid = $fromform->promptid;
+
+            if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
+                // 20210620 New code to prevent attempts to change timecreated.
+                $newentry->entrycomment = get_string('invalidtimechange', 'diary');
+                $newentry->entrycomment .= get_string(
+                    'invalidtimechangeoriginal',
+                    'diary',
+                    [
+                        'one' => userdate($entry->timecreated),
+                    ]
+                );
+                $newentry->entrycomment .= get_string(
+                    'invalidtimechangenewtime',
+                    'diary',
+                    [
+                        'one' => userdate($newentry->timecreated),
+                    ]
+                );
+                // Probably do not want to just arbitraily set a rating.
+                // Should leave it up to the teacher, otherwise will need to ascertain rating settings for the activity.
+                // phpcs:ignore
+                // $newentry->rating = 1;
+                $newentry->teacher = 2;
+                $newentry->timemodified = time();
+                $newentry->timemarked = time();
+                $newentry->timecreated = $entry->timecreated;
+                $fromform->timecreated = $entry->timecreated;
+                $newentry->entrycomment .= get_string('invalidtimeresettime', 'diary', ['one' => userdate($newentry->timecreated)]);
+                $DB->update_record("diary_entries", $newentry);
+
+                // Trigger module entry updated event.
+                $event = \mod_diary\event\invalid_entry_attempt::create(
+                    [
+                    'objectid' => $diary->id,
+                    'context' => $context,
+                    ]
+                );
+                $event->add_record_snapshot('course_modules', $cm);
+                $event->add_record_snapshot('course', $course);
+                $event->add_record_snapshot('diary', $diary);
+                $event->trigger();
+                redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
+                die();
+            }
+
+            if (! $DB->update_record("diary_entries", $newentry)) {
+                throw new moodle_exception(get_string('generalerrorupdate', 'diary'));
+            }
+        } else {
+            $newentry->userid = $USER->id;
+            $newentry->diary = $diary->id;
+            // 20260205 Grok says remove the whole if block.
+            // if (!$action == 'editentry') {
+            // 20250112 Added to get correct promptid.
+            // $newentry->promptid = prompts::get_current_promptid($diary);
+            // }
+            if (! $newentry->id = $DB->insert_record('diary_entries', $newentry)) {
+                throw new moodle_exception(get_string('generalerrorinsert', 'diary'));
+            }
+        }
+
+        // Relink using the proper entryid.
+        // We need to do this as draft area didn't have an itemid associated when creating the entry.
+        $fromform = file_postupdate_standard_editor(
+            $fromform,
+            'text',
+            $editoroptions,
+            $editoroptions['context'],
+            'mod_diary',
+            'entry',
+            $newentry->id
+        );
+        $newentry->title = $fromform->title;
+        $newentry->text = $fromform->text;
+        $newentry->format = $fromform->textformat;
+        $newentry->timecreated = $fromform->timecreated;
+        $newentry->tags = $fromform->tags;
+
+        $DB->update_record('diary_entries', $newentry);
+
+        // Do some other processing here,
+        // If this is a new page (entry) you need to insert it in the DB and obtain id.
+        core_tag_tag::set_item_tags(
+            'mod_diary',
+            'diary_entries',
+            $newentry->id,
+            $context,
+            $newentry->tags
+        );
+
+        // Fetch the full, fresh record from the DB to ensure the snapshot is complete.
+        $finalrecord = $DB->get_record('diary_entries', ['id' => $newentry->id], '*', MUST_EXIST);
+
+        // Process event as created or updated.
+        if (!empty($fromform->entryid)) {
+            $event = \mod_diary\event\entry_updated::create([
             'objectid' => $finalrecord->id,
             'context' => $context,
-        ]);
-    } else {
-        $event = \mod_diary\event\entry_created::create([
+            ]);
+        } else {
+            $event = \mod_diary\event\entry_created::create([
             'objectid' => $finalrecord->id,
             'context' => $context,
-        ]);
-    }
+            ]);
+        }
 
-    $event->add_record_snapshot('course_modules', $cm);
-    $event->add_record_snapshot('course', $course);
-    $event->add_record_snapshot('diary', $diary);
-    
-    // Use the $finalrecord here so all fields (rating, teacher, etc.) are present.
-    $event->add_record_snapshot('diary_entries', $finalrecord);
-    $event->trigger();
+        $event->add_record_snapshot('course_modules', $cm);
+        $event->add_record_snapshot('course', $course);
+        $event->add_record_snapshot('diary', $diary);
 
-    // Add confirmation of record being saved.
-    echo $OUTPUT->notification(get_string('entrysuccess', 'diary'), 'notifysuccess');
+        // Use the $finalrecord here so all fields (rating, teacher, etc.) are present.
+        $event->add_record_snapshot('diary_entries', $finalrecord);
+        $event->trigger();
 
-    // Start new code to send teachers email note when diary entry is made.
-    // 20231105 Modified code so non-editing teachers get an email, too.
-    $role1 = $DB->get_record('role', ['shortname' => 'editingteacher']);
-    $role2 = $DB->get_record('role', ['shortname' => 'teacher']);
-    $contextcourse = context_course::instance($course->id);
+        // Add confirmation of record being saved.
+        echo $OUTPUT->notification(get_string('entrysuccess', 'diary'), 'notifysuccess');
 
-    $teachers1 = get_role_users($role1->id, $contextcourse);
-    $teachers2 = get_role_users($role2->id, $contextcourse);
-    $teachers = array_merge($teachers1, $teachers2);
-    $admin = get_admin();
+        // Start new code to send teachers email note when diary entry is made.
+        // 20231105 Modified code so non-editing teachers get an email, too.
+        $role1 = $DB->get_record('role', ['shortname' => 'editingteacher']);
+        $role2 = $DB->get_record('role', ['shortname' => 'teacher']);
+        $contextcourse = context_course::instance($course->id);
 
-    // BEFORE we do any email creation, we need to see if we even need to do it!
-    // The foreach $teachers needs to be before the email wording creation.
-    // This move will allow me to use the diarymail and diarymailhtml greetings strings.
+        $teachers1 = get_role_users($role1->id, $contextcourse);
+        $teachers2 = get_role_users($role2->id, $contextcourse);
+        $teachers = array_merge($teachers1, $teachers2);
+        $admin = get_admin();
 
-    // Now send an email for each teacher in the course.
-    // First check to see if the actual data has changed by comparing before and after text fields.
-    // I think I might need to do some more debugging on the $data->text as I am receiving an email
-    // even when the user opens for edit, then saves without making any changes.
-    if ($data->text !== $newentry->text) {
-        // If data has changed, then send the email(s).
-        // 20230402 Since I added the two new fields to mdl_diary table, the following, if, check needs to be changed.
-        // 20250302 Modified to check if $diary->submissionemail is enabled.
-        if ((get_config('mod_diary', 'teacheremail')) && ($diary->teacheremail || $diary->studentemail)
-            && ($diary->submissionemail)) {
-            foreach ($teachers as $teacher) {
-                // 20250303 Check teacher email preference toggle,Email now or Email later after the normal edit delay.
-                if (get_user_preferences('diary_emailpreference_'.$diary->id, null, $teacher->id) == 1) {
-                    $diaryinfo = new stdClass();
-                    $diaryinfo->diary = format_string($diary->name, true);
-                    // 20260114 Added the entry created time.
-                    $diaryinfo->timecreated = date("l, F j, Y H:i:s", $newentry->timecreated);
-                    if ($newentry->timemodified) {
-                        $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timemodified);
-                    } else {
-                        $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timecreated);
-                    }
-                    // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id&user=$USER->id&action=currententry";
-                    // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id&user=$USER->id&action=currententry";
-                    $diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id&user=$USER->id&action=currententry&entryid=$newentry->id";
-                    $modnamesngl = get_string( 'modulename', 'diary' );
-                    $modnamepl = get_string( 'modulenameplural', 'diary' );
+        // BEFORE we do any email creation, we need to see if we even need to do it!
+        // The foreach $teachers needs to be before the email wording creation.
+        // This move will allow me to use the diarymail and diarymailhtml greetings strings.
 
-                    // 20250303 Note that when this is done, $message will contain plain text and HTML versions of the message.
-                    $message = new \core\message\message();
-                    $message->courseid = $course->id; // ID of this course.
-                    $message->modulename = $modnamesngl; // Name of this plugin.
-                    $message->component = 'mod_diary'; // Diary plugin's name.
-                    $message->name = 'diary_entry_notification'; // The notification name from message.php.
-                    $message->userfrom = $USER; // The message is 'from' a specific user and it is set here.
-                    $message->userto = $teacher->id;
-                    // Needs the whole line changed to a string.
-                    $message->subject = fullname($USER)." has posted a diary entry in course '$course->shortname' using the edit.php file.";
-                    $message->fullmessage = 'Hi, \n';
-                    $message->fullmessage .= "$course->shortname -> $modnamepl -> ".format_string($diary->name, true)."\n";
-                    $message->fullmessage .= "---------------------------------------------------------------------\n";
-                    $message->fullmessage .= fullname($USER).' '.get_string("diarymailuser", "diary", $diaryinfo)."\n";
-                    $message->fullmessage .= "---------------------------------------------------------------------\n";
-                    $message->fullmessageformat = FORMAT_MARKDOWN;
-                    // Hardcoded text needs to be converted to strings, like the two already done.
-                    $message->fullmessagehtml = "<p><font face=\"sans-serif\">" .
+        // Now send an email for each teacher in the course.
+        // First check to see if the actual data has changed by comparing before and after text fields.
+        // I think I might need to do some more debugging on the $data->text as I am receiving an email
+        // even when the user opens for edit, then saves without making any changes.
+        if ($data->text !== $newentry->text) {
+            // If data has changed, then send the email(s).
+            // 20230402 Since I added the two new fields to mdl_diary table, the following, if, check needs to be changed.
+            // 20250302 Modified to check if $diary->submissionemail is enabled.
+            if (
+                (get_config('mod_diary', 'teacheremail')) && ($diary->teacheremail || $diary->studentemail)
+                && ($diary->submissionemail)
+            ) {
+                foreach ($teachers as $teacher) {
+                    // 20250303 Check teacher email preference toggle,Email now or Email later after the normal edit delay.
+                    if (get_user_preferences('diary_emailpreference_' . $diary->id, null, $teacher->id) == 1) {
+                        $diaryinfo = new stdClass();
+                        $diaryinfo->diary = format_string($diary->name, true);
+                        // 20260114 Added the entry created time.
+                        $diaryinfo->timecreated = date("l, F j, Y H:i:s", $newentry->timecreated);
+                        if ($newentry->timemodified) {
+                            $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timemodified);
+                        } else {
+                            $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timecreated);
+                        }
+                        // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id
+                        // &user=$USER->id&action=currententry";
+                        // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id
+                        // &user=$USER->id&action=currententry";
+                        $diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id
+                            &user=$USER->id&action=currententry&entryid=$newentry->id";
+                        $modnamesngl = get_string('modulename', 'diary');
+                        $modnamepl = get_string('modulenameplural', 'diary');
+
+                        // 20250303 Note that when this is done, $message will contain plain text and HTML versions of the message.
+                        $message = new \core\message\message();
+                        $message->courseid = $course->id; // ID of this course.
+                        $message->modulename = $modnamesngl; // Name of this plugin.
+                        $message->component = 'mod_diary'; // Diary plugin's name.
+                        $message->name = 'diary_entry_notification'; // The notification name from message.php.
+                        $message->userfrom = $USER; // The message is 'from' a specific user and it is set here.
+                        $message->userto = $teacher->id;
+                        // Needs the whole line changed to a string.
+                        $message->subject = fullname($USER) .
+                            " has posted a diary entry in course '$course->shortname' using the edit.php file.";
+                        $message->fullmessage = 'Hi, \n';
+                        $message->fullmessage .= "$course->shortname -> $modnamepl -> " . format_string($diary->name, true) . "\n";
+                        $message->fullmessage .= "---------------------------------------------------------------------\n";
+                        $message->fullmessage .= fullname($USER) . ' ' . get_string("diarymailuser", "diary", $diaryinfo) . "\n";
+                        $message->fullmessage .= "---------------------------------------------------------------------\n";
+                        $message->fullmessageformat = FORMAT_MARKDOWN;
+                        // Hardcoded text needs to be converted to strings, like the two already done.
+                        $message->fullmessagehtml = "<p><font face=\"sans-serif\">" .
                             get_string("messagegreeting", "diary") . "$teacher->firstname $teacher->lastname,</p>" .
-                            "<p>".fullname($USER).'&nbsp;' . get_string("diarymailhtmluser", "diary", $diaryinfo) . "</p>" .
-                            "<p>The ".$SITE->shortname." Team</p>" .
+                            "<p>" . fullname($USER) . '&nbsp;' . get_string("diarymailhtmluser", "diary", $diaryinfo) . "</p>" .
+                            "<p>The " . $SITE->shortname . " Team</p>" .
                             "<br /><hr /><font face=\"sans-serif\">" .
-                            "<p>".get_string("additionallinks", "diary") . "</p>" .
+                            "<p>" . get_string("additionallinks", "diary") . "</p>" .
                             "<a href=\"$CFG->wwwroot/course/view.php?id=$course->id\">$course->shortname</a> ->" .
                             "<a href=\"$CFG->wwwroot/mod/diary/index.php?id=$course->id\">Diaries</a> ->" .
                             "<a href=\"$CFG->wwwroot/mod/diary/view.php?id=$cm->id\">" . format_string($diary->name, true) .
                             "</a></font>" .
                             "</font><hr />";
-                    $message->notification = 1; // Because this is a notification generated from Moodle, not a user-to-user message.
-                    $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification.
-                    $message->contexturlname = 'Course list'; // Link title explaining where users get to for the contexturl.
-                    // Extra content for specific processor.
-                    // 20260116 Added date and time using format defined by mod_diary configuration settings.
-                    $content = [
+                        // Because this is a notification generated from Moodle, not a user-to-user message.
+                        $message->notification = 1;
+                        $message->contexturl = (new \moodle_url('/course/'))->out(false); // A relevant URL for the notification.
+                        $message->contexturlname = 'Course list'; // Link title explaining where users get to for the contexturl.
+                        // Extra content for specific processor.
+                        // 20260116 Added date and time using format defined by mod_diary configuration settings.
+                        $content = [
                         '*' => [
                             'header' => '<p>The ' . $SITE->fullname . ' Team ' . date("$dateformat") . '</p>',
                             'footer' => '<p>The ' . $SITE->fullname . ' Team ' . date("$dateformat") . '</p>',
                         ],
-                    ];
-                    $message->set_additional_content('email', $content);
-                    /*
-                    // You probably don't need attachments but if you do, here is how to add one
-                    $usercontext = context_user::instance($teacher->id);
-                    $file = new stdClass();
-                    $file->contextid = $usercontext->id;
-                    $file->component = 'user';
-                    $file->filearea = 'private';
-                    $file->itemid = 0;
-                    $file->filepath = '/';
-                    $file->filename = '1.txt';
-                    $file->source = 'test';
+                        ];
+                        $message->set_additional_content('email', $content);
+                        /*
+                        // You probably don't need attachments but if you do, here is how to add one
+                        $usercontext = context_user::instance($teacher->id);
+                        $file = new stdClass();
+                        $file->contextid = $usercontext->id;
+                        $file->component = 'user';
+                        $file->filearea = 'private';
+                        $file->itemid = 0;
+                        $file->filepath = '/';
+                        $file->filename = '1.txt';
+                        $file->source = 'test';
 
-                    $fs = get_file_storage();
-                    $file = $fs->create_file_from_string($file, 'file1 content');
-                    $message->attachment = $file;
-                    */
-                    // Actually send the message.
-                    // 2025042901 Student13 just submitted an entry and got two debug messages from the next line of code.
-                    $messageid = message_send($message);
+                        $fs = get_file_storage();
+                        $file = $fs->create_file_from_string($file, 'file1 content');
+                        $message->attachment = $file;
+                        */
+                        // Actually send the message.
+                        // 2025042901 Student13 just submitted an entry and got two debug messages from the next line of code.
+                        $messageid = message_send($message);
+                    }
                 }
             }
         }
+        // End new code.
+        redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
+        die();
     }
-    // End new code.
-    redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
-    die();
-}
 
-echo $OUTPUT->header();
-if (($diary->intro) && ($CFG->branch < 400)) {
-    echo $OUTPUT->heading(format_string($diary->name));
-    $intro = $tempintro.'<br>'.format_module_intro('diary', $diary, $cm->id);
-} else {
-    $intro = format_module_intro('diary', $diary, $cm->id);
-}
-echo $OUTPUT->box($intro);
-// Otherwise fill and print the form.
-$form->display();
-echo $OUTPUT->footer();
+    echo $OUTPUT->header();
+    if (($diary->intro) && ($CFG->branch < 400)) {
+        echo $OUTPUT->heading(format_string($diary->name));
+        $intro = $tempintro . '<br>' . format_module_intro('diary', $diary, $cm->id);
+    } else {
+        $intro = format_module_intro('diary', $diary, $cm->id);
+    }
+    echo $OUTPUT->box($intro);
+    // Otherwise fill and print the form.
+    $form->display();
+    echo $OUTPUT->footer();
