@@ -95,10 +95,10 @@ require_once($CFG->dirroot . '/tag/lib.php');
 if (!empty($tagsinfo)) {
     // Remove all tag instances for this diary entry.
     core_tag_tag::remove_all_item_tags(
-        'mod_diary',       // component
-        'diary_entries',   // itemtype (must match what you use when adding tags!)
-        $entry->id,        // itemid
-        0                  // tiuserid = 0 for standard item tags (not per-user-view)
+        'mod_diary', // Component.
+        'diary_entries', // Itemtype (must match what you use when adding tags!).
+        $entry->id, // Itemid.
+        0 // The tiuserid = 0 for standard item tags (not per-user-view).
     );
 
     // Optional: Clean up truly orphaned personal tags (not standard/official).
@@ -113,7 +113,7 @@ if (!empty($tagsinfo)) {
 
         if (!$stillused && !$isstandard) {
             $DB->delete_records('tag', ['id' => $tagid]);
-            // Optional debug: debugging("Deleted unused Diary tag ID $tagid ({$tagdata['name']})", DEBUG_DEVELOPER);
+            // Optional debug: debugging("Deleted unused Diary tag ID $tagid ({$tagdata['name']})", DEBUG_DEVELOPER);.
         }
     }
 }
@@ -121,12 +121,12 @@ if (!empty($tagsinfo)) {
 // Prepare event parameters (used for both events).
 $params = [
     'context'       => $context,
-    'objectid'      => $entry->id,              // The deleted entry ID.
-    'relateduserid' => $entry->userid,          // The student who created the entry.
+    'objectid'      => $entry->id, // The deleted entry ID.
+    'relateduserid' => $entry->userid, // The student who created the entry.
     'other'         => [
         'entryid'   => $entry->id,
         'tagcount'  => count($tagsinfo),
-        'tags'      => $tagsinfo,               // Array goes here — Moodle JSON-encodes it.
+        'tags'      => $tagsinfo, // Array goes here — Moodle JSON-encodes it.
     ],
 ];
 
