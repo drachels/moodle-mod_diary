@@ -45,7 +45,6 @@ use moodle_url;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class results {
-
     /**
      * Update the calendar entries for this diary activity.
      *
@@ -57,7 +56,7 @@ class results {
         global $DB, $CFG;
 
         if ($CFG->branch > 30) { // If Moodle less than version 3.1 skip this.
-            require_once($CFG->dirroot.'/calendar/lib.php');
+            require_once($CFG->dirroot . '/calendar/lib.php');
 
             // Get CMID if not sent as part of $diary.
             if (! isset($diary->coursemodule)) {
@@ -70,11 +69,13 @@ class results {
             $event->eventtype = DIARY_EVENT_TYPE_OPEN;
             // The DIARY_EVENT_TYPE_OPEN event should only be an action event if no close time is specified.
             $event->type = empty($diary->timeclose) ? CALENDAR_EVENT_TYPE_ACTION : CALENDAR_EVENT_TYPE_STANDARD;
-            if ($event->id = $DB->get_field('event', 'id', [
+            if (
+                $event->id = $DB->get_field('event', 'id', [
                 'modulename' => 'diary',
                 'instance' => $diary->id,
                 'eventtype' => $event->eventtype,
-            ])) {
+                ])
+            ) {
                 if ((! empty($diary->timeopen)) && ($diary->timeopen > 0)) {
                     // Calendar event exists so update it.
                     $event->name = get_string('calendarstart', 'diary', $diary->name);
@@ -114,11 +115,13 @@ class results {
             $event = new stdClass();
             $event->type = CALENDAR_EVENT_TYPE_ACTION;
             $event->eventtype = DIARY_EVENT_TYPE_CLOSE;
-            if ($event->id = $DB->get_field('event', 'id', [
+            if (
+                $event->id = $DB->get_field('event', 'id', [
                 'modulename' => 'diary',
                 'instance' => $diary->id,
                 'eventtype' => $event->eventtype,
-            ])) {
+                ])
+            ) {
                 if ((! empty($diary->timeclose)) && ($diary->timeclose > 0)) {
                     // Calendar event exists so update it.
                     $event->name = get_string('calendarend', 'diary', $diary->name);
@@ -179,7 +182,7 @@ class results {
      */
     public static function download_entries($context, $course, $diary) {
         global $CFG, $DB, $USER;
-        require_once($CFG->libdir.'/csvlib.class.php');
+        require_once($CFG->libdir . '/csvlib.class.php');
         $data = new stdClass();
         $data->diary = $diary->id;
 
@@ -203,18 +206,18 @@ class results {
             $whichdiary .= ($diary->id);
             $whichprompt = ('AND dp.diaryid = ');
             $whichprompt .= ($diary->id);
-            $csv->filename = clean_filename(($course->shortname).'_');
+            $csv->filename = clean_filename(($course->shortname) . '_');
             $csv->filename .= clean_filename(($diary->name));
         } else if (has_capability('mod/diary:addentries', $context)) {
             $whichdiary = ('AND de.diary = ');
             $whichdiary .= ($diary->id);
             $whichprompt = ('AND dp.diaryid = ');
             $whichprompt .= ($diary->id);
-            $whichuser = (' AND de.userid = '.$USER->id); // Not an admin or teacher so can only get their OWN entries.
-            $csv->filename = clean_filename(($course->shortname).'_');
+            $whichuser = (' AND de.userid = ' . $USER->id); // Not an admin or teacher so can only get their OWN entries.
+            $csv->filename = clean_filename(($course->shortname) . '_');
             $csv->filename .= clean_filename(($diary->name));
         }
-        $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary').gmdate("Ymd_Hi").'GMT.csv');
+        $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary') . gmdate("Ymd_Hi") . 'GMT.csv');
 
         $promptfields = [];
         $promptfields = [
@@ -406,27 +409,27 @@ class results {
                     if (!$firstrowflag) {
                         $csv->add_data($blankrow);
                         $activityinfo = [get_string('course')
-                            .': '.$currentcrsname->shortname,
+                            . ': ' . $currentcrsname->shortname,
                             get_string('activity')
-                            .': '.$currentdiaryname->name,
+                            . ': ' . $currentdiaryname->name,
                         ];
                     } else {
                         // 20221112 Create filename for first line of CSV file depending on whether admin, teacher, or student.
                         if (is_siteadmin($USER->id)) {
-                            $tempfilename = get_string('exportfilenamep1', 'diary').
+                            $tempfilename = get_string('exportfilenamep1', 'diary') .
                                                 get_string('exportfilenamep2', 'diary');
                         } else {
-                            $tempfilename = $currentdiaryname->name.
+                            $tempfilename = $currentdiaryname->name .
                                                 get_string('exportfilenamep2', 'diary');
                         }
 
-                        $activityinfo = [$tempfilename.
-                                            gmdate("Ymd_Hi").get_string('for', 'diary').
+                        $activityinfo = [$tempfilename .
+                                            gmdate("Ymd_Hi") . get_string('for', 'diary') .
                                             $CFG->wwwroot,
                                         ];
                         $csv->add_data($activityinfo);
-                        $activityinfo = [get_string('course').': '.$currentcrsname->shortname,
-                                            get_string('activity').': '.$currentdiaryname->name,
+                        $activityinfo = [get_string('course') . ': ' . $currentcrsname->shortname,
+                                            get_string('activity') . ': ' . $currentdiaryname->name,
                                         ];
                         $csv->add_data($blankrow);
                     }
@@ -439,7 +442,7 @@ class results {
                     $diary->id = $currentdiary;
 
                     // Check to see if there are prompts for this diary.
-                    list($tcount, $past, $current, $future ) = prompts::diary_count_prompts($diary);
+                    [$tcount, $past, $current, $future ] = prompts::diary_count_prompts($diary);
                     // Add the list of prompts for this diary to our data array.
                     if ($tcount > 0) {
                         $pes = $DB->get_records_sql($psql, $promptfields);
@@ -480,12 +483,16 @@ class results {
                     $firstrowflag = 0;
                 }
 
-                $cleanedentry = format_string($d->text,
-                                              $striplinks = true,
-                                              $options = null);
-                $cleanedentrycomment = format_string($d->entrycomment,
-                                              $striplinks = true,
-                                              $options = null);
+                $cleanedentry = format_string(
+                    $d->text,
+                    $striplinks = true,
+                    $options = null
+                );
+                $cleanedentrycomment = format_string(
+                    $d->entrycomment,
+                    $striplinks = true,
+                    $options = null
+                );
 
                 $output = [$d->firstname, $d->lastname, $d->diary, $d->promptid, $d->userid,
                     $d->timecreated, $d->timemodified, $d->format, $d->rating, $cleanedentrycomment,
@@ -519,18 +526,18 @@ class results {
         $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Current sort Action.
 
         // 20210605 Changed to this format.
-        require_once(__DIR__ .'/../../../../lib/gradelib.php');
-        require_once($CFG->dirroot.'/rating/lib.php');
+        require_once(__DIR__ . '/../../../../lib/gradelib.php');
+        require_once($CFG->dirroot . '/rating/lib.php');
         // 20210705 Added new activity color setting.
         $dcolor4 = $diary->entrytextbgc;
 
         // Create a table for the current users entry with area for teacher feedback.
-        echo '<table id="entry-'.$user->id.'" class="diaryuserentry">';
+        echo '<table id="entry-' . $user->id . '" class="diaryuserentry">';
         if ($entry) {
             // 20211109 Needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
             // 20241203 Modified and not set unless one of the buttons is clicked.
-            $param1 = optional_param('button1'.$entry->id, '', PARAM_ALPHANUMEXT); // Transfer entry.
-            $param2 = optional_param('button2'.$entry->id, '', PARAM_ALPHANUMEXT); // Clear entry.
+            $param1 = optional_param('button1' . $entry->id, '', PARAM_ALPHANUMEXT); // Transfer entry.
+            $param2 = optional_param('button2' . $entry->id, '', PARAM_ALPHANUMEXT); // Clear entry.
 
             // 20241201 To make the parameters compatible with a foreign language.
             if ($param1) {
@@ -542,8 +549,8 @@ class results {
             // 20231110 Add a title for the entry, only if there is one.
             if ($entry->title) {
                 echo '<tr>';
-                echo '<td style="width:35px;"><h6>'.get_string('diarytitle', 'diary').':</h6></td>';
-                echo '<td><h6>'.$entry->title.'</h6></td>';
+                echo '<td style="width:35px;"><h6>' . get_string('diarytitle', 'diary') . ':</h6></td>';
+                echo '<td><h6>' . $entry->title . '</h6></td>';
                 echo '<td></td>';
                 echo '</tr>';
             }
@@ -557,8 +564,12 @@ class results {
                 // 20240116 Added code to use a prompt background color.
                 // 20240117 Gave promptentry it's own class name to enable
                 echo '<tr>';
-                echo '<td style="width:35px;"><h6>'.get_string('prompttext', 'diary').':</h6></td>';
-                echo '<td><div class="promptentry" style="background: '.$prompt->promptbgc.';">'.$prompt->text.'</div></td>';
+                echo '<td style="width:35px;"><h6>' . get_string('prompttext', 'diary') . ':</h6></td>';
+                echo '<td><div class="promptentry" style="background: ' .
+                    $prompt->promptbgc .
+                    ';">' .
+                    $prompt->text .
+                    '</div></td>';
                 echo '<td></td>';
                 echo '</tr>';
             }
@@ -572,40 +583,43 @@ class results {
 
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
-            echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td>';
+            echo '<td style="width:35px;">' . get_string('entry', 'diary') . ':</td>';
 
             if (has_capability('mod/diary:manageentries', $context)) {
                 // 20241204 Added delete entry check enabled code.
-                $deletethisentry = html_writer::link($url2, $OUTPUT->pix_icon('i/delete',
-                    get_string('deleteentry', 'diary')), ['class' => 'toolbutton']);
+                $deletethisentry = html_writer::link($url2, $OUTPUT->pix_icon(
+                    'i/delete',
+                    get_string('deleteentry', 'diary')
+                ), ['class' => 'toolbutton']);
             }
-            echo '<td>ID '.$entry->id.',  '.userdate($entry->timecreated).$deletethisentry;
+            echo '<td>ID ' . $entry->id . ',  ' . userdate($entry->timecreated) . $deletethisentry;
 
             // 20201202 Added link to show all entries for a single user.
             // 20230810 Changed based on pull request #29. Also had to add, use moodle_url at the head of the file.
             $url = new moodle_url('reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
-            echo '  <a href="'.$url->out(false).'">'.get_string('reportsingle', 'diary')
-                .'</a></td><td></td>';
+            echo '  <a href="' . $url->out(false) . '">' . get_string('reportsingle', 'diary')
+                . '</a></td><td></td>';
             echo '</tr>';
         }
 
         // Add first of two rows, this one showing the user picture and users name.
         echo '<tr>';
         echo '<td class="userpix" rowspan="2">';
-        echo $OUTPUT->user_picture($user,
+        echo $OUTPUT->user_picture(
+            $user,
             [
                 'courseid' => $course->id,
                 'alttext' => true,
             ]
         );
         echo '</td>';
-        echo '<td class="userfullname">'.fullname($user).'<br>';
+        echo '<td class="userfullname">' . fullname($user) . '<br>';
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
 
         // Add the second of two rows, this one containing the users text for this entry.
         echo '<tr><td>';
-        echo '<div class="entry" style="background: '.$dcolor4.';">';
+        echo '<div class="entry" style="background: ' . $dcolor4 . ';">';
 
         // If there is a user entry, format it and show it.
         if ($entry) {
@@ -634,20 +648,19 @@ class results {
             $comerrdata = diarystats::get_common_error_stats($temp, $diary);
             echo $comerrdata;
             // 20211212 List all the auto rating data.
-            list($autoratingdata, $currentratingdata) = diarystats::get_auto_rating_stats($temp, $diary);
+            [$autoratingdata, $currentratingdata] = diarystats::get_auto_rating_stats($temp, $diary);
             // 20211212 Added list function to get and print the autorating data here.
             echo $autoratingdata;
-
         } else {
             // 20231209 changed from print_string to echo get_string.
             // ...echo get_string('noentry', 'diary');...
             // 20231209 This is a good place to add code that checks for an end date and then
             // automatically create an entry for the student and mark it as a zero rating.
             if (prompts::diary_available($diary)) {
-                echo get_string('noentry', 'diary').
+                echo get_string('noentry', 'diary') .
                     'The student can still write because the diary activity is available.';
             } else {
-                echo get_string('noentry', 'diary').
+                echo get_string('noentry', 'diary') .
                 'The student did not complete the writing assignment and this diary activity is no longer
                  available because the activity is currently closed.';
             }
@@ -658,7 +671,7 @@ class results {
 
         echo '</table>';
 
-        echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
+        echo '<table class="diaryuserentry" id="entry-' . $user->id . '">';
 
         // If there is a user entry, add a teacher feedback area for grade
         // and comments. Add previous grades and comments, if available.
@@ -669,7 +682,8 @@ class results {
                 $entry->teacher = $USER->id;
             }
             if (empty($teachers[$entry->teacher])) {
-                $teachers[$entry->teacher] = $DB->get_record('user',
+                $teachers[$entry->teacher] = $DB->get_record(
+                    'user',
                     [
                         'id' => $entry->teacher,
                     ]
@@ -688,7 +702,8 @@ class results {
             $aggregatestr = self::get_diary_aggregation($diary->assessed);
 
             // Add picture of the last teacher to rate this entry.
-            echo $OUTPUT->user_picture($teachers[$entry->teacher],
+            echo $OUTPUT->user_picture(
+                $teachers[$entry->teacher],
                 [
                     'courseid' => $course->id,
                     'alttext' => true,
@@ -698,29 +713,29 @@ class results {
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to insert auto grade stats and rating to feedback.
             // Also added button to remove anything in the feedback text area.
-            echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
+            echo '<td>' . $teachers[$entry->teacher]->firstname . ' ' . $teachers[$entry->teacher]->lastname .
 
                 ' <input class="btn btn-warning btn-sm"
                         role="button"
                         style="border-radius: 8px"
-                        name="button1'.$entry->id.'"
+                        name="button1' . $entry->id . '"
                         onClick="return clClick(this.name)"
                         type="submit"
-                        value="'.get_string('addtofeedback', 'diary').'"></input> '.
+                        value="' . get_string('addtofeedback', 'diary') . '"></input> ' .
 
                 '<input class="btn btn-warning  btn-sm"
                         style="border-radius: 8px"
-                        name="button2'.$entry->id.'"
+                        name="button2' . $entry->id . '"
                         onClick="return clClick(this.name)"
                         type="submit"
-                        value="'.get_string('clearfeedback', 'diary').'"></input>';
+                        value="' . get_string('clearfeedback', 'diary') . '"></input>';
 
             // 20211228 Create a test anchor link for testing.
             // echo '<a href="#'.$entry->id.'">xxxxx</a>';
 
             // 20211228 Create an anchor right after Add/Clear buttons.
-            echo  '<a id="'.$entry->id.'"></a>';
-            echo '<br>'.get_string('rating', 'diary').':  ';
+            echo  '<a id="' . $entry->id . '"></a>';
+            echo '<br>' . get_string('rating', 'diary') . ':  ';
 
             $attrs = [];
             $hiddengradestr = '';
@@ -734,15 +749,14 @@ class results {
                 // 20220105 Do an immediate update here.
                 $entry->rating = $currentratingdata;
                 // Update feedback to show statistics, common errors, autorating.
-                $feedbacktext .= $statsdata.$comerrdata.$autoratingdata;
+                $feedbacktext .= $statsdata . $comerrdata . $autoratingdata;
                 // Add the statistics, common errors, and autorating to the current entrycomment field.
                 // 20250114 Modified code to this.Works if you click, Save all my feedback, then click, Add to feedback.
-                $entry->entrycomment .= $feedbacktext.$statsdata.$comerrdata.$autoratingdata;
+                $entry->entrycomment .= $feedbacktext . $statsdata . $comerrdata . $autoratingdata;
                 // Save the changes to the current user entry.
                 $DB->update_record('diary_entries', $entry, $bulk = false);
                 // 20250114 Added for testing.
                 diary_update_grades($diary, $entry->userid);
-
             }
             // 20220107 If the, Clear feedback, button is clicked process it here.
             // 20241203 Modified to work for the three report pages.
@@ -754,7 +768,7 @@ class results {
                 // 20220105 Update the actual diary entry.
                 $DB->update_record('diary_entries', $entry, $bulk = false);
                 // 20220107 Verify there is a rating for this entry then delete it.
-                if ($rec = $DB->get_record('rating',  ['itemid' => $entry->id])) {
+                if ($rec = $DB->get_record('rating', ['itemid' => $entry->id])) {
                     $DB->delete_records('rating', ['itemid' => $entry->id]);
                     // 20220107 Recalculate the rating for this user for this diary activity.
                     diary_update_grades($diary, $entry->userid);
@@ -762,21 +776,26 @@ class results {
             }
 
             // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
-            $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary,
+            $gradinginfo = grade_get_grades(
+                $course->id,
+                'mod',
+                'diary',
+                $entry->diary,
                 [
                     $user->id,
                 ]
             );
 
             if (! empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
-                if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
-                    || $gradinginfo->items[0]->grades[$user->id]->overridden) {
-
+                if (
+                    $gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
+                    || $gradinginfo->items[0]->grades[$user->id]->overridden
+                ) {
                     $attrs['disabled'] = 'disabled';
-                    $hiddengradestr = '<input type="hidden" name="r'.$entry->id.'" value="'.$entry->rating.'"/>';
-                    $gradebooklink = '<a href="'.$CFG->wwwroot.'/grade/report/grader/index.php?id='.$course->id.'">';
-                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade.'</a>';
-                    $gradebookgradestr = '<br/>'.get_string("gradeingradebook", "diary").':&nbsp;'.$gradebooklink;
+                    $hiddengradestr = '<input type="hidden" name="r' . $entry->id . '" value="' . $entry->rating . '"/>';
+                    $gradebooklink = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' . $course->id . '">';
+                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade . '</a>';
+                    $gradebookgradestr = '<br/>' . get_string("gradeingradebook", "diary") . ':&nbsp;' . $gradebooklink;
 
                     $feedbackdisabledstr = 'disabled="disabled"';
                     $feedbacktext = $gradinginfo->items[0]->grades[$user->id]->str_feedback;
@@ -784,49 +803,62 @@ class results {
             }
 
             // 20210510 Modified Grade selector to check for Moodle version.
-            $attrs['id'] = 'r'.$entry->id;
+            $attrs['id'] = 'r' . $entry->id;
             if ($CFG->branch < 311) {
-                echo html_writer::label(fullname($user)." ".get_string('grade'),
-                    'r'.$entry->id, true, ['class' => 'accesshide']);
+                echo html_writer::label(
+                    fullname($user) . " " . get_string('grade'),
+                    'r' . $entry->id,
+                    true,
+                    ['class' => 'accesshide']
+                );
             } else {
-                echo html_writer::label(fullname($user)." ".get_string('gradenoun'),
-                    'r'.$entry->id, true, ['class' => 'accesshide']);
+                echo html_writer::label(
+                    fullname($user) . " " . get_string('gradenoun'),
+                    'r' . $entry->id,
+                    true,
+                    ['class' => 'accesshide']
+                );
             }
 
             if ($diary->assessed > 0) {
-                echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
+                echo html_writer::select($grades, 'r' . $entry->id, $entry->rating, get_string("nograde") . '...', $attrs);
             }
             echo $hiddengradestr;
 
             // Rewrote next three lines to show entry needs to be regraded due to resubmission.
             if (! empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
-                echo ' <span class="needsedit">'.get_string("needsregrade", "diary").'</span>';
+                echo ' <span class="needsedit">' . get_string("needsregrade", "diary") . '</span>';
             } else if ($entry->timemarked) {
-                echo ' <span class="lastedit"> '.userdate($entry->timemarked).'</span>';
+                echo ' <span class="lastedit"> ' . userdate($entry->timemarked) . '</span>';
             }
             echo $gradebookgradestr;
 
             // 20200816 Added overall rating type and rating.
-            echo '<br>'.$aggregatestr.' '.$currentuserrating;
+            echo '<br>' . $aggregatestr . ' ' . $currentuserrating;
 
             // Feedback text.
-            echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true,
+            echo html_writer::label(
+                fullname($user) . " " . get_string('feedback'),
+                'c' . $entry->id,
+                true,
                 [
                     'class' => 'accesshide',
                 ]
             );
-            echo '<p><textarea id="c'.$entry->id.'" name="c'.$entry->id.'" rows="6" cols="60" $feedbackdisabledstr>';
+            echo '<p><textarea id="c' . $entry->id . '" name="c' . $entry->id . '" rows="6" cols="60" $feedbackdisabledstr>';
             echo p($feedbacktext);
             echo '</textarea></p>';
 
             // 20210630 Switched from plain textarea to an editor.
             $editor = editors_get_preferred_editor(FORMAT_HTML);
-            echo $editor->use_editor('c'.$entry->id,
-                                    ['context' => $context, 'autosave' => false],
-                                    ['return_types' => FILE_EXTERNAL]);
+            echo $editor->use_editor(
+                'c' . $entry->id,
+                ['context' => $context, 'autosave' => false],
+                ['return_types' => FILE_EXTERNAL]
+            );
 
             if ($feedbackdisabledstr != '') {
-                echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
+                echo '<input type="hidden" name="c' . $entry->id . '" value="' . $feedbacktext . '"/>';
             }
             echo '</td></tr>';
         }
@@ -864,7 +896,8 @@ class results {
         echo '<tr>';
         echo '<td class="left picture">';
 
-        echo $OUTPUT->user_picture($teacher,
+        echo $OUTPUT->user_picture(
+            $teacher,
             [
                 'courseid' => $course->id,
                 'alttext' => true,
@@ -884,7 +917,11 @@ class results {
         echo '<div class="grade">';
 
         // Gradebook preference.
-        $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary,
+        $gradinginfo = grade_get_grades(
+            $course->id,
+            'mod',
+            'diary',
+            $entry->diary,
             [
                 $entry->userid,
             ]
@@ -897,10 +934,10 @@ class results {
             } else {
                 echo get_string('grade') . ': ';
             }
-            echo $entry->rating.'/' . number_format($gradinginfo->items[0]->grademax, 2);
+            echo $entry->rating . '/' . number_format($gradinginfo->items[0]->grademax, 2);
         } else {
             echo get_string('gradenoun') . ': ';
-            echo $entry->rating.'/' . number_format($gradinginfo->items[0]->grademax, 2);
+            echo $entry->rating . '/' . number_format($gradinginfo->items[0]->grademax, 2);
         }
         echo '</div>';
 
@@ -988,12 +1025,12 @@ class results {
      */
     public static function get_grade_entry($diary, $user, $timecreated, $timemodified) {
         global $USER, $DB, $CFG;
-        $sql = "SELECT * FROM ".$CFG->prefix."diary_entries"
-                     ." WHERE diary = ".$diary
-                        ."AND userid = ".$user
-                        ."AND timecreated = ".$timecreated
-                        ."AND timemodified = ".$timemodified
-                        ."ORDER BY timecreated";
+        $sql = "SELECT * FROM " . $CFG->prefix . "diary_entries"
+                     . " WHERE diary = " . $diary
+                        . "AND userid = " . $user
+                        . "AND timecreated = " . $timecreated
+                        . "AND timemodified = " . $timemodified
+                        . "ORDER BY timecreated";
 
         if ($rec = $DB->get_record_sql($sql, [])) {
             return $rec;
@@ -1020,13 +1057,13 @@ class results {
         $params['userid'] = $ratingoptions->userid;
         $params['timecreated'] = $ratingoptions->timecreated;
 
-        $sql = 'SELECT * FROM '.$CFG->prefix.'rating'
-                     .' WHERE contextid =  ?'
-                       .' AND component =  ?'
-                       .' AND ratingarea =  ?'
-                       .' AND itemid =  ?'
-                       .' AND userid =  ?'
-                       .' AND timecreated = ?';
+        $sql = 'SELECT * FROM ' . $CFG->prefix . 'rating'
+                     . ' WHERE contextid =  ?'
+                       . ' AND component =  ?'
+                       . ' AND ratingarea =  ?'
+                       . ' AND itemid =  ?'
+                       . ' AND userid =  ?'
+                       . ' AND timecreated = ?';
 
         if ($rec = $DB->record_exists_sql($sql, $params)) {
             $rec = $DB->get_record_sql($sql, $params);
@@ -1067,7 +1104,7 @@ class results {
                 break;
             default:
                 $aggregatestr = 'AVG'; // Default to this to avoid real breakage - MDL-22270.
-                debugging('Incorrect call to get_aggregation_method(), incorrect aggregate method '.$aggregate, DEBUG_DEVELOPER);
+                debugging('Incorrect call to get_aggregation_method(), incorrect aggregate method ' . $aggregate, DEBUG_DEVELOPER);
         }
         return $aggregatestr;
     }
@@ -1195,7 +1232,7 @@ class results {
                     if (!$DB->update_record("diary_entries", $newentry)) {
                         notify("Failed to update the diary feedback for user $entry->userid");
                     } else {
-                        $count ++;
+                        $count++;
                     }
                     $entrybyuser[$entry->userid]->rating = $studentrating;
                     $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
@@ -1230,7 +1267,8 @@ class results {
                         }
                     }
 
-                    $diary = $DB->get_record("diary",
+                    $diary = $DB->get_record(
+                        "diary",
                         [
                             "id" => $entrybyuser[$entry->userid]->diary,
                         ]
@@ -1257,7 +1295,8 @@ class results {
     public static function is_deleteable_by_me($usr, $id, $entry, $course) {
         global $DB;
         $context = context_module::instance($id);
-        $diary = $DB->get_record('diary',
+        $diary = $DB->get_record(
+            'diary',
             [
                 'id' => $entry->diary,
             ]
