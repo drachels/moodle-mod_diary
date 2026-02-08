@@ -24,10 +24,15 @@
 
 namespace mod_diary\event;
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * The mod_diary entry tags deleted class.
+ *
+ * @package   mod_diary
+ * @since     Moodle 3.1
+ * @copyright AL Rachels (drachels@drachels.com)
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class entry_tags_deleted extends \core\event\base {
-
     /**
      * Init method.
      */
