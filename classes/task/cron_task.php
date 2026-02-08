@@ -27,7 +27,6 @@ use stdClass;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cron_task extends \core\task\scheduled_task {
-
     // Use the logging trait to get some nice, juicy, logging.
     use \core\task\logging_trait;
 
@@ -112,13 +111,13 @@ class cron_task extends \core\task\scheduled_task {
                 foreach ($teachers as $teacher) {
                     // Log who we are checking.
                     $this->log(" - Checking teacher: " . fullname($teacher) . " (ID: {$teacher->id})");
-                    // Check if the Diary instance has email notifications enabled
+                    // Check if the Diary instance has email notifications enabled.
                     if (empty($entry->submissionemail)) {
-                        $this->log("   - SKIPPED: This diary instance has submission emails disabled.".$entry->submissionemail);
+                        $this->log("   - SKIPPED: This diary instance has submission emails disabled." . $entry->submissionemail);
                         continue; // Proceed with next diary.
                     }
                     if (!empty($entry->teacheremail)) {
-                        $this->log("   - SKIPPED: This diary instance has teacher emails disabled.".$entry->teacheremail);
+                        $this->log("   - SKIPPED: This diary instance has teacher emails disabled." . $entry->teacheremail);
                         continue; // Proceed with next teacher.
                     }
 
@@ -140,8 +139,8 @@ class cron_task extends \core\task\scheduled_task {
                         $diaryinfo->timemodified = date("l, F j, Y H:i:s", $entry->timecreated);
                     }
 
-                    $modnamesngl = get_string( 'modulename', 'diary' );
-                    $modnamepl = get_string( 'modulenameplural', 'diary' );
+                    $modnamesngl = get_string('modulename', 'diary');
+                    $modnamepl = get_string('modulenameplural', 'diary');
 
                     $message = new \core\message\message();
                     $message->courseid          = $course->id; // ID of this course.
@@ -155,15 +154,15 @@ class cron_task extends \core\task\scheduled_task {
                     $message->fullmessage       = "Hi,\n\n" . fullname($student) .
                         " has submitted a new entry. \nView: {$diaryinfo->url}";
                     $message->fullmessage      .= "$course->shortname -> $modnamepl -> " .
-                        format_string($diaryinfo->diary, true)."\n";
+                        format_string($diaryinfo->diary, true) . "\n";
 
                     $message->fullmessageformat = FORMAT_MARKDOWN;
                     $message->fullmessagehtml = "<p><font face=\"sans-serif\">" .
-                        get_string("messagegreeting", "diary") . "$teacher->firstname $teacher->lastname,</p>".
-                        "<p>".fullname($student).'&nbsp;'.get_string("diarymailhtmluser", "diary", $diaryinfo) . "</p>".
-                        "<p>The " . $SITE->shortname . " Team</p>".
+                        get_string("messagegreeting", "diary") . "$teacher->firstname $teacher->lastname,</p>" .
+                        "<p>" . fullname($student) . '&nbsp;' . get_string("diarymailhtmluser", "diary", $diaryinfo) . "</p>" .
+                        "<p>The " . $SITE->shortname . " Team</p>" .
                         "<br /><hr /><font face=\"sans-serif\">" .
-                        "<p>" . get_string("additionallinks", "diary") . "</p>". 
+                        "<p>" . get_string("additionallinks", "diary") . "</p>" .
                         "<a href=\"$CFG->wwwroot/course/view.php?id={$course->id}\">{$course->shortname}</a> → " .
                         "<a href=\"$CFG->wwwroot/mod/diary/index.php?id={$course->id}\">Diaries</a> → " .
                         "<a href=\"$CFG->wwwroot/mod/diary/view.php?id={$entry->cmid}\">" . format_string($entry->diaryname, true) .
@@ -177,8 +176,8 @@ class cron_task extends \core\task\scheduled_task {
                     // 20260116 Added date and time using format defined by mod_diary configuration settings.
                     $content = [
                         '*' => [
-                            'header' => '<p>The ' . $SITE->fullname .' Team, ' . date("$dateformat") . '.</p>',
-                            'footer' => '<p>The ' . $SITE->fullname .' Team, ' . date("$dateformat") . '.</p>',
+                            'header' => '<p>The ' . $SITE->fullname . ' Team, ' . date("$dateformat") . '.</p>',
+                            'footer' => '<p>The ' . $SITE->fullname . ' Team, ' . date("$dateformat") . '.</p>',
                         ],
                     ];
                     $message->set_additional_content('email', $content);
@@ -196,7 +195,6 @@ class cron_task extends \core\task\scheduled_task {
 
                 // 6. Update Database
                 $DB->set_field('diary_entries', 'mailed', 1, ['id' => $entry->id]);
-
             } catch (\Exception $e) {
                 // If one entry fails, log it and keep going!
                 $this->log("Error processing entry {$entry->id}: " . $e->getMessage());
