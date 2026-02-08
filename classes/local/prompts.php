@@ -46,8 +46,6 @@ use calendar_event;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class prompts {
-
-
     /**
      * Returns availability status.
      * Added 20200903.
@@ -70,7 +68,7 @@ class prompts {
      */
     public static function download_entries($context, $course, $diary) {
         global $CFG, $DB, $USER;
-        require_once($CFG->libdir.'/csvlib.class.php');
+        require_once($CFG->libdir . '/csvlib.class.php');
         $data = new stdClass();
         $data->diary = $diary->id;
 
@@ -93,16 +91,16 @@ class prompts {
         } else if (has_capability('mod/diary:manageentries', $context)) {
             $whichdiary = ('AND d.diary = ');
             $whichdiary .= ($diary->id);
-            $csv->filename = clean_filename(($course->shortname).'_');
+            $csv->filename = clean_filename(($course->shortname) . '_');
             $csv->filename .= clean_filename(($diary->name));
         } else if (has_capability('mod/diary:addentries', $context)) {
             $whichdiary = ('AND d.diary = ');
             $whichdiary .= ($diary->id);
-            $whichuser = (' AND d.userid = '.$USER->id); // Not an admin or teacher so can only get their OWN entries.
-            $csv->filename = clean_filename(($course->shortname).'_');
+            $whichuser = (' AND d.userid = ' . $USER->id); // Not an admin or teacher so can only get their OWN entries.
+            $csv->filename = clean_filename(($course->shortname) . '_');
             $csv->filename .= clean_filename(($diary->name));
         }
-        $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary').gmdate("Ymd_Hi").'GMT.csv');
+        $csv->filename .= clean_filename(get_string('exportfilenamep2', 'diary') . gmdate("Ymd_Hi") . 'GMT.csv');
 
         $fields = [];
         $fields = [
@@ -208,48 +206,48 @@ class prompts {
         $action = required_param('action', PARAM_TEXT); // Current sort Action.
 
         // 20210605 Changed to this format.
-        require_once(__DIR__ .'/../../../../lib/gradelib.php');
-        require_once($CFG->dirroot.'/rating/lib.php');
+        require_once(__DIR__ . '/../../../../lib/gradelib.php');
+        require_once($CFG->dirroot . '/rating/lib.php');
         // 20210705 Added new activity color setting.
         $dcolor4 = $diary->entrytextbgc;
 
         // Create a table for the current users entry with area for teacher feedback.
-        echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
+        echo '<table class="diaryuserentry" id="entry-' . $user->id . '">';
         if ($entry) {
-
             // 20211109 needed for, Add to feedback/Clear feedback, buttons. 20211219 Moved here.
-            $param1 = optional_param('button1'.$entry->id, '', PARAM_TEXT); // Transfer entry.
-            $param2 = optional_param('button2'.$entry->id, '', PARAM_TEXT); // Clear entry.
+            $param1 = optional_param('button1' . $entry->id, '', PARAM_TEXT); // Transfer entry.
+            $param2 = optional_param('button2' . $entry->id, '', PARAM_TEXT); // Clear entry.
 
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
-            echo '<td style="width:35px;">'.get_string('entry', 'diary').':</td><td>';
+            echo '<td style="width:35px;">' . get_string('entry', 'diary') . ':</td><td>';
             echo userdate($entry->timecreated);
             // 20201202 Added link to show all entries for a single user.
-            echo '  <a href="reportsingle.php?id='.$id
-                .'&user='.$user->id
-                .'&action=allentries">'.get_string('reportsingle', 'diary')
-                .'</a></td><td></td>';
+            echo '  <a href="reportsingle.php?id=' . $id
+                . '&user=' . $user->id
+                . '&action=allentries">' . get_string('reportsingle', 'diary')
+                . '</a></td><td></td>';
             echo '</tr>';
         }
 
         // Add first of two rows, this one showing the user picture and users name.
         echo '<tr>';
         echo '<td class="userpix" rowspan="2">';
-        echo $OUTPUT->user_picture($user,
+        echo $OUTPUT->user_picture(
+            $user,
             [
                 'courseid' => $course->id,
                 'alttext' => true,
             ]
         );
         echo '</td>';
-        echo '<td class="userfullname">'.fullname($user).'<br>';
+        echo '<td class="userfullname">' . fullname($user) . '<br>';
         echo '</td><td style="width:55px;"></td>';
         echo '</tr>';
 
         // Add the second of two rows, this one containing the users text for this entry.
         echo '<tr><td>';
-        echo '<div class="entry" style="background: '.$dcolor4.';">';
+        echo '<div class="entry" style="background: ' . $dcolor4 . ';">';
 
         // If there is a user entry, format it and show it.
         if ($entry) {
@@ -267,8 +265,8 @@ class prompts {
             $comerrdata = diarystats::get_common_error_stats($temp, $diary);
             echo $comerrdata;
             // 20211212 List all the auto rating data.
-            list($autoratingdata,
-                 $currentratingdata)
+            [$autoratingdata,
+                 $currentratingdata]
                  = diarystats::get_auto_rating_stats($temp, $diary);
             // 20211212 Added list function to get and print the autorating data here.
             echo $autoratingdata;
@@ -280,7 +278,7 @@ class prompts {
 
         echo '</table>';
 
-        echo '<table class="diaryuserentry" id="entry-'.$user->id.'">';
+        echo '<table class="diaryuserentry" id="entry-' . $user->id . '">';
 
         // If there is a user entry, add a teacher feedback area for grade
         // and comments. Add previous grades and comments, if available.
@@ -291,7 +289,8 @@ class prompts {
                 $entry->teacher = $USER->id;
             }
             if (empty($teachers[$entry->teacher])) {
-                $teachers[$entry->teacher] = $DB->get_record('user',
+                $teachers[$entry->teacher] = $DB->get_record(
+                    'user',
                     [
                         'id' => $entry->teacher,
                     ]
@@ -310,7 +309,8 @@ class prompts {
             $aggregatestr = self::get_diary_aggregation($diary->assessed);
 
             // Add picture of the last teacher to rate this entry.
-            echo $OUTPUT->user_picture($teachers[$entry->teacher],
+            echo $OUTPUT->user_picture(
+                $teachers[$entry->teacher],
                 [
                     'courseid' => $course->id,
                     'alttext' => true,
@@ -319,29 +319,29 @@ class prompts {
             echo '</td>';
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to add/delete auto grade stats and rating to feedback.
-            echo '<td>'.$teachers[$entry->teacher]->firstname.' '.$teachers[$entry->teacher]->lastname.
+            echo '<td>' . $teachers[$entry->teacher]->firstname . ' ' . $teachers[$entry->teacher]->lastname .
 
                  ' <input class="btn btn-warning btn-sm"
                          role="button"
                          style="border-radius: 8px"
-                         name="button1'.$entry->id.'"
+                         name="button1' . $entry->id . '"
                          onClick="return clClick()"
                          type="submit"
-                         value="'.get_string('addtofeedback', 'diary').'"></input> '.
+                         value="' . get_string('addtofeedback', 'diary') . '"></input> ' .
 
                  '<input class="btn btn-warning  btn-sm"
                          style="border-radius: 8px"
-                         name="button2'.$entry->id.'"
+                         name="button2' . $entry->id . '"
                          onClick="return clClick()"
                          type="submit"
-                         value="'.get_string('clearfeedback', 'diary').'"></input>';
+                         value="' . get_string('clearfeedback', 'diary') . '"></input>';
 
             // 20211228 Create a test anchor link for testing.
             // echo '<a href="#'.$entry->id.'">xxxxx</a>';
 
             // 20211228 Create an anchor right after Add/Clear buttons.
-            echo  '<a id="'.$entry->id.'"></a>';
-            echo '<br>'.get_string('rating', 'diary').':  ';
+            echo  '<a id="' . $entry->id . '"></a>';
+            echo '<br>' . get_string('rating', 'diary') . ':  ';
 
             $attrs = [];
             $hiddengradestr = '';
@@ -352,8 +352,8 @@ class prompts {
             if (isset($param1) && get_string('addtofeedback', 'diary') == $param1) {
                 // 20220105 Do an immediate update here.
                 $entry->rating = $currentratingdata;
-                $feedbacktext .= $statsdata.$comerrdata.$autoratingdata;
-                $entry->entrycomment = $statsdata.$comerrdata.$autoratingdata;
+                $feedbacktext .= $statsdata . $comerrdata . $autoratingdata;
+                $entry->entrycomment = $statsdata . $comerrdata . $autoratingdata;
                 $DB->update_record('diary_entries', $entry, $bulk = false);
             }
             // 20220107 If the, Clear feedback, button is clicked process it here.
@@ -365,7 +365,7 @@ class prompts {
                 // 20220105 Update the actual diary entry.
                 $DB->update_record('diary_entries', $entry, $bulk = false);
                 // 20220107 Verify there is a rating for this entry then delete it.
-                if ($rec = $DB->get_record('rating',  ['itemid' => $entry->id])) {
+                if ($rec = $DB->get_record('rating', ['itemid' => $entry->id])) {
                     $DB->delete_records('rating', ['itemid' => $entry->id]);
                     // 20220107 Recalculate the rating for this user for this diary activity.
                     diary_update_grades($diary, $entry->userid);
@@ -373,21 +373,26 @@ class prompts {
             }
 
             // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
-            $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary,
+            $gradinginfo = grade_get_grades(
+                $course->id,
+                'mod',
+                'diary',
+                $entry->diary,
                 [
                     $user->id,
                 ]
             );
 
-            if (! empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
-                if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
-                    || $gradinginfo->items[0]->grades[$user->id]->overridden) {
-
+            if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
+                if (
+                    $gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
+                    || $gradinginfo->items[0]->grades[$user->id]->overridden
+                ) {
                     $attrs['disabled'] = 'disabled';
-                    $hiddengradestr = '<input type="hidden" name="r'.$entry->id.'" value="'.$entry->rating.'"/>';
-                    $gradebooklink = '<a href="'.$CFG->wwwroot.'/grade/report/grader/index.php?id='.$course->id.'">';
-                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade.'</a>';
-                    $gradebookgradestr = '<br/>'.get_string("gradeingradebook", "diary").':&nbsp;'.$gradebooklink;
+                    $hiddengradestr = '<input type="hidden" name="r' . $entry->id . '" value="' . $entry->rating . '"/>';
+                    $gradebooklink = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' . $course->id . '">';
+                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade . '</a>';
+                    $gradebookgradestr = '<br/>' . get_string("gradeingradebook", "diary") . ':&nbsp;' . $gradebooklink;
 
                     $feedbackdisabledstr = 'disabled="disabled"';
                     $feedbacktext = $gradinginfo->items[0]->grades[$user->id]->str_feedback;
@@ -395,44 +400,77 @@ class prompts {
             }
 
             // 20210510 Modified Grade selector to check for Moodle version.
-            $attrs['id'] = 'r'.$entry->id;
-            echo html_writer::label(fullname($user)." ".get_string('gradenoun'),
-                'r'.$entry->id, true, ['class' => 'accesshide']);
+            $attrs['id'] = 'r' . $entry->id;
+            echo html_writer::label(
+                fullname($user) .
+                " " .
+                get_string(
+                    'gradenoun'
+                ),
+                'r' .
+                $entry->id,
+                true,
+                [
+                    'class' => 'accesshide',
+                ]
+            );
 
             if ($diary->assessed > 0) {
-                echo html_writer::select($grades, 'r'.$entry->id, $entry->rating, get_string("nograde").'...', $attrs);
+                echo html_writer::select($grades, 'r' . $entry->id, $entry->rating, get_string("nograde") . '...', $attrs);
             }
             echo $hiddengradestr;
 
             // Rewrote next three lines to show entry needs to be regraded due to resubmission.
             if (! empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
-                echo ' <span class="needsedit">'.get_string("needsregrade", "diary").'</span>';
+                echo ' <span class="needsedit">' . get_string("needsregrade", "diary") . '</span>';
             } else if ($entry->timemarked) {
-                echo ' <span class="lastedit"> '.userdate($entry->timemarked).'</span>';
+                echo ' <span class="lastedit"> ' . userdate($entry->timemarked) . '</span>';
             }
             echo $gradebookgradestr;
 
             // 20200816 Added overall rating type and rating.
-            echo '<br>'.$aggregatestr.' '.$currentuserrating;
+            echo '<br>' . $aggregatestr . ' ' . $currentuserrating;
 
             // Feedback text.
-            echo html_writer::label(fullname($user)." ".get_string('feedback'), 'c'.$entry->id, true,
+            echo html_writer::label(
+                fullname($user) .
+                " " .
+                get_string(
+                    'feedback'
+                ),
+                'c' .
+                $entry->id,
+                true,
                 [
                     'class' => 'accesshide',
                 ]
             );
-            echo '<p><textarea id="c'.$entry->id.'" name="c'.$entry->id.'" rows="6" cols="60" $feedbackdisabledstr>';
+            echo '<p><textarea id="c' .
+                $entry->id .
+                '" name="c' .
+                $entry->id .
+                '" rows="6" cols="60" ' .
+                $feedbackdisabledstr .
+                '>';
             echo p($feedbacktext);
             echo '</textarea></p>';
 
             // 20210630 Switched from plain textarea to an editor.
             $editor = editors_get_preferred_editor(FORMAT_HTML);
-            echo $editor->use_editor('c'.$entry->id,
-                                    ['context' => $context, 'autosave' => false],
-                                    ['return_types' => FILE_EXTERNAL]);
+            echo $editor->use_editor(
+                'c' .
+                $entry->id,
+                [
+                    'context' => $context,
+                    'autosave' => false,
+                ],
+                [
+                    'return_types' => FILE_EXTERNAL,
+                ]
+            );
 
             if ($feedbackdisabledstr != '') {
-                echo '<input type="hidden" name="c'.$entry->id.'" value="'.$feedbacktext.'"/>';
+                echo '<input type="hidden" name="c' . $entry->id . '" value="' . $feedbacktext . '"/>';
             }
             echo '</td></tr>';
         }
@@ -461,7 +499,8 @@ class prompts {
         echo '<tr>';
         echo '<td class="left picture">';
 
-        echo $OUTPUT->user_picture($teacher,
+        echo $OUTPUT->user_picture(
+            $teacher,
             [
                 'courseid' => $course->id,
                 'alttext' => true,
@@ -481,7 +520,11 @@ class prompts {
         echo '<div class="grade">';
 
         // Gradebook preference.
-        $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $entry->diary,
+        $gradinginfo = grade_get_grades(
+            $course->id,
+            'mod',
+            'diary',
+            $entry->diary,
             [
                 $entry->userid,
             ]
@@ -494,7 +537,7 @@ class prompts {
             } else {
                 echo get_string('grade') . ': ';
             }
-            echo $entry->rating.'/' . number_format($gradinginfo->items[0]->grademax, 2);
+            echo $entry->rating . '/' . number_format($gradinginfo->items[0]->grademax, 2);
         } else {
             print_string('nograde');
         }
@@ -646,8 +689,14 @@ class prompts {
                 $event = \mod_diary\event\prompt_removed::create($params);
                 $event->trigger();
             } else {
-                add_to_log($cm->id, 'diary', 'remove prompt',
-                    "view.php?id={$cm->id}&round=$rid", $rid, $cm->id);
+                add_to_log(
+                    $cm->id,
+                    'diary',
+                    'remove prompt',
+                    "view.php?id={$cm->id}&round=$rid",
+                    $rid,
+                    $cm->id
+                );
             }
         }
         return;
@@ -705,9 +754,9 @@ class prompts {
         $current = 0;
         $future = 0;
 
-        $entry = $DB->get_record('diary_entries', ['id' => $firstkey, 'diary' => $diary->id], );
+        $entry = $DB->get_record('diary_entries', ['id' => $firstkey, 'diary' => $diary->id]);
         $promptsall = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart ASC, datestop ASC');
-        $promptsone = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id], );
+        $promptsone = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id]);
 
         $diary->intro = '';
         // If there are any prompts for this diary, create a list of them.
@@ -746,41 +795,48 @@ class prompts {
                     $data->maxparagraph = $prompts->maxparagraph;
                     $data->minmaxparagraphpercent = $prompts->minmaxparagraphpercent;
 
-                    $start = '<td>'.userdate($data->datestart).'</td>';
-                    $stop = '<td>'.userdate($data->datestop).'</td>';
+                    $start = '<td>' . userdate($data->datestart) . '</td>';
+                    $stop = '<td>' . userdate($data->datestop) . '</td>';
 
-                    $prompttext = '<div class="promptentry" style="background: '.$data->promptbgc.';"><td>'.
-                                  get_string('writingpromptlable', 'diary',
-                                  ['counter' => $counter,
-                                  'entryid' => $data->entryid,
-                                  'starton' => $start,
-                                  'endon' => $stop,
-                                  'datatext' => '<b>'.$data->text.'</b>',
-                                  ]).
-                                  '<br><br></td>';
-                    $characters = '<td>'.get_string('chars', 'diary')
-                                  .get_string('minc', 'diary').$data->minchar
-                                  .get_string('maxc', 'diary').$data->maxchar
-                                  .get_string('errp', 'diary').$data->minmaxcharpercent.', </td>';
-                    $words = '<td>'.get_string('words', 'diary')
-                             .get_string('minc', 'diary').$data->minword
-                             .get_string('maxc', 'diary').$data->maxword
-                             .get_string('errp', 'diary').$data->minmaxwordpercent.', </td>';
-                    $sentences = '<td>'.get_string('sentences', 'diary')
-                                 .get_string('minc', 'diary').$data->minsentence
-                                 .get_string('maxc', 'diary').$data->maxsentence
-                                  .get_string('errp', 'diary').$data->minmaxsentencepercent.', </td>';
-                    $paragraphs = '<td>'.get_string('paragraphs', 'diary')
-                                  .get_string('minc', 'diary').$data->minparagraph
-                                  .get_string('maxc', 'diary').$data->maxparagraph
-                                  .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td></div>';
+                    $prompttext = '<div class="promptentry" style="background: ' .
+                        $data->promptbgc . ';"><td>' .
+                        get_string(
+                            'writingpromptlable',
+                            'diary',
+                            [
+                                'counter' => $counter,
+                                'entryid' => $data->entryid,
+                                'starton' => $start,
+                                'endon' => $stop,
+                                'datatext' => '<b>' . $data->text . '</b>',
+                            ]
+                        ) .
+                        '<br><br></td>';
+                    $characters = '<td>' . get_string('chars', 'diary')
+                                  . get_string('minc', 'diary') . $data->minchar
+                                  . get_string('maxc', 'diary') . $data->maxchar
+                                  . get_string('errp', 'diary') . $data->minmaxcharpercent . ', </td>';
+                    $words = '<td>' . get_string('words', 'diary')
+                             . get_string('minc', 'diary') . $data->minword
+                             . get_string('maxc', 'diary') . $data->maxword
+                             . get_string('errp', 'diary') . $data->minmaxwordpercent . ', </td>';
+                    $sentences = '<td>' . get_string('sentences', 'diary')
+                                 . get_string('minc', 'diary') . $data->minsentence
+                                 . get_string('maxc', 'diary') . $data->maxsentence
+                                  . get_string('errp', 'diary') . $data->minmaxsentencepercent . ', </td>';
+                    $paragraphs = '<td>' . get_string('paragraphs', 'diary')
+                                  . get_string('minc', 'diary') . $data->minparagraph
+                                  . get_string('maxc', 'diary') . $data->maxparagraph
+                                  . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td></div>';
 
-                    $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
+                    $status .= $status . $prompttext . $characters . $words . $sentences . $paragraphs;
                     if ($status) {
-                        $diary->intro .= $status.'<hr>';
+                        $diary->intro .= $status . '<hr>';
                     }
-                } else if ((($action == 'editentry') && ($prompts->id == $promptid))
-                    || (($action == 'editentry') && ($prompts->id == $promptid))) {
+                } else if (
+                    (($action == 'editentry') && ($prompts->id == $promptid))
+                    || (($action == 'editentry') && ($prompts->id == $promptid))
+                ) {
                     // To get the last use case to work, I think I will also need to include $firstkey
                     // so that I can check to see what the $entry->promptid is and use it to
                     // compare to $promptid.
@@ -806,38 +862,43 @@ class prompts {
                     $data->maxparagraph = $prompts->maxparagraph;
                     $data->minmaxparagraphpercent = $prompts->minmaxparagraphpercent;
 
-                    $start = '<td>'.userdate($data->datestart).'</td>';
-                    $stop = '<td>'.userdate($data->datestop).'</td>';
+                    $start = '<td>' . userdate($data->datestart) . '</td>';
+                    $stop = '<td>' . userdate($data->datestop) . '</td>';
 
-                    $prompttext = '<div class="promptentry" style="background: '.$data->promptbgc.';"><b><td>'.
-                                  get_string('writingpromptlable', 'diary',
-                                  ['counter' => $counter,
-                                  'entryid' => $data->entryid,
-                                  'starton' => $start,
-                                  'endon' => $stop,
-                                  'datatext' => '</b>'.$data->text,
-                                  ]).
-                                  '<br><br></td>';
-                    $characters = '<td>'.get_string('chars', 'diary')
-                                  .get_string('minc', 'diary').$data->minchar
-                                  .get_string('maxc', 'diary').$data->maxchar
-                                  .get_string('errp', 'diary').$data->minmaxcharpercent.', </td>';
-                    $words = '<td>'.get_string('words', 'diary')
-                             .get_string('minc', 'diary').$data->minword
-                             .get_string('maxc', 'diary').$data->maxword
-                             .get_string('errp', 'diary').$data->minmaxwordpercent.', </td>';
-                    $sentences = '<td>'.get_string('sentences', 'diary')
-                                 .get_string('minc', 'diary').$data->minsentence
-                                 .get_string('maxc', 'diary').$data->maxsentence
-                                  .get_string('errp', 'diary').$data->minmaxsentencepercent.', </td>';
-                    $paragraphs = '<td>'.get_string('paragraphs', 'diary')
-                                  .get_string('minc', 'diary').$data->minparagraph
-                                  .get_string('maxc', 'diary').$data->maxparagraph
-                                  .get_string('errp', 'diary').$data->minmaxparagraphpercent.'</td></div>';
+                    $prompttext = '<div class="promptentry" style="background: ' .
+                        $data->promptbgc . ';"><b><td>' .
+                        get_string(
+                            'writingpromptlable',
+                            'diary',
+                            [
+                                'counter' => $counter,
+                                'entryid' => $data->entryid,
+                                'starton' => $start,
+                                'endon' => $stop,
+                                'datatext' => '</b>' . $data->text,
+                            ]
+                        ) .
+                        '<br><br></td>';
+                    $characters = '<td>' . get_string('chars', 'diary')
+                                  . get_string('minc', 'diary') . $data->minchar
+                                  . get_string('maxc', 'diary') . $data->maxchar
+                                  . get_string('errp', 'diary') . $data->minmaxcharpercent . ', </td>';
+                    $words = '<td>' . get_string('words', 'diary')
+                             . get_string('minc', 'diary') . $data->minword
+                             . get_string('maxc', 'diary') . $data->maxword
+                             . get_string('errp', 'diary') . $data->minmaxwordpercent . ', </td>';
+                    $sentences = '<td>' . get_string('sentences', 'diary')
+                                 . get_string('minc', 'diary') . $data->minsentence
+                                 . get_string('maxc', 'diary') . $data->maxsentence
+                                  . get_string('errp', 'diary') . $data->minmaxsentencepercent . ', </td>';
+                    $paragraphs = '<td>' . get_string('paragraphs', 'diary')
+                                  . get_string('minc', 'diary') . $data->minparagraph
+                                  . get_string('maxc', 'diary') . $data->maxparagraph
+                                  . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td></div>';
 
-                    $status .= $status.$prompttext.$characters.$words.$sentences.$paragraphs;
+                    $status .= $status . $prompttext . $characters . $words . $sentences . $paragraphs;
                     if ($status) {
-                        $diary->intro .= $status.'<hr>';
+                        $diary->intro .= $status . '<hr>';
                     }
                 }
             }
@@ -858,9 +919,15 @@ class prompts {
         $current = 0;
         $future = 0;
         $promptid = 0;
-        if (!$promptsall = $DB->get_records('diary_prompts',
-                                            ['diaryid' => $diary->id],
-                                            $sort = 'datestart ASC, datestop ASC')) {
+        if (
+            !$promptsall = $DB->get_records(
+                'diary_prompts',
+                [
+                    'diaryid' => $diary->id,
+                ],
+                $sort = 'datestart ASC, datestop ASC'
+            )
+        ) {
             $promptid = new stdClass();
             $promptid = 0;
         } else {
