@@ -25,13 +25,12 @@
 
 defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
 
-require_once($CFG->dirroot.'/mod/diary/backup/moodle2/backup_diary_stepslib.php');
+require_once($CFG->dirroot . '/mod/diary/backup/moodle2/backup_diary_stepslib.php');
 
 /**
  * Provides the steps to perform one complete backup of the Diary instance.
  */
 class backup_diary_activity_task extends backup_activity_task {
-
     /**
      * No specific settings for this activity.
      */
@@ -55,22 +54,22 @@ class backup_diary_activity_task extends backup_activity_task {
 
         global $CFG;
 
-        $base = preg_quote($CFG->wwwroot.'/mod/diary', '#');
+        $base = preg_quote($CFG->wwwroot . '/mod/diary', '#');
 
         // Link to the list of diaries.
-        $pattern = "#(".$base."\/index.php\?id\=)([0-9]+)#";
+        $pattern = "#(" . $base . "\/index.php\?id\=)([0-9]+)#";
         $content = preg_replace($pattern, '$@DIARYINDEX*$2@$', $content);
 
         // Link to diary view by moduleid.
-        $pattern = "#(".$base."\/view.php\?id\=)([0-9]+)#";
+        $pattern = "#(" . $base . "\/view.php\?id\=)([0-9]+)#";
         $content = preg_replace($pattern, '$@DIARYVIEWBYID*$2@$', $content);
 
         // Link to diary report by moduleid.
-        $pattern = "#(".$base."\/report.php\?id\=)([0-9]+)#";
+        $pattern = "#(" . $base . "\/report.php\?id\=)([0-9]+)#";
         $content = preg_replace($pattern, '$@DIARYREPORT*$2@$', $content);
 
         // Link to diary entry by moduleid.
-        $pattern = "#(".$base."\/edit.php\?id\=)([0-9]+)#";
+        $pattern = "#(" . $base . "\/edit.php\?id\=)([0-9]+)#";
         $content = preg_replace($pattern, '$@DIARYEDIT*$2@$', $content);
 
         return $content;
