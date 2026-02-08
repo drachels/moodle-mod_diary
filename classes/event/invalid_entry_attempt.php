@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class invalid_entry_attempt extends \core\event\base {
-
     /**
      * Init method.
      */
@@ -69,7 +68,8 @@ class invalid_entry_attempt extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/diary/edit.php',
+        return new \moodle_url(
+            '/mod/diary/edit.php',
             [
                 'id' => $this->contextinstanceid,
             ]

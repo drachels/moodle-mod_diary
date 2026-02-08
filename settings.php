@@ -25,71 +25,95 @@ defined('MOODLE_INTERNAL') || die();
 use mod_diary\local\diarystats;
 
 if ($ADMIN->fulltree) {
-
     // Availability settings.
     $settings->add(new admin_setting_heading('mod_diary/availibility', get_string('availability'), ''));
 
     $name = new lang_string('alwaysshowdescription', 'mod_diary');
     $description = new lang_string('alwaysshowdescription_help', 'mod_diary');
-    $setting = new admin_setting_configcheckbox('mod_diary/alwaysshowdescription',
-                                                    $name,
-                                                    $description,
-                                                    1);
+    $setting = new admin_setting_configcheckbox(
+        'mod_diary/alwaysshowdescription',
+        $name,
+        $description,
+        1
+    );
     $setting->set_advanced_flag_options(admin_setting_flag::ENABLED, false);
     $setting->set_locked_flag_options(admin_setting_flag::ENABLED, false);
     $settings->add($setting);
 
-    $settings->add(new admin_setting_configselect('mod_diary/showrecentactivity',
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/showrecentactivity',
         get_string('showrecentactivity', 'diary'),
-        get_string('showrecentactivity', 'diary'), 1, [
+        get_string('showrecentactivity', 'diary'),
+        1,
+        [
             '0' => get_string('no'),
             '1' => get_string('yes'),
         ]
     ));
 
-    $settings->add(new admin_setting_configselect('mod_diary/overview',
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/overview',
         get_string('showoverview', 'diary'),
-        get_string('showoverview', 'diary'), 1, [
+        get_string('showoverview', 'diary'),
+        1,
+        [
              '0' => get_string('no'),
             '1' => get_string('yes'),
         ]
     ));
 
     // 20201015 Default edit all entries setting.
-    $settings->add(new admin_setting_configselect('mod_diary/editall',
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/editall',
         get_string('editall', 'diary'),
-        get_string('editall_help', 'diary'), 1, [
+        get_string('editall_help', 'diary'),
+        1,
+        [
             '0' => get_string('no'),
             '1' => get_string('yes'),
         ]
     ));
 
     // 20241113 Delete an entry setting.
-    $settings->add(new admin_setting_configselect('mod_diary/deleteentries',
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/deleteentries',
         get_string('deleteentries', 'diary'),
-        get_string('deleteentry_help', 'diary'), 0, [
+        get_string('deleteentry_help', 'diary'),
+        0,
+        [
             '0' => get_string('no'),
             '1' => get_string('yes'),
         ]
     ));
 
     // 20201119 Default edit the date of any entry setting.
-    $settings->add(new admin_setting_configselect('mod_diary/editdates',
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/editdates',
         get_string('editdates', 'diary'),
-        get_string('editdates_help', 'diary'), 1, [
+        get_string('editdates_help', 'diary'),
+        1,
+        [
             '0' => get_string('no'),
             '1' => get_string('yes'),
         ]
     ));
 
     // Appearance settings.
-    $settings->add(new admin_setting_heading('mod_diary/appearance',
-        get_string('appearance'), ''));
+    $settings->add(new admin_setting_heading(
+        'mod_diary/appearance',
+        get_string('appearance'),
+        ''
+    ));
 
     // Date format setting using abbreviations. Spell out days and months with 'l, F j, Y H:i:s' if wanted.
-    $settings->add(new admin_setting_configtext('mod_diary/dateformat',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/dateformat',
         get_string('dateformat', 'diary'),
-        get_string('configdateformat', 'diary'), 'M d, Y G:i', PARAM_TEXT, 15));
+        get_string('configdateformat', 'diary'),
+        'M d, Y G:i',
+        PARAM_TEXT,
+        15
+    ));
 
     // Diary entry/feedback background colour setting.
     $name = 'mod_diary/entrybgc';
@@ -114,7 +138,11 @@ if ($ADMIN->fulltree) {
     $title = get_string('enablestats_title', 'diary');
     $description = get_string('enablestats_descr', 'diary');
     $default = 1;
-    $settings->add(new admin_setting_configselect($name, $title, $description, $default,
+    $settings->add(new admin_setting_configselect(
+        $name,
+        $title,
+        $description,
+        $default,
         [
             '0' => get_string('no'),
             '1' => get_string('yes'),
@@ -126,7 +154,11 @@ if ($ADMIN->fulltree) {
     $title = get_string('enabletitles_title', 'diary');
     $description = get_string('enabletitles_descr', 'diary');
     $default = 0;
-    $settings->add(new admin_setting_configselect($name, $title, $description, $default,
+    $settings->add(new admin_setting_configselect(
+        $name,
+        $title,
+        $description,
+        $default,
         [
             '0' => get_string('no'),
             '1' => get_string('yes'),
@@ -144,7 +176,11 @@ if ($ADMIN->fulltree) {
     $title = get_string('autorating_title', 'diary');
     $description = get_string('autorating_descr', 'diary');
     $default = 1;
-    $settings->add(new admin_setting_configselect($name, $title, $description, $default,
+    $settings->add(new admin_setting_configselect(
+        $name,
+        $title,
+        $description,
+        $default,
         [
             '0' => get_string('no'),
             '1' => get_string('yes'),
@@ -158,14 +194,24 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading($name, $label, $description));
 
     // 20210708 Diary minimum characters setting.
-    $settings->add(new admin_setting_configtext('mod_diary/mincharacterlimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/mincharacterlimit',
         get_string('mincharacterlimit', 'diary'),
-        get_string('mincharacterlimit_help', 'diary'), '', PARAM_INT, 10));
+        get_string('mincharacterlimit_help', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20210708 Diary maximum characters setting.
-    $settings->add(new admin_setting_configtext('mod_diary/maxcharacterlimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/maxcharacterlimit',
         get_string('maxcharacterlimit', 'diary'),
-        get_string('maxcharacterlimit_help', 'diary'), '', PARAM_INT, 10));
+        get_string('maxcharacterlimit_help', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20211006 Diary expected min/max error percentage setting.
     $name = 'mod_diary/minmaxcharpercent';
@@ -175,21 +221,34 @@ if ($ADMIN->fulltree) {
     $default = 0;
     $options = [];
     $options = diarystats::get_rating_options($plugin);
-    $settings->add(new admin_setting_configselect($name,
+    $settings->add(new admin_setting_configselect(
+        $name,
         $title,
         $description,
         $default,
-        $options, 10));
+        $options,
+        10
+    ));
 
     // 20210708 Diary minimum words setting.
-    $settings->add(new admin_setting_configtext('mod_diary/minwordlimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/minwordlimit',
         get_string('minwordlimit', 'diary'),
-        get_string('minwordlimit', 'diary'), '', PARAM_INT, 10));
+        get_string('minwordlimit', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20210708 Diary maximum words setting.
-    $settings->add(new admin_setting_configtext('mod_diary/maxwordlimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/maxwordlimit',
         get_string('maxwordlimit', 'diary'),
-        get_string('maxwordlimit', 'diary'), '', PARAM_INT, 10));
+        get_string('maxwordlimit', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20211006 Diary expected min/max word error percentage setting.
     $name = 'mod_diary/minmaxwordpercent';
@@ -202,14 +261,24 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect($name, $title, $description, $default, $options, 10));
 
     // 20211006 Diary minimum sentence setting.
-    $settings->add(new admin_setting_configtext('mod_diary/minsentencelimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/minsentencelimit',
         get_string('minsentencelimit', 'diary'),
-        get_string('minsentencelimit', 'diary'), '', PARAM_INT, 10));
+        get_string('minsentencelimit', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20211006 Diary maximum sentence setting.
-    $settings->add(new admin_setting_configtext('mod_diary/maxsentencelimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/maxsentencelimit',
         get_string('maxsentencelimit', 'diary'),
-        get_string('maxsentencelimit', 'diary'), '', PARAM_INT, 10));
+        get_string('maxsentencelimit', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20211006 Diary expected min/max sentence error percentage setting.
     $name = 'mod_diary/minmaxsentpercent';
@@ -222,14 +291,24 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect($name, $title, $description, $default, $options, 10));
 
     // 20211006 Diary minimum paragraph setting.
-    $settings->add(new admin_setting_configtext('mod_diary/minparagraphlimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/minparagraphlimit',
         get_string('minparagraphlimit', 'diary'),
-        get_string('minparagraphlimit', 'diary'), '', PARAM_INT, 10));
+        get_string('minparagraphlimit', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20211006 Diary maximum paragraph setting.
-    $settings->add(new admin_setting_configtext('mod_diary/maxparagraphlimit',
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/maxparagraphlimit',
         get_string('maxparagraphlimit', 'diary'),
-        get_string('maxparagraphlimit', 'diary'), '', PARAM_INT, 10));
+        get_string('maxparagraphlimit', 'diary'),
+        '',
+        PARAM_INT,
+        10
+    ));
 
     // 20211006 Diary expected min/max paragraph error percentage setting.
     $name = 'mod_diary/minmaxparapercent';
@@ -257,9 +336,19 @@ if ($ADMIN->fulltree) {
     $options = diarystats::get_showhide_options($plugin);
     $settings->add(new admin_setting_configselect($name, $title, $description, $default, $options, 10));
 
-    $settings->add(new admin_setting_configselect('mod_diary/teacheremail', get_string('teacheremail', 'diary'),
-        get_string('teacheremail', 'diary'), 0, ['0' => get_string('no'), '1' => get_string('yes')]));
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/teacheremail',
+        get_string('teacheremail', 'diary'),
+        get_string('teacheremail', 'diary'),
+        0,
+        ['0' => get_string('no'), '1' => get_string('yes')]
+    ));
 
-    $settings->add(new admin_setting_configselect('mod_diary/studentemail', get_string('studentemail', 'diary'),
-        get_string('studentemail', 'diary'), 0, ['0' => get_string('no'), '1' => get_string('yes')]));
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/studentemail',
+        get_string('studentemail', 'diary'),
+        get_string('studentemail', 'diary'),
+        0,
+        ['0' => get_string('no'), '1' => get_string('yes')]
+    ));
 }

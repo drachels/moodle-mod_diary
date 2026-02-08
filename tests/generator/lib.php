@@ -33,7 +33,6 @@ defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_diary_generator extends testing_module_generator {
-
     /**
      *
      * @var int keep track of how many diarys have been created.
@@ -74,7 +73,7 @@ class mod_diary_generator extends testing_module_generator {
             $record->grade = 100;
         }
 
-        $this->diarycount ++;
+        $this->diarycount++;
 
         return parent::create_instance($record, (array) $options);
     }

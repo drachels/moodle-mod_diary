@@ -26,10 +26,8 @@ use mod_diary\local\results;
 require_once(__DIR__ . "/../../config.php");
 require_once("lib.php");
 
-global $CFG;
-
 $id = required_param('id', PARAM_INT); // Course.
-$currentgroup = optional_param('currentgroup', 0, PARAM_INT); // Id of the current group(default to zero).
+$currentgroup = optional_param('currentgroup', 0, PARAM_INT); // Id of the current group (default to zero).
 
 if (!$course = $DB->get_record('course', ['id' => $id])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
@@ -41,7 +39,7 @@ if ($CFG->version > 2025041400) {
     \core_courseformat\activityoverviewbase::redirect_to_overview_page($id, 'diary');
 }
 
-// Header.
+// Header and page setup.
 $PAGE->set_url('/mod/diary/index.php', ['id' => $id]);
 $PAGE->set_pagelayout('incourse');
 
@@ -58,108 +56,58 @@ $PAGE->set_title($strplural);
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($strplural));
 
-if (! $diarys = get_all_instances_in_course('diary', $course)) {
-    notice(get_string('thereareno', 'moodle', get_string('modulenameplural', 'diary')), '../../course/view.php?id=$course->id');
-    die();
+// Fetch all Diary instances in the course.
+if (!$diarys = get_all_instances_in_course('diary', $course)) {
+    // No instances → renderer will handle empty message.
+    $diarys = [];
 }
 
-// Sections.
-$usesections = course_format_uses_sections($course->format);
-if ($usesections) {
-    $modinfo = get_fast_modinfo($course);
-    $sections = $modinfo->get_section_info_all();
-}
-
-$timenow = time();
-
-// Table data.
-$table = new html_table();
-
-$table->head = [];
-$table->align = [];
-if ($usesections) {
-    // Add column heading based on the course format. e.g. Week, Topic.
-    $table->head[] = get_string('sectionname', 'format_' . $course->format);
-    $table->align[] = 'left';
-}
-// Add activity, Name, and activity, Description, headings.
-$table->head[] = get_string('name');
-$table->align[] = 'left';
-$table->head[] = get_string('description');
-$table->align[] = 'left';
-
-$currentsection = '';
-$i = 0;
-
+// Determine if we should show the "View entries" column.
+// (Only if user has manageentries capability in at least one Diary context.)
+$showentriescolumn = false;
 foreach ($diarys as $diary) {
-
     $context = context_module::instance($diary->coursemodule);
-    $entriesmanager = has_capability('mod/diary:manageentries', $context);
-
-    // Section.
-    $printsection = '';
-    if ($diary->section !== $currentsection) {
-        if ($diary->section) {
-            $printsection = get_section_name($course, $sections[$diary->section]);
-        }
-        if ($currentsection !== '') {
-            $table->data[$i] = 'hr';
-            $i ++;
-        }
-        $currentsection = $diary->section;
+    if (has_capability('mod/diary:manageentries', $context)) {
+        $showentriescolumn = true;
+        break;
     }
-    if ($usesections) {
-        $table->data[$i][] = $printsection;
-    }
-
-    // Link.
-    $diaryname = format_string($diary->name, true, ['context' => $context]);
-    if (! $diary->visible) {
-        // Show dimmed if the mod is hidden. 20230810 Changed based on pull rquest #29.
-        $url = new moodle_url('view.php', ['id' => $diary->coursemodule]);
-        $table->data[$i][] = '<a class="dimmed" href="'.$url->out(false).'">'.$diaryname.'</a>';
-    } else {
-        // Show normal if the mod is visible. 20230810 Changed based on pull rquest #29.
-        $url = new moodle_url('view.php', ['id' => $diary->coursemodule]);
-        $table->data[$i][] = '<a href="'.$url->out(false).'">'.$diaryname. '</a>';
-    }
-
-    // Description.
-    $table->data[$i][] = format_text($diary->intro, $diary->introformat);
-
-    // Entries info.
-    if ($entriesmanager) {
-
-        // Display the report.php col only if is a entries manager in some CONTEXT_MODULE.
-        if (empty($managersomewhere)) {
-            $table->head[] = get_string('viewentries', 'diary');
-            $table->align[] = 'left';
-            $managersomewhere = true;
-
-            // Fill the previous col cells.
-            $manageentriescell = count($table->head) - 1;
-            for ($j = 0; $j < $i; $j ++) {
-                if (is_array($table->data[$j])) {
-                    $table->data[$j][$manageentriescell] = '';
-                }
-            }
-        }
-        // 20230810 Diary_1066 changed this to use $currentgroup.
-        $entrycount = results::diary_count_entries($diary, $currentgroup);
-
-        // 20220102 Added action to the href. 20230810 Changed based on pull request #29.
-        $url = new moodle_url('report.php', ['id' => $diary->coursemodule, 'action' => 'currententry']);
-        $table->data[$i][] = '<a href="'.$url->out(false).'">'
-            .get_string('viewallentries', 'diary', $entrycount).'</a>';
-    } else if (! empty($managersomewhere)) {
-        $table->data[$i][] = "";
-    }
-
-    $i ++;
 }
 
-echo html_writer::table($table);
+// Prepare instances with extra data for the template.
+$instances = [];
+foreach ($diarys as $diary) {
+    $context = context_module::instance($diary->coursemodule);
+
+    $row = new stdClass();
+    $row->name        = format_string($diary->name, true, ['context' => $context]);
+    $row->viewurl     = (new moodle_url('/mod/diary/view.php', ['id' => $diary->coursemodule]))->out();
+    $row->dimmed      = !$diary->visible;  // Used in template for class="dimmed" if needed.
+    $row->intro       = format_module_intro('diary', $diary, $diary->coursemodule, false); // Short version.
+    $row->summary     = format_text($diary->intro, $diary->introformat, ['context' => $context]);
+
+    // Optional: section name (if course uses sections).
+    $row->sectionname = '';
+    if (course_format_uses_sections($course->format)) {
+        $modinfo = get_fast_modinfo($course);
+        if (isset($modinfo->get_sections()[$diary->section])) {
+            $row->sectionname = get_section_name($course, $modinfo->get_section_info($diary->section));
+        }
+    }
+
+    // Entries link (only shown if user can manage entries in this instance).
+    $row->entrieslink = '';
+    if (has_capability('mod/diary:manageentries', $context)) {
+        $entrycount = results::diary_count_entries($diary, $currentgroup);
+        $url = new moodle_url('/mod/diary/report.php', ['id' => $diary->coursemodule, 'action' => 'currententry']);
+        $row->entrieslink = html_writer::link($url, get_string('viewallentries', 'diary', $entrycount));
+    }
+
+    $instances[] = $row;
+}
+
+// Render via renderer + Mustache.
+$renderer = $PAGE->get_renderer('mod_diary');
+echo $renderer->render_index_page($course, $instances, true, $showentriescolumn);
 
 echo $OUTPUT->footer();

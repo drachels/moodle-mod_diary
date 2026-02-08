@@ -25,7 +25,7 @@ use mod_diary\local\results;
 
 require_once("../../config.php");
 require_once("lib.php");
-require_once($CFG->dirroot.'/rating/lib.php');
+require_once($CFG->dirroot . '/rating/lib.php');
 
 $id = required_param('id', PARAM_INT);          // Course module.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT);
@@ -63,7 +63,8 @@ if (!$sortoption = get_user_preferences('sortoption')) {
 $entry = $DB->get_record('diary_entries', ['id' => $entryid, 'userid' => $user]);
 
 // Header with additional info in the url.
-$PAGE->set_url('/mod/diary/reportone.php',
+$PAGE->set_url(
+    '/mod/diary/reportone.php',
     [
         'id'      => $id,
         'user'    => $user,
@@ -120,7 +121,7 @@ $templatecontext = $renderer->prepare_reportone_data(
     $cm,
     $course,
     $diary,
-    $DB->get_record('user', ['id' => $user]), // full user record
+    $DB->get_record('user', ['id' => $user]), // Full user record.
     $entry,
     $teachers,
     $grades

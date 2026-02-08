@@ -31,7 +31,6 @@ defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_diary_renderer extends plugin_renderer_base {
-
     /**
      * Rendering diary files.
      *
@@ -80,7 +79,9 @@ class mod_diary_renderer extends plugin_renderer_base {
         // Print export to .csv file toolbutton.
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('i/export', get_string('csvexport', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $this->pix_icon('i/export', get_string('csvexport', 'diary')),
             [
             'class' => 'toolbutton',
             ]
@@ -89,7 +90,9 @@ class mod_diary_renderer extends plugin_renderer_base {
         // Print reload toolbutton.
         $options['action'] = 'reload';
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/reload', get_string('reload', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $this->pix_icon('t/reload', get_string('reload', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -102,7 +105,9 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['firstkey'] = $cm['firstkey'];
         $options['promptid'] = $cm['promptid'];
         $url = new moodle_url('/mod/diary/edit.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('i/edit', get_string('edittopoflist', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $this->pix_icon('i/edit', get_string('edittopoflist', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -113,7 +118,9 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'sortfirstentry';
         $options['firstkey'] = $cm['firstkey'];
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/left', get_string('sortfirstentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $this->pix_icon('t/left', get_string('sortfirstentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -124,7 +131,9 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'lowestgradeentry';
         $options['firstkey'] = $cm['firstkey'];
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -135,7 +144,9 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'highestgradeentry';
         $options['firstkey'] = $cm['firstkey'];
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -146,7 +157,9 @@ class mod_diary_renderer extends plugin_renderer_base {
         $options['action'] = 'latestmodifiedentry';
         $options['firstkey'] = $cm['firstkey'];
         $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link($url, $this->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $this->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -171,10 +184,10 @@ class mod_diary_renderer extends plugin_renderer_base {
         $output .= (get_string('notavailable', 'diary'));
         $output .= $message;
         $output .= $this->output->box('<a href="'
-            .$CFG->wwwroot.'/course/view.php?id='
-            .$this->page->course->id.'">'
-            .get_string('returnto', 'diary', format_string($this->page->course->fullname, true))
-            .'</a>', 'diarybutton standardbutton');
+            . $CFG->wwwroot . '/course/view.php?id='
+            . $this->page->course->id . '">'
+            . get_string('returnto', 'diary', format_string($this->page->course->fullname, true))
+            . '</a>', 'diarybutton standardbutton');
         $output .= $this->output->box_end();
         $output .= $this->output->box_end();
         return $output;

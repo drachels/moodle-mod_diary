@@ -63,9 +63,10 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
 
     // 20211112 Check and make sure journal transferring from and diary transferring too, actually exist.
     // Verify journal and diary exists.
-    if (($journalck = $DB->get_record('journal', ['id' => $journalfromid], '*', MUST_EXIST))
-        && ($diaryto = $DB->get_record('diary', ['id' => $diarytoid], '*', MUST_EXIST))) {
-
+    if (
+        ($journalck = $DB->get_record('journal', ['id' => $journalfromid], '*', MUST_EXIST))
+        && ($diaryto = $DB->get_record('diary', ['id' => $diarytoid], '*', MUST_EXIST))
+    ) {
         // 20211113 Adding transferred from note to the feedback via $feedbacktag, below.
         $journalck = $DB->get_record('journal', ['id' => $journalfromid], '*', MUST_EXIST);
         $journalentries = $DB->get_records_sql($sql, ['journalid' => $journalfromid]);
@@ -91,7 +92,7 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
             $newdiaryentry->format = $journalentry->format;
             if ($journalentry->rating) {
                 $newdiaryentry->rating = $journalentry->rating;
-                $newdiaryentry->entrycomment = $journalentry->entrycomment.$feedbacktag;
+                $newdiaryentry->entrycomment = $journalentry->entrycomment . $feedbacktag;
                 $newdiaryentry->teacher = $journalentry->teacher;
                 $newdiaryentry->timemarked = $journalentry->timemarked;
             }
@@ -109,13 +110,16 @@ if (isset($param1) && get_string('transfer', 'diary') == $param1) {
                        AND de.userid = $journalentry->userid
                        AND de.timemodified = $journalentry->modified
                   ORDER BY de.id ASC';
-            if (!$DB->record_exists('diary_entries',
-                [
+            if (
+                !$DB->record_exists(
+                    'diary_entries',
+                    [
                     'diary' => $diarytoid,
                     'userid' => $journalentry->userid,
                     'timemodified' => $journalentry->modified,
-                ]
-            )) {
+                    ]
+                )
+            ) {
                 // 20211228 Bump count of transfers.
                 $xfrcountxfrd++;
                 // 20211228 Create and insert a new Diary entry from the old Journal entry.
@@ -158,7 +162,7 @@ $color3 = $diary->entrytextbgc;
 
 // Add colored background with border.
 echo '<div class="w-75 p-3" style="font-size:1em;
-    background: '.$color3.';
+    background: ' . $color3 . ';
     border:2px solid black;
     -webkit-border-radius:16px;
     -moz-border-radius:16px;border-radius:16px;">';
@@ -168,11 +172,11 @@ echo '<form method="POST">';
 
 // 20211105 Setup a url that takes you back to the Diary you came from.
 // 20230810 Changed based on pull request #29.
-$url1 = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', ['id' => $id]);
-$url2 = new moodle_url($CFG->wwwroot.'/mod/diary/journaltodiaryxfr.php', ['id' => $cm->id]);
+$url1 = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $id]);
+$url2 = new moodle_url($CFG->wwwroot . '/mod/diary/journaltodiaryxfr.php', ['id' => $cm->id]);
 
 // 20211202 Add some instructions and information to the page.
-echo '<h3 style="text-align:center;"><b>'.get_string('journaltodiaryxfrtitle', 'diary').'</b></h3>';
+echo '<h3 style="text-align:center;"><b>' . get_string('journaltodiaryxfrtitle', 'diary') . '</b></h3>';
 echo get_string('journaltodiaryxfrp1', 'diary');
 echo get_string('journaltodiaryxfrp2', 'diary');
 echo get_string('journaltodiaryxfrp3', 'diary');
@@ -190,10 +194,10 @@ echo get_string('journaltodiaryxfrjid', 'diary');
 
 if ($journals) {
     foreach ($journals as $journal) {
-        echo '<b>    '.$journal->id.'</b>  '.$journal->course.'  '.$journal->name.'<br>';
+        echo '<b>    ' . $journal->id . '</b>  ' . $journal->course . '  ' . $journal->name . '<br>';
     }
 } else {
-    echo '<b>'.get_string('journalmissing', 'diary').'</b><br>';
+    echo '<b>' . get_string('journalmissing', 'diary') . '</b><br>';
 }
 
 $dsql = 'SELECT *
@@ -206,15 +210,15 @@ $diarys = $DB->get_records_sql($dsql, ['course' => $cm->course]);
 echo get_string('journaltodiaryxfrdid', 'diary');
 
 foreach ($diarys as $diary) {
-    echo '<b>    '.$diary->id.'</b>  '.$diary->course.'  '.$diary->name.'<br>';
+    echo '<b>    ' . $diary->id . '</b>  ' . $diary->course . '  ' . $diary->name . '<br>';
 }
     // Set up place to enter Journal ID to transfer entries from.
-    echo '<br><br>'.get_string('journalid', 'diary').': <input type="text"
+    echo '<br><br>' . get_string('journalid', 'diary') . ': <input type="text"
                                                                name="journalid"
                                                                id="journalid">';
 
     // Set up place to enter Diary ID to transfer entries to.
-    echo '<br><br>'.get_string('diaryid', 'diary').': <input type="text"
+    echo '<br><br>' . get_string('diaryid', 'diary') . ': <input type="text"
                                                              name="diaryid"
                                                              id="diaryid">';
 
@@ -224,14 +228,14 @@ foreach ($diarys as $diary) {
                          name="transferwemail"
                          id="transferwemail"
                          value="checked">'
-                         .get_string('transferwemail', 'diary');
+                         . get_string('transferwemail', 'diary');
 
     // Set up option to include feedback that the entry was transferred.
     echo '<br><input type="checkbox"
                      name="transferwfb"
                      id="transferwfb"
                      value="checked">'
-                     .get_string('transferwfb', 'diary');
+                     . get_string('transferwfb', 'diary');
 
 // Add a transfer button.
 // Add a cancel button that clears the input boxes and reloads the page.
@@ -241,22 +245,22 @@ echo '<br><br><input class="btn btn-warning"
                      name="button1"
                      onClick="return clClick()"
                      type="submit" value="'
-                     .get_string('transfer', 'diary').'"> <a href="'.$url2->out(false).'"
+                     . get_string('transfer', 'diary') . '"> <a href="' . $url2->out(false) . '"
                      class="btn btn-secondary"
                      style="border-radius: 8px">'
-                     .get_string('cancel', 'diary').'</a></input>';
+                     . get_string('cancel', 'diary') . '</a></input>';
 
 // 20211206 Added results so the admin knows what has occured.
 if ($xfrcountck > 0) {
-    $xfrresults = get_string('xfrresults', 'diary', ['one' => $xfrcountck , 'two' => $xfrcountxfrd]);
+    $xfrresults = get_string('xfrresults', 'diary', ['one' => $xfrcountck, 'two' => $xfrcountxfrd]);
 } else {
     $xfrresults = '';
 }
 // 20230810 Changed based on pull request #29.
-echo '<br><br><a href="'.$url1->out(false)
-    .'" class="btn btn-success" style="border-radius: 8px">'
-    .get_string('returnto', 'diary', $diary->name)
-    .'</a> '.$xfrresults;
+echo '<br><br><a href="' . $url1->out(false)
+    . '" class="btn btn-success" style="border-radius: 8px">'
+    . get_string('returnto', 'diary', $diary->name)
+    . '</a> ' . $xfrresults;
 echo '</form>';
 echo '</div>';
 

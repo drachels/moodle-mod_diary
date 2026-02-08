@@ -60,7 +60,7 @@ if ($sortoption = get_user_preferences('sortoption')) {
     $sortoption = get_user_preferences('sortoption');
 }
 
-$oldlistpreference = get_user_preferences('diary_listpreference_'.$diary->id, null);
+$oldlistpreference = get_user_preferences('diary_listpreference_' . $diary->id, null);
 $listpreference = optional_param('listpreference', $oldlistpreference, PARAM_INT);
 $entryrater = has_capability('mod/diary:rate', $context);
 
@@ -142,7 +142,8 @@ if (! empty($action)) {
 }
 
 // Header.
-$PAGE->set_url('/mod/diary/report.php',
+$PAGE->set_url(
+    '/mod/diary/report.php',
     [
         'id' => $id,
         'diary' => $diaryid,
@@ -150,7 +151,7 @@ $PAGE->set_url('/mod/diary/report.php',
     ]
 );
 
-$PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
+$PAGE->navbar->add((get_string("rate", "diary")) . ' ' . (get_string("entries", "diary")));
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 
@@ -162,12 +163,12 @@ $participanttable = new \core_user\table\participants("user-index-participants-{
 
 // 20210511 Changed to using div and span.
 echo '<div class="sortandaggregate">';
-echo ('<span>'.get_string('sortorder', "diary"));
-echo (get_string($stringlable, "diary").'</span>');
+echo ('<span>' . get_string('sortorder', "diary"));
+echo (get_string($stringlable, "diary") . '</span>');
 
 // 20200827 Added link to index.php page. 20210501 Moved to here.
-echo '<span><a style="float: right;" href="index.php?id='.$course->id.'">'
-    .get_string('viewalldiaries', 'diary').'</a></span></div>';
+echo '<span><a style="float: right;" href="index.php?id=' . $course->id . '">'
+    . get_string('viewalldiaries', 'diary') . '</a></span></div>';
 
 // Get a list of groups for this course.
 $currentgroup = groups_get_activity_group($cm, true);
@@ -233,7 +234,9 @@ if (!$users) {
         // Add download button.
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('i/export', get_string('csvexport', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('i/export', get_string('csvexport', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -242,7 +245,9 @@ if (!$users) {
         // Add sort by lastname ascending button.
         $options['action'] = 'lastnameasc';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/sort_asc', get_string('lastnameasc', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/sort_asc', get_string('lastnameasc', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -251,7 +256,9 @@ if (!$users) {
         // Add sort by lastname descending button.
         $options['action'] = 'lastnamedesc';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/sort_desc', get_string('lastnamedesc', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/sort_desc', get_string('lastnamedesc', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -260,7 +267,9 @@ if (!$users) {
         // Add reload toolbutton.
         $options['action'] = $stringlable;
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/reload', get_string('reload', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/reload', get_string('reload', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -268,7 +277,9 @@ if (!$users) {
 
         $options['action'] = 'currententry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('i/edit', get_string('currententry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('i/edit', get_string('currententry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -276,7 +287,9 @@ if (!$users) {
 
         $options['action'] = 'firstentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/left', get_string('firstentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/left', get_string('firstentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -284,7 +297,9 @@ if (!$users) {
 
         $options['action'] = 'lowestgradeentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -292,7 +307,9 @@ if (!$users) {
 
         $options['action'] = 'highestgradeentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -300,15 +317,17 @@ if (!$users) {
 
         $options['action'] = 'latestmodifiedentry';
         $url = new moodle_url('/mod/diary/report.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
         );
 
         // 20210511 Reorganized group and toolbar output. 20220102 Added action.
-        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/report.php?id=$cm->id&action=currententry")
-            .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
+        echo '<span>' . groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id&action=currententry")
+            . '</span><span style="float: right;">' . get_string('toolbar', 'diary') . $output . '</span>';
     }
 
     // Next line is different from Journal line 171 202. Difference is $journal->grade.
@@ -322,22 +341,22 @@ if (!$users) {
     // Start the page area where feedback and grades are added and will need to be saved.
     // 20230810 Changed based on pull request #29.
     $url = new moodle_url('report.php', ['id' => $id, 'diaryid' => $diaryid, 'action' => $action]);
-    echo '<form action="'.$url->out(false).'" method="post">';
+    echo '<form action="' . $url->out(false) . '" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
     // 20211027 changed to rounded buttons. 20211229 Removed escaped double quotes.
     $saveallbutton = '';
     $saveallbutton = '<p class="feedbacksave">';
-    $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
-    $saveallbutton .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+    $saveallbutton .= '<input type="hidden" name="id" value="' . $cm->id . '" />';
+    $saveallbutton .= '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
-        .get_string("saveallfeedback", "diary").'" />';
+        . get_string("saveallfeedback", "diary") . '" />';
     // 20200421 Added a return button.
     // 20230810 Changed based on pull request #29.
-    $url = new moodle_url($CFG->wwwroot.'/mod/diary/view.php', ['id' => $id]);
-    $saveallbutton .= ' <a href="'.$url->out(false)
-                     .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
-                     .get_string('returnto', 'diary', $diary->name)
-                     .'</a>';
+    $url = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $id]);
+    $saveallbutton .= ' <a href="' . $url->out(false)
+                     . '" class="btn btn-secondary" role="button" style="border-radius: 8px">'
+                     . get_string('returnto', 'diary', $diary->name)
+                     . '</a>';
 
     $saveallbutton .= '</p>';
 
@@ -350,16 +369,18 @@ if (!$users) {
     // Print a list of users who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup, $sortoption)) {
         foreach ($usersdone as $user) {
-            echo '<div class="entry" style="background: '.$dcolor3.'">';
+            echo '<div class="entry" style="background: ' . $dcolor3 . '">';
 
             // Based on toolbutton and on list of users with at least one entry, print the entries on screen.
-            echo results::diary_print_user_entry($context,
+            echo results::diary_print_user_entry(
+                $context,
                 $course,
                 $diary,
                 $user,
                 $entrybyuser[$user->id],
                 $teachers,
-                $grades);
+                $grades
+            );
             echo '</div>';
 
             // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
@@ -374,7 +395,7 @@ if (!$users) {
     // Need to check if user is an entry rater.
     if ($entryrater) {
         if ($listpreference != $oldlistpreference) {
-            set_user_preference('diary_listpreference_'.$diary->id, $listpreference);
+            set_user_preference('diary_listpreference_' . $diary->id, $listpreference);
         }
 
         $listoptions = [
@@ -382,12 +403,16 @@ if (!$users) {
             2 => get_string('showlistno', 'diary'),
         ];
         // This creates the dropdown list for list preference on the report page above the first empty entry.
-        $selection = html_writer::select($listoptions, 'listpreference', $listpreference, false,
+        $selection = html_writer::select(
+            $listoptions,
+            'listpreference',
+            $listpreference,
+            false,
             ['id' => 'pref_lists', 'class' => 'custom-select']
         );
 
-        echo get_string('showlistpreference', 'diary').': <select onchange="this.form.submit()" name="listpreference">';
-        echo '<option selected="true" value="'.$selection.'</option>';
+        echo get_string('showlistpreference', 'diary') . ': <select onchange="this.form.submit()" name="listpreference">';
+        echo '<option selected="true" value="' . $selection . '</option>';
         echo '</select>';
     }
 
@@ -396,15 +421,17 @@ if (!$users) {
         // List remaining users with no entries.
         foreach ($users as $user) {
             // 20210511 Changed to class.
-            echo '<div class="entry" style="background: '.$dcolor3.'">';
+            echo '<div class="entry" style="background: ' . $dcolor3 . '">';
 
-            echo results::diary_print_user_entry($context,
+            echo results::diary_print_user_entry(
+                $context,
                 $course,
                 $diary,
                 $user,
                 null,
                 $teachers,
-                $grades);
+                $grades
+            );
             echo '</div><br>';
         }
 

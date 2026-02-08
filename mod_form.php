@@ -34,7 +34,6 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_diary_mod_form extends moodleform_mod {
-
     /** Settings for adding repeated form elements. */
     /** @var int */
     const NUM_ITEMS_DEFAULT = 0;
@@ -68,7 +67,7 @@ class mod_diary_mod_form extends moodleform_mod {
      */
     protected function plugin_constant($name) {
         $plugin = $this->plugin_name();
-        return constant($plugin.'::'.$name);
+        return constant($plugin . '::' . $name);
     }
 
     /**
@@ -87,8 +86,8 @@ class mod_diary_mod_form extends moodleform_mod {
         $PAGE->requires->js_call_amd("$plugin/form", 'init', $params);
 
         // 20210706 Cache options for form elements to input text.
-        $shorttextoptions = ['size' => 3,  'style' => 'width: auto'];
-        $mediumtextoptions = ['size' => 5,  'style' => 'width: auto'];
+        $shorttextoptions = ['size' => 3, 'style' => 'width: auto'];
+        $mediumtextoptions = ['size' => 5, 'style' => 'width: auto'];
         $longtextoptions = ['size' => 10, 'style' => 'width: auto'];
 
         // 20210706 Cache options for show/hide elements.
@@ -118,10 +117,10 @@ class mod_diary_mod_form extends moodleform_mod {
         if ($COURSE->format == 'weeks') {
             $options = [];
             $options[0] = get_string('alwaysopen', 'diary');
-            for ($i = 1; $i <= 13; $i ++) {
+            for ($i = 1; $i <= 13; $i++) {
                 $options[$i] = get_string('numdays', '', $i);
             }
-            for ($i = 2; $i <= 16; $i ++) {
+            for ($i = 2; $i <= 16; $i++) {
                 $days = $i * 7;
                 $options[$days] = get_string('numweeks', '', $i);
             }
@@ -134,7 +133,10 @@ class mod_diary_mod_form extends moodleform_mod {
             $mform->setDefault('days', '0');
         }
 
-        $mform->addElement('date_time_selector', 'timeopen', get_string('diaryopentime', 'diary'),
+        $mform->addElement(
+            'date_time_selector',
+            'timeopen',
+            get_string('diaryopentime', 'diary'),
             [
                 'optional' => true,
                 'step' => 1,
@@ -142,7 +144,10 @@ class mod_diary_mod_form extends moodleform_mod {
         );
         $mform->addHelpButton('timeopen', 'diaryopentime', 'diary');
 
-        $mform->addElement('date_time_selector', 'timeclose', get_string('diaryclosetime', 'diary'),
+        $mform->addElement(
+            'date_time_selector',
+            'timeclose',
+            get_string('diaryclosetime', 'diary'),
             [
                 'optional' => true,
                 'step' => 1,
@@ -444,7 +449,7 @@ class mod_diary_mod_form extends moodleform_mod {
      * @param array $courseid
      * @return array $options
      */
-    protected function get_errorcmid_options($courseid=0) {
+    protected function get_errorcmid_options($courseid = 0) {
         $options = ['0' => ''];
         $modinfo = get_fast_modinfo($courseid);
         foreach ($modinfo->cms as $cmid => $cm) {
@@ -468,7 +473,7 @@ class mod_diary_mod_form extends moodleform_mod {
             return $this->get_default_value($name, $default);
         } else {
             // Moodle <= 3.9.
-            return get_user_preferences($this->plugin_name().'_'.$name, $default);
+            return get_user_preferences($this->plugin_name() . '_' . $name, $default);
         }
     }
 
@@ -516,7 +521,6 @@ class mod_diary_mod_form extends moodleform_mod {
     protected function get_ignorebreaks_options($plugin) {
         return [0 => get_string('phraseignorebreaksno', $plugin), 1 => get_string('phraseignorebreaksyes', $plugin)];
     }
-
 }
 
 /**
@@ -527,7 +531,6 @@ class mod_diary_mod_form extends moodleform_mod {
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_diary_prompt_form extends moodleform {
-
     /**
      * Define the Diary Prompts input form called from prompt_edit.php.
      */
@@ -577,9 +580,11 @@ class mod_diary_prompt_form extends moodleform {
         $name = 'prompt';
         $label = get_string($name, $plugin);
         // 2026110 Change the editor to use cleaned options.
-        $mform->addElement('editor',
-                           'text_editor',
-                           get_string('prompt', 'mod_diary')); // Use a plain string label here.
+        $mform->addElement(
+            'editor',
+            'text_editor',
+            get_string('prompt', 'mod_diary')
+        ); // Use a plain string label here.
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 
@@ -600,7 +605,7 @@ class mod_diary_prompt_form extends moodleform {
                          'yellow': '#ffff00', 'pink': '#ffc0cb', 'white': '#ffffff',
                          'orange': '#ffa500', 'purple': '#800080'
                      };
-        
+
                      // If the current value is a word in our map, swap it for the Hex
                      var currentVal = cp.value.toLowerCase();
                      if (colors[currentVal]) {
@@ -715,7 +720,6 @@ class mod_diary_prompt_form extends moodleform {
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_diary_prompt_edit_form extends moodleform {
-
     /**
      * Define the Diary Prompts input form called from prompt_edit.php.
      */
@@ -748,12 +752,17 @@ class mod_diary_prompt_edit_form extends moodleform {
         $name = 'text_editor';
         $label = get_string($name, $plugin);
 
-        $mform->addElement('editor', $name,
-                           format_text($label,
-                           $promptformat = FORMAT_MOODLE,
-                           $options = null,
-                           $courseiddonotuse = null),
-                           'wrap="virtual" rows="3"');
+        $mform->addElement(
+            'editor',
+            $name,
+            format_text(
+                $label,
+                $promptformat = FORMAT_MOODLE,
+                $options = null,
+                $courseiddonotuse = null
+            ),
+            'wrap="virtual" rows="3"'
+        );
         $mform->setType($name, PARAM_RAW);
         $mform->addRule($name, null, 'required', null, 'client');
 

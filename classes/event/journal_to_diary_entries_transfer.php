@@ -33,7 +33,6 @@ defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class journal_to_diary_entries_transfer extends \core\event\base {
-
     /**
      * Init method.
      */
@@ -70,7 +69,8 @@ class journal_to_diary_entries_transfer extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/diary/journaltodiaryxfr.php',
+        return new \moodle_url(
+            '/mod/diary/journaltodiaryxfr.php',
             [
                 'id' => $this->contextinstanceid,
             ]

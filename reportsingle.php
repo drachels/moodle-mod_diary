@@ -25,7 +25,7 @@ use mod_diary\local\results;
 
 require_once("../../config.php");
 require_once("lib.php");
-require_once($CFG->dirroot.'/rating/lib.php');
+require_once($CFG->dirroot . '/rating/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
@@ -98,8 +98,11 @@ if (! empty($action)) {
                 // oldest, ungraded entry. Once all ungraded entries have a grade, the entry
                 // with the lowest grade is shown. For duplicate low grades, the entry that
                 // is oldest, is shown.
-                $eee = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $user],
-                    $sort = 'rating ASC, timemodified DESC');
+                $eee = $DB->get_records(
+                    'diary_entries',
+                    ['diary' => $diary->id, 'userid' => $user],
+                    $sort = 'rating ASC, timemodified DESC'
+                );
             }
             break;
         case 'highestgradeentry':
@@ -128,14 +131,15 @@ if (! empty($action)) {
 
 
 // 20211214 Header with additional info in the url.
-$PAGE->set_url('/mod/diary/reportsingle.php',
+$PAGE->set_url(
+    '/mod/diary/reportsingle.php',
     [
         'id' => $id,
         'user' => $user,
         'action' => $action,
     ]
 );
-$PAGE->navbar->add((get_string("rate", "diary")).' '.(get_string("entries", "diary")));
+$PAGE->navbar->add((get_string("rate", "diary")) . ' ' . (get_string("entries", "diary")));
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 
@@ -143,12 +147,12 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($diaryname);
 
 // 20201016 Added missing header label. 20210511 Changed to remove hard coded <h5>'s.
-echo '<div>'.(get_string('sortorder', "diary"));
+echo '<div>' . (get_string('sortorder', "diary"));
 echo (get_string($stringlable, "diary"));
 
 // 20200827 Added link to index.php page.
-echo '<span style="float: right;"><a href="index.php?id='.$course->id.'">'
-    .get_string('viewalldiaries', 'diary').'</a></span></div>';
+echo '<span style="float: right;"><a href="index.php?id=' . $course->id . '">'
+    . get_string('viewalldiaries', 'diary') . '</a></span></div>';
 
 // Save our current user id and also get his details. CHECK - might not need this.
 $users = $user;
@@ -183,9 +187,7 @@ if ($data = data_submitted()) {
     $event->add_record_snapshot('course', $course);
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
-
 } else {
-
     // Trigger module viewed event.
     $event = \mod_diary\event\entries_viewed::create(
         [
@@ -202,7 +204,6 @@ if ($data = data_submitted()) {
 if (! $users) {
     echo $OUTPUT->heading(get_string("nousersyet"));
 } else {
-
     $output = '';
     // Create download, reload, current, oldest, lowest, highest, and most recent tool buttons for all entries.
     if (has_capability('mod/diary:manageentries', $context)) {
@@ -215,7 +216,9 @@ if (! $users) {
         // Add download button.
         $options['action'] = 'download';
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('i/export', get_string('csvexport', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('i/export', get_string('csvexport', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -224,7 +227,9 @@ if (! $users) {
         // Add reload toolbutton.
         $options['action'] = $stringlable;
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/reload', get_string('reload', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/reload', get_string('reload', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -232,7 +237,9 @@ if (! $users) {
 
         $options['action'] = 'currententry';
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('i/edit', get_string('currententry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('i/edit', get_string('currententry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -240,7 +247,9 @@ if (! $users) {
 
         $options['action'] = 'firstentry';
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/left', get_string('firstentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/left', get_string('firstentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -248,7 +257,9 @@ if (! $users) {
 
         $options['action'] = 'lowestgradeentry';
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -256,7 +267,9 @@ if (! $users) {
 
         $options['action'] = 'highestgradeentry';
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
@@ -264,15 +277,21 @@ if (! $users) {
 
         $options['action'] = 'latestmodifiedentry';
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link($url, $OUTPUT->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
+        $output .= html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/right', get_string('latestmodifiedentry', 'diary')),
             [
                 'class' => 'toolbutton',
             ]
         );
 
         // 20210511 Reorganized group and toolbar output. 20220102 Added action.
-        echo '<span>'.groups_print_activity_menu($cm, $CFG->wwwroot."/mod/diary/reportsingle.php?id=$cm->id&action=currententry")
-            .'</span><span style="float: right;">'.get_string('toolbar', 'diary').$output.'</span>';
+        echo '<span>' .
+            groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/reportsingle.php?id=$cm->id&action=currententry")
+            . '</span><span style="float: right;">' .
+            get_string('toolbar', 'diary') .
+            $output .
+            '</span>';
     }
 
 
@@ -287,15 +306,15 @@ if (! $users) {
     // 20211213 Start the page area where feedback and grades are added and will need to be saved.
     // 20230810 Changed due to pull request #29.
     $url = new moodle_url('reportsingle.php', ['id' => $id, 'user' => $user->id, 'action' => 'allentries']);
-    echo '<form action="'.$url->out(false).'" method="post">';
+    echo '<form action="' . $url->out(false) . '" method="post">';
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
     // 20211210 Cleaned up unnecessary escaped double quotes.
     $saveallbutton = '';
     $saveallbutton = '<p class="feedbacksavereturn">';
-    $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
+    $saveallbutton .= '<input type="hidden" name="id" value="' . $cm->id . '" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
     $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
-                      .get_string('saveallfeedback', 'diary').'" />';
+                      . get_string('saveallfeedback', 'diary') . '" />';
 
     // phpcs:ignore
     /*
@@ -311,11 +330,11 @@ if (! $users) {
     // 20211230 Tacked on an action for the return URL.
     // 20201222 Added a return to report.php button if you do not want to save feedback.
     // 20230810 Made changes based on pull request#29.
-    $url2 = new moodle_url($CFG->wwwroot.'/mod/diary/report.php', ['id' => $id, 'action' => 'currententry']);
-    $saveallbutton .= ' <a href="'.$url2->out(true)
-                     .'" class="btn btn-secondary" role="button" style="border-radius: 8px">'
-                     .get_string('returntoreport', 'diary', $diary->name)
-                     .'</a>';
+    $url2 = new moodle_url($CFG->wwwroot . '/mod/diary/report.php', ['id' => $id, 'action' => 'currententry']);
+    $saveallbutton .= ' <a href="' . $url2->out(true)
+                     . '" class="btn btn-secondary" role="button" style="border-radius: 8px">'
+                     . get_string('returntoreport', 'diary', $diary->name)
+                     . '</a>';
 
     $saveallbutton .= "</p>";
 
@@ -325,15 +344,17 @@ if (! $users) {
     $dcolor3 = $diary->entrybgc;
     foreach ($eee as $ee) {
         // 20210511 Changed to using class.
-        echo '<div class="entry" style="background: '.$dcolor3.'">';
+        echo '<div class="entry" style="background: ' . $dcolor3 . '">';
         // Based on the single selected user, print all their entries on screen.
-        echo results::diary_print_user_entry($context,
-                                             $course,
-                                             $diary,
-                                             $user,
-                                             $ee,
-                                             $teachers,
-                                             $grades);
+        echo results::diary_print_user_entry(
+            $context,
+            $course,
+            $diary,
+            $user,
+            $ee,
+            $teachers,
+            $grades
+        );
         echo '</div>';
         // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
         echo $saveallbutton;
