@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die(); // @codingStandardsIgnoreLine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_diary_activity_structure_step extends restore_activity_structure_step {
-
     /**
      * Define the structure of the restore workflow.
      *
