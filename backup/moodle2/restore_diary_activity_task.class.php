@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/mod/diary/backup/moodle2/restore_diary_stepslib.p
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_diary_activity_task extends restore_activity_task {
-
     /**
      * Define (add) particular settings this activity can have.
      */
@@ -56,19 +55,22 @@ class restore_diary_activity_task extends restore_activity_task {
      */
     public static function define_decode_contents() {
         $contents = [];
-        $contents[] = new restore_decode_content('diary',
+        $contents[] = new restore_decode_content(
+            'diary',
             [
                 'intro',
             ],
             'diary'
         );
-        $contents[] = new restore_decode_content('diary_prompts',
+        $contents[] = new restore_decode_content(
+            'diary_prompts',
             [
                 'text',
             ],
             'diary_prompt'
         );
-        $contents[] = new restore_decode_content('diary_entries',
+        $contents[] = new restore_decode_content(
+            'diary_entries',
             [
                 'text',
                 'entrycomment',
