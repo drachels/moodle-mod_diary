@@ -37,14 +37,13 @@ defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class syllables {
-
     // Specific common exceptions that don't follow the rule set below are handled individually
     // array of problem words (with word as key, syllable count as value).
     // Common reasons we need to override some words:
     // - Trailing 'e' is pronounced.
     // - Portmanteaus.
     /** @var array */
-    static public $arrproblemwords =
+    public static $arrproblemwords =
         [
             'abalone' => 4,
             'abare' => 3,
@@ -103,7 +102,7 @@ class syllables {
 
     // These syllables would be counted as two but should be one.
     /** @var array */
-    static public $arrsubsyllables =
+    public static $arrsubsyllables =
         [
             'cia(l|$)', // Use in words such as glacial, acacia.
             'tia',
@@ -196,7 +195,7 @@ class syllables {
 
     // These syllables would be counted as one but should be two.
     /** @var array */
-    static public $arraddsyllables =
+    public static $arraddsyllables =
         [
             '([^s]|^)ia',
             'riet',
@@ -232,7 +231,7 @@ class syllables {
 
     // Single syllable prefixes and suffixes.
     /** @var array */
-    static public $arraffix =
+    public static $arraffix =
         [
             '`^un`',        // phpcs:ignore
             '`^fore`',      // phpcs:ignore
@@ -264,7 +263,7 @@ class syllables {
 
     // Double syllable prefixes and suffixes.
     /** @var array */
-    static public $arrdoubleaffix =
+    public static $arrdoubleaffix =
         [
             '`^above`',     // phpcs:ignore
             '`^ant[ie]`',   // phpcs:ignore
@@ -293,7 +292,7 @@ class syllables {
 
     // Triple syllable prefixes and suffixes.
     /** @var array */
-    static public $arrtripleaffix =
+    public static $arrtripleaffix =
         [
             '`ology$`',    // phpcs:ignore
             '`ologist$`',  // phpcs:ignore
