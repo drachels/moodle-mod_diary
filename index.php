@@ -64,7 +64,7 @@ if (!$diarys = get_all_instances_in_course('diary', $course)) {
 }
 
 // Determine if we should show the "View entries" column.
-// (Only if user has manageentries capability in at least one Diary context.)
+// Only if user has manageentries capability in at least one Diary context.
 $showentriescolumn = false;
 foreach ($diarys as $diary) {
     $context = context_module::instance($diary->coursemodule);
