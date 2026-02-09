@@ -70,7 +70,7 @@ class overview extends \core_courseformat\activityoverviewbase {
         );
 
         $items[] = new overviewitem(
-            get_string('ungradedentries', 'diary'), // Add this string too
+            get_string('ungradedentries', 'diary'), // Add this string too.
             $ungraded,
             null,
             text_align::CENTER
@@ -118,7 +118,7 @@ class overview extends \core_courseformat\activityoverviewbase {
 
         return new overviewitem(
             get_string('availability', 'diary'),
-            $dates, // array of label/value pairs
+            $dates, // Array of label/value pairs.
             null,
             text_align::LEFT
         );
@@ -136,7 +136,7 @@ class overview extends \core_courseformat\activityoverviewbase {
         $text = get_string('view');
         $bodyoutline = button::BODY_OUTLINE;
 
-        // Your existing button class handling (looks fine)
+        // Your existing button class handling (looks fine).
         if (is_object($bodyoutline) && method_exists($bodyoutline, 'classes')) {
             $buttonclass = $bodyoutline->classes();
         } else {
