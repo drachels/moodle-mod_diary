@@ -83,7 +83,8 @@ This file describes changes and other work in the diary code.
     Used Gemini for suggestions and now have a working color selector. See ticket for details.
 20260205 Diary_1402bt - Dop down menu - More -> Logs generates a Warning. Rewrote the files,
     entry_deleted.php and entry_tags_deleted.php to remove the warning.
-
+20260209 Diary_1405 - Add to feedback on report pages does not update system rating. Changed
+    the code in results.php around line 746. See ticket for details.
 
 
 === 3.8.0 === pending (Build: 2024042900)
