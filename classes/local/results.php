@@ -745,19 +745,52 @@ class results {
 
             // 20220107 If the, Add to feedback, button is clicked process it here.
             // 20241203 Modified to work for the three report pages.
+            // 20260209 Modified to update the system rating based on the rating for this entry.
             if ($param1 == get_string('addtofeedback', 'diary')) {
-                // 20220105 Do an immediate update here.
+                // Set rating from autorating calculation.
                 $entry->rating = $currentratingdata;
-                // Update feedback to show statistics, common errors, autorating.
+
+                // Build and append the feedback text.
                 $feedbacktext .= $statsdata . $comerrdata . $autoratingdata;
-                // Add the statistics, common errors, and autorating to the current entrycomment field.
-                // 20250114 Modified code to this.Works if you click, Save all my feedback, then click, Add to feedback.
-                $entry->entrycomment .= $feedbacktext . $statsdata . $comerrdata . $autoratingdata;
-                // Save the changes to the current user entry.
+                $entry->entrycomment .= $feedbacktext;  // Adjust if you want different concatenation.
+
+                // Save changes to the diary entry.
                 $DB->update_record('diary_entries', $entry, $bulk = false);
-                // 20250114 Added for testing.
+
+                // Ensure core mdl_rating record exists/updated (using the existing $context).
+                global $USER;  // The teacher.
+
+                $ratingdata = new stdClass();
+                $ratingdata->contextid    = $context->id;
+                $ratingdata->component    = 'mod_diary';
+                $ratingdata->ratingarea   = 'entry';
+                $ratingdata->itemid       = $entry->id;
+                $ratingdata->scaleid      = $diary->scale;
+                $ratingdata->rating       = $currentratingdata;
+                $ratingdata->userid       = $USER->id;
+                $ratingdata->timemodified = time();
+
+                // Look for an existing rating by this teacher.
+                $existing = $DB->get_record('rating', [
+                    'contextid'  => $context->id,
+                    'component'  => 'mod_diary',
+                    'ratingarea' => 'entry',
+                    'itemid'     => $entry->id,
+                    'userid'     => $USER->id,
+                ]);
+
+                if ($existing) {
+                    $ratingdata->id = $existing->id;
+                    $DB->update_record('rating', $ratingdata);
+                } else {
+                    $ratingdata->timecreated = time();
+                    $DB->insert_record('rating', $ratingdata);
+                }
+
+                // Recalculate grade (now with rating in place).
                 diary_update_grades($diary, $entry->userid);
             }
+
             // 20220107 If the, Clear feedback, button is clicked process it here.
             // 20241203 Modified to work for the three report pages.
             if ($param2 == get_string('clearfeedback', 'diary')) {
