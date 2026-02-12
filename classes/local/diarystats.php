@@ -441,19 +441,12 @@ class diarystats {
             $diarystats->commonpercent = $diarystats->commonerrors * $diary->errorpercent;
         }
 
-        //if ($CFG->branch > 32) {
-        //    // Can try e/help or f/help-32.
-        //    $itemp = $OUTPUT->image_icon('a/help', get_string('popoverhelp', 'diary'));
-        //} else {
-        //    $itemp = $OUTPUT->pix_icon('a/help', get_string('popoverhelp', 'diary'));
-        //}
-
-        // Where you currently generate the help icon for stats/feedback
-        if ($CFG->branch >= 33) {  // or >32, whatever your threshold is
+        // Where you currently generate the help icon for stats/feedback.
+        if ($CFG->branch >= 33) {  // Or >32, whatever your threshold is.
             $itemp = $OUTPUT->image_icon('a/help', get_string('popoverhelp', 'diary'), 'core', [
                 'width'  => 16,
                 'height' => 16,
-                'class'  => 'icon smallicon',  // keep classes if needed
+                'class'  => 'icon smallicon', // Keep classes if needed.
             ]);
         } else {
             $itemp = $OUTPUT->pix_icon('a/help', get_string('popoverhelp', 'diary'), 'core', [
@@ -462,7 +455,6 @@ class diarystats {
                 'class'  => 'icon smallicon',
             ]);
         }
-
 
         // 20210812 Show/hide statistics for each entry. 20220903 Total re-write of code.
         if ($diary->enablestats) {
