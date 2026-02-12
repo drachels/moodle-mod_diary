@@ -518,7 +518,7 @@ class results {
      * @param array $grades
      */
     public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
-        global $CFG, $DB, $OUTPUT, $USER;
+        global $CFG, $DB, $OUTPUT, $SESSION, $USER;
         $id = required_param('id', PARAM_INT); // Course module.
         // 20241204 Added $cm for delete entry code.
         $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
@@ -677,6 +677,8 @@ class results {
         // and comments. Add previous grades and comments, if available.
         if ($entry) {
             echo '<tr>';
+            // 20260210 Grok AI recommendation for an anchor.
+            echo '<div id="entry-' . $entry->id . '">';  // Start anchor container here
             echo '<td class="userpix">';
             if (! $entry->teacher) {
                 $entry->teacher = $USER->id;
@@ -710,31 +712,34 @@ class results {
                 ]
             );
             echo '</td>';
+
+            // 20260211 Create an anchor right before the feedback buttons.
+            //echo '<a id="entry-' . $entry->id . '"></a>';
+
+            // 20260211 Added scroll-to-rating-anchor before Add/Clear feedback buttons to improve teacher UX.
+            // Uses session to store clicked entry ID and scrolls to rating-anchor-{$entry->id} with 300px margin-top to clear fixed header.
+            echo '<a id="rating-anchor-' . $entry->id . '"></a>';
+
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to insert auto grade stats and rating to feedback.
             // Also added button to remove anything in the feedback text area.
             echo '<td>' . $teachers[$entry->teacher]->firstname . ' ' . $teachers[$entry->teacher]->lastname .
-
                 ' <input class="btn btn-warning btn-sm"
                         role="button"
                         style="border-radius: 8px"
                         name="button1' . $entry->id . '"
-                        onClick="return clClick(this.name)"
                         type="submit"
                         value="' . get_string('addtofeedback', 'diary') . '"></input> ' .
 
                 '<input class="btn btn-warning  btn-sm"
                         style="border-radius: 8px"
                         name="button2' . $entry->id . '"
-                        onClick="return clClick(this.name)"
                         type="submit"
                         value="' . get_string('clearfeedback', 'diary') . '"></input>';
 
-            // 20211228 Create a test anchor link for testing.
-            // echo '<a href="#'.$entry->id.'">xxxxx</a>';
+            // 20260210 Close the anchor container.
+            echo '</div>';
 
-            // 20211228 Create an anchor right after Add/Clear buttons.
-            echo  '<a id="' . $entry->id . '"></a>';
             echo '<br>' . get_string('rating', 'diary') . ':  ';
 
             $attrs = [];
@@ -789,6 +794,9 @@ class results {
 
                 // Recalculate grade (now with rating in place).
                 diary_update_grades($diary, $entry->userid);
+
+                // 20260211 Added due to Grok recommendation.
+                $SESSION->diary_clicked_entry = $entry->id;
             }
 
             // 20220107 If the, Clear feedback, button is clicked process it here.
@@ -806,6 +814,8 @@ class results {
                     // 20220107 Recalculate the rating for this user for this diary activity.
                     diary_update_grades($diary, $entry->userid);
                 }
+                // 20260211 Added due to Grok recommendation.
+                $SESSION->diary_clicked_entry = $entry->id;
             }
 
             // If the grade was modified from the gradebook disable edition also skip if diary is not graded.
@@ -896,15 +906,6 @@ class results {
             echo '</td></tr>';
         }
         echo '</table>';
-
-        ?>
-        <script type="text/javascript" defer>
-            function clClick(clicked) {
-                console.log("The Button 1 was clicked!");
-                return true;
-            }
-        </script>
-        <?php // phpcs:ignore
     }
 
     /**
