@@ -371,9 +371,9 @@ if (isset($SESSION->diary_clicked_entry)) {
         document.addEventListener("DOMContentLoaded", function() {
             var target = document.getElementById("rating-anchor-' . $SESSION->diary_clicked_entry . '");
             if (target) {
-                // Smooth scroll, align to top of viewport (but with margin via CSS)
+                // Auto scroll, align to top of viewport (but with margin via CSS)
                 target.scrollIntoView({
-                    behavior: "smooth",   // Use "smooth" or "auto" for instant.
+                    behavior: "auto",   // Use "smooth" or "auto" for instant.
                     block: "start",       // Aligns target to top (good with scroll-margin-top).
                     inline: "nearest"
                 });
