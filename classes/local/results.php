@@ -677,8 +677,6 @@ class results {
         // and comments. Add previous grades and comments, if available.
         if ($entry) {
             echo '<tr>';
-            // 20260210 Grok AI recommendation for an anchor.
-            echo '<div id="entry-' . $entry->id . '">';  // Start anchor container here
             echo '<td class="userpix">';
             if (! $entry->teacher) {
                 $entry->teacher = $USER->id;
@@ -713,11 +711,9 @@ class results {
             );
             echo '</td>';
 
-            // 20260211 Create an anchor right before the feedback buttons.
-            //echo '<a id="entry-' . $entry->id . '"></a>';
-
             // 20260211 Added scroll-to-rating-anchor before Add/Clear feedback buttons to improve teacher UX.
-            // Uses session to store clicked entry ID and scrolls to rating-anchor-{$entry->id} with 300px margin-top to clear fixed header.
+            // Uses session to store clicked entry ID and scrolls to rating-anchor-{$entry->id}.
+            // Uses 300px margin-top to clear fixed header.
             echo '<a id="rating-anchor-' . $entry->id . '"></a>';
 
             // 20210707 Added teachers name to go with their picture.
