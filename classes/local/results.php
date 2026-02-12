@@ -768,7 +768,7 @@ class results {
                 $ratingdata->itemid       = $entry->id;
                 $ratingdata->scaleid      = $diary->scale;
                 $ratingdata->rating       = $currentratingdata;
-                $ratingdata->userid       = $USER->id;
+                $ratingdata->userid       = $user->id;
                 $ratingdata->timemodified = time();
 
                 // Look for an existing rating by this teacher.
@@ -777,7 +777,7 @@ class results {
                     'component'  => 'mod_diary',
                     'ratingarea' => 'entry',
                     'itemid'     => $entry->id,
-                    'userid'     => $USER->id,
+                    'userid'     => $user->id   // Match on student's ID.
                 ]);
 
                 if ($existing) {
