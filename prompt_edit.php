@@ -24,6 +24,7 @@
 use mod_diary\local\results;
 use mod_diary\local\diarystats;
 use mod_diary\local\prompts;
+use mod_diary\local\prompts_form;
 use mod_diary\event\invalid_access_attempt;
 use mod_diary\event\prompt_edited;
 
@@ -317,7 +318,8 @@ $data = file_prepare_standard_editor(
 );
 
 // 20240806 Moved 12 variables from $editoroptions to here.
-$form = new mod_diary_prompt_form(
+// 20260212 Changed the name and moved the form to /mod/diary/classes/local/.
+$form = new prompts_form(
     null,
     [
         'current' => $data,
