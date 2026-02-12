@@ -86,7 +86,7 @@ This file describes changes and other work in the diary code.
     entry_deleted.php and entry_tags_deleted.php to remove the warning.
 20260209 Diary_1405 - Add to feedback on report pages does not update system rating. Changed
     the code in results.php around line 746. See ticket for details. Anchor works now, too.
-
+20260212 Diary_1406 - Average of ratings xx/xxx calculates wrong. 
 
 === 3.8.0 === pending (Build: 2024042900)
 20210515  Diary_720r - I am getting the String [grade, core] is deprecated debug message in
