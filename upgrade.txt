@@ -21,12 +21,7 @@ This file describes changes and other work in the diary code.
 20240221 Diary_1211 - Feature request - Would be nice to be able to use a grading rubric.
 20240426 Diary_1237 - New feature request - show individual names for selection in the,
     Visible groups dropdown.
-20241203 Diary_1343 - When the, Add to feedback, button is clicked, the feedback textarea info
-    icons are VERY large! 20250112 I think this is going to be one of those that I cannot fix
-    and will therefore switch it's status to, Waiting. The problem is editor related. The icons
-    are rendered 16x16 when using the Atto editor, even though the intrinsic size is 150x150.
-    However, when using the TinyMCE editor, the icons size automatically contracts/expands to
-    fill the table cell.
+
 20250113 Diary_1351 - Feature Request - Need to have new entry fields for feedback and text
     background colors.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
@@ -43,6 +38,12 @@ This file describes changes and other work in the diary code.
     $param test and stats and auto rating now are added/cleared from the feedback textarea when
     the, Add to feedback, or the, Clear feedback buttons are clicked. 20260206 Still does NOT
     correctly update the students grade/average.
+20241203 Diary_1343bt - When the, Add to feedback, button is clicked, the feedback textarea info
+    icons are VERY large! 20250112 I think this is going to be one of those that I cannot fix
+    and will therefore switch it's status to, Waiting. The problem is editor related. The icons
+    are rendered 16x16 when using the Atto editor, even though the intrinsic size is 150x150.
+    However, when using the TinyMCE editor, the icons size automatically contracts/expands to
+    fill the table cell. 20260211 This is now fixed by code change in diarystats.php
 20250204 Diary_1366bt - Immediate email from student to teacher is broken. Another can of worms
     as I had to add new files for messages, new strings for the new messages, bump the version,
     plus testing! See the ticket for details.
@@ -84,7 +85,7 @@ This file describes changes and other work in the diary code.
 20260205 Diary_1402bt - Dop down menu - More -> Logs generates a Warning. Rewrote the files,
     entry_deleted.php and entry_tags_deleted.php to remove the warning.
 20260209 Diary_1405 - Add to feedback on report pages does not update system rating. Changed
-    the code in results.php around line 746. See ticket for details.
+    the code in results.php around line 746. See ticket for details. Anchor works now, too.
 
 
 === 3.8.0 === pending (Build: 2024042900)

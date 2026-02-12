@@ -446,4 +446,25 @@ if (!$users) {
     echo "</form>";
 }
 
+// 20260211 New: If a button was clicked, output JS to scroll back to that entry's rating area.
+global $SESSION;
+if (isset($SESSION->diary_clicked_entry)) {
+    echo '<script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            var target = document.getElementById("rating-anchor-' . $SESSION->diary_clicked_entry . '");
+            if (target) {
+                // Smooth scroll, align to top of viewport (but with margin via CSS)
+                target.scrollIntoView({
+                    behavior: "smooth",   // Use "smooth" or "auto" for instant.
+                    block: "start",       // Aligns target to top (good with scroll-margin-top).
+                    inline: "nearest"
+                });
+            }
+        });
+    </script>';
+
+    // Clear the session var to avoid repeating on next loads.
+    unset($SESSION->diary_clicked_entry);
+}
+
 echo $OUTPUT->footer();

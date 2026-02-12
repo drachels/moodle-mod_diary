@@ -237,3 +237,13 @@
     border-bottom-color: #000;
     bottom: 0.25em;
 }
+
+[id^="rating-anchor-"] {
+    scroll-margin-top: 300px;   /* Adjust: Using 300px so the teacher can see the possible rating part of statistics. */
+    display: block;
+}
+
+/* Or more specific if you want to target only Diary anchors */
+.anchor-offset {
+    scroll-margin-top: 300px;
+}
