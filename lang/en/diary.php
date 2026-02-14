@@ -447,6 +447,7 @@ $string['sortlastentry'] = 'From latest modified diary entry to the oldest modif
 $string['sortlowestentry'] = 'From lowest rated diary entry to the highest entry.';
 $string['sortoptions'] = ' Sort options: ';
 $string['sortorder'] = 'Sort order is: ';
+$string['started'] = 'Started';
 $string['startnewentry'] = 'Start new entry';
 $string['startoredit'] = 'Start new or edit today\'s entry';
 $string['statshdr'] = 'Text statistics';
