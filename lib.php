@@ -988,3 +988,34 @@ function diary_extend_settings_navigation(settings_navigation $settingsnav, navi
         $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
     }
 }
+
+
+/**
+ * Obtains the automatic completion state for this diary based on the rule
+ * on its completion settings.
+ *
+ * @param stdClass $course Course
+ * @param cm_info|stdClass $cm Course-module
+ * @param int $userid User ID
+ * @param bool $type Type of comparison (or/and; can be used as return value if no conditions are met)
+ * @return bool True if completed, false if not, $type if conditions not met.
+ */
+function diary_get_completion_state($course, $cm, $userid, $type) {
+    global $DB;
+
+    // No need to check for the 'view' condition, completion_info_custom::get_state
+    // already checks for the 'view' rule before calling this function.
+
+    if ($type == COMPLETION_AND) {
+        $diary = $DB->get_record('diary', ['id' => $cm->instance]);
+        if (!$diary) {
+            return $type;
+        }
+
+        if ($diary->completion_create_entry) {
+            return $DB->record_exists('diary_entries', ['diary' => $diary->id, 'userid' => $userid]);
+        }
+    }
+
+    return $type;
+}
