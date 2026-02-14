@@ -1152,7 +1152,7 @@ class results {
         $cm = diary_get_coursemodule($diary->id);
         $context = context_module::instance($cm->id);
         // Get the groupmode which should be 0, 1, or 2.
-        $groupmode = ($diary->groupmode);
+        $groupmode = $cm->groupmode;
 
         // If user is in a group, how many users in each Diary activity?
         if ($groupid && ($groupmode > '0')) {
