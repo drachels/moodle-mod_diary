@@ -876,7 +876,7 @@ function diary_get_users_done($diary, $currentgroup, $sortoption) {
 function diary_get_coursemodule($diaryid) {
     global $DB;
 
-    return $DB->get_record_sql("SELECT cm.id
+    return $DB->get_record_sql("SELECT cm.*
                                   FROM {course_modules} cm
                                   JOIN {modules} m ON m.id = cm.module
                                  WHERE cm.instance = ?
@@ -1012,7 +1012,7 @@ function diary_get_completion_state($course, $cm, $userid, $type) {
             return $type;
         }
 
-        if ($diary->completion_create_entry) {
+        if (!empty($diary->completion_create_entry)) {
             return $DB->record_exists('diary_entries', ['diary' => $diary->id, 'userid' => $userid]);
         }
     }
