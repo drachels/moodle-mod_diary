@@ -112,10 +112,8 @@ class overview extends \core_courseformat\activityoverviewbase {
      * @return overviewitem|null An overview item or null for teachers.
      */
     private function get_extra_status_for_user(): ?overviewitem {
-        if (
-            !has_capability('mod/diary:addentries', $this->cm->context) ||
-            has_capability('mod/diary:manageentries', $this->cm->context)
-        ) {
+        if (has_capability('mod/diary:manageentries', $this->cm->context) ||
+            has_capability('mod/diary:rate', $this->cm->context)) {
             return null;
         }
 
