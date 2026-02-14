@@ -714,7 +714,7 @@ class results {
             // 20260211 Added scroll-to-rating-anchor before Add/Clear feedback buttons to improve teacher UX.
             // Uses session to store clicked entry ID and scrolls to rating-anchor-{$entry->id}.
             // Uses 300px margin-top to clear fixed header.
-            echo '<a id="rating-anchor-' . $entry->id . '"></a>';
+            echo '<div><a id="rating-anchor-' . $entry->id . '"></a>';
 
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to insert auto grade stats and rating to feedback.
@@ -777,7 +777,7 @@ class results {
                     'component'  => 'mod_diary',
                     'ratingarea' => 'entry',
                     'itemid'     => $entry->id,
-                    'userid'     => $user->id   // Match on student's ID.
+                    'userid'     => $user->id,   // Match on student's ID.
                 ]);
 
                 if ($existing) {
@@ -1085,15 +1085,15 @@ class results {
         $params['ratingarea'] = $ratingoptions->ratingarea;
         $params['itemid'] = $ratingoptions->itemid;
         $params['userid'] = $ratingoptions->userid;
-        $params['timecreated'] = $ratingoptions->timecreated;
+        // ...$params['timecreated'] = $ratingoptions->timecreated;.
 
         $sql = 'SELECT * FROM ' . $CFG->prefix . 'rating'
                      . ' WHERE contextid =  ?'
                        . ' AND component =  ?'
                        . ' AND ratingarea =  ?'
                        . ' AND itemid =  ?'
-                       . ' AND userid =  ?'
-                       . ' AND timecreated = ?';
+                       . ' AND userid =  ?';
+                       // .... ' AND timecreated = ?';.
 
         if ($rec = $DB->record_exists_sql($sql, $params)) {
             $rec = $DB->get_record_sql($sql, $params);
