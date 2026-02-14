@@ -16,135 +16,128 @@
 
 namespace mod_diary\courseformat;
 
-use cm_info;
-use core\url;
 use core\output\action_link;
-use core\output\local\properties\text_align;
-use core_courseformat\local\overview\overviewitem;
 use core\output\local\properties\button;
-use mod_diary\local\results; // Assuming this has your diary_count_entries() or similar.
+use core\output\local\properties\text_align;
+use core\output\pix_icon;
+use core\url;
+use core_courseformat\local\overview\overviewitem;
+use mod_diary\manager;
 
 /**
- * Diary overview integration for Moodle 5.0+ Activities overview page
+ * diary overview integration (for Moodle 5.1+)
  *
  * @package   mod_diary
- * @copyright 2025 AL Rachels <drachels@drachels.com>
+ * @copyright 2026 AL Rachels (drachels@drachels.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class overview extends \core_courseformat\activityoverviewbase {
     /**
+     * @var manager the diary manager.
+     */
+    private manager $manager;
+    /**
+     * @var \core\output\renderer_helper $rendererhelper the renderer helper
+     */
+    private \core\output\renderer_helper $rendererhelper;
+
+    /**
      * Constructor.
      *
-     * @param cm_info $cm the course module instance.
+     * @param \cm_info $cm the course module instance.
+     * @param \core\output\renderer_helper $rendererhelper the renderer helper.
      */
-    public function __construct(cm_info $cm) {
+    public function __construct(
+        \cm_info $cm,
+        \core\output\renderer_helper $rendererhelper
+    ) {
         parent::__construct($cm);
+        $this->rendererhelper = $rendererhelper;
+        $this->manager = manager::create_from_coursemodule($cm);
+    }
+
+    #[\Override]
+    public function get_extra_overview_items(): array {
+        return [
+            'studentswhowrote' => $this->get_extra_responses_overview(),
+            'write' => $this->get_extra_status_for_user(),
+        ];
     }
 
     /**
-     * Provide custom overview items (e.g. entry counts).
+     * Retrieves an overview of entries for the diary.
      *
-     * @return array of overviewitem
+     * @return overviewitem|null An overview item c, or null if the user lacks the required capability.
      */
-    public function get_custom_overview(): array {
-        global $DB;
+    private function get_extra_responses_overview(): ?overviewitem {
+        global $USER;
 
-        $items = [];
+        if (!has_capability('mod/diary:manageentries', $this->manager->get_coursemodule()->context)) {
+            return null;
+        }
+        if (is_callable([$this, 'get_groups_for_filtering'])) {
+            $groupids = array_keys($this->get_groups_for_filtering());
+        } else {
+            $groupids = [];
+        }
 
-        // Total entries count.
-        $totalentries = $DB->count_records('diary_entries', ['diary' => $this->cm->instance]);
+        $submissions = $this->manager->count_all_users_answered($groupids);
+        $total = $this->manager->count_all_users($groupids);
 
-        $items[] = new overviewitem(
-            get_string('totalentries', 'diary'), // You may need to add this string.
-            $totalentries,
-            null, // No content/link here, just value.
-            text_align::CENTER
-        );
+        if (defined('button::SECONDARY_OUTLINE')) {
+            $secondaryoutline = button::SECONDARY_OUTLINE;
+            $buttonclass = $secondaryoutline->classes();
+        } else {
+            $buttonclass = "btn btn-outline-secondary";
+        }
 
-        // Entries needing grading (assuming rating is null/empty for ungraded).
-        // Adjust query if your "graded" logic is different (e.g. timegraded IS NULL).
-        $ungraded = $DB->count_records_select(
-            'diary_entries',
-            'diary = ? AND (rating IS NULL OR rating = 0)',
-            [$this->cm->instance]
-        );
-
-        $items[] = new overviewitem(
-            get_string('ungradedentries', 'diary'), // Add this string too.
-            $ungraded,
+        $content = new action_link(
+            new url('/mod/diary/report.php', ['id' => $this->cm->id]),
+            get_string('count_of_total', 'core', ['count' => $submissions, 'total' => $total]),
             null,
-            text_align::CENTER
+            ['class' => $buttonclass]
         );
 
-        // Optional: link the ungraded count to the report page for quick access.
-        if ($ungraded > 0 && has_capability('mod/diary:manageentries', $this->cm->context)) {
-            $url = new url('/mod/diary/report.php', ['id' => $this->cm->id, 'action' => 'currententry']);
-            $items[] = new overviewitem(
-                get_string('gradeentrieslink', 'diary'),
-                new action_link($url, get_string('viewungraded', 'diary')),
-                null,
-                text_align::CENTER
-            );
-        }
-
-        return $items;
+        return new overviewitem(
+            get_string('entries', 'diary'),
+            $submissions,
+            $content,
+            text_align::CENTER
+        );
     }
 
     /**
-     * Provide dates overview (open/close times if set).
+     * Get the diary status overview item.
      *
-     * @return ?overviewitem
+     * @return overviewitem|null An overview item or null for teachers.
      */
-    public function get_dates_overview(): ?overviewitem {
-        $dates = [];
-
-        if (!empty($this->cm->customdata->timeopen)) {
-            $dates[] = [
-                'label' => get_string('diaryopentime', 'diary'),
-                'value' => userdate($this->cm->customdata->timeopen),
-            ];
-        }
-
-        if (!empty($this->cm->customdata->timeclose)) {
-            $dates[] = [
-                'label' => get_string('diaryclosetime', 'diary'),
-                'value' => userdate($this->cm->customdata->timeclose),
-            ];
-        }
-
-        if (empty($dates)) {
+    private function get_extra_status_for_user(): ?overviewitem {
+        if (
+            !has_capability('mod/diary:addentries', $this->cm->context) ||
+            has_capability('mod/diary:manageentries', $this->cm->context)
+        ) {
             return null;
         }
 
-        return new overviewitem(
-            get_string('availability', 'diary'),
-            $dates, // Array of label/value pairs.
-            null,
-            text_align::LEFT
-        );
-    }
-
-    /**
-     * Override to add custom actions (your existing View button).
-     *
-     * @return ?overviewitem
-     */
-    #[\Override]
-    public function get_actions_overview(): ?overviewitem {
-        $url = new url('/mod/diary/view.php', ['id' => $this->cm->id]);
-
-        $text = get_string('view');
-        $bodyoutline = button::BODY_OUTLINE;
-
-        // Your existing button class handling (looks fine).
-        if (is_object($bodyoutline) && method_exists($bodyoutline, 'classes')) {
-            $buttonclass = $bodyoutline->classes();
-        } else {
-            $buttonclass = (string) $bodyoutline;
+        $status = $this->manager->has_answered();
+        $statustext = get_string('notstarted', 'diary');
+        if ($status) {
+            $statustext = get_string('started', 'diary');
         }
-
-        $content = new action_link($url, $text, null, ['class' => $buttonclass]);
-
-        return new overviewitem(get_string('actions'), $content, null, text_align::CENTER);
+        $diarystatuscontent = "-";
+        if ($status) {
+            $diarystatuscontent = new pix_icon(
+                'i/checkedcircle',
+                $statustext,
+                'core',
+                ['class' => 'text-success']
+            );
+        }
+        return new overviewitem(
+            get_string('entry', 'diary'),
+            $status,
+            $diarystatuscontent,
+            text_align::CENTER
+        );
     }
 }
