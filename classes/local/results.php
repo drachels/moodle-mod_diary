@@ -777,7 +777,7 @@ class results {
                     'component'  => 'mod_diary',
                     'ratingarea' => 'entry',
                     'itemid'     => $entry->id,
-                    'userid'     => $user->id,   // Match on student's ID.
+                    'userid'     => $user->id, // Match on student's ID.
                 ]);
 
                 if ($existing) {
