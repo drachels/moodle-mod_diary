@@ -195,6 +195,16 @@ if ($eee) {
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
     results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
+    
+    // 20260215 Re-fetch entries from database to display updated values after feedback save.
+    $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
+    if ($eee) {
+        foreach ($eee as $ee) {
+            $entrybyentry[$ee->id] = $ee;
+            $entrybyuser[$ee->userid] = $ee;
+        }
+    }
+    
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(
         [
@@ -341,7 +351,11 @@ if (!$users) {
     // Start the page area where feedback and grades are added and will need to be saved.
     // 20230810 Changed based on pull request #29.
     $url = new moodle_url('report.php', ['id' => $id, 'diaryid' => $diaryid, 'action' => $action]);
-    echo '<form action="' . $url->out(false) . '" method="post">';
+    echo '<form action="' . $url->out(false) . '" method="post" id="feedbackform">';
+    // 20260215 Add hidden field to track last edited entry for scroll-back functionality.
+    // This MUST be before the save button to only appear once.
+    echo '<input type="hidden" name="last_edited_entry" id="last_edited_entry" value="" />';
+    
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
     // 20211027 changed to rounded buttons. 20211229 Removed escaped double quotes.
     $saveallbutton = '';
@@ -466,5 +480,89 @@ if (isset($SESSION->diary_clicked_entry)) {
     // Clear the session var to avoid repeating on next loads.
     unset($SESSION->diary_clicked_entry);
 }
+
+// 20260215 Added: Track which entry is being edited to enable scroll-back on save.
+// 20260215 Improved: Detect which save button was clicked to determine scroll-back entry.
+echo '<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // Track the last edited entry from field changes.
+        var lastEditedEntry = 0;
+        
+        // Listen for changes to rating fields.
+        var ratingSelects = document.querySelectorAll("select[id^=\"r\"]");
+        ratingSelects.forEach(function(select) {
+            select.addEventListener("change", function() {
+                var entryId = this.id.replace(/[^0-9]/g, "");
+                if (entryId) {
+                    lastEditedEntry = entryId;
+                }
+            });
+        });
+        
+        // Listen for changes to all possible comment field types (textarea, input, contenteditable).
+        var commentFields = document.querySelectorAll(
+            "textarea[name^=\"c\"], input[name^=\"c\"], [name^=\"c\"][contenteditable]"
+        );
+        commentFields.forEach(function(field) {
+            field.addEventListener("input", function() {
+                var entryId = this.name.replace(/[^0-9]/g, "");
+                if (entryId) {
+                    lastEditedEntry = entryId;
+                }
+            });
+            field.addEventListener("change", function() {
+                var entryId = this.name.replace(/[^0-9]/g, "");
+                if (entryId) {
+                    lastEditedEntry = entryId;
+                }
+            });
+        });
+        
+        // Find all input submit buttons with value "Save all my feedback" and track which one is clicked.
+        var submitButtons = document.querySelectorAll("input[type=\"submit\"]");
+        submitButtons.forEach(function(button) {
+            button.addEventListener("click", function(e) {
+                // If we have a lastEditedEntry from field tracking, use that.
+                if (lastEditedEntry > 0) {
+                    document.getElementById("last_edited_entry").value = lastEditedEntry;
+                } else {
+                    // Fallback: find the previous entry div before this button.
+                    var currentElement = button;
+                    var entryDiv = null;
+                    
+                    // Walk backwards through siblings and ancestors to find an entry div.
+                    while (currentElement && !entryDiv) {
+                        // Check previous siblings.
+                        var prevSibling = currentElement.previousElementSibling;
+                        while (prevSibling) {
+                            if (prevSibling.classList && prevSibling.classList.contains("entry")) {
+                                entryDiv = prevSibling;
+                                break;
+                            }
+                            prevSibling = prevSibling.previousElementSibling;
+                        }
+                        
+                        // If not found in siblings, go up to parent and try again.
+                        if (!entryDiv) {
+                            currentElement = currentElement.parentElement;
+                        }
+                    }
+                    
+                    // If we found the entry div, extract the entry ID from its anchor.
+                    if (entryDiv) {
+                        var anchors = entryDiv.querySelectorAll("[id^=\"rating-anchor-\"]");
+                        if (anchors.length > 0) {
+                            var anchorId = anchors[0].id; // rating-anchor-{id}
+                            var entryIdFromAnchor = anchorId.replace(/[^0-9]/g, "");
+                            if (entryIdFromAnchor) {
+                                document.getElementById("last_edited_entry").value = entryIdFromAnchor;
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    });
+</script>';
 
 echo $OUTPUT->footer();
