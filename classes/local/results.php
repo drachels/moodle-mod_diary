@@ -1219,7 +1219,7 @@ class results {
      * @return int count($diarys) Count of diary entries.
      */
     public static function diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry) {
-        global $DB, $CFG, $OUTPUT, $USER;
+        global $DB, $CFG, $OUTPUT, $USER, $SESSION;
 
         confirm_sesskey();
         $feedback = [];
@@ -1234,6 +1234,9 @@ class results {
             }
         }
 
+        // 20260215 Get the last edited entry ID for scroll-back functionality.
+        $last_edited_entry = isset($data['last_edited_entry']) ? (int)$data['last_edited_entry'] : 0;
+
         $timenow = time();
         // 20241129 Changed from 0 to 1. 20250113 Changed from 0 to 1, again.
         // 20211203 Changed back to 0.
@@ -1242,6 +1245,7 @@ class results {
             $entry = $entrybyentry[$num];
             // Only update entries where feedback has actually changed.
             $ratingchanged = false;
+            $commentchanged = false;
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
                 $studentrating = clean_param($vals['r'], PARAM_INT);
             } else {
@@ -1251,64 +1255,74 @@ class results {
 
             if ($studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;
-                if ($ratingchanged || $studentcomment != $entry->entrycomment) {
-                    $newentry = new StdClass();
-                    $newentry->rating = $studentrating;
-                    $newentry->entrycomment = $studentcomment;
-                    $newentry->teacher = $USER->id;
-                    $newentry->timemarked = $timenow;
-                    $newentry->mailed = 0; // Make sure mail goes out (again, even). This might need to be entrynoticemailed.
-                    $newentry->id = $num;
-                    if (!$DB->update_record("diary_entries", $newentry)) {
-                        notify("Failed to update the diary feedback for user $entry->userid");
-                    } else {
-                        $count++;
-                    }
-                    $entrybyuser[$entry->userid]->rating = $studentrating;
-                    $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
-                    $entrybyuser[$entry->userid]->teacher = $USER->id;
-                    $entrybyuser[$entry->userid]->timemarked = $timenow;
+            }
 
-                    $records[$entry->id] = $entrybyuser[$entry->userid];
+            if ($studentcomment != $entry->entrycomment) {
+                $commentchanged = true;
+            }
 
-                    // Compare to database view.php line 465.
-                    if ($diary->assessed != RATING_AGGREGATE_NONE) {
-                        // 20200812 Added rating code and got it working.
-                        $ratingoptions = new stdClass();
-                        $ratingoptions->contextid = $context->id;
-                        $ratingoptions->component = 'mod_diary';
-                        $ratingoptions->ratingarea = 'entry';
-                        $ratingoptions->itemid = $entry->id;
-                        $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
-                        $ratingoptions->scaleid = $diary->scale;
-                        $ratingoptions->rating = $studentrating;
-                        $ratingoptions->userid = $entry->userid;
-                        $ratingoptions->timecreated = $entry->timecreated;
-                        $ratingoptions->timemodified = $entry->timemodified;
-                        $ratingoptions->returnurl = $CFG->wwwroot . '/mod/diary/report.php?id' . $cm->id;
-                        $ratingoptions->assesstimestart = $diary->assesstimestart;
-                        $ratingoptions->assesstimefinish = $diary->assesstimefinish;
-                        // 20200813 Check if there is already a rating, and if so, just update it.
-                        if ($rec = self::check_rating_entry($ratingoptions)) {
-                            $ratingoptions->id = $rec->id;
-                            $DB->update_record('rating', $ratingoptions, false);
-                        } else {
-                            $DB->insert_record('rating', $ratingoptions, false);
-                        }
-                    }
-
-                    $diary = $DB->get_record(
-                        "diary",
-                        [
-                            "id" => $entrybyuser[$entry->userid]->diary,
-                        ]
-                    );
-                    $diary->cmidnumber = $cm->idnumber;
-
-                    diary_update_grades($diary, $entry->userid);
+            if ($ratingchanged || $commentchanged) {
+                $newentry = new StdClass();
+                $newentry->rating = $studentrating;
+                $newentry->entrycomment = $studentcomment;
+                $newentry->teacher = $USER->id;
+                $newentry->timemarked = $timenow;
+                $newentry->mailed = 0; // Make sure mail goes out (again, even). This might need to be entrynoticemailed.
+                $newentry->id = $num;
+                if (!$DB->update_record("diary_entries", $newentry)) {
+                    notify("Failed to update the diary feedback for user $entry->userid");
+                } else {
+                    $count++;
                 }
+                $entrybyuser[$entry->userid]->rating = $studentrating;
+                $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
+                $entrybyuser[$entry->userid]->teacher = $USER->id;
+                $entrybyuser[$entry->userid]->timemarked = $timenow;
+
+                $records[$entry->id] = $entrybyuser[$entry->userid];
+
+                // Compare to database view.php line 465.
+                if ($diary->assessed != RATING_AGGREGATE_NONE) {
+                    // 20200812 Added rating code and got it working.
+                    $ratingoptions = new stdClass();
+                    $ratingoptions->contextid = $context->id;
+                    $ratingoptions->component = 'mod_diary';
+                    $ratingoptions->ratingarea = 'entry';
+                    $ratingoptions->itemid = $entry->id;
+                    $ratingoptions->aggregate = $diary->assessed; // The aggregation method.
+                    $ratingoptions->scaleid = $diary->scale;
+                    $ratingoptions->rating = $studentrating;
+                    $ratingoptions->userid = $entry->userid;
+                    $ratingoptions->timecreated = $entry->timecreated;
+                    $ratingoptions->timemodified = $entry->timemodified;
+                    $ratingoptions->returnurl = $CFG->wwwroot . '/mod/diary/report.php?id' . $cm->id;
+                    $ratingoptions->assesstimestart = $diary->assesstimestart;
+                    $ratingoptions->assesstimefinish = $diary->assesstimefinish;
+                    // 20200813 Check if there is already a rating, and if so, just update it.
+                    if ($rec = self::check_rating_entry($ratingoptions)) {
+                        $ratingoptions->id = $rec->id;
+                        $DB->update_record('rating', $ratingoptions, false);
+                    } else {
+                        $DB->insert_record('rating', $ratingoptions, false);
+                    }
+                }
+
+                $diary = $DB->get_record(
+                    "diary",
+                    [
+                        "id" => $entrybyuser[$entry->userid]->diary,
+                    ]
+                );
+                $diary->cmidnumber = $cm->idnumber;
+
+                diary_update_grades($diary, $entry->userid);
             }
             echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
+        }
+
+        // 20260215 Set session variable to scroll back to last edited entry.
+        if ($last_edited_entry > 0) {
+            $SESSION->diary_clicked_entry = $last_edited_entry;
         }
     }
 
