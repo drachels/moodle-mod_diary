@@ -56,6 +56,11 @@ class overview extends \core_courseformat\activityoverviewbase {
         $this->manager = manager::create_from_coursemodule($cm);
     }
 
+        /**
+     * Retrieves the number of entries for the diary.
+     *
+     * @return overviewitem|null An overview item.
+     */
     #[\Override]
     public function get_extra_overview_items(): array {
         return [
