@@ -569,7 +569,7 @@ function xmldb_diary_upgrade($oldversion = 0) {
     }
 
     // New field to allow entries to be deleted by individual user. Diary v3.8.0.
-    if ($oldversion < 2025030100) {
+    if ($oldversion < 2026020603) {
         // Define field deleteentry to be added to diary.
         $table = new xmldb_table('diary');
         $field = new xmldb_field('deleteentry', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'editdates');
@@ -598,7 +598,7 @@ function xmldb_diary_upgrade($oldversion = 0) {
         }
 
         // Diary savepoint reached.
-        upgrade_mod_savepoint(true, 2025030100, 'diary');
+        upgrade_mod_savepoint(true, 2026020603, 'diary');
     }
     return true;
 }
