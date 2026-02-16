@@ -771,7 +771,7 @@ class results {
                 $ratingdata->userid       = $user->id;
                 $ratingdata->timemodified = time();
 
-                // Look for an existing rating by this teacher.
+                // Look for an existing rating of this entry.
                 $existing = $DB->get_record('rating', [
                     'contextid'  => $context->id,
                     'component'  => 'mod_diary',
