@@ -743,8 +743,8 @@ class prompts {
         // 20240507 Added for testing.
         $id = required_param('id', PARAM_INT); // Course Module ID.
         $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
-        $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
-        $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
+        $firstkey = optional_param('firstkey', 0, PARAM_INT); // Which diary_entries id to edit.
+        $promptid = optional_param('promptid', 0, PARAM_INT); // Current entries promptid.
 
         $data = new stdClass();
         $output = '';
