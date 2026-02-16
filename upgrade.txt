@@ -56,16 +56,16 @@ This file describes changes and other work in the diary code.
 20250512 Diary_1377bt - Undefined property $promptbgc in prompt_edit.php line 262.
     I already have a fix for this in the works as part of, Diary_1246 - There is no place
     for default $promptbgc to be set. Added setting about line 39 of prompt_edit.php file.
-20250714 Diary_1380 - Icon is clipped on the corners when using tiles course format.
-20260108 Diary_1391 - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
+20250714 Diary_1380r - Icon is clipped on the corners when using tiles course format.
+20260108 Diary_1391bt - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
     Modified lib.php now at about line 893 to 902, by checking existance of entryid.
-20260109 Diary_1392 - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
+20260109 Diary_1392bt - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
     See ticket. Fixed 2 variable and 1 typo error in restore_diary_stepslib.php.
-20260109 Diary_1393 - Diary - Implicitly marking parameter $context as nullable is deprecated.
+20260109 Diary_1393bt - Diary - Implicitly marking parameter $context as nullable is deprecated.
     Added a question mark before the \context part of line 53 of the search/entry.php page.
 20250804 Diary_1382bt - Help contents string does not exist: [submissionemail_help, mod_diary].
     Added new string. Moved from v4.0.0 due to needing a correction. See ticket for details.
-20260112 Diary_1394 - Feature request - Diary needs to support course overview. See ticket.
+20260112 Diary_1394bt - Feature request - Diary needs to support course overview. See ticket.
     Modified the code in index.php to use the new overview.php file in any Moodle where,
     $CFG->version > 2025041400.
 20260113 Diary_1395bt - Feature request - cron generated emails should have a date time/stamp.
@@ -73,8 +73,8 @@ This file describes changes and other work in the diary code.
 20260116 Diary_1396bt - The edit.php file, entry updated event, does not work. Found a first.js
     Uncausght TypeError, that needed to be fixed. Used Gemini to give code change suggestions
     to the event processing and getting correct/expected log entries.
-20260116 Diary_1397 - In whichever php file, the date format defined in settings should be used.
-    Added to code in edit.php. ?????
+20260116 Diary_1397bt - In whichever php file, the date format defined in settings should be used.
+    Added to code in edit.php. See ticket for details.
 20260124 Diary_1398bt - Need to rebuild messages code and files used for Diary. Email now code
     is in edit.php and email later code is in cron_task.php file. 20260205 Added greeting string.
 20260124 Diary_1399bt - Need to start developing mustache templates - reportone.php first.
@@ -87,7 +87,8 @@ This file describes changes and other work in the diary code.
     entry_deleted.php and entry_tags_deleted.php to remove the warning.
 20260209 Diary_1405 - Add to feedback on report pages does not update system rating. Changed
     the code in results.php around line 746. See ticket for details. Anchor works now, too.
-20260212 Diary_1406 - Average of ratings xx/xxx calculates wrong. 
+20260212 Diary_1406 - Average of ratings xx/xxx calculates wrong.Mostly fixed,but rating count
+    can give an error on first, Add to feedback, click. Does not update the count/rating.
 
 === 3.8.0 === pending (Build: 2024042900)
 20210515  Diary_720r - I am getting the String [grade, core] is deprecated debug message in
