@@ -22,7 +22,7 @@ use mod_diary\local\results;
 use stdClass;
 
 /**
- * Class manager for diary activity
+ * Class manager for diary activity.
  *
  * @package   mod_diary
  * @copyright 2026 AL Rachels <drachels@drachels.com>
