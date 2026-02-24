@@ -154,6 +154,24 @@
     width: 100%;
 }
 
+/* Keep report table layers transparent so configured Diary entry colors remain visible. */
+#page-mod-diary-report .diaryuserentry,
+#page-mod-diary-report .diaryuserentry tr,
+#page-mod-diary-report .diaryuserentry th,
+#page-mod-diary-report .diaryuserentry td,
+#page-mod-diary-reportsingle .diaryuserentry,
+#page-mod-diary-reportsingle .diaryuserentry tr,
+#page-mod-diary-reportsingle .diaryuserentry th,
+#page-mod-diary-reportsingle .diaryuserentry td,
+#page-mod-diary-reportone .diaryuserentry,
+#page-mod-diary-reportone .diaryuserentry tr,
+#page-mod-diary-reportone .diaryuserentry th,
+#page-mod-diary-reportone .diaryuserentry td {
+    background-color: transparent !important;
+    --bs-table-bg: transparent;
+    --bs-table-accent-bg: transparent;
+}
+
 #page-mod-diary-report .diaryuserentry td.userpix {
     width: 35px;
 }
@@ -246,4 +264,62 @@
 /* Or more specific if you want to target only Diary anchors */
 .anchor-offset {
     scroll-margin-top: 300px;
+}
+
+/* 1. Force all cells in the feedback box to be transparent so the table color shows through */
+#page-mod-diary-view .feedbackbox td.left,
+#page-mod-diary-view .feedbackbox td.entryheader,
+#page-mod-diary-view .feedbackbox td.entrycontent,
+#page-mod-diary-view .feedbackbox td.side {
+    background-color: transparent !important;
+}
+
+/* 2. Optional: Ensure the table has no internal borders that might look white */
+#page-mod-diary-view .feedbackbox {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+/* Keep Diary stats/autorating tables transparent, but preserve warning/highlight rows. */
+#page-mod-diary-view .generaltable,
+#page-mod-diary-view .generaltable tr,
+#page-mod-diary-view .generaltable th,
+#page-mod-diary-view .generaltable td,
+#page-mod-diary-report .generaltable,
+#page-mod-diary-report .generaltable tr,
+#page-mod-diary-report .generaltable th,
+#page-mod-diary-report .generaltable td,
+#page-mod-diary-reportsingle .generaltable,
+#page-mod-diary-reportsingle .generaltable tr,
+#page-mod-diary-reportsingle .generaltable th,
+#page-mod-diary-reportsingle .generaltable td,
+#page-mod-diary-reportone .generaltable,
+#page-mod-diary-reportone .generaltable tr,
+#page-mod-diary-reportone .generaltable th,
+#page-mod-diary-reportone .generaltable td {
+    background-color: transparent !important;
+    --bs-table-bg: transparent;
+    --bs-table-accent-bg: transparent;
+}
+
+/* Preserve explicit highlight rows/cells used by autorating output. */
+#page-mod-diary-view .generaltable tr.table-primary > td,
+#page-mod-diary-report .generaltable tr.table-primary > td,
+#page-mod-diary-reportsingle .generaltable tr.table-primary > td,
+#page-mod-diary-reportone .generaltable tr.table-primary > td {
+    background-color: #cfe2ff !important;
+}
+
+#page-mod-diary-view .generaltable td.table-danger,
+#page-mod-diary-report .generaltable td.table-danger,
+#page-mod-diary-reportsingle .generaltable td.table-danger,
+#page-mod-diary-reportone .generaltable td.table-danger {
+    background-color: #f8d7da !important;
+}
+
+#page-mod-diary-view .generaltable td.table-warning,
+#page-mod-diary-report .generaltable td.table-warning,
+#page-mod-diary-reportsingle .generaltable td.table-warning,
+#page-mod-diary-reportone .generaltable td.table-warning {
+    background-color: #fff3cd !important;
 }
