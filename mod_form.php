@@ -25,6 +25,7 @@ defined('MOODLE_INTERNAL') || die();
 use mod_diary\local\diarystats;
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/rating/lib.php');
 
 /**
  * Diary settings form.
@@ -34,6 +35,10 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_diary_mod_form extends moodleform_mod {
+    /** Threshold above which Count of ratings + Point warning applies. */
+    /** @var int */
+    const COUNT_RATINGS_POINT_WARNING_THRESHOLD = 10;
+
     /** Settings for adding repeated form elements. */
     /** @var int */
     const NUM_ITEMS_DEFAULT = 0;
@@ -76,7 +81,7 @@ class mod_diary_mod_form extends moodleform_mod {
      * @return void
      */
     public function definition() {
-        global $COURSE, $PAGE;
+        global $COURSE, $PAGE, $CFG;
         // Cache the plugin name.
         $plugin = 'mod_diary';
         $diaryconfig = get_config('mod_diary');
@@ -439,8 +444,55 @@ class mod_diary_mod_form extends moodleform_mod {
 
         // Add the rest of the common settings.
         $this->standard_grading_coursemodule_elements();
+
+        // Warn about Count of ratings with Point maximum grade >10.
+        $name = 'countofratingswarning';
+        $warningdata = (object) [
+            'threshold' => self::COUNT_RATINGS_POINT_WARNING_THRESHOLD,
+            'pointdefault' => $CFG->gradepointdefault ?? '',
+            'pointmax' => $CFG->gradepointmax ?? '',
+        ];
+        $warning = '<div class="alert alert-warning">'
+            . get_string('countofratingspointwarning', 'diary', $warningdata)
+            . '</div>';
+        $mform->addElement('static', $name, '', $warning);
+        $mform->hideIf($name, 'assessed', 'neq', RATING_AGGREGATE_COUNT);
+        $mform->hideIf($name, 'scale[modgrade_type]', 'neq', 'point');
+        $mform->hideIf($name, 'scale[modgrade_point]', 'in', '|0|1|2|3|4|5|6|7|8|9|10');
+
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
+    }
+
+    /**
+     * Validate submitted form data.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        $assessed = $data['assessed'] ?? 0;
+        $gradetype = $data['scale']['modgrade_type'] ?? '';
+        $gradepoint = $data['scale']['modgrade_point'] ?? '';
+
+        if (
+            (int)$assessed === RATING_AGGREGATE_COUNT
+            && $gradetype === 'point'
+            && $gradepoint !== ''
+            && is_numeric($gradepoint)
+            && (float)$gradepoint > self::COUNT_RATINGS_POINT_WARNING_THRESHOLD
+        ) {
+            $errors['scale[modgrade_point]'] = get_string(
+                'countofratingspointvalidation',
+                'diary',
+                (object)['threshold' => self::COUNT_RATINGS_POINT_WARNING_THRESHOLD]
+            );
+        }
+
+        return $errors;
     }
 
     /**
