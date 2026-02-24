@@ -530,3 +530,5 @@ $string['itemtypenone'] = 'None';
 $string['itemtypensentences'] = 'Sentences';
 $string['itemtypeparagraphs'] = 'Paragraphs';
 $string['itemtypewords'] = 'Words';
+$string['countofratingspointwarning'] = 'Warning: Aggregate type "Count of ratings" with Grade type "Point" can produce unintuitive grade totals as the number of ratings increases. Consider using a point maximum at or below {$a->threshold}, or selecting a different aggregate type. Site settings: default point={$a->pointdefault}, maximum point={$a->pointmax}.';
+$string['countofratingspointvalidation'] = 'For Aggregate type "Count of ratings", Point maximum grade must be {$a->threshold} or less.';
