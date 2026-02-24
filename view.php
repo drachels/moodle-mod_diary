@@ -38,14 +38,6 @@ $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST); // 
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
 
-if (!$cm) {
-    throw new moodle_exception(get_string('incorrectmodule', 'diary'));
-}
-
-if (!$course) {
-    throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
-}
-
 $context = context_module::instance($cm->id);
 
 // Confirm login.
@@ -63,14 +55,11 @@ if (!$diarys = get_all_instances_in_course('diary', $course)) {
     die();
 }
 
-foreach ($diarys as $temp) {
-    if ($temp->id === $cm->instance) {
-        $diary = $temp;
-        // 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
-        $color3 = $diary->entrybgc;
-        $color4 = $diary->entrytextbgc;
-    }
-}
+// 20260223 Got rid of foreach loop and just load directly.
+$diary = $DB->get_record('diary', ['id' => $cm->instance], '*', MUST_EXIST);
+// 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
+$color3 = $diary->entrybgc;
+$color4 = $diary->entrytextbgc;
 
 // 20230511 Following two lines are for View, Automatic Completion marking.
 $completion = new completion_info($course);
@@ -89,152 +78,49 @@ $diaryname = format_string($diary->name, true, ['context' => $context]);
 // Get local renderer.
 $output = $PAGE->get_renderer('mod_diary');
 
-// Handle toolbar capabilities.
-if (!empty($action)) {
-    switch ($action) {
-        case 'download':
-            if (has_capability('mod/diary:addentries', $context)) {
-                // Call download entries function in results.php.
-                // 20231007 Added set_url to fix error.
-                $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]);
-                results::download_entries($context, $course, $diary);
-            }
-            break;
+// Handle actions and sorting.
+$entries = [];
+$firstkey = '';
+$firstpromptid = 0;
+$sortorderinfo = get_string('sortcurrententry', 'diary');
+$sortactions = [
+    // Show the reload button for sorting from current entry to oldest entry.
+    'reload' => ['label' => 'sortcurrententry', 'sort' => 'timecreated DESC'],
+    // Show the edit button for editing the first entry in the current list of entries.
+    'currententry' => ['label' => 'sortcurrententry', 'sort' => 'timecreated DESC'],
+    // Sort the list of entries from oldest to newest based on timecreated.
+    'sortfirstentry' => ['label' => 'sortfirstentry', 'sort' => 'timecreated ASC'],
+    // Sort the list from lowest grade to highest grade. Show ungraded first, from oldest to newest.
+    'lowestgradeentry' => ['label' => 'sortlowestentry', 'sort' => 'rating ASC, timemodified ASC'],
+    // Sort list from highest grade to lowest grade. If tie grade, further sort from newest to oldest.
+    'highestgradeentry' => ['label' => 'sorthighestentry', 'sort' => 'rating DESC, timecreated DESC'],
+    // Sort list from most recently modified to the one modified the longest time ago.
+    'latestmodifiedentry' => ['label' => 'sortlastentry', 'sort' => 'timemodified DESC'],
+];
 
-        // Show the reload button for sorting from current entry to oldest entry.
-        case 'reload':
-            if (has_capability('mod/diary:addentries', $context)) {
-                // Reload the current page.
-                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
-                $entrys = $DB->get_records(
-                    'diary_entries',
-                    [
-                        'userid' => $USER->id,
-                        'diary' => $diary->id,
-                    ],
-                    $sort = 'timecreated DESC'
-                );
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
-            break;
+if ($action === 'download' && $canadd) {
+    // Call download entries function in results.php.
+    // 20231007 Added set_url to fix error.
+    $PAGE->set_url('/mod/diary/view.php', ['id' => $cm->id]);
+    results::download_entries($context, $course, $diary);
+}
 
-        // Show the edit button for editing the first entry in the current list of entries.
-        case 'currententry':
-            if (has_capability('mod/diary:addentries', $context)) {
-                // Reload the current page.
-                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
-                $entrys = $DB->get_records(
-                    'diary_entries',
-                    [
-                        'userid' => $USER->id,
-                        'diary' => $diary->id,
-                    ],
-                    $sort = 'timecreated DESC'
-                );
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
-            break;
+if ($canadd) {
+    $sortaction = array_key_exists($action, $sortactions) ? $action : 'currententry';
+    $sortorderinfo = get_string($sortactions[$sortaction]['label'], 'diary');
+    $entries = $DB->get_records(
+        'diary_entries',
+        [
+            'userid' => $USER->id,
+            'diary' => $diary->id,
+        ],
+        $sortactions[$sortaction]['sort']
+    );
 
-        // Sort the list of entries from oldest to newest based on timecreated.
-        case 'sortfirstentry':
-            if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = (get_string('sortfirstentry', 'diary'));
-                $entrys = $DB->get_records(
-                    "diary_entries",
-                    [
-                        'userid' => $USER->id,
-                        'diary' => $diary->id,
-                    ],
-                    $sort = 'timecreated ASC'
-                );
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
-            break;
-
-        // Sort the list from lowest grade to highest grade. Show ungraded first, from oldest to newest.
-        case 'lowestgradeentry':
-            if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = (get_string('sortlowestentry', 'diary'));
-                $entrys = $DB->get_records(
-                    "diary_entries",
-                    [
-                        'userid' => $USER->id,
-                        'diary' => $diary->id,
-                    ],
-                    $sort = 'rating ASC, timemodified ASC'
-                );
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
-            break;
-
-        // Sort list from highest grade to lowest grade. If tie grade, further sort from newest to oldest.
-        case 'highestgradeentry':
-            if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = (get_string('sorthighestentry', 'diary'));
-                $entrys = $DB->get_records(
-                    "diary_entries",
-                    [
-                        'userid' => $USER->id,
-                        'diary' => $diary->id,
-                    ],
-                    $sort = 'rating DESC, timecreated DESC'
-                );
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
-            break;
-
-        // Sort list from most recently modified to the one modified the longest time ago.
-        case 'latestmodifiedentry':
-            if (has_capability('mod/diary:addentries', $context)) {
-                $sortorderinfo = (get_string('sortlastentry', 'diary'));
-                // May be needed for future version if editing old entries is allowed.
-                $entrys = $DB->get_records(
-                    "diary_entries",
-                    [
-                        'userid' => $USER->id,
-                        'diary' => $diary->id,
-                    ],
-                    $sort = 'timemodified DESC'
-                );
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
-            break;
-
-        default:
-            if (has_capability('mod/diary:addentries', $context)) {
-                // Reload the current page.
-                $sortorderinfo = (get_string('sortcurrententry', 'diary'));
-                $entrys = $DB->get_records(
-                    'diary_entries',
-                    [
-                        'userid' => $USER->id,
-                        'diary' => $diary->id,
-                    ],
-                    $sort = 'timecreated DESC'
-                );
-                $firstkey = ''; // Fixes error if user has no entries at all.
-                foreach ($entrys as $firstkey => $firstvalue) {
-                    break;
-                }
-            }
+    if (!empty($entries)) {
+        $firstentry = reset($entries);
+        $firstkey = (int)$firstentry->id;
+        $firstpromptid = (int)$firstentry->promptid;
     }
 }
 
@@ -386,15 +272,15 @@ if ($timenow > $timestart) {
                 );
             }
             // Print user toolbar icons only if there is at least one entry for this user.
-            if ($entrys) {
+            if ($entries) {
                 // 20250110 Create options list to pass to the toolbar. 20260204 Changed options order to match above.
                 $options['id'] = $cm->id;
                 $options['firstkey'] = $firstkey;
                 $options['action'] = 'editentry';
-                $options['promptid'] = $promptid;
+                $options['promptid'] = $firstpromptid;
                 echo '<span style="float: right;">' . get_string('usertoolbar', 'diary');
                 echo $output->toolbar(
-                    has_capability('mod/diary:addentries', $context),
+                    $firstkey,
                     $options
                 ) . '</span>';
             }
@@ -437,13 +323,17 @@ if ($timenow > $timestart) {
                 'perpage',
                 $perpage,
                 false,
-                ['id' => 'pref_perpage', 'class' => 'custom-select']
+                [
+                    'id' => 'pref_perpage',
+                    'class' => 'custom-select',
+                    'style' => 'display:inline-block;width:auto;',
+                    'onchange' => 'this.form.submit()',
+                ]
             );
 
-            echo get_string('pagesize', 'diary') . ': <select onchange="this.form.submit()" name="perpage">';
-            echo '<option selected="true" value="' . $selection . '</option>';
+            echo get_string('pagesize', 'diary') . ': ' . $selection;
             // 20200905 Added count of all user entries.
-            echo '</select>' . get_string('outof', 'diary', (count($entrys)));
+            echo get_string('outof', 'diary', (count($entries)));
             // Extend the form to include the stats selector.
 
             // 20230322 Added selector for prefered stats view. Default is ON.
@@ -461,12 +351,15 @@ if ($timenow > $timestart) {
                 'statspreference',
                 $statspreference,
                 false,
-                ['id' => 'pref_stats', 'class' => 'custom-select']
+                [
+                    'id' => 'pref_stats',
+                    'class' => 'custom-select',
+                    'style' => 'display:inline-block;width:auto;',
+                    'onchange' => 'this.form.submit()',
+                ]
             );
 
-            echo ' | ' . get_string('statshdr', 'diary') . ': <select onchange="this.form.submit()" name="statspreference">';
-            echo '<option selected="true" value="' . $selection . '</option>';
-            echo '</select>';
+            echo ' | ' . get_string('statshdr', 'diary') . ': ' . $selection;
 
             // 20230323 Extend form and added selector for prefered email delivery. Default is ON.
             // Need to check if user is an entry manager here so that students do not see the email pref.
@@ -485,13 +378,15 @@ if ($timenow > $timestart) {
                     'emailpreference',
                     $emailpreference,
                     false,
-                    ['id' => 'pref_emails', 'class' => 'custom-select']
+                    [
+                        'id' => 'pref_emails',
+                        'class' => 'custom-select',
+                        'style' => 'display:inline-block;width:auto;',
+                        'onchange' => 'this.form.submit()',
+                    ]
                 );
 
-                echo ' | ' . get_string('emailpreference', 'diary') .
-                    ': <select onchange="this.form.submit()" name="emailpreference">';
-                echo '<option selected="true" value="' . $selection . '</option>';
-                echo '</select>';
+                echo ' | ' . get_string('emailpreference', 'diary') . ': ' . $selection;
             }
             echo '</form>';
             echo $output->box_end();
@@ -503,16 +398,16 @@ if ($timenow > $timestart) {
     }
 
     // Display entry with the $DB portion supplied/set by the toolbar.
-    if ($entrys) {
+    if ($entries) {
         // 20200905 Fixed Entries per page when activity is closed.
         if ($timenow > $timefinish) {
             // 20200905 If a diary is closed, show all entries to a user.
-            $perpage = (count($entrys));
+            $perpage = (count($entries));
             $thispage = '1';
         } else {
             $thispage = '1';
         }
-        foreach ($entrys as $entry) {
+        foreach ($entries as $entry) {
             if (empty($entry->text)) {
                 echo '<p align="center"><b>' . get_string('blankentry', 'diary') . '</b></p>';
             } else if ($thispage <= $perpage) {
@@ -646,8 +541,12 @@ if ($timenow > $timestart) {
 
                     echo '</table>';
 
+                    $hasfeedback = trim(strip_tags((string)$entry->entrycomment)) !== '';
+                    $hasrating = $entry->rating !== null && $entry->rating !== '';
+                    $hasteacherresponse = $hasfeedback || $hasrating;
+
                     // Added lines to mark entry as needing to be rated or rated again after the entry was updated.
-                    if (!empty($entry->timecreated) && !empty($entry->timemodified) && empty($entry->timemarked)) {
+                    if (!$hasteacherresponse) {
                         echo '<div class="needsedit">' . get_string('needsgrading', 'diary') . '</div>';
                     } else if (
                         !empty($entry->timemodified) && !empty($entry->timemarked)
@@ -666,7 +565,7 @@ if ($timenow > $timestart) {
                 }
 
                 // Print feedback from the teacher for the current entry.
-                if (!empty($entry->entrycomment) || !empty($entry->rating)) {
+                if ($hasteacherresponse) {
                     // Get the rating for the current entry.
                     $grades = $entry->rating;
                     // Add a heading for each feedback on the page.
