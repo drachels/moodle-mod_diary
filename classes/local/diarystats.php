@@ -441,20 +441,13 @@ class diarystats {
             $diarystats->commonpercent = $diarystats->commonerrors * $diary->errorpercent;
         }
 
-        // Where you currently generate the help icon for stats/feedback.
-        if ($CFG->branch >= 33) {  // Or >32, whatever your threshold is.
-            $itemp = $OUTPUT->image_icon('a/help', get_string('popoverhelp', 'diary'), 'core', [
-                'width'  => 16,
-                'height' => 16,
-                'class'  => 'icon smallicon', // Keep classes if needed.
-            ]);
-        } else {
-            $itemp = $OUTPUT->pix_icon('a/help', get_string('popoverhelp', 'diary'), 'core', [
-                'width'  => 16,
-                'height' => 16,
-                'class'  => 'icon smallicon',
-            ]);
-        }
+        $shortwordshelp = $OUTPUT->help_icon('shortwords', 'diary');
+        $mediumwordshelp = $OUTPUT->help_icon('mediumwords', 'diary');
+        $longwordshelp = $OUTPUT->help_icon('longwords', 'diary');
+        $lexicaldensityhelp = $OUTPUT->help_icon('lexicaldensity', 'diary');
+        $fkgradehelp = $OUTPUT->help_icon('fkgrade', 'diary');
+        $freadingeasehelp = $OUTPUT->help_icon('freadingease', 'diary');
+        $fogindexhelp = $OUTPUT->help_icon('fogindex', 'diary');
 
         // 20210812 Show/hide statistics for each entry. 20220903 Total re-write of code.
         if ($diary->enablestats) {
@@ -729,20 +722,17 @@ class diarystats {
                         . '<br>' . $autoparagraphs . '</td></tr>'
                 . '<tr><td>' . get_string('uniquewords', 'diary') . ' ' . $diarystats->uniquewords . '</td>'
                     . '<td>' . get_string('shortwords', 'diary')
-                         . ' <a href="#" data-toggle="popover" data-content="'
-                         . get_string('shortwords_help', 'diary') . '">' . $itemp . '</a> '
+                        . ' ' . $shortwordshelp . ' '
                          . $diarystats->shortwords
                          . ' (' . number_format($diarystats->shortwords / $diarystats->uniquewords * (100), 2, '.', '')
                          . '%)</td>'
                     . '<td>' . get_string('mediumwords', 'diary')
-                         . ' <a href="#" data-toggle="popover" data-content="'
-                         . get_string('mediumwords_help', 'diary') . '">' . $itemp . '</a> '
+                        . ' ' . $mediumwordshelp . ' '
                          . $diarystats->mediumwords
                          . ' (' . number_format($diarystats->mediumwords / $diarystats->uniquewords * (100), 2, '.', '')
                          . '%)</td>'
                     . '<td>' . get_string('longwords', 'diary')
-                         . ' <a href="#" data-toggle="popover" data-content="'
-                         . get_string('longwords_help', 'diary') . '">' . $itemp . '</a> '
+                        . ' ' . $longwordshelp . ' '
                          . $diarystats->longwords
                          . ' (' . number_format($diarystats->longwords / $diarystats->uniquewords * (100), 2, '.', '')
                          . '%)</td>'
@@ -770,20 +760,16 @@ class diarystats {
                     ) . ' </td></tr>'
 
                 . '<tr><td>' . get_string('lexicaldensity', 'diary')
-                        . ' <a href="#" data-toggle="popover" data-content="'
-                        . get_string('lexicaldensity_help', 'diary') . '">' . $itemp . '</a> '
+                        . ' ' . $lexicaldensityhelp . ' '
                         . $diarystats->lexicaldensity . '</td>'
                     . '<td>' . get_string('fkgrade', 'diary')
-                        . ' <a href="#" data-toggle="popover" data-content="'
-                        . get_string('fkgrade_help', 'diary') . '">' . $itemp . '</a> '
+                        . ' ' . $fkgradehelp . ' '
                         . $diarystats->fkgrade . ' </td>'
                     . '<td>' . get_string('freadingease', 'diary')
-                        . ' <a href="#" data-toggle="popover" data-content="'
-                        . get_string('freadingease_help', 'diary') . '">' . $itemp . '</a> '
+                        . ' ' . $freadingeasehelp . ' '
                         . $diarystats->freadease . ' </td>'
                     . '<td>' . get_string('fogindex', 'diary')
-                        . ' <a href="#" data-toggle="popover" data-content="'
-                        . get_string('fogindex_help', 'diary') . '">' . $itemp . '</a> '
+                        . ' ' . $fogindexhelp . ' '
                         . $diarystats->fogindex . '</td></tr>';
 
                 // 20211224 Moved return to prevent undefined variable: currentstats warning.
