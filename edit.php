@@ -55,6 +55,14 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
+// Get the single record specified by firstkey.
+$entry = $DB->get_record('diary_entries', ['userid' => $USER->id, 'id' => $firstkey]);
+
+// Defensive fallback: when editing an existing entry, trust the entry's stored promptid, not URL params.
+if ($action == 'editentry' && $entry) {
+    $promptid = (int)$entry->promptid;
+}
+
 // 20260116 Get the date and time configuration from settings for later use.
 $dateformat = get_config('mod_diary', 'dateformat');
 
@@ -63,7 +71,7 @@ $tempintro = $diary->intro;
 
 // 20240413 Check the promptid delivered in the URL. DO NOT get current if editing entry already has one.
 // 20240507 Added for testing and it appears to work for existing entry without a prompt.
-if (!($promptid > 0) && ($diary->timeopen < time())) {
+if (!($promptid > 0) && ($diary->timeopen < time()) && !($action == 'editentry' && $entry)) {
     // Need to call a prompt function that returns the current promptid, if there is one that is current.
     $promptid = prompts::get_current_promptid($diary);
 }
@@ -101,9 +109,6 @@ $parameters = [
     'action' => $action,
     'firstkey' => $firstkey,
 ];
-
-// Get the single record specified by firstkey.
-$entry = $DB->get_record('diary_entries', ['userid' => $USER->id, 'id' => $firstkey]);
 
 // 20230306 Added code that lists the tags on the edit_form page.
 $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
