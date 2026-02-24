@@ -864,8 +864,14 @@ class results {
             }
             echo $hiddengradestr;
 
+            $hasfeedback = trim(strip_tags((string)$entry->entrycomment)) !== '';
+            $hasrating = $entry->rating !== null && $entry->rating !== '';
+            $hasteacherresponse = $hasfeedback || $hasrating;
+
             // Rewrote next three lines to show entry needs to be regraded due to resubmission.
-            if (! empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
+            if (! $hasteacherresponse) {
+                echo ' <span class="needsedit">' . get_string("needsgrading", "diary") . '</span>';
+            } else if (! empty($entry->timemarked) && $entry->timemodified > $entry->timemarked) {
                 echo ' <span class="needsedit">' . get_string("needsregrade", "diary") . '</span>';
             } else if ($entry->timemarked) {
                 echo ' <span class="lastedit"> ' . userdate($entry->timemarked) . '</span>';
@@ -958,7 +964,7 @@ class results {
         );
 
         // 20210609 Added branch check for string compatibility.
-        if (!empty($entry->rating)) {
+        if ($entry->rating !== null && $entry->rating !== '') {
             if ($CFG->branch > 310) {
                 echo get_string('gradenoun') . ': ';
             } else {
