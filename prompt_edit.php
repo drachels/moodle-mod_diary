@@ -37,12 +37,29 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
 $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
-$promptbgc = optional_param('promptbgc', '#ffffff', PARAM_INT); // Prompt bgc default to fix undefined error down around line 322.
+$promptbgc = optional_param('promptbgc', '#ffffff', PARAM_TEXT); // Prompt bgc default to fix undefined error down around line 322.
+if (!preg_match('/^#[0-9a-fA-F]{6}$/', $promptbgc)) {
+    $promptbgc = '#ffffff';
+}
 $viewby = optional_param('viewby', -1, PARAM_INT);
 $view = optional_param('viewp', -1, PARAM_INT);
-$viewbyp = optional_param('viewbyp', -1, PARAM_INT);
-$viewbyc = optional_param('viewbyc', -1, PARAM_INT);
-$viewbyf = optional_param('viewbyf', -1, PARAM_INT);
+$viewbyp = optional_param('viewbyp', 1, PARAM_INT);
+$viewbyc = optional_param('viewbyc', 1, PARAM_INT);
+$viewbyf = optional_param('viewbyf', 1, PARAM_INT);
+$collapsedidsraw = optional_param('collapsedids', '', PARAM_TEXT);
+$collapsedids = [];
+if (!empty($collapsedidsraw)) {
+    $collapsedidparts = explode(',', $collapsedidsraw);
+    foreach ($collapsedidparts as $collapsedidpart) {
+        $collapsedidpart = trim($collapsedidpart);
+        if (ctype_digit($collapsedidpart)) {
+            $collapsedid = (int)$collapsedidpart;
+            if ($collapsedid > 0) {
+                $collapsedids[$collapsedid] = $collapsedid;
+            }
+        }
+    }
+}
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
 }
@@ -146,9 +163,8 @@ if ($view == -1) {
 }
 
 // Set up a general table to hold the list of prompts.
-$table = new html_table();
-$table->cellpadding = 5;
-$table->class = 'generaltable';
+$tableheadrow1 = '';
+$tableheadrow2 = '';
 
 // 20240603 View prompt list view/hide.
 if ($view == -1 || $view == 1) {
@@ -159,48 +175,57 @@ if ($view == -1 || $view == 1) {
 
 $arrtextadds = [];
 $arrtextadds[1] = '<span class="arrow-s" style="font-size:1em;"></span>';
-$arrtextadds[2] = '<span class="arrow-s" style="font-size:1em;"></span>';
-$arrtextadds[3] = '<span class="arrow-s" style="font-size:1em;"></span>';
 
 $arrtextadds[$viewby] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
     </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
-$arrtextadds[$viewbyp] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
-    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
-$arrtextadds[$viewbyc] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
-    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
-$arrtextadds[$viewbyf] = $view == -1 || $view == 1 ? '<span class="arrow-s" style="font-size:1em;">
-    </span>' : '<span class="arrow-n" style="font-size:1em;"></span>';
 
-// Add column headings to the table list of prompts.
-$table->head = [
-    '<a href="?id=' . $id . '&viewby=1' . $lnkadd . '">' . get_string('tablecolumnstatus', 'diary') . $arrtextadds[1] . '</a>',
-    get_string('tablecolumnprompts', 'diary'),
-    get_string('tablecolumnpromptsbgc', 'diary'),
-    get_string('tablecolumnstart', 'diary'),
-    get_string('tablecolumnstop', 'diary'),
-    get_string('tablecolumncharacters', 'diary'),
-    get_string('tablecolumnwords', 'diary'),
-    get_string('tablecolumnsentences', 'diary'),
-    get_string('tablecolumnparagraphs', 'diary'),
-    get_string('tablecolumnedit', 'diary'),
-];
+$tableheadrow1 .= '<tr>';
+$tableheadrow1 .= '<th><a href="?id=' . $id . '&viewby=1' . $lnkadd . '&collapsedids=#promptlist">'
+    . get_string('tablecolumnstatus', 'diary') . $arrtextadds[1] . '</a></th>';
+$tableheadrow1 .= '<th colspan="8">' . get_string('tablecolumnprompts', 'diary') . '</th>';
+$tableheadrow1 .= '</tr>';
 
-$output = '';
-$line = [];
+$tableheadrow2 .= '<tr>';
+$tableheadrow2 .= '<th></th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumnpromptsbgc', 'diary') . '</th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumnstart', 'diary') . '</th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumnstop', 'diary') . '</th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumncharacters', 'diary') . '</th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumnwords', 'diary') . '</th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumnsentences', 'diary') . '</th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumnparagraphs', 'diary') . '</th>';
+$tableheadrow2 .= '<th>' . get_string('tablecolumnedit', 'diary') . '</th>';
+$tableheadrow2 .= '</tr>';
+
+$output = '<a id="promptlist"></a><table class="generaltable" cellpadding="5"><thead>'
+    . $tableheadrow1 . $tableheadrow2 . '</thead><tbody>';
+$rows = '';
 // Initialize a prompt counter.
 $counter = 0;
 
 // If there are any prompts for this diary, create a descending list of them.
 if ($prompts && $view == 0) {
     foreach ($prompts as $prompt) {
-        $status = '';
-        if (($prompt->datestop < time()) && ($viewbyp = 1)) {
-            $status .= '<a href="?id=' . $id . '&viewbyp=0' . $lnkadd . '">' . get_string('promptsp', 'diary') . $arrtextadds[2];
-        } else if (($prompt->datestart < time()) && ($prompt->datestop > time()) && ($viewbyc = 1)) {
-            $status .= '<a href="?id=' . $id . '&viewbyc=0' . $lnkadd . '">' . get_string('promptsc', 'diary') . $arrtextadds[2];
-        } else if (($prompt->datestart > time()) && ($viewbyf = 1)) {
-            $status .= '<a href="?id=' . $id . '&viewbyf=0' . $lnkadd . '">' . get_string('promptsf', 'diary') . $arrtextadds[2];
+        $rowanchor = 'prompt-' . $prompt->id;
+        $promptidint = (int)$prompt->id;
+        $rowcollapsed = isset($collapsedids[$promptidint]);
+        $nextcollapsedids = $collapsedids;
+        if ($rowcollapsed) {
+            unset($nextcollapsedids[$promptidint]);
+        } else {
+            $nextcollapsedids[$promptidint] = $promptidint;
         }
+        ksort($nextcollapsedids);
+        $nextcollapsedidsparam = implode(',', $nextcollapsedids);
+        $statuslabel = get_string('promptsf', 'diary');
+        if ($prompt->datestop < time()) {
+            $statuslabel = get_string('promptsp', 'diary');
+        } else if (($prompt->datestart < time()) && ($prompt->datestop > time())) {
+            $statuslabel = get_string('promptsc', 'diary');
+        }
+        $statusicon = $rowcollapsed ? '&#9654;' : '&#9660;';
+        $status = '<a href="?id=' . $id . '&collapsedids=' . urlencode($nextcollapsedidsparam) . '#' . $rowanchor . '">'
+            . $statuslabel . '<span style="font-size:1em;">' . $statusicon . '</span></a>';
 
         $data->entryid = $prompt->id;
         $data->diaryid = $prompt->diaryid;
@@ -239,38 +264,55 @@ if ($prompts && $view == 0) {
         $jlink2 = '<a href="' . $url->out(false) . '"><img src="pix/edit.png" alt='
                   . get_string('eeditlabel', 'diary') . '></a>';
         $counter++;
-        $prompttext = '<td bgcolor="' . $data->promptbgc . '">'
+
+        if ($rowcollapsed) {
+            $promptsummary = get_string('idlable', 'diary', $data->entryid) . ' '
+                . userdate($data->datestart, get_string('strftimedateshort')) . ' - '
+                . userdate($data->datestop, get_string('strftimedateshort'));
+            $rows .= '<tr id="' . $rowanchor . '"><td>' . $status . '</td><td colspan="8">' . $promptsummary . '</td></tr>';
+        } else {
+            $prompttext = '<div class="promptentry" style="background: '
+                      . $data->promptbgc
+                      . ';">'
                       . get_string('writingpromptlable2', 'diary')
                       . $counter
                       . get_string('idlable', 'diary', $data->entryid)
-                      . '<br>' . $data->text . '</td>';
-        $promptbgc = '<td>' . $data->promptbgc . '</td>';
-        $start = '<td>' . userdate($data->datestart) . '</td>';
-        $stop = '<td>' . userdate($data->datestop) . '</td>';
-        $characters = '<td>' . get_string('chars', 'diary') . '<br>'
-                      . get_string('minc', 'diary') . $data->minchar . '<br>'
-                      . get_string('maxc', 'diary') . $data->maxchar . '<br>'
-                      . get_string('errp', 'diary') . $data->minmaxcharpercent . '</td>';
-        $words = '<td>' . get_string('words', 'diary') . '&nbsp;&nbsp;&nbsp;<br>'
-                 . get_string('minc', 'diary') . $data->minword . '<br>'
-                 . get_string('maxc', 'diary') . $data->maxword . '<br>'
-                 . get_string('errp', 'diary') . $data->minmaxwordpercent . '</td>';
-        $sentences = '<td>' . get_string('sentences', 'diary') . '<br>'
-                     . get_string('minc', 'diary') . $data->minsentence . '<br>'
-                     . get_string('maxc', 'diary') . $data->maxsentence . '<br>'
-                      . get_string('errp', 'diary') . $data->minmaxsentencepercent . '</td>';
-        $paragraphs = '<td>' . get_string('paragraphs', 'diary') . '<br>'
-                      . get_string('minc', 'diary') . $data->minparagraph . '<br>'
-                      . get_string('maxc', 'diary') . $data->maxparagraph . '<br>'
-                      . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td>';
-        $edit = '<td>' . $jlink2 . ' | ' . $jlink1 . '</td></tr>';
-        // Create a line containing the data for our current prompt.
-        $line[] = $status . $prompttext . $promptbgc . $start . $stop . $characters . $words . $sentences . $paragraphs . $edit;
+                      . '<br>' . $data->text . '</div>';
+            $promptbgc = '<td>' . $data->promptbgc . '</td>';
+            $start = '<td>' . userdate($data->datestart) . '</td>';
+            $stop = '<td>' . userdate($data->datestop) . '</td>';
+            $characters = '<td>' . get_string('chars', 'diary') . '<br>'
+                          . get_string('minc', 'diary') . $data->minchar . '<br>'
+                          . get_string('maxc', 'diary') . $data->maxchar . '<br>'
+                          . get_string('errp', 'diary') . $data->minmaxcharpercent . '</td>';
+            $words = '<td>' . get_string('words', 'diary') . '&nbsp;&nbsp;&nbsp;<br>'
+                     . get_string('minc', 'diary') . $data->minword . '<br>'
+                     . get_string('maxc', 'diary') . $data->maxword . '<br>'
+                     . get_string('errp', 'diary') . $data->minmaxwordpercent . '</td>';
+            $sentences = '<td>' . get_string('sentences', 'diary') . '<br>'
+                         . get_string('minc', 'diary') . $data->minsentence . '<br>'
+                         . get_string('maxc', 'diary') . $data->maxsentence . '<br>'
+                          . get_string('errp', 'diary') . $data->minmaxsentencepercent . '</td>';
+            $paragraphs = '<td>' . get_string('paragraphs', 'diary') . '<br>'
+                          . get_string('minc', 'diary') . $data->minparagraph . '<br>'
+                          . get_string('maxc', 'diary') . $data->maxparagraph . '<br>'
+                          . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td>';
+
+            $rows .= '<tr id="' . $rowanchor . '"><td>' . $status . '</td><td colspan="8">' . $prompttext . '</td></tr>';
+            $rows .= '<tr><td></td>'
+                . $promptbgc
+                . $start
+                . $stop
+                . $characters
+                . $words
+                . $sentences
+                . $paragraphs
+                . '<td>' . $jlink2 . ' | ' . $jlink1 . '</td></tr>';
+        }
     }
 
     // Now print out all the prompts for this diary.
-    $table->data[] = $line;
-    $output = html_writer::table($table);
+    $output .= $rows;
     $counter = 0;
 } else {
     // Double check for prompts when view is 1.
@@ -279,16 +321,41 @@ if ($prompts && $view == 0) {
     $data->entryid = null;
     $data->text = '';
     $data->format = FORMAT_HTML;
+    if ($tcount > 0 && !empty($prompts)) {
+        $lastprompt = end($prompts);
+        if ($lastprompt) {
+            $data->entryid = $lastprompt->id;
+            $data->diaryid = $lastprompt->diaryid;
+            $data->datestart = $lastprompt->datestart;
+            $data->datestop = $lastprompt->datestop;
+            $data->text = $lastprompt->text;
+            $data->format = FORMAT_HTML;
+            $data->promptbgc = $lastprompt->promptbgc;
+            $data->minchar = $lastprompt->minchar;
+            $data->maxchar = $lastprompt->maxchar;
+            $data->minmaxcharpercent = $lastprompt->minmaxcharpercent;
+            $data->minword = $lastprompt->minword;
+            $data->maxword = $lastprompt->maxword;
+            $data->minmaxwordpercent = $lastprompt->minmaxwordpercent;
+            $data->minsentence = $lastprompt->minsentence;
+            $data->maxsentence = $lastprompt->maxsentence;
+            $data->minmaxsentencepercent = $lastprompt->minmaxsentencepercent;
+            $data->minparagraph = $lastprompt->minparagraph;
+            $data->maxparagraph = $lastprompt->maxparagraph;
+            $data->minmaxparagraphpercent = $lastprompt->minmaxparagraphpercent;
+            $promptbgc = $lastprompt->promptbgc;
+        }
+    }
     if ($tcount > 0) {
         $prompttext = get_string('promptzerocount', 'diary', $tcount);
     } else {
         $prompttext = get_string('promptzerocount', 'diary', $counter);
     }
-    $line[] = $prompttext . '';
-    $table->data[] = $line;
-    $output = html_writer::table($table);
+    $output .= '<tr><td colspan="9">' . $prompttext . '</td></tr>';
     $counter = 0;
 }
+
+$output .= '</tbody></table>';
 
 $data->id = $cm->id;
 $data->textformat = FORMAT_HTML;
