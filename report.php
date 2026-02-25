@@ -195,7 +195,7 @@ if ($eee) {
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
     results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
-    
+
     // 20260215 Re-fetch entries from database to display updated values after feedback save.
     $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
     if ($eee) {
@@ -204,7 +204,7 @@ if ($data = data_submitted()) {
             $entrybyuser[$ee->userid] = $ee;
         }
     }
-    
+
     // Trigger module feedback updated event.
     $event = \mod_diary\event\feedback_updated::create(
         [
@@ -355,7 +355,7 @@ if (!$users) {
     // 20260215 Add hidden field to track last edited entry for scroll-back functionality.
     // This MUST be before the save button to only appear once.
     echo '<input type="hidden" name="last_edited_entry" id="last_edited_entry" value="" />';
-    
+
     // Create a variable with all the info to save all my feedback, so it can be used multiple places.
     // 20211027 changed to rounded buttons. 20211229 Removed escaped double quotes.
     $saveallbutton = '';
@@ -487,7 +487,7 @@ echo '<script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
         // Track the last edited entry from field changes.
         var lastEditedEntry = 0;
-        
+
         // Listen for changes to rating fields.
         var ratingSelects = document.querySelectorAll("select[id^=\"r\"]");
         ratingSelects.forEach(function(select) {
@@ -498,7 +498,7 @@ echo '<script type="text/javascript">
                 }
             });
         });
-        
+
         // Listen for changes to all possible comment field types (textarea, input, contenteditable).
         var commentFields = document.querySelectorAll(
             "textarea[name^=\"c\"], input[name^=\"c\"], [name^=\"c\"][contenteditable]"
@@ -517,7 +517,7 @@ echo '<script type="text/javascript">
                 }
             });
         });
-        
+
         // Find all input submit buttons with value "Save all my feedback" and track which one is clicked.
         var submitButtons = document.querySelectorAll("input[type=\"submit\"]");
         submitButtons.forEach(function(button) {
@@ -529,7 +529,7 @@ echo '<script type="text/javascript">
                     // Fallback: find the previous entry div before this button.
                     var currentElement = button;
                     var entryDiv = null;
-                    
+
                     // Walk backwards through siblings and ancestors to find an entry div.
                     while (currentElement && !entryDiv) {
                         // Check previous siblings.
@@ -541,13 +541,13 @@ echo '<script type="text/javascript">
                             }
                             prevSibling = prevSibling.previousElementSibling;
                         }
-                        
+
                         // If not found in siblings, go up to parent and try again.
                         if (!entryDiv) {
                             currentElement = currentElement.parentElement;
                         }
                     }
-                    
+
                     // If we found the entry div, extract the entry ID from its anchor.
                     if (entryDiv) {
                         var anchors = entryDiv.querySelectorAll("[id^=\"rating-anchor-\"]");
