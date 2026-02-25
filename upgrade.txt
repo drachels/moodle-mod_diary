@@ -1,4 +1,5 @@
 This file describes changes and other work in the diary code.
+Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 === Deferred until fixed. ===
 20200601 Diary_526r - Make toggle to allow grade and feedback for users with no entry.
     Making changes in the results.php file. Currently the code is just, text, based on
@@ -27,7 +28,10 @@ This file describes changes and other work in the diary code.
     Clear feedback, on report pages.
 20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses, Clear feedback.
 20260206 Diary_1403 - Issue #51 - Feature request - Upgrade possible for Global Search Index #51.
-
+20260225 Diary_1414 - CSS theming support: replace hardcoded styling with classes and allow
+    theme-level control. 
+    Requests: remove borders, allow theme color overrides, show dates/statistics on one line,
+    and render dates/statistics text as non-bold via CSS.
 
 === 5.0.0 === pending
 
