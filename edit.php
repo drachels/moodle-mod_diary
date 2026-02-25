@@ -404,10 +404,6 @@ $data->id = $cm->id;
                         } else {
                             $diaryinfo->timemodified = date("l, F j, Y H:i:s", $newentry->timecreated);
                         }
-                        // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportsingle.php?id=$cm->id
-                        // &user=$USER->id&action=currententry";
-                        // ...$diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id
-                        // &user=$USER->id&action=currententry";
                         $diaryinfo->url = "$CFG->wwwroot/mod/diary/reportone.php?id=$cm->id
                             &user=$USER->id&action=currententry&entryid=$newentry->id";
                         $modnamesngl = get_string('modulename', 'diary');
@@ -455,22 +451,6 @@ $data->id = $cm->id;
                         ],
                         ];
                         $message->set_additional_content('email', $content);
-                        /*
-                        // You probably don't need attachments but if you do, here is how to add one
-                        $usercontext = context_user::instance($teacher->id);
-                        $file = new stdClass();
-                        $file->contextid = $usercontext->id;
-                        $file->component = 'user';
-                        $file->filearea = 'private';
-                        $file->itemid = 0;
-                        $file->filepath = '/';
-                        $file->filename = '1.txt';
-                        $file->source = 'test';
-
-                        $fs = get_file_storage();
-                        $file = $fs->create_file_from_string($file, 'file1 content');
-                        $message->attachment = $file;
-                        */
                         // Actually send the message.
                         // 2025042901 Student13 just submitted an entry and got two debug messages from the next line of code.
                         $messageid = message_send($message);
