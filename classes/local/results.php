@@ -1091,7 +1091,7 @@ class results {
         $params['ratingarea'] = $ratingoptions->ratingarea;
         $params['itemid'] = $ratingoptions->itemid;
         $params['userid'] = $ratingoptions->userid;
-        // ...$params['timecreated'] = $ratingoptions->timecreated;.
+        // Optional: include timecreated in the filter if future logic requires it.
 
         $sql = 'SELECT * FROM ' . $CFG->prefix . 'rating'
                      . ' WHERE contextid =  ?'
@@ -1099,7 +1099,7 @@ class results {
                        . ' AND ratingarea =  ?'
                        . ' AND itemid =  ?'
                        . ' AND userid =  ?';
-                       // .... ' AND timecreated = ?';.
+                       // Optional: add a timecreated condition if needed.
 
         if ($rec = $DB->record_exists_sql($sql, $params)) {
             $rec = $DB->get_record_sql($sql, $params);
@@ -1241,7 +1241,7 @@ class results {
         }
 
         // 20260215 Get the last edited entry ID for scroll-back functionality.
-        $last_edited_entry = isset($data['last_edited_entry']) ? (int)$data['last_edited_entry'] : 0;
+        $lasteditedentry = isset($data['last_edited_entry']) ? (int)$data['last_edited_entry'] : 0;
 
         $timenow = time();
         // 20241129 Changed from 0 to 1. 20250113 Changed from 0 to 1, again.
@@ -1327,8 +1327,8 @@ class results {
         }
 
         // 20260215 Set session variable to scroll back to last edited entry.
-        if ($last_edited_entry > 0) {
-            $SESSION->diary_clicked_entry = $last_edited_entry;
+        if ($lasteditedentry > 0) {
+            $SESSION->diary_clicked_entry = $lasteditedentry;
         }
     }
 
