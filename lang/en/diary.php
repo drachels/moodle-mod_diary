@@ -96,24 +96,20 @@ $string['diaryclosetime_help'] = 'If enabled, you can set a date for the diary t
 $string['diarydescription'] = 'Diary description';
 $string['diaryentrydate'] = 'Set date for this entry';
 $string['diaryid'] = 'diaryid to transfer to';
-// Plain text email.
 $string['diarymail'] = 'Greetings {$a->user},
 {$a->teacher} has posted some feedback on your diary entry for \'{$a->diary}\'.
 
 You can see it appended to your diary entry:
 
     {$a->url}';
-// Email formatted with HTML.
 $string['diarymailhtml'] = '<strong>Greetings {$a->user},</strong><br /><br />
 {$a->teacher} has posted some feedback on your
 diary entry for \'<i>{$a->diary}</i>\'.<br /><br />
 You can see it appended to your <a href="{$a->url}">diary entry</a>.';
 
-// Email formatted with HTML used in edit.php file.
 $string['diarymailhtmluser'] = 'has posted a diary entry for \'<i>{$a->diary}</i>\' Created {$a->timecreated} and modified {$a->timemodified}.<br /><br />
 You may view the <a href="{$a->url}">diary entry here</a>.<br /><br />Note: You may need to provide feedback or update the status of the entry in order for the activity to be set to complete.';
 
-// Plain text email used in edit.php file.
 $string['diarymailuser'] = 'has posted a diary entry for \'{$a->diary}\'
 
 You may view the entry here:
@@ -212,7 +208,7 @@ $string['freadingease_help'] = 'Flesch reading ease: high scores indicate your t
 $string['generalerror'] = 'There has been an error.';
 $string['generalerrorinsert'] = 'Could not insert a new diary entry.';
 $string['generalerrorupdate'] = 'Could not update your diary.';
-$string['gradeentrieslink']   = 'Grading';  // Header for the link item.
+$string['gradeentrieslink']   = 'Grading';
 $string['gradeingradebook'] = 'Current rating in gradebook';
 $string['highestgradeentry'] = 'Highest rated entries:';
 $string['idlable'] = ' (ID: {$a})';
@@ -464,7 +460,6 @@ $string['tablecolumnedit'] = 'Edit&nbsp;&nbsp;&nbsp;&nbsp;';
 $string['tablecolumnparagraphs'] = 'Paragraphs';
 $string['tablecolumnprompts'] = 'Prompts';
 $string['tablecolumnpromptsbgc'] = 'Prompt background color';
-$string['tablecolumnpromptsbgc'] = 'Prompt color';
 $string['tablecolumnpromptsbgc_help'] = 'Click the box to choose a background color for this specific prompt.';
 $string['tablecolumnsentences'] = 'Sentences';
 $string['tablecolumnstart'] = 'Start';
@@ -510,6 +505,8 @@ $string['writingpromptused'] = 'Writing prompt ID: {$a} was used for this entry\
 $string['xfrresults'] = 'There were {$a->one} entry\'s processed, and {$a->two} of them transferred.';
 
 // Deprecated since Moodle 4.3.
+$string['countofratingspointvalidation'] = 'For Aggregate type "Count of ratings", Point maximum grade must be {$a->threshold} or less.';
+$string['countofratingspointwarning'] = 'Warning: Aggregate type "Count of ratings" with Grade type "Point" can produce unintuitive grade totals as the number of ratings increases. Consider using a point maximum at or below {$a->threshold}, or selecting a different aggregate type. Site settings: default point={$a->pointdefault}, maximum point={$a->pointmax}.';
 $string['grade'] = 'Grade';
 $string['itemcount'] = 'Expected number of items';
 $string['itemcount_help'] = 'The minimum number of countable items that must be in the essay text
@@ -530,5 +527,3 @@ $string['itemtypenone'] = 'None';
 $string['itemtypensentences'] = 'Sentences';
 $string['itemtypeparagraphs'] = 'Paragraphs';
 $string['itemtypewords'] = 'Words';
-$string['countofratingspointwarning'] = 'Warning: Aggregate type "Count of ratings" with Grade type "Point" can produce unintuitive grade totals as the number of ratings increases. Consider using a point maximum at or below {$a->threshold}, or selecting a different aggregate type. Site settings: default point={$a->pointdefault}, maximum point={$a->pointmax}.';
-$string['countofratingspointvalidation'] = 'For Aggregate type "Count of ratings", Point maximum grade must be {$a->threshold} or less.';
