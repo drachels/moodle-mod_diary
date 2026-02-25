@@ -8,6 +8,7 @@ which can access the Moodle site.
 - Moodle tracker component: https://github.com/drachels/moodle-mod_diary/issues
 - Documentation: https://docs.moodle.org/405/en/Diary
 - Source Code: https://github.com/drachels/moodle-mod_diary
+- Release run sheet: mod/diary/RELEASE_RUN_SHEET.md
 - License: http://www.gnu.org/licenses/gpl-2.0.txt
 
 ## Install from git
