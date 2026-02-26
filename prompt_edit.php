@@ -47,6 +47,7 @@ $viewbyp = optional_param('viewbyp', 1, PARAM_INT);
 $viewbyc = optional_param('viewbyc', 1, PARAM_INT);
 $viewbyf = optional_param('viewbyf', 1, PARAM_INT);
 $jumptocurrent = optional_param('jumptocurrent', 0, PARAM_INT);
+$jumpdone = optional_param('jumpdone', 0, PARAM_INT);
 $collapsedidsraw = optional_param('collapsedids', '', PARAM_TEXT);
 $collapsedids = [];
 if (!empty($collapsedidsraw)) {
@@ -83,6 +84,7 @@ $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
 
 $data = new stdClass();
+$selectedpromptdata = null;
 
 // 20221002 Added sort for ticket Diary_926.
 $prompts = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart, datestop');
@@ -108,7 +110,9 @@ if (!empty($action)) {
                 $promptid = required_param('promptid', PARAM_INT); // Prompt ID to edit.
                 $action = optional_param('action', 'edit', PARAM_ACTION); // Action(promt).
                 $data = $DB->get_record('diary_prompts', ['id' => $promptid]);
-                $prompts = $DB->get_records('diary_prompts', ['id' => $promptid], $sort = 'id ASC');
+                if ($data) {
+                    $selectedpromptdata = clone $data;
+                }
 
                 // Trigger prompt edited event.
                 $event = \mod_diary\event\prompt_edited::create(
@@ -163,6 +167,19 @@ if ($view == -1) {
     $view = 0;
 }
 
+$editmode = ($action === 'edit' && !empty($promptid));
+$selectedpromptcounter = 0;
+if ($editmode && !empty($prompts)) {
+    $promptindex = 0;
+    foreach ($prompts as $promptrecord) {
+        $promptindex++;
+        if ((int)$promptrecord->id === (int)$promptid) {
+            $selectedpromptcounter = $promptindex;
+            break;
+        }
+    }
+}
+
 // Set up a general table to hold the list of prompts.
 $tableheadrow1 = '';
 $tableheadrow2 = '';
@@ -207,6 +224,9 @@ $counter = 0;
 // If there are any prompts for this diary, create a descending list of them.
 if ($prompts && $view == 0) {
     foreach ($prompts as $prompt) {
+        if ($editmode && (int)$prompt->id !== (int)$promptid) {
+            continue;
+        }
         $rowanchor = 'prompt-' . $prompt->id;
         $promptidint = (int)$prompt->id;
         $rowcollapsed = isset($collapsedids[$promptidint]);
@@ -262,9 +282,14 @@ if ($prompts && $view == 0) {
         // Use prompt ID so we can come back to the Prompt Editor we came from.
         // 20230810 Changed based on pull request #29.
         $url = new moodle_url('prompt_edit.php', ['id' => $id, 'action' => 'edit', 'promptid' => $data->entryid]);
+        $url->set_anchor('prompt-' . $data->entryid);
         $jlink2 = '<a href="' . $url->out(false) . '"><img src="pix/edit.png" alt='
                   . get_string('eeditlabel', 'diary') . '></a>';
         $counter++;
+        $displaycounter = $counter;
+        if ($editmode && $selectedpromptcounter > 0) {
+            $displaycounter = $selectedpromptcounter;
+        }
 
         if ($rowcollapsed) {
             $promptsummary = get_string('idlable', 'diary', $data->entryid) . ' '
@@ -276,7 +301,7 @@ if ($prompts && $view == 0) {
                       . $data->promptbgc
                       . ';">'
                       . get_string('writingpromptlable2', 'diary')
-                      . $counter
+                      . $displaycounter
                       . get_string('idlable', 'diary', $data->entryid)
                       . '<br>' . $data->text . '</div>';
             $promptbgc = '<td>' . $data->promptbgc . '</td>';
@@ -357,6 +382,27 @@ if ($prompts && $view == 0) {
 }
 
 $output .= '</tbody></table>';
+
+if (!empty($jumptocurrent) && empty($jumpdone)) {
+    $jumpurlparams = ['id' => $cm->id, 'jumptocurrent' => 1, 'jumpdone' => 1];
+    if (!empty($data->entryid)) {
+        $jumpurlparams['promptid'] = (int)$data->entryid;
+        $jumpurl = new moodle_url('/mod/diary/prompt_edit.php', $jumpurlparams);
+        $jumpurl->set_anchor('prompt-' . (int)$data->entryid);
+    } else {
+        $jumpurl = new moodle_url('/mod/diary/prompt_edit.php', $jumpurlparams);
+        $jumpurl->set_anchor('prompteditor');
+    }
+    redirect($jumpurl);
+}
+
+if (!empty($selectedpromptdata)) {
+    $data = $selectedpromptdata;
+}
+
+if (empty($data->entryid) && !empty($data->id)) {
+    $data->entryid = (int)$data->id;
+}
 
 $data->id = $cm->id;
 $data->textformat = FORMAT_HTML;
@@ -490,17 +536,6 @@ echo '<a id="prompteditor"></a>';
 echo $OUTPUT->heading(get_string('writingpromptlable3', 'diary'));
 $intro = format_module_intro('diary', $diary, $cm->id);
 $form->display();
-
-if (!empty($jumptocurrent) && !empty($data->entryid)) {
-    echo '<script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            var target = document.getElementById("prompt-' . (int)$data->entryid . '");
-            if (target) {
-                target.scrollIntoView({behavior: "auto", block: "start", inline: "nearest"});
-            }
-        });
-    </script>';
-}
 
 // 20230810 Changed based on pull request #29.
 $url1 = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $id]);
