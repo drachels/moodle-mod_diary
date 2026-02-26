@@ -46,6 +46,7 @@ $view = optional_param('viewp', -1, PARAM_INT);
 $viewbyp = optional_param('viewbyp', 1, PARAM_INT);
 $viewbyc = optional_param('viewbyc', 1, PARAM_INT);
 $viewbyf = optional_param('viewbyf', 1, PARAM_INT);
+$jumptocurrent = optional_param('jumptocurrent', 0, PARAM_INT);
 $collapsedidsraw = optional_param('collapsedids', '', PARAM_TEXT);
 $collapsedids = [];
 if (!empty($collapsedidsraw)) {
@@ -351,7 +352,7 @@ if ($prompts && $view == 0) {
     } else {
         $prompttext = get_string('promptzerocount', 'diary', $counter);
     }
-    $output .= '<tr><td colspan="9">' . $prompttext . '</td></tr>';
+    $output .= '<tr><td colspan="9">' . strip_tags($prompttext) . '</td></tr>';
     $counter = 0;
 }
 
@@ -478,20 +479,34 @@ if ($form->is_cancelled()) {
 
     $DB->update_record('diary_prompts', $newentry);
     // 20230810 Changed based on pull request #29.
-    redirect(new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'promptid' => $newentry->id]));
+    $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'promptid' => $newentry->id]);
+    $saveurl->set_anchor('prompt-' . $newentry->id);
+    redirect($saveurl);
 }
 
 echo $OUTPUT->header();
 echo $output;
+echo '<a id="prompteditor"></a>';
 echo $OUTPUT->heading(get_string('writingpromptlable3', 'diary'));
 $intro = format_module_intro('diary', $diary, $cm->id);
 $form->display();
+
+if (!empty($jumptocurrent) && !empty($data->entryid)) {
+    echo '<script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            var target = document.getElementById("prompt-' . (int)$data->entryid . '");
+            if (target) {
+                target.scrollIntoView({behavior: "auto", block: "start", inline: "nearest"});
+            }
+        });
+    </script>';
+}
 
 // 20230810 Changed based on pull request #29.
 $url1 = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $id]);
 $url2 = new moodle_url($CFG->wwwroot . '/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'create', 'promptid' => 0]);
 // 20220920 Add a Create button and a return button. 20230810 Changed due to pull request #29.
-echo '<br><a href="' . $url2->out(false) . '"
+echo '<br><a href="' . $url2->out(false) . '#prompteditor"
     class="btn btn-warning"
     style="border-radius: 8px">';
 // 20230810 Changed due to pull request #29.
