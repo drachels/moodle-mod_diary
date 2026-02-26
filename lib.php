@@ -974,7 +974,7 @@ function diary_extend_settings_navigation(settings_navigation $settingsnav, navi
 
     // Link to add automatic time released prompts to Diary activities. Visible to teachers and admin only.
     if (has_capability('mod/diary:addinstance', $context)) {
-        $link = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id]);
+        $link = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'jumptocurrent' => 1]);
         $linkname = get_string('promptstitle', 'diary');
         $icon = new pix_icon('icon', '', 'diary', ['class' => 'icon']);
         $node = $navref->add($linkname, $link, navigation_node::TYPE_SETTING, null, null, $icon);
