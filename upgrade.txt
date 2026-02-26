@@ -201,7 +201,8 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     looks even better than before since it now includes the same border style used elsewhere.
 20260225 Diary_1413bt - Feature request - Change prompt_edit.php to show each prompt in two rows.
     Completed. See ticket for further details.
-
+20260226 Diary_1415bt - Diary - Feature request - Add more anchor points on the prompt_edit.php page.
+    Multiple changes made to the lib.php, prompt_edit.php, and view.php files.
 
 === 3.7.9 === (Build: 2024042100)
 2024042400 Diary_1235v - Bug fix release for github issue #38 Module will update and produce
