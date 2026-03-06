@@ -38,13 +38,15 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     on Site administration -> Messaging -> Notification settings in Moodle 5.1.
     Added missing language string in lang/en/diary.php.
 20260606 Diary_1431bt - All the Behat *.feature files need maintenance and upgrading.
-
+    Refactored and modernized the Diary Behat .feature suite by removing numeric filenames,
+    deleting duplicate scenarios, and updating outdated steps/selectors to align with
+    current Diary UI behavior.
 
 === 4.0.0 === 2026022600
 20210515  Diary_720r - I am getting the String [grade, core] is deprecated debug message in
     multiple locations. Made changes to deprecated.txt and diary.php files but most
     notable change occurred when I switch to TinyMCE editor. No More error.
-20211130 Diary_779bt - Need to work on the help pop up windows for stats. Currently
+20211130 Diary_779r - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting. As of 20260224 this ticket is completed. See the
     ticket for details of the fix. Replaced legacy popover anchor links in diarystats.php
     with Moodle help_icon output.
@@ -62,7 +64,8 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 20240209 Diary_1201r - Feature request - Need a reportone.php page for single user entry from
     a Grade Me link. The fix for ticket Diary_1016 fixes this ticket also.
 20240209 Diary_1202r - Feature request - Need new by name link to go to proposed reportone.php
-    page.
+    page. 2026030601 Diary_1202r - Verified by-name/tag navigation for managers now targets
+    reportone.php with user+entryid (currententry) and opens the intended single entry.
 20240304 Diary_1223r - Major bug - Editing an OLD entry with a current timed prompt showing,
     the current prompt over writes the OLD and becomes required. 20250113 Fixed, I think, but
     due to the amount of changes, see the ticket for details.
