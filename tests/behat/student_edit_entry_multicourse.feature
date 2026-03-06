@@ -44,7 +44,7 @@ Feature: Students can add and edit entries to diary activities
       | student3 | GC32  |
     When I am on the "diary1" "diary activity" page logged in as student1
     And I should see "You have not started this diary yet."
-    And I press "Start new entry" #BROKEN
+    And I press "Start new or edit today's entry"
     And I set the following fields to these values:
       | Entry | First entry by student1. |
     And I press "Save changes"

@@ -1,4 +1,4 @@
-@mod @mod_diary1
+@mod @mod_diary
 Feature: Basic diary use
   In order to complete diary entries
   As a teacher or student

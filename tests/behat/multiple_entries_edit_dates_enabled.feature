@@ -1,8 +1,8 @@
-@mod @mod_diary1
-Feature: Basic diary entry use
-  In order to complete diary entries
+@mod @mod_diary
+Feature: Multiple entries with edit entry dates yes
+  In order to complete multiple diary entries and edit the dates
   As a teacher or student
-  I need to make a diary entry
+  I need to make multiple diary entries and edit the dates
 
   Background:
     Given the following "courses" exist:
@@ -20,11 +20,14 @@ Feature: Basic diary entry use
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
 
+# Note that for this feature, the default settings for the activty will need to be modified
+# so that users can make multiple entries.
   @javascript
-  Scenario: A teacher creates a diary entry
+  Scenario: A teacher creates multiple diary entries
     When I am on the "Test diary" "diary activity" page logged in as "teacher1"
     Then I should see "Test diary"
     And I should see "This is a diary"
+    And I should see "View 3 diary entries"
     And I should see "Start new or edit today's entry"
     And I press "Start new or edit today's entry"
     And I set the field "Entry" to "Some sample text by teacher1."
@@ -33,7 +36,7 @@ Feature: Basic diary entry use
     And I log out
 
   @javascript
-  Scenario: A student creates a diary entry
+  Scenario: A student creates multiple diary entries
     When I am on the "Test diary" "diary activity" page logged in as "student1"
     Then I should see "Test diary"
     And I should see "This is a diary"
@@ -42,5 +45,16 @@ Feature: Basic diary entry use
     And I set the field "Entry" to "Some sample text by student1."
     And I press "Save changes"
     And I should see "Test diary"
+    And I should see "This is a diary"
+    And I should see "Start new or edit today's entry"
+    And I press "Start new entry"
+    And I set the field "Entry" to "A second sample text by student1."
+    And I press "Save changes"
+    And I should see "Test diary"
+    And I should see "This is a diary"
+    And I should see "Start new or edit today's entry"
+    And I press "Start new entry"
+    And I set the field "Entry" to "A third sample text by student1."
+    And I press "Save changes"
+    And I should see "Test diary"
     And I log out
-

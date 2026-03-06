@@ -20,13 +20,13 @@ Feature: Students can add and edit entries to diary activities
       | activity | name            | intro          | course | idnumber |
       | diary    | Test diary name | Diary question | C1     | diary1   |
     And I log in as "student1"
-    And I am on "Course1" course homepage
+    And I am on "Course 1" course homepage
     And I follow "Test diary name"
-    And I press "Start new day or edit current day diary entry"
+    And I press "Start new or edit today's entry"
     And I set the following fields to these values:
       | Entry | First entry by student1. |
     And I press "Save changes"
-    And I press "Start or edit my diary entry"
+    And I press "Start new or edit today's entry"
     Then the field "Entry" matches value "First entry by student1."
     And I set the following fields to these values:
       | Entry | Second reply |

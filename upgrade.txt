@@ -33,11 +33,14 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     Requests: remove borders, allow theme color overrides, show dates/statistics on one line,
     and render dates/statistics text as non-bold via CSS.
 
-=== 5.0.0 === pending
+=== 4.0.1 === pending
+20260306 Diary_1430bt - Invalid get_string() identifier for messageprovider:diary_entry_confirmation
+    on Site administration -> Messaging -> Notification settings in Moodle 5.1.
+    Added missing language string in lang/en/diary.php.
+20260606 Diary_1431bt - All the Behat *.feature files need maintenance and upgrading.
 
 
-
-=== 4.0.0 === pending
+=== 4.0.0 === 2026022600
 20210515  Diary_720r - I am getting the String [grade, core] is deprecated debug message in
     multiple locations. Made changes to deprecated.txt and diary.php files but most
     notable change occurred when I switch to TinyMCE editor. No More error.

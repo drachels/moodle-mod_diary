@@ -275,6 +275,7 @@ $string['messageprovider:diary_entries_due'] = 'Diary is due in 7 days';
 $string['messageprovider:diary_entries_due_soon'] = 'Your Diary entry is due soon';
 
 $string['messageprovider:diary_entries_overdue'] = 'Warning when your Diary attempt becomes overdue';
+$string['messageprovider:diary_entry_confirmation'] = 'Diary entry confirmation';
 $string['messageprovider:diary_entry_notification'] = 'Confirm your own Diary entry submissions';
 
 

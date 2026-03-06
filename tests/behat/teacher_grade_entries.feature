@@ -43,37 +43,37 @@ Feature: Teacher can view, comment and grade students entries
       | student3 | GC31  |
       | student3 | GC32  |
     And I log in as "student1"
-    And I am on "Course1" course homepage
-    And I follow "Test diary name"
-    And I press "Start new day or edit current day diary entry"
+    And I am on "Course 1" course homepage
+    And I follow "Test diary name 1"
+    And I press "Start new or edit today's entry"
     And I set the following fields to these values:
       | Entry | Student 1 first reply |
     And I press "Save changes"
     And I log out
     And I log in as "student2"
-    And I am on "Course1" course homepage
-    And I follow "Test diary name"
-    And I should see "Diary question"
-    And I press "Start new day or edit current day diary entry"
+    And I am on "Course 1" course homepage
+    And I follow "Test diary name 1"
+    And I should see "Test diary description 1"
+    And I press "Start new or edit today's entry"
     And I set the following fields to these values:
       | Entry | Student 2 first reply |
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course1" course homepage
+    And I am on "Course 1" course homepage
 
-  Scenario: Teacher can access students entries from the diarys list page
+  Scenario: Teacher can access students entries from the diaries list page
     When I follow "Course 1"
     And I turn editing mode on
     And I add the "Activities" block
-    And I click on "Diarys" "link" in the "Activities" "block"
-    Then I should see "Diary question" in the "Test diary name" "table_row"
-    And I should see "View 2 diary entries" in the "Test diary name" "table_row"
+    And I click on "Diaries" "link" in the "Activities" "block"
+    Then I should see "Test diary description 1" in the "Test diary name 1" "table_row"
+    And I should see "View 2 diary entries" in the "Test diary name 1" "table_row"
     And I follow "View 2 diary entries"
 
   Scenario: Teacher grades and adds/edits feedback to student's entries
-    When I follow "Test diary name"
-    And I should see "Diary question"
+    When I follow "Test diary name 1"
+    And I should see "Test diary description 1"
     And I follow "View 2 diary entries"
     Then I should see "Student 1 first reply" in the "//table[@class='diaryuserentry']/descendant::td[@class='userfullname'][contains(., 'Student 1')]/ancestor::table[@class='diaryuserentry']" "xpath_element"
     And I should see "Student 2 first reply" in the "//table[@class='diaryuserentry']/descendant::td[@class='userfullname'][contains(., 'Student 2')]/ancestor::table[@class='diaryuserentry']" "xpath_element"
@@ -98,17 +98,17 @@ Feature: Teacher can view, comment and grade students entries
     # Check that users see the regraded message
     And I log out
     And I log in as "student1"
-    And I am on "Course1" course homepage
-    And I follow "Test diary name"
-    And I press "Start new day or edit current day diary entry"
+    And I am on "Course 1" course homepage
+    And I follow "Test diary name 1"
+    And I press "Start new or edit today's entry"
     And I set the following fields to these values:
       | Entry | Student 1 edited first reply |
     And I press "Save changes"
     And I should see "Entry has changed since last feedback was saved"
     And I log out
     And I log in as "teacher1"
-    And I am on "Course1" course homepage
-    And I follow "Test diary name"
+    And I am on "Course 1" course homepage
+    And I follow "Test diary name 1"
     And I follow "View 2 diary entries"
     And I should see "Entry has changed since last feedback was saved" in the "//table[@class='diaryuserentry'][contains(., 'Student 1')]" "xpath_element"
     And I should see "Student 1 edited first reply" in the "//table[@class='diaryuserentry'][contains(., 'Student 1')]" "xpath_element"

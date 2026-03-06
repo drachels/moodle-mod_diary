@@ -1,4 +1,4 @@
-@mod @mod_diary1
+@mod @mod_diary
 Feature: Teacher can setup diary
   In order to complete diary entries
   As a teacher

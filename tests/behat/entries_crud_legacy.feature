@@ -1,8 +1,8 @@
-@mod @mod_diary
+@mod @mod_diary_legacy
 Feature: Users can add entries to diary activities
-  In order to populate diarys
+  In order to populate diaries
   As a user
-  I need to add entries to diarys
+  I need to add entries to diaries
 
   @javascript
   Scenario: Students can add entries to a diary

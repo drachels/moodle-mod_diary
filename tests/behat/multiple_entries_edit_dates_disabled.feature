@@ -1,4 +1,4 @@
-@mod @mod_diary1
+@mod @mod_diary
 Feature: Multiple entries with edit entry dates no
   In order to complete diary entries without editing dates
   As a teacher or student
