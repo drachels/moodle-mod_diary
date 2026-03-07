@@ -22,6 +22,9 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     Visible groups dropdown.
 20250113 Diary_1351 - Feature Request - Need to have new entry fields for feedback and text
     background colors.
+20250123 - Feature needed - Need an event, class entry_deleted extends \core\event\base {.
+    Created event file and it's contents, entry_deleted.php. Added new string,
+    $string['evententrydeleted'] = 'Diary entry deleted';
 20250211 Diary_1370 - Diary - Feature request - Need a new mdl_diary_entries field such as,
     mailedsubmission.
 20250211 Diary_1371 - Diary - Feature request - Send email to student when teacher clicks,
@@ -34,6 +37,8 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     and render dates/statistics text as non-bold via CSS.
 
 === 4.0.1 === pending
+20260130 Diary_1363bt - Feature request - The index.php file should include how many diary entries
+    need grading. Completed and working simple version now. Will add more info later.
 20260306 Diary_1430bt - Invalid get_string() identifier for messageprovider:diary_entry_confirmation
     on Site administration -> Messaging -> Notification settings in Moodle 5.1.
     Added missing language string in lang/en/diary.php.
@@ -41,173 +46,172 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     Refactored and modernized the Diary Behat .feature suite by removing numeric filenames,
     deleting duplicate scenarios, and updating outdated steps/selectors to align with
     current Diary UI behavior.
+20260307 Notes - Future feature planning details are documented in mod/diary/future_development.txt.
+20260307 Notes - Mobile capability request roadmap is documented in mod/diary/future_development.txt.
 
 === 4.0.0 === 2026022600
-20210515  Diary_720r - I am getting the String [grade, core] is deprecated debug message in
+20210515  Diary_720v - I am getting the String [grade, core] is deprecated debug message in
     multiple locations. Made changes to deprecated.txt and diary.php files but most
     notable change occurred when I switch to TinyMCE editor. No More error.
-20211130 Diary_779r - Need to work on the help pop up windows for stats. Currently
+20211130 Diary_779v - Need to work on the help pop up windows for stats. Currently
     set this ticket status to waiting. As of 20260224 this ticket is completed. See the
     ticket for details of the fix. Replaced legacy popover anchor links in diarystats.php
     with Moodle help_icon output.
-20230306 Diary_1016r - Need to see about creating a view single entry page especially going
+20230306 Diary_1016v - Need to see about creating a view single entry page especially going
     from a tag item or tag list. I have created a page, reportone.php, that seems to be
     working the way I want it to, but the feedback is only partially working, so far.
-20240117 Diary_1173r - Prompts are NOT restored after a backup and restore operation. Fixed
+20240117 Diary_1173v - Prompts are NOT restored after a backup and restore operation. Fixed
     errors in backup files.
-20240206 Diary_1196r - Toolbar is missing on the reportsingle.php page. Copied the toolbar
+20240206 Diary_1196v - Toolbar is missing on the reportsingle.php page. Copied the toolbar
     code from the report.php file over into the reportsingle.php file. I then commented
     out the sort by ascending and descending last name tool button. Had to reopen due to
     not getting records based on current userid.
-20240206 Diary_1197r - Diary - Feature request - Toggle hide/view and sort prompts. Added
+20240206 Diary_1197v - Diary - Feature request - Toggle hide/view and sort prompts. Added
     arrow toggle code similar to MooTyper owngrades.php to hide the whole list of prompts.
-20240209 Diary_1201r - Feature request - Need a reportone.php page for single user entry from
+20240209 Diary_1201v - Feature request - Need a reportone.php page for single user entry from
     a Grade Me link. The fix for ticket Diary_1016 fixes this ticket also.
-20240209 Diary_1202r - Feature request - Need new by name link to go to proposed reportone.php
-    page. 2026030601 Diary_1202r - Verified by-name/tag navigation for managers now targets
+20240209 Diary_1202v - Feature request - Need new by name link to go to proposed reportone.php
+    page. 2026030601 Diary_1202v - Verified by-name/tag navigation for managers now targets
     reportone.php with user+entryid (currententry) and opens the intended single entry.
-20240304 Diary_1223r - Major bug - Editing an OLD entry with a current timed prompt showing,
+20240304 Diary_1223v - Major bug - Editing an OLD entry with a current timed prompt showing,
     the current prompt over writes the OLD and becomes required. 20250113 Fixed, I think, but
     due to the amount of changes, see the ticket for details.
-20240408 Diary_1231r - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
+20240408 Diary_1231v - Deprecated: Creation of dynamic property mod_diary_renderer::$cm.
     Changed the code, see ticket for details. Deprecation warning no longer occurs.
     2024042901 I have reverted to the previous code that gets the deprecated message.
     Otherwise, when anyone is on the view page, they get undefined id in line 80 of the
     renderer.php file.
-20240410 Diary_1233r - Numbers do not match between prompt and description. Modified
+    2026030701 Diary_1231v - Re-verified on current code: active renderer path is
+    mod/diary/classes/output/renderer.php (view.php uses $PAGE->get_renderer('mod_diary')),
+    and toolbar() now normalizes $cm id safely while legacy mod_diary_renderer also declares
+    $cm; deprecated dynamic-property warning is no longer expected.
+20240410 Diary_1233v - Numbers do not match between prompt and description. Modified
     diarystats.php file to use the data from the diary_prompts table. See ticket for details. 
-20240429 Diary_1238r - My mdl_diary_entries table defines promptid as null but needs to
+20240429 Diary_1238v - My mdl_diary_entries table defines promptid as null but needs to
     be not null. Made a copy of the table, mdl_diary_entries2. Exported the tables and
     saved both in today's development folder. I then dropped the original table, edited
     the sql file so the field gets created as not null 0, then imported the table back
     into the moodledev database.
-20240519 Diary_1243r - The following options are not valid: promptid, promptbgc, timeopen,
+20240519 Diary_1243v - The following options are not valid: promptid, promptbgc, timeopen,
     timeclose, editall, editdates, action, texttrust, maxbytes, maxfiles, subdirs, enable_filemanagement.
     Moved them all from editoroptions to form.
-20240520 Diary_1246r - There is no place for default $promptbgc to be set. Added code for a default
+20240520 Diary_1246v - There is no place for default $promptbgc to be set. Added code for a default
     $promptbgc setting in the prompt_edit.php file, about line 39. See the ticket for details.
-20240520 Diary_1247r - Need a setting to allow for deleting an entry. As of 20250123 I have
+20240520 Diary_1247v - Need a setting to allow for deleting an entry. As of 20250123 I have
     deleteentry.php working for entries and user tag instances. See the ticket for more details.
-20240527 Diary_1249r - core\string_manager_standard_test::test_validate_deprecated_strings_files
+20240527 Diary_1249v - core\string_manager_standard_test::test_validate_deprecated_strings_files
     is failing #42. I had created the deprecated.txt file in the wrong format and did not
     have all the needed strings in the correct section of the diary.php language file.
-20240603 Diary_1250r - In prompt_edit.php, Past, Current, and Future need to have strings created.
+20240603 Diary_1250v - In prompt_edit.php, Past, Current, and Future need to have strings created.
     Created three new strings, promptsc, promptsf, and promptsp, for Current, Future, and Past. 
-20240604 Diary_1251r - TinyMCE Editor problem in prompt_edit.php page - fails to show the
+20240604 Diary_1251v - TinyMCE Editor problem in prompt_edit.php page - fails to show the
     toolbar. Was missing <!DOCTYPE HTML> at start and </html> at end of the page.
-20240806 Diary_1258r - Need to change all occurrences of, // @codingStandardsIgnoreLine, over to,
+20240806 Diary_1258v - Need to change all occurrences of, // @codingStandardsIgnoreLine, over to,
     // phpcs:ignore. There are a bunch of places that needed changing. See the ticket for details.
-20240806 Diary_1294r - Got browser debug message regarding multiple invalid options when trying
+20240806 Diary_1294v - Got browser debug message regarding multiple invalid options when trying
     to edit prompts. Made modifications in the prompt_edit.php and mod_form.php files. See the
     ticket for details of the changes.
-20241119 Diary_1338r - Removes unnecessary version check in *_supports() callback. #49. Completed
+20241119 Diary_1338v - Removes unnecessary version check in *_supports() callback. #49. Completed
     merge request that changes the collaboration case and removes the Moodle version check.
-20241125 Diary_1341bt - Add to feedback button on new reportone.php page is broken. Fixed the
+20241125 Diary_1341v - Add to feedback button on new reportone.php page is broken. Fixed the
     $param test and stats and auto rating now are added/cleared from the feedback textarea when
     the, Add to feedback, or the, Clear feedback buttons are clicked. 20260206 Still does NOT
     correctly update the students grade/average.
-20241125 Diary_1341r - Add to feedback button on new reportone.php page is broken. Fixed the
+20241125 Diary_1341v - Add to feedback button on new reportone.php page is broken. Fixed the
     $param test and stats and auto rating now are added/cleared from the feedback textarea when
     the, Add to feedback, or the, Clear feedback buttons are clicked.
-20241203 Diary_1343bt - When the, Add to feedback, button is clicked, the feedback textarea info
+20241203 Diary_1343v - When the, Add to feedback, button is clicked, the feedback textarea info
     icons are VERY large! 20250112 I think this is going to be one of those that I cannot fix
     and will therefore switch it's status to, Waiting. The problem is editor related. The icons
     are rendered 16x16 when using the Atto editor, even though the intrinsic size is 150x150.
     However, when using the TinyMCE editor, the icons size automatically contracts/expands to
     fill the table cell. 20260211 This is now fixed by code change in diarystats.php.
-20241204 Diary_1344r - Need entry delete tool when teacher is using any report page. Added needed
+20241204 Diary_1344v - Need entry delete tool when teacher is using any report page. Added needed
     code to the results.php page so that any report page now has the, Delete entry, icon.
-20250114 Diary_1352r - Auto-rating does not seem to update Diary student grades. Modified code
+20250114 Diary_1352v - Auto-rating does not seem to update Diary student grades. Modified code
     in results.php about line 745. See ticket for details of the code change.
-20250122 Diary_1353r - Feature request - Moved tags from below stats to end of the actual entry.
+20250122 Diary_1353v - Feature request - Moved tags from below stats to end of the actual entry.
     Moved the code from about line 664 in view.php up to about line 608 of the same view.php file.
     Also moved it in results.php to new location starting about line 616, to fix report.php,
     reportone.php, and reportsingle.php files.
-20250123r - Feature needed - Need an event, class entry_deleted extends \core\event\base {.
-    Created event file and it's contents, entry_deleted.php. Added new string,
-    $string['evententrydeleted'] = 'Diary entry deleted';
-20250123 Diary_1355r - Feature needed - Need an event, class entry_tags_deleted extends \core\event\base {.
+20250123 Diary_1355v - Feature needed - Need an event, class entry_tags_deleted extends \core\event\base {.
     Created event file and it's contents, entry_tags_deleted.php. Also added,
     $string['evententrytagsdeleted'] = 'Diary entry tags deleted';
-20250123 Diary_1356r - Feature needed - Might need an event, class invalid_access_attempt
+20250123 Diary_1356v - Feature needed - Might need an event, class invalid_access_attempt
     extends \core\event\base {. The needed files and strings already exist, so will just
     need to test and post my results. - Access prevented, so far.
-20250124 Diary_1357r - Diary - Feature needed - Need a new admin only capability to delete entries.
+20250124 Diary_1357v - Diary - Feature needed - Need a new admin only capability to delete entries.
     Modified line 518 of the view.php to allow a site admin delete capability at any time.
-20250203 Diary_1365bt - Needs Fixing - Link to logs on the More tab is broken. Completed. See
+20250203 Diary_1365v - Needs Fixing - Link to logs on the More tab is broken. Completed. See
     the ticket and code for further details.
-20250204 Diary_1366bt - Immediate email from student to teacher is broken. Another can of worms
+20250204 Diary_1366v - Immediate email from student to teacher is broken. Another can of worms
     as I had to add new files for messages, new strings for the new messages, bump the version,
     plus testing! See the ticket for details.
-20250206 Diary_1368bt - Delayed email, Email later, from student to teacher does not work.
+20250206 Diary_1368v - Delayed email, Email later, from student to teacher does not work.
     Added code. Used Gemini for help and now have emails from student to teacher working. If there
     are multiple teachers in a course, and they have the same setting selected, then all get emails
     at the same time. However, if only one has, Email now, they are the only one who will get an email.
-20250211 Diary_1369bt - Report pages when clicking, Clear feedback, only removes the rating
+20250211 Diary_1369v - Report pages when clicking, Clear feedback, only removes the rating
     from the DB. Even though this was in v3.8.0, I reopened, due to message needing grading was not
     being updated correctly. 20260224 Now message shows even when feedback is cleared.
-20250211 Diary_1369r - Diary - Report pages when clicking, Clear feedback, only removes the rating
-    from the DB.
-20250301 Diary_1372bt - Feature Request - Submission email enable/disable. Created new setting
+20250301 Diary_1372v - Feature Request - Submission email enable/disable. Created new setting
     that is in the Diary settings and then enabled for each teacher via user preference.
-20250512 Diary_1377bt - Undefined property $promptbgc in prompt_edit.php line 262.
+20250512 Diary_1377v - Undefined property $promptbgc in prompt_edit.php line 262.
     I already have a fix for this in the works as part of, Diary_1246 - There is no place
     for default $promptbgc to be set. Added setting about line 39 of prompt_edit.php file.
-20250714 Diary_1380bt - Icon is clipped on the corners when using tiles course format. 2026021701 Have
+20250714 Diary_1380v - Icon is clipped on the corners when using tiles course format. 2026021701 Have
     been in contact with the OP, and the corner clip problem is no longer there. However, the Diary
     icon is slightly larger than other icons. I said I would see about changing it's size in the
     release after Diary v4.0.0.
-20250804 Diary_1382bt - Help contents string does not exist: [submissionemail_help, mod_diary].
+20250804 Diary_1382v - Help contents string does not exist: [submissionemail_help, mod_diary].
     Added new string. Moved from v4.0.0 due to needing a correction. See ticket for details.
-20260108 Diary_1391bt - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
+20260108 Diary_1391v - Diary - ERROR: invalid input syntax for type bigint: "" Issue#52.
     Modified lib.php now at about line 893 to 902, by checking existence of entryid.
     Keep open until Diary v4.0.0 release, then close GitHub Issue #52.
-20260109 Diary_1392bt - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
+20260109 Diary_1392v - Diary - Exception - Attempt to assign property "datestart" on null Issue#56.
     See ticket. Fixed 2 variable and 1 typo error in restore_diary_stepslib.php.
-20260109 Diary_1393bt - Diary - Implicitly marking parameter $context as nullable is deprecated.
+20260109 Diary_1393v - Diary - Implicitly marking parameter $context as nullable is deprecated.
     Added a question mark before the \context part of line 53 of the search/entry.php page.
-20260112 Diary_1394bt - Feature request - Diary needs to support course overview. See ticket.
+20260112 Diary_1394v - Feature request - Diary needs to support course overview. See ticket.
     Modified the code in index.php to use the new overview.php file in any Moodle where,
     $CFG->version > 2025041400.
-20260113 Diary_1395bt - Feature request - cron generated emails should have a date time/stamp.
+20260113 Diary_1395v - Feature request - cron generated emails should have a date time/stamp.
     Dates and times are now included in the emails generated by edit.php and cron_task.php.
-20260116 Diary_1396bt - The edit.php file, entry updated event, does not work. Found a first.js
+20260116 Diary_1396v - The edit.php file, entry updated event, does not work. Found a first.js
     Uncaught TypeError, that needed to be fixed. Used Gemini to give code change suggestions
     to the event processing and getting correct/expected log entries.
-20260116 Diary_1397bt - In whichever php file, the date format defined in settings should be used.
+20260116 Diary_1397v - In whichever php file, the date format defined in settings should be used.
     Added to code in edit.php. ?????
-20260124 Diary_1398bt - Need to rebuild messages code and files used for Diary. Email now code
+20260124 Diary_1398v - Need to rebuild messages code and files used for Diary. Email now code
     is in edit.php and email later code is in cron_task.php file. 20260205 Added greeting string.
-20260124 Diary_1399bt - Need to start developing mustache templates - reportone.php first.
+20260124 Diary_1399v - Need to start developing mustache templates - reportone.php first.
     Reportone.php-DONE. Testing seems okay for everything I've checked.
-20260124 Diary_1400r - If needed, move completion rules/code to /diary/classes/completion. Not
+20260124 Diary_1400v - If needed, move completion rules/code to /diary/classes/completion. Not
     needed as Diary only uses built in Moodle API Completion code.
-20260130 Diary_1363bt - Feature request - The index.php file should include how many diary entries
-    need grading. Completed and working simple version now. Will add more info later.
-20260203 Diary_1401bt - Feature request - Change promptbgc to a color selector instead of text input.
+20260203 Diary_1401v - Feature request - Change promptbgc to a color selector instead of text input.
     Used Gemini for suggestions and now have a working color selector. See ticket for details.
-20260205 Diary_1402bt - Drop-down menu - More -> Logs generates a Warning. Rewrote the files,
+20260205 Diary_1402v - Drop-down menu - More -> Logs generates a Warning. Rewrote the files,
     entry_deleted.php and entry_tags_deleted.php to remove the warning.
-20260207 Diary_1404bt - Need mustache template for index.php. Got a simple version working.
-20260209 Diary_1405bt - Add to feedback on report pages does not update system rating. Changed
+20260207 Diary_1404v - Need mustache template for index.php. Got a simple version working.
+20260209 Diary_1405v - Add to feedback on report pages does not update system rating. Changed
     the code in results.php around line 746. See ticket for details. Anchor works now, too.
-20260212 Diary_1406bt - Average of ratings xx/xxx calculates wrong. Completed. See ticket and
+20260212 Diary_1406v - Average of ratings xx/xxx calculates wrong. Completed. See ticket and
     the code for actual details.
-20260214 Diary_1407bt - Add to feedback button does NOT keep any prior text but wipes it out.
+20260214 Diary_1407v - Add to feedback button does NOT keep any prior text but wipes it out.
     Completed. Look at the ticket and code for details.
-20260223 Diary_1408bt - Need to simplify code for getting the diary record in use in view.php.
+20260223 Diary_1408v - Need to simplify code for getting the diary record in use in view.php.
     Made simplified code change. See ticket for details.
-20260224 Diary_1409bt - Need to simplify the switch code in view.php. Completed. Look at the code
+20260224 Diary_1409v - Need to simplify the switch code in view.php. Completed. Look at the code
     in view.php for the details.
-20260224 Diary_1410bt - Redundant selector code in line 330 of the view.php file. Completed.
+20260224 Diary_1410v - Redundant selector code in line 330 of the view.php file. Completed.
     Look at the ticket for details.
-20260224 Diary_1411bt - Rating Count should warn if point total is over 10. Completed. Look
+20260224 Diary_1411v - Rating Count should warn if point total is over 10. Completed. Look
     at the ticket for details.
-20260225 Diary_1412bt - Prompts column on prompt_edit.php page color not showing bgc. To me, the fix
+20260225 Diary_1412v - Prompts column on prompt_edit.php page color not showing bgc. To me, the fix
     looks even better than before since it now includes the same border style used elsewhere.
-20260225 Diary_1413bt - Feature request - Change prompt_edit.php to show each prompt in two rows.
+20260225 Diary_1413v - Feature request - Change prompt_edit.php to show each prompt in two rows.
     Completed. See ticket for further details.
-20260226 Diary_1415bt - Diary - Feature request - Add more anchor points on the prompt_edit.php page.
+20260226 Diary_1415v - Diary - Feature request - Add more anchor points on the prompt_edit.php page.
     Multiple changes made to the lib.php, prompt_edit.php, and view.php files.
 
 === 3.7.9 === (Build: 2024042100)
