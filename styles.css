@@ -167,7 +167,7 @@
 #page-mod-diary-reportone .diaryuserentry tr,
 #page-mod-diary-reportone .diaryuserentry th,
 #page-mod-diary-reportone .diaryuserentry td {
-    background-color: transparent !important;
+    background-color: transparent;
     --bs-table-bg: transparent;
     --bs-table-accent-bg: transparent;
 }
@@ -271,7 +271,7 @@
 #page-mod-diary-view .feedbackbox td.entryheader,
 #page-mod-diary-view .feedbackbox td.entrycontent,
 #page-mod-diary-view .feedbackbox td.side {
-    background-color: transparent !important;
+    background-color: transparent;
 }
 
 /* 2. Optional: Ensure the table has no internal borders that might look white */
@@ -305,7 +305,7 @@
 #page-mod-diary-reportone .generaltable tr,
 #page-mod-diary-reportone .generaltable th,
 #page-mod-diary-reportone .generaltable td {
-    background-color: transparent !important;
+    background-color: transparent;
     --bs-table-bg: transparent;
     --bs-table-accent-bg: transparent;
 }
@@ -315,19 +315,19 @@
 #page-mod-diary-report .generaltable tr.table-primary > td,
 #page-mod-diary-reportsingle .generaltable tr.table-primary > td,
 #page-mod-diary-reportone .generaltable tr.table-primary > td {
-    background-color: #cfe2ff !important;
+    background-color: #cfe2ff;
 }
 
 #page-mod-diary-view .generaltable td.table-danger,
 #page-mod-diary-report .generaltable td.table-danger,
 #page-mod-diary-reportsingle .generaltable td.table-danger,
 #page-mod-diary-reportone .generaltable td.table-danger {
-    background-color: #f8d7da !important;
+    background-color: #f8d7da;
 }
 
 #page-mod-diary-view .generaltable td.table-warning,
 #page-mod-diary-report .generaltable td.table-warning,
 #page-mod-diary-reportsingle .generaltable td.table-warning,
 #page-mod-diary-reportone .generaltable td.table-warning {
-    background-color: #fff3cd !important;
+    background-color: #fff3cd;
 }

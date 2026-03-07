@@ -46,6 +46,16 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     Refactored and modernized the Diary Behat .feature suite by removing numeric filenames,
     deleting duplicate scenarios, and updating outdated steps/selectors to align with
     current Diary UI behavior.
+20260307 Diary_XXXX - Code precheck cleanup for Diary templates and docs.
+    Added missing @template headers and Example context sections to mustache templates,
+    improved reportone.mustache form HTML validity, and updated mobile template button handlers.
+20260307 Diary_XXXX - Code precheck cleanup for Diary CSS and PHPDocs.
+    Removed !important usage in styles.css and completed phpdoc parameter/return lists in
+    diarystats.php, prompts.php, results.php, classes/output/renderer.php, and renderer.php.
+20260307 Diary_XXXX - Gherkin precheck cleanup for duplicate feature names.
+    Renamed duplicate Feature: titles in Diary behat files so each feature name is unique.
+2026030701 Diary_XXXX - Post-Node-upgrade gherkinlint one-liner.
+    Exact command: npx grunt gherkinlint --root=mod/diary
 20260307 Notes - Future feature planning details are documented in mod/diary/future_development.txt.
 20260307 Notes - Mobile capability request roadmap is documented in mod/diary/future_development.txt.
 

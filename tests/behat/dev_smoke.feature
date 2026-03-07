@@ -1,5 +1,5 @@
 @mod @mod_diary
-Feature: Basic diary use
+Feature: Diary smoke flow
   In order to complete diary entries
   As a teacher or student
   I need to make diary entries

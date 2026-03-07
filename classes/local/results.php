@@ -1333,14 +1333,15 @@ class results {
     }
 
     /**
-     * 20240924 Created to check permissions before deleting an entry
+     * 20240924 Created to check permissions before deleting an entry.
      *
      * Check if current user can delete and the timeclose has not expired.
      *
-     * @param int $usr
-     * @param int $id
-     * @param int $entry
-     * @return boolean
+     * @param int $usr User id.
+     * @param int $id Course module id.
+     * @param stdClass $entry Diary entry record.
+     * @param stdClass|null $course Course record if already available.
+     * @return bool
      */
     public static function is_deleteable_by_me($usr, $id, $entry, $course) {
         global $DB;

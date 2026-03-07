@@ -1,5 +1,5 @@
 @mod @mod_diary
-Feature: Basic diary use
+Feature: Basic diary use across multiple users
   In order to make multiple diary entries
   As a teacher or student
   I need to make diary entries
@@ -43,4 +43,3 @@ Feature: Basic diary use
     And I press "Save changes"
     And I should see "Test diary"
     And I log out
-

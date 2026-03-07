@@ -19,6 +19,18 @@
 
     Displays a single diary entry for teacher feedback/grading.
     Context: Diary activity, one user entry, form for saving feedback.
+
+    Example context (json):
+    {
+        "formaction": ".",
+        "cmid": 12,
+        "sesskey": "abc123",
+        "savebuttons": true,
+        "diaryname": "Diary",
+        "hasentry": true,
+        "entrybgc": "#ffffff",
+        "entryhtml": "<p>Entry content</p>"
+    }
 }}
 
 <div class="mod-diary-reportone container-fluid">
@@ -35,9 +47,9 @@
         <h2>{{heading}}</h2>
     {{/heading}}
 
-    <form action="{{formaction}}" method="post" class="diary-single-entry-form">
-        <input type="hidden" name="id" value="{{cmid}}" />
-        <input type="hidden" name="sesskey" value="{{sesskey}}" />
+    <form action="{{#formaction}}{{.}}{{/formaction}}{{^formaction}}.{{/formaction}}" method="post" class="diary-single-entry-form">
+        <input type="hidden" name="id" value="{{cmid}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
 
         {{#savebuttons}}
             <p class="feedbacksavereturn">

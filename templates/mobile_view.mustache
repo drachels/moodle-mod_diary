@@ -1,3 +1,19 @@
+{{!
+    @template mod_diary/mobile_view
+
+    Mobile view page for Diary entries and teacher grading actions.
+
+    Example context (json):
+    {
+        "cmid": 12,
+        "name": "Diary",
+        "intro": "Diary intro",
+        "isteacher": false,
+        "hasentry": true,
+        "text": "Student entry"
+    }
+}}
+
 <div class="ion-padding">
     {{#warning}}
         <core-alert message="{{warning}}" type="warning"></core-alert>

@@ -735,8 +735,10 @@ class prompts {
     /**
      * Get current prompts for view/use.
      *
-     * @param array $diary The settings for this diary activity.
-     * @return object
+     * @param stdClass $diary The settings for this diary activity.
+     * @param string $action Current page action.
+     * @param int $promptid Current prompt id.
+     * @return string
      */
     public static function prompts_viewcurrent($diary, $action, $promptid) {
         global $CFG, $DB;

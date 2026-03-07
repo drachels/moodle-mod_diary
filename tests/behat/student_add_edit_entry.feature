@@ -1,5 +1,5 @@
 @mod @mod_diary
-Feature: Students can add and edit entries to diary activities
+Feature: Students can add and edit entries in one diary course
   In order to express and refine my thoughts
   As a student
   I need to add and update my diary entry

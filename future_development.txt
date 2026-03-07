@@ -1,0 +1,220 @@
+Diary future development notes
+============================
+Date: 2026-03-07
+
+Purpose
+-------
+Capture the research and design ideas for adding prompt-specific required words/phrases
+for Diary auto-grading, based on analysis of question/type/essayautograde and current
+mod_diary architecture.
+
+Summary of findings
+-------------------
+1. Diary already has prompt linkage that fits this feature:
+   - diary_entries.promptid links each entry to the prompt used.
+   - diary_prompts holds prompt-level settings.
+
+2. Diary already has reusable text matching logic:
+   - mod/diary/classes/local/diarystats.php has search_text(...).
+   - This can be reused for phrase matching so behavior stays consistent.
+
+3. Essay auto-grade phrase storage model (reference only):
+   - Plugin examined: question/type/essayautograde
+   - Phrase rules are not stored in a dedicated phrase table.
+   - Phrase data is packed into question_answers fields:
+     - phrase text in question_answers.feedback
+     - phrase percent in question_answers.feedbackformat
+     - rule flags/type/divisor encoded into question_answers.fraction
+   - This works, but is compact/encoded and harder to maintain for Diary.
+
+Recommendation for Diary
+------------------------
+Use a dedicated Diary table for prompt phrase rules instead of encoded storage.
+This will be cleaner, easier to query, easier to migrate, and simpler to maintain.
+
+Proposed schema
+---------------
+New table: mdl_diary_prompt_phrases
+
+Suggested fields:
+- id (PK)
+- diaryid (FK to mdl_diary.id)
+- promptid (FK to mdl_diary_prompts.id)
+- phrase (text/varchar)
+- matchtype (int): exact / contains / regex (if regex is allowed)
+- casesensitive (int/bool)
+- fullmatch (int/bool)
+- ignorebreaks (int/bool)
+- weightpercent (number): contribution to phrase score
+- required (int/bool): if true, missing phrase can trigger warning/penalty
+- sortorder (int)
+- timecreated
+- timemodified
+- usermodified
+
+Index suggestions:
+- (promptid)
+- (diaryid, promptid)
+- (promptid, sortorder)
+
+Implementation outline
+----------------------
+1. Database and upgrade
+   - Add new table in mod/diary/db/install.xml.
+   - Add upgrade step in mod/diary/db/upgrade.php.
+   - Bump version in mod/diary/version.php when implemented.
+
+2. Prompt editor UI
+   - Extend mod/diary/prompt_edit.php (and related form handling) to manage phrases
+     per prompt (add/edit/delete/reorder).
+   - Include controls for match options and weight percent.
+   - Validate totals and input limits (for example, no negative weights).
+
+3. Data access layer
+   - Add helper methods in Diary local classes to:
+     - fetch prompt phrases
+     - normalize phrase config
+     - evaluate entry text against configured phrases
+
+4. Scoring integration
+   - During stats/auto-rating calculation, detect entry promptid.
+   - Load phrase rules for that prompt only.
+   - Reuse search_text(...) for phrase detection.
+   - Calculate phrase contribution and merge with existing min/max metric logic.
+   - Decide policy for required phrase misses:
+     - warning only, or
+     - grade penalty, or
+     - block full phrase score.
+
+5. Display and teacher feedback
+   - Show phrase match details in report output:
+     - matched phrases
+     - missing required phrases
+     - phrase score contribution
+   - Keep output compact and readable for report.php/reportone.php/reportsingle.php.
+
+6. Language strings
+   - Add new lang strings for phrase labels/help and validation messages.
+   - Ensure no hardcoded UI text.
+
+7. Backup/restore and privacy
+   - Add phrase table to backup and restore definitions.
+   - Review privacy provider export coverage if phrase settings should appear there.
+
+8. Tests
+   - PHPUnit:
+     - prompt phrase CRUD
+     - phrase matching cases (case-sensitive, full match, line breaks)
+     - score calculations and edge cases
+   - Behat:
+     - prompt edit phrase workflow
+     - teacher report visibility for match results
+
+Behavior design options to decide
+---------------------------------
+1. Required phrase policy:
+   - strict required (must exist), or soft required (warning only).
+2. Match mode:
+   - exact/whole-word only vs substring option.
+3. Regex support:
+   - allow or disallow (safety/performance implications).
+4. Weight model:
+   - per phrase percentages sum to 100, or independent additive weights.
+5. Student visibility:
+   - show required phrase checklist to students before submit, or teacher-only.
+
+Why this approach is preferred
+------------------------------
+- Aligns with Diary prompt-centric architecture already in place.
+- Avoids overloaded encoded fields used by Essay auto-grade internals.
+- Improves readability and future maintenance.
+- Enables straightforward reporting, migration, and testing.
+
+Reference files examined
+------------------------
+Essay auto-grade:
+- question/type/essayautograde/edit_essayautograde_form.php
+- question/type/essayautograde/questiontype.php
+- question/type/essayautograde/question.php
+- question/type/essayautograde/db/install.xml
+
+Diary:
+- mod/diary/db/install.xml
+- mod/diary/classes/local/diarystats.php
+- mod/diary/edit.php
+- mod/diary/reportone.php
+- mod/diary/locallib.php
+
+Suggested next implementation step
+----------------------------------
+Create the schema and upgrade patch first (table + upgrade step), then add a minimal
+prompt_edit.php UI for phrase CRUD, then wire scoring in diarystats.
+
+Mobile capability request
+-------------------------
+User demand note:
+- Multiple users have requested Diary support in the Moodle Mobile app.
+
+Current context:
+- Upgrade notes already reference historical non-support for mobile and earlier work
+  around mobile/template modernization.
+- Diary now uses Mustache for reportone and has index rendering updates that can help
+  a mobile rollout.
+
+Recommended mobile roadmap
+--------------------------
+1. Define minimum mobile scope (phase 1)
+   - Student: view prompt, create/edit entry text, view own prior entries.
+   - Teacher: view entries needing grading, add feedback/rating.
+   - Out of scope initially: advanced prompt admin UX and full report tooling.
+
+2. API and external functions audit
+   - Confirm required ws functions exist for entry CRUD, prompt retrieval, and feedback.
+   - Add/adjust external services if gaps are found.
+
+3. Mobile handlers/templates
+   - Implement or extend mobile handlers (db/mobile.php + templates) for core Diary flows.
+   - Reuse Mustache-style data shaping where possible to reduce duplicate logic.
+
+4. Capability and privacy checks
+   - Enforce addentries/manageentries capability checks in all mobile endpoints.
+   - Ensure privacy/export expectations are consistent for mobile-accessed content.
+
+5. Notifications in mobile context
+   - Confirm message providers and push/email behaviors are coherent for app users.
+   - Validate immediate vs delayed teacher notifications still behave as intended.
+
+6. Offline and sync strategy
+   - Decide whether to support offline draft/edit in phase 1 or defer.
+   - If deferred, show clear in-app messaging to avoid data-loss expectations.
+
+7. Testing plan
+   - Behat/API tests for mobile web service responses.
+   - Manual Moodle App verification on Android and iOS for student and teacher roles.
+
+Acceptance targets for initial mobile release
+--------------------------------------------
+- Student can submit and edit an entry for available windows.
+- Student can view prompt used and own feedback/rating.
+- Teacher can open a single student entry, provide feedback/rating, and save.
+- No capability leaks, and no regressions in browser-based Diary workflows.
+
+Tiles icon size consistency
+---------------------------
+Date: 2026-03-07
+
+Context:
+- The original clipping problem for the Diary icon in Tiles format appears resolved.
+- Remaining visual issue: the Diary icon still appears slightly larger than neighboring activity icons.
+
+Future development item:
+- Standardize Diary icon rendered size to match core activity icon dimensions in course overview/Tiles displays.
+
+Suggested implementation notes:
+1. Verify where Diary icon size is set for course overview rendering (for example in `classes/courseformat/overview.php` and icon output paths).
+2. Align icon output classes/attributes with core activity icons rather than relying on plugin-specific sizing.
+3. Prefer theme-compatible CSS hooks over hardcoded inline dimensions.
+4. Validate in multiple course formats/themes, including Tiles and Boost, on desktop and mobile widths.
+
+Acceptance target:
+- Diary icon visual size matches adjacent activity icons without clipping or disproportionate scaling.

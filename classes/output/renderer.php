@@ -265,7 +265,13 @@ class renderer extends plugin_renderer_base {
     }
 
     /**
-     * Prepares context data for index_page.mustache
+     * Prepares context data for index_page.mustache.
+     *
+     * @param stdClass $course The course record.
+     * @param array $instances Array of diary instances prepared for display.
+     * @param bool $showlastmodified Whether to show last modified column.
+     * @param bool $showentries Whether to show entry count column.
+     * @return stdClass
      */
     protected function prepare_index_data(
         stdClass $course,

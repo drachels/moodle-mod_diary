@@ -43,4 +43,3 @@ Feature: Basic diary entry use
     And I press "Save changes"
     And I should see "Test diary"
     And I log out
-

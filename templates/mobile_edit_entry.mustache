@@ -1,3 +1,19 @@
+{{!
+    @template mod_diary/mobile_edit_entry
+
+    Mobile edit entry view for the Diary plugin.
+
+    Example context (json):
+    {
+        "cmid": 12,
+        "name": "Diary",
+        "canedit": true,
+        "diaryid": 34,
+        "format": 1,
+        "text_plain": "My current entry"
+    }
+}}
+
 <div class="ion-padding">
     {{#warning}}
         <core-alert message="{{warning}}" type="warning"></core-alert>
@@ -56,7 +72,7 @@
                         {{#str}}savechanges, mod_diary{{/str}}
                     </ion-button>
 
-                    <ion-button expand="block" fill="clear" (click)="goBack()">
+                    <ion-button expand="block" fill="clear" onclick="history.back();">
                         {{#str}}cancel{{/str}}
                     </ion-button>
                 </div>
@@ -64,7 +80,7 @@
 
             {{^canedit}}
                 <div class="ion-margin-top">
-                    <ion-button expand="block" fill="clear" (click)="goBack()">
+                    <ion-button expand="block" fill="clear" onclick="history.back();">
                         {{#str}}back{{/str}}
                     </ion-button>
                 </div>

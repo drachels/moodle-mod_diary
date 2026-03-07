@@ -14,6 +14,26 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
+{{!
+    @template mod_diary/index_page
+
+    Renders the list of Diary activities in a course.
+
+    Example context (json):
+    {
+        "heading": "Diaries in Course 1",
+        "modulenameplural": "Diaries",
+        "hasinstances": true,
+        "totalinstances": 1,
+        "instances": [
+            {
+                "name": "Weekly diary",
+                "viewurl": "https://example.invalid/mod/diary/view.php?id=10",
+                "summary": "Diary intro"
+            }
+        ]
+    }
+}}
 
 <h2>{{heading}}</h2>
 

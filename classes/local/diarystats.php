@@ -1313,8 +1313,10 @@ class diarystats {
     /**
      * Update the list of item min/maxes in this activities intro/desciption.
      *
-     * @param string $diary The diary containing the min/maxes.
-     * @return nothing
+     * @param stdClass $diary The diary containing the min/maxes.
+     * @param string $action Current page action.
+     * @param int $promptid Current prompt id.
+     * @return void
      */
     public static function get_minmaxes($diary, $action, $promptid) {
         global $DB;
