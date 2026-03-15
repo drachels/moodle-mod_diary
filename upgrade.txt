@@ -56,6 +56,55 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     Renamed duplicate Feature: titles in Diary behat files so each feature name is unique.
 2026030701 Diary_XXXX - Post-Node-upgrade gherkinlint one-liner.
     Exact command: npx grunt gherkinlint --root=mod/diary
+2026030702 Diary_XXXX - Mobile support scaffolding (Step 2) for Moodle App.
+    Added db/mobile.php handler registration, db/services.php web-service mapping,
+    new external endpoints (view_diary, set_text, save_feedback), output mobile class,
+    and wired templates under templates/mobileapp/ per current mobile path guidance.
+2026030703 Diary_XXXX - Mobile webservice registration fix for app actions.
+    Bumped plugin version and added upgrade savepoint so new Diary mobile functions
+    (mod_diary_view_diary, mod_diary_set_text, mod_diary_save_feedback) are registered
+    in external_functions and available to Moodle App buttons.
+2026030704 Diary_XXXX - Mobile UX follow-up for grading anchors and edit readability.
+    Added grading-list anchor ids and client-side anchor restore after Save feedback
+    refresh, and forced readable light textarea styling for mobile edit-entry input.
+2026030705 Diary_XXXX - Mobile anchor restore hardening for feedback saves.
+    Reworked grading-page anchor restore to use delegated click capture, reliable
+    plain DOM anchor targets, and retry-based post-refresh scroll handling.
+2026030801 Diary_XXXX - Mobile grading save no-refresh behavior.
+    Removed refreshOnSuccess from the Save feedback button in the mobile grading
+    list so saving feedback does not auto-refresh the page and jump back to top.
+2026030802 Diary_XXXX - Mobile grading feedback readability enhancement.
+    Added a formatted existing-feedback preview above the editable feedback textarea
+    so prior teacher feedback structure is preserved for quick scanning.
+2026030803 Diary_XXXX - Mobile Add/Clear feedback controls and layout retention.
+    Added per-entry Add to feedback/Clear feedback controls in mobile grading list,
+    matched warning color style, and changed Add action to insert HTML seed content
+    so feedback layout is retained when copied into the textarea.
+2026030804 Diary_XXXX - Mobile teacher view parity with view.php links/button.
+    In manager non-grading mobile view, added two top links (view entries list and
+    view all course diaries) and switched the single entry-action button label to
+    dynamic Start new entry vs Start new or edit today's entry based on editdates.
+2026030805 Diary_XXXX - Mobile manager group selector parity and spacing tune.
+    Added group selector controls for manager mobile view when group mode is active,
+    wired selected group filtering into grading list retrieval, and tightened top-row
+    link spacing for better readability on narrow phone widths.
+2026030806 Diary_XXXX - Mobile group selector collapsed layout.
+    Changed manager group selector to a collapsed panel (tap to expand) so
+    group options do not consume vertical space on initial mobile view.
+2026030807 Diary_XXXX - Mobile group header and entries-link visual parity.
+    Updated collapsed group summary to show current group name (Groups: selected)
+    and styled the View x diary entries control as underlined link-style text.
+2026030808 Diary_XXXX - Mobile editing-ended status parity for weekly/day windows.
+    Updated mobile open/closed status checks to include weekly course format +
+    Diary days-based finish calculation so the "Editing period has ended" message
+    appears consistently with desktop view.php behavior.
+2026030809 Diary_XXXX - Mobile open/close status logic parity rewrite.
+    Reworked mobile get_open_status() to follow desktop view.php timing flow:
+    weekly days windows, unavailable fallback via timeopen/timeclose, and default
+    open window handling for consistent editing-ended/not-open messaging.
+2026030810 Diary_XXXX - Mobile warning visibility hardening.
+    Added a plain warning banner fallback in mobile_view template (in addition to
+    core-alert) so closed-period messages remain clearly visible across app builds.
 20260307 Notes - Future feature planning details are documented in mod/diary/future_development.txt.
 20260307 Notes - Mobile capability request roadmap is documented in mod/diary/future_development.txt.
 

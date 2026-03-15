@@ -191,6 +191,17 @@
     margin-left: 10px;
 }
 
+/* Keep teacher feedback editor readable on mobile/dark themes in report views. */
+#page-mod-diary-report textarea[name^="c"],
+#page-mod-diary-report input[name^="c"],
+#page-mod-diary-reportsingle textarea[name^="c"],
+#page-mod-diary-reportsingle input[name^="c"],
+#page-mod-diary-reportone textarea[name^="c"],
+#page-mod-diary-reportone input[name^="c"] {
+    background-color: #fff;
+    color: #111;
+}
+
 #page-mod-diary-report .mediaplugin {
     width: 100%;
 }

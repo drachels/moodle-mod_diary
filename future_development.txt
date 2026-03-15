@@ -199,6 +199,94 @@ Acceptance targets for initial mobile release
 - Teacher can open a single student entry, provide feedback/rating, and save.
 - No capability leaks, and no regressions in browser-based Diary workflows.
 
+Step 1 audit results (current state)
+------------------------------------
+Date: 2026-03-07
+
+Path standard update (Moodle Academy 2026-02-10)
+------------------------------------------------
+- Mobile Mustache templates should be placed in `templates/mobileapp/`.
+- Mobile JS source files should be placed in `js/mobileapp/`.
+- This path convention should be used for new Diary mobile work to align with
+   current guidance and avoid later coding-standards churn.
+
+What exists now:
+- Mobile-focused templates are present:
+   - mod/diary/templates/mobile_view.mustache
+   - mod/diary/templates/mobile_edit_entry.mustache
+- Browser save/update logic already exists and can be reused as source logic:
+   - Student entry save flow in mod/diary/edit.php
+   - Teacher feedback/rating save flow in mod/diary/classes/local/results.php
+- Required capabilities and message providers already exist:
+   - mod/diary:addentries, mod/diary:manageentries
+   - mod/diary/db/messages.php
+
+Confirmed gaps (blocking Moodle App support):
+- No Diary web service layer is currently implemented:
+   - missing mod/diary/externallib.php
+   - missing mod/diary/db/services.php
+   - missing mod/diary/classes/external/*
+- No mobile callback/handler file exists:
+   - missing mod/diary/db/mobile.php (templates currently reference this in comments)
+- Mobile template method names are not implemented anywhere in the plugin:
+   - mod_diary_set_text
+   - mod_diary_save_feedback
+   - mobile_entry_edit
+
+Conclusion:
+- Diary has useful UI template groundwork, but does not yet expose app-consumable
+   mobile web services/callbacks. Phase 1 should start by adding the external API
+   surface and wiring it to existing Diary save logic.
+
+Proposed files for next implementation step:
+- mod/diary/externallib.php (or classes/external/*) for mobile WS methods
+- mod/diary/db/services.php to register functions
+- mod/diary/db/mobile.php (if using site plugin callbacks for app content routing)
+- Wiring updates so mobile templates call implemented methods
+
+Step 2 scaffolding status
+-------------------------
+Date: 2026-03-07
+
+Implemented:
+- Added mobile addon registration: `mod/diary/db/mobile.php`
+- Added web service function registration: `mod/diary/db/services.php`
+- Added mobile output handler: `mod/diary/classes/output/mobile.php`
+- Added external endpoints:
+   - `mod/diary/classes/external/view_diary.php`
+   - `mod/diary/classes/external/set_text.php`
+   - `mod/diary/classes/external/save_feedback.php`
+- Added/wired templates under new path guidance:
+   - `mod/diary/templates/mobileapp/mobile_view.mustache`
+   - `mod/diary/templates/mobileapp/mobile_edit_entry.mustache`
+
+Notes:
+- The older `mod/diary/templates/mobile_*.mustache` files remain in place for now.
+- Next pass should decide whether to retire old-path templates once app behavior is verified.
+
+Step 3 verification status
+--------------------------
+Date: 2026-03-07
+
+Runtime smoke checks completed in CLI against existing Diary records.
+
+Verified paths:
+- `mobile_course_view` returns template and JS payload as expected.
+- `mobile_entry_edit` returns template payload as expected.
+- `mod_diary\\external\\view_diary::execute(...)` runs successfully.
+- `mod_diary\\external\\set_text::execute(...)` creates/updates entries successfully.
+- `mod_diary\\external\\save_feedback::execute(...)` saves teacher feedback/rating successfully.
+
+Fix applied during verification:
+- In `mod/diary/classes/external/save_feedback.php`, replaced dependency on
+   `RATING_AGGREGATE_NONE` with a direct `assessed !== 0` check to avoid
+   undefined constant fatals in this execution context.
+
+Remaining validation recommended:
+- Manual Moodle App checks (Android/iOS) for student and teacher workflows.
+- Final decision on retiring legacy `templates/mobile_*.mustache` files after
+   app-side verification.
+
 Tiles icon size consistency
 ---------------------------
 Date: 2026-03-07

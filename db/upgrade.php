@@ -600,5 +600,11 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2026020603, 'diary');
     }
+
+    if ($oldversion < 2026030703) {
+        // No schema change. Version bump ensures new mobile web-service
+        // function definitions in db/services.php are registered on upgrade.
+        upgrade_mod_savepoint(true, 2026030703, 'diary');
+    }
     return true;
 }
