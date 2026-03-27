@@ -203,6 +203,14 @@ class prompts_form extends moodleform {
         $mform->addElement('select', $name, $label, $ratingoptions);
         $mform->addHelpButton($name, $name, $plugin);
 
+        // Prompt-level edit-open override: -1 uses diary setting, 0 means no re-open, positive values limit opens.
+        $name = 'promptmaxeditopens';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, -1);
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'firstkey');

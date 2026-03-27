@@ -606,5 +606,80 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // function definitions in db/services.php are registered on upgrade.
         upgrade_mod_savepoint(true, 2026030703, 'diary');
     }
+
+    if ($oldversion < 2026032600) {
+        // Define table diary_prompt_autograde_rules to be created.
+        $table = new xmldb_table('diary_prompt_autograde_rules');
+
+        // Adding fields to table diary_prompt_autograde_rules.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('diaryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('promptid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('phrase', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('matchtype', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('casesensitive', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('fullmatch', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('ignorebreaks', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('weightpercent', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('required', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table diary_prompt_autograde_rules.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('diaryid', XMLDB_KEY_FOREIGN, ['diaryid'], 'diary', ['id']);
+        $table->add_key('promptid', XMLDB_KEY_FOREIGN, ['promptid'], 'diary_prompts', ['id']);
+
+        // Adding indexes to table diary_prompt_autograde_rules.
+        $table->add_index('diary_prompt', XMLDB_INDEX_NOTUNIQUE, ['diaryid', 'promptid']);
+        $table->add_index('prompt_sort', XMLDB_INDEX_NOTUNIQUE, ['promptid', 'sortorder']);
+
+        // Conditionally launch create table for diary_prompt_autograde_rules.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026032600, 'diary');
+    }
+
+    if ($oldversion < 2026032700) {
+        // Define field maxeditopens to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field('maxeditopens', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'editdates');
+
+        // Conditionally launch add field maxeditopens.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field editcount to be added to diary_entries.
+        $table = new xmldb_table('diary_entries');
+        $field = new xmldb_field('editcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+
+        // Conditionally launch add field editcount.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026032700, 'diary');
+    }
+
+    if ($oldversion < 2026032800) {
+        // Define field maxeditopens to be added to diary_prompts.
+        $table = new xmldb_table('diary_prompts');
+        $field = new xmldb_field('maxeditopens', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '-1', 'minmaxparagraphpercent');
+
+        // Conditionally launch add field maxeditopens.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026032800, 'diary');
+    }
     return true;
 }

@@ -98,6 +98,16 @@ if ($ADMIN->fulltree) {
         ]
     ));
 
+    // Default max number of times an existing entry can be opened for edit.
+    $settings->add(new admin_setting_configtext(
+        'mod_diary/maxeditopens',
+        get_string('maxeditopens', 'diary'),
+        get_string('maxeditopens_help', 'diary'),
+        0,
+        PARAM_INT,
+        5
+    ));
+
     // Appearance settings.
     $settings->add(new admin_setting_heading(
         'mod_diary/appearance',

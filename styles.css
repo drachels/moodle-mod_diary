@@ -336,6 +336,10 @@
     background-color: #f8d7da;
 }
 
+#page-mod-diary-view .generaltable tr.table-warning > td,
+#page-mod-diary-report .generaltable tr.table-warning > td,
+#page-mod-diary-reportsingle .generaltable tr.table-warning > td,
+#page-mod-diary-reportone .generaltable tr.table-warning > td,
 #page-mod-diary-view .generaltable td.table-warning,
 #page-mod-diary-report .generaltable td.table-warning,
 #page-mod-diary-reportsingle .generaltable td.table-warning,

@@ -162,6 +162,36 @@ if (prompts::diary_available($diary)) {
     }
     echo get_string('tcount', 'diary', $tcount);
     echo get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
+    if ((int)$current === 0) {
+        if ($diary->mincharacterlimit > 0) {
+            echo '<br>' . get_string('mincharacterlimit_desc', 'diary', (int)$diary->mincharacterlimit);
+        }
+        if ($diary->maxcharacterlimit > 0) {
+            echo '<br>' . get_string('maxcharacterlimit_desc', 'diary', (int)$diary->maxcharacterlimit);
+        }
+        if ($diary->minwordlimit > 0) {
+            echo '<br>' . get_string('minwordlimit_desc', 'diary', (int)$diary->minwordlimit);
+        }
+        if ($diary->maxwordlimit > 0) {
+            echo '<br>' . get_string('maxwordlimit_desc', 'diary', (int)$diary->maxwordlimit);
+        }
+        if ($diary->minsentencelimit > 0) {
+            echo '<br>' . get_string('minsentencelimit_desc', 'diary', (int)$diary->minsentencelimit);
+        }
+        if ($diary->maxsentencelimit > 0) {
+            echo '<br>' . get_string('maxsentencelimit_desc', 'diary', (int)$diary->maxsentencelimit);
+        }
+        if ($diary->minparagraphlimit > 0) {
+            echo '<br>' . get_string('minparagraphlimit_desc', 'diary', (int)$diary->minparagraphlimit);
+        }
+        if ($diary->maxparagraphlimit > 0) {
+            echo '<br>' . get_string('maxparagraphlimit_desc', 'diary', (int)$diary->maxparagraphlimit);
+        }
+        $editlimitnote = diarystats::get_edit_limit_note_html($diary, 0);
+        if ($editlimitnote !== '') {
+            echo '<br>' . $editlimitnote;
+        }
+    }
 }
 
 // If viewer is a manager, create a link to report.php showing diary entries made by users.
@@ -435,9 +465,22 @@ if ($timenow > $timestart) {
 
                 $url2 = new moodle_url('/mod/diary/deleteentry.php', $deloptions);
 
+                $effectiveeditlimit = (int)($diary->maxeditopens ?? 0);
+                if (!empty($entry->promptid)) {
+                    $prompteditlimit = diarystats::get_prompt_edit_limit_override((int)$diary->id, (int)$entry->promptid);
+                    if ($prompteditlimit !== null) {
+                        $effectiveeditlimit = $prompteditlimit;
+                    }
+                }
+
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
-                if (($timenow < $timefinish && $diary->editall) || (is_siteadmin())) {
+                $editlimitreached = (!is_siteadmin()
+                    && !$entriesmanager
+                    && (($effectiveeditlimit === 0 && !empty($entry->promptid))
+                        || ($effectiveeditlimit > 0 && (int)($entry->editcount ?? 0) >= $effectiveeditlimit)));
+
+                if ((($timenow < $timefinish && $diary->editall) || (is_siteadmin())) && !$editlimitreached) {
                     $editthisentry = html_writer::link(
                         $url,
                         $output->pix_icon('i/edit', get_string('editthisentry', 'diary')),
@@ -514,6 +557,11 @@ if ($timenow > $timestart) {
                 // 20250122 This is the close div for each entry listed on the page.
                 echo '</div>';
 
+                // Compute once so feedback checks are always available in all branches below.
+                $hasfeedback = trim(strip_tags((string)$entry->entrycomment)) !== '';
+                $hasrating = $entry->rating !== null && $entry->rating !== '';
+                $hasteacherresponse = $hasfeedback || $hasrating;
+
                 // Info regarding entry details with stats, date when created, and date of last edit.
                 if ($timenow < $timefinish) {
                     // 20211217 If there is a user entry, format it and show it.
@@ -540,10 +588,6 @@ if ($timenow > $timestart) {
                     }
 
                     echo '</table>';
-
-                    $hasfeedback = trim(strip_tags((string)$entry->entrycomment)) !== '';
-                    $hasrating = $entry->rating !== null && $entry->rating !== '';
-                    $hasteacherresponse = $hasfeedback || $hasrating;
 
                     // Added lines to mark entry as needing to be rated or rated again after the entry was updated.
                     if (!$hasteacherresponse) {

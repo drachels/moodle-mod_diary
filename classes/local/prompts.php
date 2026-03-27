@@ -829,7 +829,12 @@ class prompts {
                     $paragraphs = '<td>' . get_string('paragraphs', 'diary')
                                   . get_string('minc', 'diary') . $data->minparagraph
                                   . get_string('maxc', 'diary') . $data->maxparagraph
-                                  . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td></div>';
+                                  . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td>';
+                    $editlimitnote = diarystats::get_edit_limit_note_html($diary, (int)$data->id);
+                    if ($editlimitnote !== '') {
+                        $paragraphs .= '<br>' . $editlimitnote;
+                    }
+                    $paragraphs .= '</div>';
 
                     $status .= $status . $prompttext . $characters . $words . $sentences . $paragraphs;
                     if ($status) {
@@ -896,7 +901,12 @@ class prompts {
                     $paragraphs = '<td>' . get_string('paragraphs', 'diary')
                                   . get_string('minc', 'diary') . $data->minparagraph
                                   . get_string('maxc', 'diary') . $data->maxparagraph
-                                  . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td></div>';
+                                  . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td>';
+                    $editlimitnote = diarystats::get_edit_limit_note_html($diary, (int)$data->id);
+                    if ($editlimitnote !== '') {
+                        $paragraphs .= '<br>' . $editlimitnote;
+                    }
+                    $paragraphs .= '</div>';
 
                     $status .= $status . $prompttext . $characters . $words . $sentences . $paragraphs;
                     if ($status) {
@@ -906,6 +916,128 @@ class prompts {
             }
         }
         return;
+    }
+
+    /**
+     * Return all autograde rules for a prompt.
+     *
+     * @param int $promptid Prompt id.
+     * @return array
+     */
+    public static function get_autograde_rules($promptid) {
+        global $DB;
+
+        return $DB->get_records(
+            'diary_prompt_autograde_rules',
+            ['promptid' => (int)$promptid],
+            'sortorder ASC, id ASC'
+        );
+    }
+
+    /**
+     * Return one autograde rule by id.
+     *
+     * @param int $ruleid Rule id.
+     * @param int $promptid Optional prompt id guard.
+     * @return false|object
+     */
+    public static function get_autograde_rule($ruleid, $promptid = 0) {
+        global $DB;
+
+        $params = ['id' => (int)$ruleid];
+        if (!empty($promptid)) {
+            $params['promptid'] = (int)$promptid;
+        }
+        return $DB->get_record('diary_prompt_autograde_rules', $params);
+    }
+
+    /**
+     * Delete one autograde rule.
+     *
+     * @param int $ruleid Rule id.
+     * @param int $promptid Optional prompt id guard.
+     * @return bool
+     */
+    public static function delete_autograde_rule($ruleid, $promptid = 0) {
+        global $DB;
+
+        $params = ['id' => (int)$ruleid];
+        if (!empty($promptid)) {
+            $params['promptid'] = (int)$promptid;
+        }
+        return $DB->delete_records('diary_prompt_autograde_rules', $params);
+    }
+
+    /**
+     * Insert or update one autograde rule.
+     *
+     * @param object $rule Rule record.
+     * @return int Rule id.
+     */
+    public static function save_autograde_rule($rule) {
+        global $DB, $USER;
+
+        $now = time();
+        $record = new stdClass();
+        if (!empty($rule->id)) {
+            $record->id = (int)$rule->id;
+        }
+        $record->diaryid = (int)$rule->diaryid;
+        $record->promptid = (int)$rule->promptid;
+        $record->phrase = trim((string)$rule->phrase);
+        $record->matchtype = self::normalize_matchtype($rule->matchtype ?? 0);
+        $record->casesensitive = empty($rule->casesensitive) ? 0 : 1;
+        $record->fullmatch = empty($rule->fullmatch) ? 0 : 1;
+        $record->ignorebreaks = empty($rule->ignorebreaks) ? 0 : 1;
+        $record->weightpercent = max(0, (int)($rule->weightpercent ?? 0));
+        $record->required = empty($rule->required) ? 0 : 1;
+        $record->sortorder = max(0, (int)($rule->sortorder ?? 0));
+        $record->usermodified = (int)$USER->id;
+        $record->timemodified = $now;
+
+        if (!empty($record->id)) {
+            $DB->update_record('diary_prompt_autograde_rules', $record);
+            return $record->id;
+        }
+
+        if (empty($record->sortorder)) {
+            $record->sortorder = self::next_autograde_rule_sortorder($record->promptid);
+        }
+        $record->timecreated = $now;
+        return $DB->insert_record('diary_prompt_autograde_rules', $record);
+    }
+
+    /**
+     * Calculate next sort order value for a prompt rule.
+     *
+     * @param int $promptid Prompt id.
+     * @return int
+     */
+    public static function next_autograde_rule_sortorder($promptid) {
+        global $DB;
+
+        $max = $DB->get_field_sql(
+            'SELECT MAX(sortorder) FROM {diary_prompt_autograde_rules} WHERE promptid = ?',
+            [(int)$promptid]
+        );
+        if ($max === false || $max === null) {
+            return 1;
+        }
+        return ((int)$max) + 1;
+    }
+
+    /**
+     * Normalize matchtype to known values.
+     *
+     * @param int $matchtype Match mode.
+     * @return int
+     */
+    public static function normalize_matchtype($matchtype) {
+        $matchtype = (int)$matchtype;
+        if ($matchtype < 0 || $matchtype > 2) {
+            return 0;
+        }
+        return $matchtype;
     }
 
     /**

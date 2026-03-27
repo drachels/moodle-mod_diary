@@ -60,6 +60,51 @@ class diarystats {
     private static $flipmetachars = null;
     /** @var array null */
     private static $autoratepenaltys = null;
+    /** @var bool|null Cache for diary_prompts.maxeditopens column availability. */
+    private static $haspromptmaxeditopens = null;
+
+    /**
+     * Check whether prompt-level edit limit override column exists.
+     *
+     * This guards sites where code is newer than database schema.
+     *
+     * @return bool
+     */
+    public static function prompt_edit_limit_override_supported() {
+        global $DB;
+
+        if (self::$haspromptmaxeditopens !== null) {
+            return self::$haspromptmaxeditopens;
+        }
+
+        $columns = $DB->get_columns('diary_prompts');
+        self::$haspromptmaxeditopens = isset($columns['maxeditopens']);
+        return self::$haspromptmaxeditopens;
+    }
+
+    /**
+     * Get prompt-level edit limit override, if available.
+     *
+     * @param int $diaryid Diary id.
+     * @param int $promptid Prompt id.
+     * @return int|null Null means no override/inherit.
+     */
+    public static function get_prompt_edit_limit_override($diaryid, $promptid) {
+        global $DB;
+
+        $promptid = (int)$promptid;
+        if ($promptid <= 0 || !self::prompt_edit_limit_override_supported()) {
+            return null;
+        }
+
+        $promptlimit = $DB->get_field('diary_prompts', 'maxeditopens', ['id' => $promptid, 'diaryid' => (int)$diaryid]);
+        if ($promptlimit === false || $promptlimit === null) {
+            return null;
+        }
+
+        $promptlimit = (int)$promptlimit;
+        return ($promptlimit >= 0) ? $promptlimit : null;
+    }
 
     /**
      * Update the list of Common errors.
@@ -319,6 +364,94 @@ class diarystats {
     }
 
     /**
+     * Evaluate prompt autograde rules against entry text.
+     *
+     * @param string $text Plain entry text.
+     * @param int $promptid Prompt id.
+     * @return stdClass
+     */
+    public static function evaluate_prompt_autograde_rules($text, $promptid) {
+        $result = (object)[
+            'rulecount' => 0,
+            'matchedcount' => 0,
+            'missingcount' => 0,
+            'requiredmissing' => 0,
+            'missingphrases' => [],
+            'totalweight' => 0,
+            'matchedweight' => 0,
+            'penalty' => 0,
+        ];
+
+        if (empty($promptid)) {
+            return $result;
+        }
+
+        $rules = prompts::get_autograde_rules((int)$promptid);
+        if (empty($rules)) {
+            return $result;
+        }
+
+        foreach ($rules as $rule) {
+            $phrase = trim((string)$rule->phrase);
+            if ($phrase === '') {
+                continue;
+            }
+
+            $result->rulecount++;
+            $weight = max(0, (int)$rule->weightpercent);
+            $result->totalweight += $weight;
+
+            $matched = false;
+            $matchtype = (int)$rule->matchtype;
+            if ($matchtype === 2) {
+                $modifiers = 'u';
+                if (empty($rule->casesensitive)) {
+                    $modifiers .= 'i';
+                }
+                if (!empty($rule->ignorebreaks)) {
+                    $modifiers .= 's';
+                }
+                $regexp = '/' . str_replace('/', '\\/', $phrase) . '/' . $modifiers;
+                $test = @preg_match($regexp, $text);
+                if ($test === false) {
+                    $matched = !empty(self::search_text($phrase, $text, false, $rule->casesensitive, $rule->ignorebreaks));
+                } else {
+                    $matched = ($test === 1);
+                }
+            } else if ($matchtype === 1) {
+                // Exact mode means literal phrase search (no alias expansion and no regex parsing).
+                $haystack = (string)$text;
+                $needle = (string)$phrase;
+                if (!empty($rule->ignorebreaks)) {
+                    $haystack = preg_replace('/\s+/u', ' ', $haystack);
+                    $needle = preg_replace('/\s+/u', ' ', $needle);
+                }
+                if (empty($rule->casesensitive)) {
+                    $haystack = core_text::strtolower($haystack);
+                    $needle = core_text::strtolower($needle);
+                }
+                $matched = (core_text::strpos($haystack, $needle) !== false);
+            } else {
+                $matched = !empty(self::search_text($phrase, $text, (int)$rule->fullmatch, $rule->casesensitive, $rule->ignorebreaks));
+            }
+
+            if ($matched) {
+                $result->matchedcount++;
+                $result->matchedweight += $weight;
+            } else {
+                $result->missingcount++;
+                $result->penalty += $weight;
+                $result->missingphrases[] = $phrase;
+                if (!empty($rule->required)) {
+                    $result->requiredmissing++;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Update the diary statistics for this diary activity.
      *
      * @param string $entry The text for this entry.
@@ -384,6 +517,7 @@ class diarystats {
         $temp = [];
         $text = self::to_plain_text($entry->text, $entry->format);
         [$errors, $errortext, $erropercent] = self::get_common_errors($text, $diary);
+        $phraseeval = self::evaluate_prompt_autograde_rules($text, (int)$entry->promptid);
         $diarystats =
             (object)[
                 'words' => self::get_stats_words($text),
@@ -828,6 +962,8 @@ class diarystats {
                 'fkgrade' => 0,
                 'freadease' => 0,
             ];
+        $phraseeval = self::evaluate_prompt_autograde_rules($text, (int)$entry->promptid);
+
         // 20210704 If common errors from the glossary are detected, list them here.
         if ($errors) {
             $x = 1;
@@ -838,7 +974,7 @@ class diarystats {
             }
 
             // 20211028 Put the info in a variable for later use. 20211208 Converted from hardcoded text to string.
-            $usercommonerrors = '<tr class="table-warning"><td colspan="4">'
+            $usercommonerrors = '<tr class="table-warning"><td colspan="4" style="background-color: #fff3cd;">'
                                 . get_string(
                                     'detectcommonerror',
                                     'diary',
@@ -849,6 +985,25 @@ class diarystats {
                                 ) . '</td></tr>';
         } else {
             $usercommonerrors = '';
+        }
+
+        // Show missing phrase-rule matches in the same warning area as common errors.
+        if (!empty($phraseeval->missingcount)) {
+            $x = 1;
+            $missingphrases = '';
+            foreach ($phraseeval->missingphrases as $missingphrase) {
+                $missingphrases .= $x . '. ' . s($missingphrase) . ' ';
+                ++$x;
+            }
+            $usercommonerrors .= '<tr class="table-warning"><td colspan="4" style="background-color: #fff3cd;">'
+                . get_string(
+                    'detectmissingphrase',
+                    'diary',
+                    [
+                        'one' => $phraseeval->missingcount,
+                        'two' => $missingphrases,
+                    ]
+                ) . '</td></tr>';
         }
 
         return $usercommonerrors;
@@ -914,6 +1069,7 @@ class diarystats {
         $temp = [];
         $text = self::to_plain_text($entry->text, $entry->format);
         [$errors, $errortext, $erropercent] = self::get_common_errors($text, $diary);
+        $phraseeval = self::evaluate_prompt_autograde_rules($text, (int)$entry->promptid);
         $diarystats =
             (object)[
                 'words' => self::get_stats_words($text),
@@ -956,11 +1112,13 @@ class diarystats {
             && ($settingsused->minchar > 0
             || $settingsused->minword > 0
             || $settingsused->minsentence > 0
-            || $settingsused->minparagraph > 0)
+            || $settingsused->minparagraph > 0
+            || $phraseeval->rulecount > 0)
         ) {
             // 20220206 Added these two due to string changes.
             $diarystats->commonpercent = $diarystats->commonerrors * $diary->errorpercent;
             $commonerrorrating = $diarystats->commonpercent;
+            $phrasepenalty = $phraseeval->penalty;
 
             // 20220904 Character potential auto-rating.
             $autoratecharacters = 0;
@@ -1038,31 +1196,49 @@ class diarystats {
                                       * $settingsused->minmaxparagraphpercent);
             }
 
-            $potentialratingdisp = $autoratecharacters . ' - '
-                                   . $autoratewords . ' - '
-                                   . $autoratesentences . ' - '
-                                   . $autorateparagraphs . ' = '
-                                   . ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs);
+            $potentialratingdisp = $autoratecharacters . '(char) - '
+                                   . $autoratewords . '(word) - '
+                                   . $autoratesentences . '(sent) - '
+                                   . $autorateparagraphs . '(para) - '
+                                   . $phrasepenalty . '(phrase) = '
+                                   . ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs + $phrasepenalty);
 
             $currentratingdisp = $diary->scale . ' - '
-                                 . $autoratecharacters . ' - '
-                                 . $autoratewords . ' - '
-                                 . $autoratesentences . ' - '
-                                 . $autorateparagraphs . ' - '
-                                 . $commonerrorrating . ' = '
+                                 . $autoratecharacters . '(char) - '
+                                 . $autoratewords . '(word) - '
+                                 . $autoratesentences . '(sent) - '
+                                 . $autorateparagraphs . '(para) - '
+                                 . $phrasepenalty . '(phrase) - '
+                                 . $commonerrorrating . '(err) = '
                                  . ($diary->scale - $autoratecharacters
                                                  - $autoratewords
                                                  - $autoratesentences
                                                   - $autorateparagraphs
+                                                                                                    - $phrasepenalty
                                                   - $commonerrorrating);
+
+            // Show prompt phrase-rule details first, including the no-rules case.
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                . get_string(
+                    'potphraserulepen',
+                    'diary',
+                    [
+                        'one' => $phraseeval->rulecount,
+                        'two' => $phraseeval->matchedcount,
+                        'three' => $phraseeval->missingcount,
+                        'four' => $phraseeval->requiredmissing,
+                        'five' => $phraseeval->penalty,
+                    ]
+                ) . '</td></tr>';
 
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
                 . get_string(
                     'potautoratingerrpen',
                     'diary',
                     [
-                    'one' => $potentialratingdisp,
-                    'two' => ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs - $commonerrorrating),
+                        'one' => $potentialratingdisp,
+                        'two' => ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs
+                            + $phrasepenalty - $commonerrorrating),
                     ]
                 )
                 . '</td></tr>';
@@ -1086,21 +1262,23 @@ class diarystats {
                     'currpotrating',
                     'diary',
                     [
-                    'one' => $currentratingdisp,
-                    'two' => (max($diary->scale - $autoratecharacters
-                        - $autoratewords
-                        - $autoratesentences
-                        - $autorateparagraphs
-                        - $commonerrorrating, 0)),
+                        'one' => $currentratingdisp,
+                        'two' => (max($diary->scale - $autoratecharacters
+                            - $autoratewords
+                            - $autoratesentences
+                            - $autorateparagraphs
+                            - $phrasepenalty
+                            - $commonerrorrating, 0)),
                     ]
                 )
                 . '</td></tr>';
 
             $currentratingdata = (max($diary->scale - $autoratecharacters
-                                                    - $autoratewords
-                                                    - $autoratesentences
-                                                    - $autorateparagraphs
-                                                    - $commonerrorrating, 0));
+                                    - $autoratewords
+                                    - $autoratesentences
+                                    - $autorateparagraphs
+                                    - $phrasepenalty
+                                    - $commonerrorrating, 0));
         }
         // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
         $autoratingdata .= '</table>';
@@ -1311,6 +1489,36 @@ class diarystats {
     }
 
     /**
+     * Return edit-open limit note text for the current diary/prompt context.
+     *
+     * @param stdClass $diary The diary settings.
+     * @param int $promptid Optional prompt id.
+     * @return string
+     */
+    public static function get_edit_limit_note_html($diary, $promptid = 0) {
+        $baselimit = max(0, (int)($diary->maxeditopens ?? 0));
+        $effectivelimit = $baselimit;
+        $source = 'diary';
+
+        if (!empty($promptid)) {
+            $promptlimit = self::get_prompt_edit_limit_override((int)$diary->id, (int)$promptid);
+            if ($promptlimit !== null) {
+                $effectivelimit = $promptlimit;
+                $source = 'prompt';
+            }
+        }
+
+        if ($source === 'prompt' && $effectivelimit === 0) {
+            return get_string('editlimitnote_promptonedone', 'diary');
+        }
+        if ($effectivelimit > 0) {
+            return get_string('editlimitnote_maxopens', 'diary', $effectivelimit);
+        }
+
+        return '';
+    }
+
+    /**
      * Update the list of item min/maxes in this activities intro/desciption.
      *
      * @param stdClass $diary The diary containing the min/maxes.
@@ -1419,6 +1627,12 @@ class diarystats {
             $diary->intro .= get_string('maxparagraphlimit_desc', 'diary', ($prompt->maxparagraph)) . '<br>';
         } else if ($diary->maxparagraphlimit > 0) {
             $diary->intro .= get_string('maxparagraphlimit_desc', 'diary', ($diary->maxparagraphlimit)) . '<br>';
+        }
+
+        // Show edit-open limit info before lockout so users can plan revisions.
+        $editlimitnote = self::get_edit_limit_note_html($diary, (int)$promptid);
+        if ($editlimitnote !== '') {
+            $diary->intro .= $editlimitnote . '<br>';
         }
         return;
     }

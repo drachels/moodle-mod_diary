@@ -55,6 +55,24 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
     throw new moodle_exception(get_string('incorrectcourseid', 'diary'));
 }
 
+$entriesmanager = has_capability('mod/diary:manageentries', $context);
+$canbypasseditlimit = $entriesmanager || is_siteadmin();
+
+$resolveeditlimit = function($entryrecord) use ($DB, $diary) {
+    $resolved = (object)[
+        'limit' => max(0, (int)($diary->maxeditopens ?? 0)),
+        'source' => 'diary',
+    ];
+    if (!empty($entryrecord) && !empty($entryrecord->promptid)) {
+        $promptlimit = diarystats::get_prompt_edit_limit_override((int)$diary->id, (int)$entryrecord->promptid);
+        if ($promptlimit !== null) {
+            $resolved->limit = $promptlimit;
+            $resolved->source = 'prompt';
+        }
+    }
+    return $resolved;
+};
+
 // Get the single record specified by firstkey.
 $entry = $DB->get_record('diary_entries', ['userid' => $USER->id, 'id' => $firstkey]);
 
@@ -155,6 +173,37 @@ if ($action == 'currententry' && $entry) {
     throw new moodle_exception(get_string('generalerror', 'diary'));
 }
 
+// Limit how many times a student can open an existing entry in the editor.
+if (!empty($data->entryid) && !$canbypasseditlimit) {
+    $resolvedlimit = $resolveeditlimit($entry);
+    $currentcount = (int)($entry->editcount ?? 0);
+
+    // Prompt override of 0 means one-and-done: no re-opening once an entry exists.
+    if ($resolvedlimit->source === 'prompt' && (int)$resolvedlimit->limit === 0) {
+        redirect(
+            $CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id,
+            get_string('editlimitreached', 'diary', ['one' => $currentcount, 'two' => 0]),
+            null,
+            \core\output\notification::NOTIFY_WARNING
+        );
+    }
+
+    if ((int)$resolvedlimit->limit > 0) {
+        if ($currentcount >= (int)$resolvedlimit->limit) {
+            redirect(
+                $CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id,
+                get_string('editlimitreached', 'diary', ['one' => $currentcount, 'two' => (int)$resolvedlimit->limit]),
+                null,
+                \core\output\notification::NOTIFY_WARNING
+            );
+        }
+        $DB->set_field('diary_entries', 'editcount', $currentcount + 1, ['id' => $data->entryid, 'userid' => $USER->id]);
+        if ($entry) {
+            $entry->editcount = $currentcount + 1;
+        }
+    }
+}
+
 $data->id = $cm->id;
     [$editoroptions, $attachmentoptions] = results::diary_get_editor_and_attachment_options(
         $course,
@@ -248,6 +297,21 @@ $data->id = $cm->id;
             $newentry->id = $fromform->entryid;
             // 20240426 When I save the entry, this is undefined! 20260205 Grok says to remove this line.
             // $newentry->promptid = $fromform->promptid;
+
+            // Re-check limit for safety in case a direct post bypasses normal editor open flow.
+            if (!$canbypasseditlimit) {
+                $entryforlimit = $DB->get_record('diary_entries', ['id' => $fromform->entryid, 'userid' => $USER->id], 'id,promptid,editcount', MUST_EXIST);
+                $resolvedlimit = $resolveeditlimit($entryforlimit);
+                if (($resolvedlimit->source === 'prompt' && (int)$resolvedlimit->limit === 0)
+                    || ((int)$resolvedlimit->limit > 0 && (int)$entryforlimit->editcount > (int)$resolvedlimit->limit)) {
+                    redirect(
+                        $CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id,
+                        get_string('editlimitreached', 'diary', ['one' => (int)$entryforlimit->editcount, 'two' => (int)$resolvedlimit->limit]),
+                        null,
+                        \core\output\notification::NOTIFY_WARNING
+                    );
+                }
+            }
 
             if (($entry) && (!($entry->timecreated == $newentry->timecreated))) {
                 // 20210620 New code to prevent attempts to change timecreated.

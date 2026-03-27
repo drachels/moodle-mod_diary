@@ -184,6 +184,14 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->editdates);
 
+        // Maximum number of times an existing entry can be opened for editing.
+        $name = 'maxeditopens';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, (int)($diaryconfig->maxeditopens ?? 0));
+
         // 20210704 Added heading for appearance options section.
         $name = 'appearancehdr';
         $label = get_string('appearance');

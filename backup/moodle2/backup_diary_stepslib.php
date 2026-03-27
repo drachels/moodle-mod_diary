@@ -39,7 +39,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
      */
     protected function define_structure() {
 
-        // To know if we are including userinfo.
+         // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated.
@@ -63,6 +63,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'timeclose',
                 'editall',
                 'editdates',
+                'maxeditopens',
                 'deleteentry',
                 'entrybgc',
                 'entrytextbgc',
@@ -119,6 +120,30 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'minparagraph',
                 'maxparagraph',
                 'minmaxparagraphpercent',
+                'maxeditopens',
+            ]
+        );
+
+        $autograderules = new backup_nested_element('autograde_rules');
+        $autograderule = new backup_nested_element(
+            'autograde_rule',
+            [
+                'id',
+            ],
+            [
+                'diaryid',
+                'promptid',
+                'phrase',
+                'matchtype',
+                'casesensitive',
+                'fullmatch',
+                'ignorebreaks',
+                'weightpercent',
+                'required',
+                'sortorder',
+                'timecreated',
+                'timemodified',
+                'usermodified',
             ]
         );
 
@@ -133,6 +158,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'userid',
                 'timecreated',
                 'timemodified',
+                'editcount',
                 'title',
                 'entrynoticemailed',
                 'text',
@@ -177,6 +203,8 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         // Build the tree.
         $diary->add_child($prompts);
         $prompts->add_child($prompt);
+        $prompt->add_child($autograderules);
+        $autograderules->add_child($autograderule);
 
         $diary->add_child($entries);
         $entries->add_child($entry);
@@ -190,6 +218,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         // Define sources.
         $diary->set_source_table('diary', ['id' => backup::VAR_ACTIVITYID]);
         $prompt->set_source_table('diary_prompts', ['diaryid' => backup::VAR_PARENTID]);
+        $autograderule->set_source_table('diary_prompt_autograde_rules', ['promptid' => backup::VAR_PARENTID]);
 
         // All the rest of elements only happen if we are including user info.
         if ($this->get_setting_value('userinfo')) {
@@ -227,6 +256,9 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $entry->annotate_ids('user', 'teacher'); // Not sure if this is needed.
         $entry->annotate_ids('promptid', 'promptid');
         $prompt->annotate_ids('diaryid', 'diaryid');
+        $autograderule->annotate_ids('diaryid', 'diaryid');
+        $autograderule->annotate_ids('promptid', 'promptid');
+        $autograderule->annotate_ids('user', 'usermodified');
         $rating->annotate_ids('scale', 'scaleid');
         $rating->annotate_ids('user', 'userid');
 

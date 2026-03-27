@@ -44,6 +44,10 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         $paths[] = new restore_path_element('diary', '/activity/diary');
 
         $paths[] = new restore_path_element('diary_prompt', '/activity/diary/prompts/prompt');
+        $paths[] = new restore_path_element(
+            'diary_prompt_autograde_rule',
+            '/activity/diary/prompts/prompt/autograde_rules/autograde_rule'
+        );
 
         if ($userinfo) {
             $paths[] = new restore_path_element('diary_entry', '/activity/diary/entries/entry');
@@ -110,6 +114,28 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $newid = $DB->insert_record('diary_prompts', $diaryprompt); // Create a new prompt record ID.
         $this->set_mapping('diary_prompt', $oldid, $newid); // Map the new prompt ID to the old prompt ID.
+    }
+
+    /**
+     * Process a diary prompt autograde rule restore.
+     *
+     * @param object $rule The autograde rule in object form.
+     * @return void
+     */
+    protected function process_diary_prompt_autograde_rule($rule) {
+        global $DB;
+
+        $rule = (object) $rule;
+        $oldid = $rule->id;
+
+        unset($rule->id);
+
+        $rule->diaryid = $this->get_new_parentid('diary');
+        $rule->promptid = $this->get_new_parentid('diary_prompt');
+        $rule->usermodified = $this->get_mappingid('user', $rule->usermodified, 0);
+
+        $newid = $DB->insert_record('diary_prompt_autograde_rules', $rule);
+        $this->set_mapping('diary_prompt_autograde_rule', $oldid, $newid);
     }
 
     /**

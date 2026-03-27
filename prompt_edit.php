@@ -37,6 +37,9 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $cm = get_coursemodule_from_id('diary', $id);
 $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Action(promt).
 $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
+$ruleaction = optional_param('ruleaction', '', PARAM_ALPHANUMEXT); // Rule action.
+$ruleid = optional_param('ruleid', 0, PARAM_INT); // Rule id.
+$ruleeditid = optional_param('ruleeditid', 0, PARAM_INT); // Rule id to prefill edit form.
 $promptbgc = optional_param('promptbgc', '#ffffff', PARAM_TEXT); // Prompt bgc default to fix undefined error down around line 322.
 if (!preg_match('/^#[0-9a-fA-F]{6}$/', $promptbgc)) {
     $promptbgc = '#ffffff';
@@ -163,6 +166,52 @@ if (!empty($action)) {
     }
 }
 
+if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) {
+    require_sesskey();
+
+    $targetpromptid = required_param('promptid', PARAM_INT);
+    $targetprompt = $DB->get_record('diary_prompts', ['id' => $targetpromptid, 'diaryid' => $diary->id]);
+    if (!$targetprompt) {
+        throw new moodle_exception(get_string('generalerror', 'diary'));
+    }
+
+    if ($ruleaction === 'delete' && !empty($ruleid)) {
+        prompts::delete_autograde_rule((int)$ruleid, (int)$targetpromptid);
+        $deleteurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
+        $deleteurl->set_anchor('prompteditor');
+        redirect($deleteurl, get_string('autograderuledeleted', 'diary'));
+    }
+
+    if ($ruleaction === 'save') {
+        $phrase = trim((string)optional_param('rulephrase', '', PARAM_TEXT));
+        if ($phrase === '') {
+            $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
+            $saveurl->set_anchor('prompteditor');
+            redirect($saveurl, get_string('autograderulephraseempty', 'diary'), null, \core\output\notification::NOTIFY_ERROR);
+        }
+
+        $rule = new stdClass();
+        if (!empty($ruleid)) {
+            $rule->id = (int)$ruleid;
+        }
+        $rule->diaryid = (int)$diary->id;
+        $rule->promptid = (int)$targetpromptid;
+        $rule->phrase = $phrase;
+        $rule->matchtype = optional_param('rulematchtype', 0, PARAM_INT);
+        $rule->casesensitive = optional_param('rulecasesensitive', 0, PARAM_INT);
+        $rule->fullmatch = optional_param('rulefullmatch', 0, PARAM_INT);
+        $rule->ignorebreaks = optional_param('ruleignorebreaks', 0, PARAM_INT);
+        $rule->weightpercent = optional_param('ruleweightpercent', 0, PARAM_INT);
+        $rule->required = optional_param('rulerequired', 0, PARAM_INT);
+        $rule->sortorder = optional_param('rulesortorder', 0, PARAM_INT);
+
+        prompts::save_autograde_rule($rule);
+        $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
+        $saveurl->set_anchor('prompteditor');
+        redirect($saveurl, get_string('autograderulesaved', 'diary'));
+    }
+}
+
 if ($view == -1) {
     $view = 0;
 }
@@ -267,6 +316,7 @@ if ($prompts && $view == 0) {
         $data->minparagraph = $prompt->minparagraph;
         $data->maxparagraph = $prompt->maxparagraph;
         $data->minmaxparagraphpercent = $prompt->minmaxparagraphpercent;
+        $data->promptmaxeditopens = isset($prompt->maxeditopens) ? (int)$prompt->maxeditopens : -1;
 
         // If user can edit, create a delete link to the current prompt.
         // 20230810 Changed based on pull request #29.
@@ -369,6 +419,7 @@ if ($prompts && $view == 0) {
             $data->minparagraph = $lastprompt->minparagraph;
             $data->maxparagraph = $lastprompt->maxparagraph;
             $data->minmaxparagraphpercent = $lastprompt->minmaxparagraphpercent;
+            $data->promptmaxeditopens = isset($lastprompt->maxeditopens) ? (int)$lastprompt->maxeditopens : -1;
             $promptbgc = $lastprompt->promptbgc;
         }
     }
@@ -398,6 +449,10 @@ if (!empty($jumptocurrent) && empty($jumpdone)) {
 
 if (!empty($selectedpromptdata)) {
     $data = $selectedpromptdata;
+}
+
+if (!isset($data->promptmaxeditopens)) {
+    $data->promptmaxeditopens = isset($data->maxeditopens) ? (int)$data->maxeditopens : -1;
 }
 
 if (empty($data->entryid) && !empty($data->id)) {
@@ -480,6 +535,7 @@ if ($form->is_cancelled()) {
     $newentry->minparagraph = $fromform->minparagraph;
     $newentry->maxparagraph = $fromform->maxparagraph;
     $newentry->minmaxparagraphpercent = $fromform->minmaxparagraphpercent;
+    $newentry->maxeditopens = (int)$fromform->promptmaxeditopens;
 
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
@@ -536,6 +592,128 @@ echo '<a id="prompteditor"></a>';
 echo $OUTPUT->heading(get_string('writingpromptlable3', 'diary'));
 $intro = format_module_intro('diary', $diary, $cm->id);
 $form->display();
+
+if (!empty($data->entryid)) {
+    $matchtypes = [
+        0 => get_string('autograderulematchcontains', 'diary'),
+        1 => get_string('autograderulematchexact', 'diary'),
+        2 => get_string('autograderulematchregex', 'diary'),
+    ];
+    $rules = prompts::get_autograde_rules((int)$data->entryid);
+    $ruleedit = null;
+    if (!empty($ruleeditid)) {
+        $ruleedit = prompts::get_autograde_rule((int)$ruleeditid, (int)$data->entryid);
+    }
+
+    if (empty($ruleedit)) {
+        $ruleedit = new stdClass();
+        $ruleedit->id = 0;
+        $ruleedit->phrase = '';
+        $ruleedit->matchtype = 0;
+        $ruleedit->casesensitive = 0;
+        $ruleedit->fullmatch = 0;
+        $ruleedit->ignorebreaks = 0;
+        $ruleedit->weightpercent = 0;
+        $ruleedit->required = 0;
+        $ruleedit->sortorder = prompts::next_autograde_rule_sortorder((int)$data->entryid);
+    }
+
+    echo $OUTPUT->heading(get_string('autograderulesheading', 'diary'), 4);
+    echo '<p>' . get_string('autograderulesintro', 'diary') . '</p>';
+
+    if (!empty($rules)) {
+        echo '<table class="generaltable" cellpadding="5"><thead><tr>'
+            . '<th>' . get_string('autograderulephrase', 'diary') . '</th>'
+            . '<th>' . get_string('autograderulematchtype', 'diary') . '</th>'
+            . '<th>' . get_string('autograderuleweightpercent', 'diary') . '</th>'
+            . '<th>' . get_string('autograderulerequired', 'diary') . '</th>'
+            . '<th>' . get_string('autograderulesortorder', 'diary') . '</th>'
+            . '<th>' . get_string('tablecolumnedit', 'diary') . '</th></tr></thead><tbody>';
+
+        foreach ($rules as $rule) {
+            $editurl = new moodle_url('/mod/diary/prompt_edit.php', [
+                'id' => $cm->id,
+                'action' => 'edit',
+                'promptid' => (int)$data->entryid,
+                'ruleeditid' => (int)$rule->id,
+            ]);
+            $editurl->set_anchor('prompteditor');
+
+            $delurl = new moodle_url('/mod/diary/prompt_edit.php', [
+                'id' => $cm->id,
+                'action' => 'edit',
+                'promptid' => (int)$data->entryid,
+                'ruleaction' => 'delete',
+                'ruleid' => (int)$rule->id,
+                'sesskey' => sesskey(),
+            ]);
+            $delurl->set_anchor('prompteditor');
+
+            $requiredlabel = empty($rule->required) ? get_string('no') : get_string('yes');
+            $matchlabel = $matchtypes[(int)$rule->matchtype] ?? $matchtypes[0];
+
+            echo '<tr>'
+                . '<td>' . s($rule->phrase) . '</td>'
+                . '<td>' . s($matchlabel) . '</td>'
+                . '<td>' . (int)$rule->weightpercent . '</td>'
+                . '<td>' . s($requiredlabel) . '</td>'
+                . '<td>' . (int)$rule->sortorder . '</td>'
+                . '<td><a href="' . $editurl->out(false) . '">' . get_string('edit') . '</a>'
+                . ' | <a onclick="return confirm(\'' . get_string('deleteexconfirm', 'diary')
+                . (int)$rule->id . '\')" href="' . $delurl->out(false) . '">' . get_string('delete') . '</a></td>'
+                . '</tr>';
+        }
+        echo '</tbody></table>';
+    }
+
+    $saveurl = new moodle_url('/mod/diary/prompt_edit.php', [
+        'id' => $cm->id,
+        'action' => 'edit',
+        'promptid' => (int)$data->entryid,
+    ]);
+    $saveurl->set_anchor('prompteditor');
+
+    echo '<form method="post" action="' . $saveurl->out(false) . '">';
+    echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
+    echo '<input type="hidden" name="ruleaction" value="save">';
+    echo '<input type="hidden" name="ruleid" value="' . (int)$ruleedit->id . '">';
+
+    echo '<div><label for="rulephrase"><strong>' . get_string('autograderulephrase', 'diary') . '</strong></label><br>';
+    echo '<input type="text" id="rulephrase" name="rulephrase" value="' . s($ruleedit->phrase) . '" size="70"></div><br>';
+
+    echo '<div><label for="rulematchtype"><strong>' . get_string('autograderulematchtype', 'diary') . '</strong></label><br>';
+    echo '<select id="rulematchtype" name="rulematchtype">';
+    foreach ($matchtypes as $matchvalue => $matchlabel) {
+        $selected = ((int)$ruleedit->matchtype === (int)$matchvalue) ? ' selected' : '';
+        echo '<option value="' . (int)$matchvalue . '"' . $selected . '>' . s($matchlabel) . '</option>';
+    }
+    echo '</select></div><br>';
+
+    echo '<div><label><input type="checkbox" name="rulecasesensitive" value="1"'
+        . (!empty($ruleedit->casesensitive) ? ' checked' : '') . '> '
+        . get_string('autograderulecasesensitive', 'diary') . '</label></div>';
+    echo '<div><label><input type="checkbox" name="rulefullmatch" value="1"'
+        . (!empty($ruleedit->fullmatch) ? ' checked' : '') . '> '
+        . get_string('autograderulefullmatch', 'diary') . '</label></div>';
+    echo '<div><label><input type="checkbox" name="ruleignorebreaks" value="1"'
+        . (!empty($ruleedit->ignorebreaks) ? ' checked' : '') . '> '
+        . get_string('autograderuleignorebreaks', 'diary') . '</label></div>';
+    echo '<div><label><input type="checkbox" name="rulerequired" value="1"'
+        . (!empty($ruleedit->required) ? ' checked' : '') . '> '
+        . get_string('autograderulerequired', 'diary') . '</label></div><br>';
+
+    echo '<div><label for="ruleweightpercent"><strong>' . get_string('autograderuleweightpercent', 'diary') . '</strong></label><br>';
+    echo '<input type="number" id="ruleweightpercent" name="ruleweightpercent" min="0" max="100" value="'
+        . (int)$ruleedit->weightpercent . '"></div><br>';
+
+    echo '<div><label for="rulesortorder"><strong>' . get_string('autograderulesortorder', 'diary') . '</strong></label><br>';
+    echo '<input type="number" id="rulesortorder" name="rulesortorder" min="1" value="'
+        . max(1, (int)$ruleedit->sortorder) . '"></div><br>';
+
+    $submitlabel = empty($ruleedit->id) ? get_string('autograderuleadd', 'diary') : get_string('autograderuleupdate', 'diary');
+    echo '<button type="submit" class="btn btn-primary">' . s($submitlabel) . '</button>';
+    echo '</form><br>';
+}
 
 // 20230810 Changed based on pull request #29.
 $url1 = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $id]);
