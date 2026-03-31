@@ -28,6 +28,7 @@ $string['additionallinks'] = 'Additional links for this activity and course:';
 $string['addtofeedback'] = 'Add to feedback';
 $string['alias'] = 'Keyword';
 $string['aliases'] = 'Keyword(s)';
+$string['assignzeronoentry'] = 'Assign zero and create entry';
 $string['aliases_help'] = 'Each diary entry can have an associated list of keywords (or aliases).
 
 Enter each keyword on a new line (not separated by commas).';
@@ -56,6 +57,12 @@ $string['cancel'] = 'Cancel transfer';
 $string['chars'] = 'Characters:';
 $string['charspersentence'] = 'Characters per sentence';
 $string['clearfeedback'] = 'Clear feedback';
+$string['feedbackclearedbodyhtml'] = '<p>{$a->teacher} cleared feedback for one of your entries in <strong>{$a->diary}</strong> ({$a->course}).</p><p>You can review your entry here: <a href="{$a->url}">{$a->url}</a></p>';
+$string['feedbackclearedbodyplain'] = '{$a->teacher} cleared feedback for one of your entries in {$a->diary} ({$a->course}).
+
+You can review your entry here:
+{$a->url}';
+$string['feedbackclearedsubject'] = 'Diary feedback cleared in {$a->diary}';
 $string['commonerrorpercentset'] = 'Common error percent setting {$a}%';
 $string['commonerrors'] = 'Common Errors';
 $string['commonerrors_help'] = 'The common errors are defined in the "Glossary of errors" associated with this question.';
@@ -302,7 +309,7 @@ $string['messageprovider:diary_entries_due_soon'] = 'Your Diary entry is due soo
 
 $string['messageprovider:diary_entries_overdue'] = 'Warning when your Diary attempt becomes overdue';
 $string['messageprovider:diary_entry_confirmation'] = 'Diary entry confirmation';
-$string['messageprovider:diary_entry_notification'] = 'Confirm your own Diary entry submissions';
+$string['messageprovider:diary_entry_notification'] = 'Notify teacher that a user has submitted a Diary entry';
 
 
 $string['min'] = ' min';
@@ -443,6 +450,7 @@ $string['reportsingleallentries'] = 'All Diary entries for this user.';
 $string['returnto'] = 'Return to {$a}';
 $string['returntoreport'] = 'Return to report page for - {$a}';
 $string['saveallfeedback'] = 'Save all my feedback';
+$string['saveandcontinueediting'] = 'Save and continue editing';
 $string['savefeedback'] = 'Save feedback';
 $string['changessaved'] = 'Changes saved';
 $string['savesettings'] = 'Save settings';
@@ -504,6 +512,8 @@ $string['tcount'] = 'Currently, this diary activity has a total of {$a} writing 
 $string['teacher'] = 'Teacher';
 $string['teacheremail'] = 'Send email notifications to teachers';
 $string['teacheremail_help'] = 'Enable or disable the capability to immediately send email notifications to teachers.';
+$string['teachercreatedemptyentry'] = 'This entry was created by {$a->one} on {$a->two} because no student submission existed at grading time.';
+$string['teachercreatedemptytitle'] = 'Teacher-created entry (no student submission)';
 $string['text'] = 'Enter your writing prompt';
 $string['text_editor'] = 'Prompt text';
 $string['textstatitems'] = 'Statistical items';

@@ -68,8 +68,20 @@
                         name="mod_diary_set_text"
                         form="diary-entry-form-{{cmid}}"
                         successMessage="{{#str}}changessaved, mod_diary{{/str}}"
+                        (onSuccess)="onDiaryEntrySaved($event)"
                         goBackOnSuccess="true">
-                        {{#str}}savechanges, mod_diary{{/str}}
+                        {{#str}}savechanges{{/str}}
+                    </ion-button>
+
+                    <ion-button
+                        expand="block"
+                        fill="outline"
+                        core-site-plugins-call-ws
+                        name="mod_diary_set_text"
+                        form="diary-entry-form-{{cmid}}"
+                        successMessage="{{#str}}changessaved, mod_diary{{/str}}"
+                        (onSuccess)="onDiaryEntrySaved($event)">
+                        {{#str}}saveandcontinueediting, mod_diary{{/str}}
                     </ion-button>
 
                     <ion-button expand="block" fill="clear" onclick="history.back();">

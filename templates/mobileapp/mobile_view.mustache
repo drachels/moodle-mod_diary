@@ -287,6 +287,36 @@
                     </ion-button>
                 </ion-card-content>
             </ion-card>
+
+            {{#haseditableentries}}
+                <ion-card>
+                    <ion-item-divider>
+                        <ion-label>{{#str}}entries, mod_diary{{/str}}</ion-label>
+                    </ion-item-divider>
+                    <ion-list>
+                        {{#editableentries}}
+                            <ion-item lines="full">
+                                <ion-label>
+                                    <h3>{{title}}</h3>
+                                    <p>{{timemodified}}</p>
+                                    {{#preview}}<p>{{preview}}</p>{{/preview}}
+                                </ion-label>
+                                <ion-button
+                                    slot="end"
+                                    fill="outline"
+                                    size="small"
+                                    core-site-plugins-new-content
+                                    title="{{#str}}editthisentry, mod_diary{{/str}}"
+                                    component="mod_diary"
+                                    method="mobile_entry_edit"
+                                    [args]="{cmid: {{cmid}}, courseid: {{courseid}}, entryid: {{entryid}}}">
+                                    {{#str}}eeditlabel, mod_diary{{/str}}
+                                </ion-button>
+                            </ion-item>
+                        {{/editableentries}}
+                    </ion-list>
+                </ion-card>
+            {{/haseditableentries}}
         {{/canedit}}
     {{/showgrading}}
 </div>

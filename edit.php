@@ -36,6 +36,7 @@ $id = required_param('id', PARAM_INT); // Course Module ID.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 $promptid = optional_param('promptid', '', PARAM_INT); // The current one.
+$saveandcontinue = optional_param('saveandcontinue', '', PARAM_RAW_TRIMMED);
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -128,9 +129,6 @@ $parameters = [
     'firstkey' => $firstkey,
 ];
 
-// 20230306 Added code that lists the tags on the edit_form page.
-$data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', $firstkey);
-
 if ($action == 'currententry' && $entry) {
     $data->entryid = $entry->id;
     // 20240426 Trying to add the promptid here.
@@ -171,6 +169,13 @@ if ($action == 'currententry' && $entry) {
     $data->textformat = FORMAT_HTML;
 } else {
     throw new moodle_exception(get_string('generalerror', 'diary'));
+}
+
+// 20260331 Diary_1461: start new entries with empty tags instead of carrying over the prior entry tags.
+if (!empty($data->entryid)) {
+    $data->tags = core_tag_tag::get_item_tags_array('mod_diary', 'diary_entries', (int)$data->entryid);
+} else {
+    $data->tags = [];
 }
 
 // Limit how many times a student can open an existing entry in the editor.
@@ -458,7 +463,8 @@ $data->id = $cm->id;
             ) {
                 foreach ($teachers as $teacher) {
                     // 20250303 Check teacher email preference toggle,Email now or Email later after the normal edit delay.
-                    if (get_user_preferences('diary_emailpreference_' . $diary->id, null, $teacher->id) == 1) {
+                    $defaultemailpreference = ((int)$diary->teacheremail === 1) ? 1 : 2;
+                    if (get_user_preferences('diary_emailpreference_' . $diary->id, $defaultemailpreference, $teacher->id) == 1) {
                         $diaryinfo = new stdClass();
                         $diaryinfo->diary = format_string($diary->name, true);
                         // 20260114 Added the entry created time.
@@ -523,6 +529,15 @@ $data->id = $cm->id;
             }
         }
         // End new code.
+        if (!empty($saveandcontinue)) {
+            redirect(new moodle_url('/mod/diary/edit.php', [
+                'id' => $cm->id,
+                'action' => 'editentry',
+                'firstkey' => $newentry->id,
+                'promptid' => $newentry->promptid,
+            ]));
+        }
+
         redirect(new moodle_url('/mod/diary/view.php?id=' . $cm->id));
         die();
     }

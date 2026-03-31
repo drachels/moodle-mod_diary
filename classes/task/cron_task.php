@@ -108,6 +108,7 @@ class cron_task extends \core\task\scheduled_task {
                     continue;
                 }
 
+                $allmessagesent = true;
                 foreach ($teachers as $teacher) {
                     // Log who we are checking.
                     $this->log(" - Checking teacher: " . fullname($teacher) . " (ID: {$teacher->id})");
@@ -187,14 +188,24 @@ class cron_task extends \core\task\scheduled_task {
 
                     try {
                         $messageid = message_send($message);
-                        $this->log("   - SUCCESS: Message sent with ID: " . $messageid);
+                        if ($messageid) {
+                            $this->log("   - SUCCESS: Message sent with ID: " . $messageid);
+                        } else {
+                            $allmessagesent = false;
+                            $this->log("   - ERROR: message_send returned false for teacher ID: {$teacher->id}");
+                        }
                     } catch (\Exception $e) {
+                        $allmessagesent = false;
                         $this->log("   - ERROR: message_send failed: " . $e->getMessage());
                     }
                 }
 
-                // 6. Update Database
-                $DB->set_field('diary_entries', 'mailed', 1, ['id' => $entry->id]);
+                // 6. Update Database only when all sends succeeded so failures can retry on next cron run.
+                if ($allmessagesent) {
+                    $DB->set_field('diary_entries', 'mailed', 1, ['id' => $entry->id]);
+                } else {
+                    $this->log("Entry {$entry->id} will remain unmailed for retry due to send failures.");
+                }
             } catch (\Exception $e) {
                 // If one entry fails, log it and keep going!
                 $this->log("Error processing entry {$entry->id}: " . $e->getMessage());

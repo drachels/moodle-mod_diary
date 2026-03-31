@@ -46,6 +46,125 @@ use moodle_url;
  */
 class results {
     /**
+     * Handle report.php request to create zero-grade placeholder entries for users with no entry.
+     *
+     * @param stdClass $cm Course module record.
+     * @param stdClass $context Module context.
+     * @param stdClass $course Course record.
+     * @param stdClass $diary Diary record.
+     * @param array $data Submitted form data.
+     * @param array $users Users currently listed as having no entries.
+     * @param array $entrybyuser Entry map keyed by userid.
+     * @param array $entrybyentry Entry map keyed by entry id.
+     * @return int Number of created placeholder entries.
+     */
+    public static function create_zero_entries_from_report_submission(
+        $cm,
+        $context,
+        $course,
+        $diary,
+        array $data,
+        array $users,
+        array $entrybyuser,
+        array $entrybyentry
+    ) {
+        $createdcount = 0;
+        foreach ($data as $key => $value) {
+            if (strpos((string)$key, 'createzero') !== 0 || empty($value)) {
+                continue;
+            }
+
+            $userid = (int)substr((string)$key, strlen('createzero'));
+            if ($userid <= 0 || !isset($users[$userid])) {
+                continue;
+            }
+            if (isset($entrybyuser[$userid])) {
+                continue;
+            }
+
+            if (self::create_zero_placeholder_entry($cm, $context, $course, $diary, $users[$userid])) {
+                $createdcount++;
+            }
+        }
+
+        return $createdcount;
+    }
+
+    /**
+     * Create a teacher-generated placeholder entry with zero grade for a student who has no entry.
+     *
+     * @param stdClass $cm Course module record.
+     * @param stdClass $context Module context.
+     * @param stdClass $course Course record.
+     * @param stdClass $diary Diary record.
+     * @param stdClass $student Student record.
+     * @return int New entry id on success, 0 on failure.
+     */
+    protected static function create_zero_placeholder_entry($cm, $context, $course, $diary, $student) {
+        global $DB, $SESSION, $USER;
+
+        if ($DB->record_exists('diary_entries', ['diary' => $diary->id, 'userid' => $student->id])) {
+            return 0;
+        }
+
+        $now = time();
+        $entry = new stdClass();
+        $entry->diary = (int)$diary->id;
+        $entry->promptid = 0;
+        $entry->userid = (int)$student->id;
+        $entry->timecreated = $now;
+        $entry->timemodified = $now;
+        $entry->editcount = 0;
+        $entry->title = get_string('teachercreatedemptytitle', 'diary');
+        $entry->text = get_string('teachercreatedemptyentry', 'diary', [
+            'one' => fullname($USER),
+            'two' => userdate($now),
+        ]);
+        $entry->entrynoticemailed = 1;
+        $entry->format = FORMAT_HTML;
+        $entry->rating = 0;
+        $entry->entrycomment = '';
+        $entry->teacher = $USER->id;
+        $entry->timemarked = $now;
+        $entry->mailed = 1;
+
+        $entryid = $DB->insert_record('diary_entries', $entry);
+        if (!$entryid) {
+            return 0;
+        }
+
+        if ($diary->assessed != RATING_AGGREGATE_NONE) {
+            $rating = new stdClass();
+            $rating->contextid = $context->id;
+            $rating->component = 'mod_diary';
+            $rating->ratingarea = 'entry';
+            $rating->itemid = $entryid;
+            $rating->scaleid = $diary->scale;
+            $rating->rating = 0;
+            $rating->userid = $student->id;
+            $rating->timecreated = $now;
+            $rating->timemodified = $now;
+            $DB->insert_record('rating', $rating, false);
+        }
+
+        diary_update_grades($diary, $student->id);
+
+        $event = \mod_diary\event\entry_created::create([
+            'objectid' => $entryid,
+            'context' => $context,
+        ]);
+        $event->add_record_snapshot('course_modules', $cm);
+        $event->add_record_snapshot('course', $course);
+        $event->add_record_snapshot('diary', $diary);
+        $event->trigger();
+
+        // Keep report-page anchor behavior consistent after creating a no-entry placeholder.
+        $SESSION->diary_clicked_entry = (int)$entryid;
+
+        return (int)$entryid;
+    }
+
+    /**
      * Update the calendar entries for this diary activity.
      *
      * @param stdClass $diary the row from the database table diary.
@@ -157,6 +276,56 @@ class results {
                 }
             }
             return true;
+        }
+    }
+
+    /**
+     * Send a notification to the student when a teacher clears feedback.
+     *
+     * @param stdClass $context Module context.
+     * @param stdClass $course Course record.
+     * @param stdClass $diary Diary record.
+     * @param stdClass $entry Diary entry record.
+     */
+    protected static function send_feedback_cleared_notification($context, $course, $diary, $entry) {
+        global $DB, $USER;
+
+        if ((int) get_config('mod_diary', 'studentemail') !== 1 || empty($diary->studentemail)) {
+            return;
+        }
+
+        $student = $DB->get_record('user', ['id' => $entry->userid]);
+        if (!$student || !empty($student->deleted) || !empty($student->suspended)) {
+            return;
+        }
+
+        $a = new stdClass();
+        $a->teacher = fullname($USER);
+        $a->diary = format_string($diary->name, true);
+        $a->course = format_string($course->shortname, true);
+
+        $cm = get_coursemodule_from_instance('diary', $diary->id, $course->id, false, MUST_EXIST);
+        $a->url = (new moodle_url('/mod/diary/view.php', ['id' => $cm->id]))->out(false);
+
+        $message = new \core\message\message();
+        $message->courseid = $course->id;
+        $message->component = 'mod_diary';
+        $message->name = 'diary_entry_confirmation';
+        $message->userfrom = $USER;
+        $message->userto = $student;
+        $message->subject = get_string('feedbackclearedsubject', 'diary', $a);
+        $message->fullmessage = get_string('feedbackclearedbodyplain', 'diary', $a);
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml = get_string('feedbackclearedbodyhtml', 'diary', $a);
+        $message->notification = 1;
+        $message->contexturl = $a->url;
+        $message->contexturlname = get_string('modulename', 'diary');
+
+        try {
+            message_send($message);
+        } catch (\Throwable $e) {
+            debugging('mod_diary clear-feedback notification failed for entry ' . $entry->id . ': ' . $e->getMessage(),
+                DEBUG_DEVELOPER);
         }
     }
 
@@ -517,7 +686,7 @@ class results {
      * @param array $teachers
      * @param array $grades
      */
-    public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades) {
+    public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades, $allowemptygrading = false) {
         global $CFG, $DB, $OUTPUT, $SESSION, $USER;
         $id = required_param('id', PARAM_INT); // Course module.
         // 20241204 Added $cm for delete entry code.
@@ -665,6 +834,15 @@ class results {
                  available because the activity is currently closed.';
             }
 
+            if ($allowemptygrading && has_capability('mod/diary:manageentries', $context)) {
+                echo '<p><input class="btn btn-warning btn-sm"
+                        role="button"
+                        style="border-radius: 8px"
+                        name="createzero' . $user->id . '"
+                        type="submit"
+                        value="' . get_string('assignzeronoentry', 'diary') . '"></input></p>';
+            }
+
             // 20210701 Moved copy 2 of 2 here due to new stats.
             echo '</div></td><td style="width:55px;"></td></tr>';
         }
@@ -798,18 +976,39 @@ class results {
             // 20220107 If the, Clear feedback, button is clicked process it here.
             // 20241203 Modified to work for the three report pages.
             if ($param2 == get_string('clearfeedback', 'diary')) {
-                // 20220105 Reset the entry rating and entry comment to null.
-                $entry->rating = null;
-                $feedbacktext = null;
-                $entry->entrycomment = null;
-                // 20220105 Update the actual diary entry.
-                $DB->update_record('diary_entries', $entry, $bulk = false);
-                // 20220107 Verify there is a rating for this entry then delete it.
-                if ($rec = $DB->get_record('rating', ['itemid' => $entry->id])) {
-                    $DB->delete_records('rating', ['itemid' => $entry->id]);
-                    // 20220107 Recalculate the rating for this user for this diary activity.
-                    diary_update_grades($diary, $entry->userid);
+                $currententry = $DB->get_record('diary_entries', ['id' => $entry->id]);
+                if ($currententry) {
+                    $hadfeedback = trim(strip_tags((string)$currententry->entrycomment)) !== '';
+                    $hadrating = $currententry->rating !== null && $currententry->rating !== '';
+
+                    // Only clear and notify when there is something to clear.
+                    if ($hadfeedback || $hadrating) {
+                        $clearupdate = new StdClass();
+                        $clearupdate->id = $currententry->id;
+                        $clearupdate->rating = null;
+                        $clearupdate->entrycomment = null;
+                        $clearupdate->teacher = $USER->id;
+                        $clearupdate->timemarked = time();
+                        $clearupdate->mailed = 0;
+                        $DB->update_record('diary_entries', $clearupdate, false);
+
+                        $DB->delete_records('rating', [
+                            'contextid' => $context->id,
+                            'component' => 'mod_diary',
+                            'ratingarea' => 'entry',
+                            'itemid' => $entry->id,
+                            'userid' => $entry->userid,
+                        ]);
+
+                        diary_update_grades($diary, $entry->userid);
+                        self::send_feedback_cleared_notification($context, $course, $diary, $entry);
+
+                        $entry->rating = null;
+                        $entry->entrycomment = null;
+                        $feedbacktext = null;
+                    }
                 }
+
                 // 20260211 Added due to Grok recommendation.
                 $SESSION->diary_clicked_entry = $entry->id;
             }
@@ -1035,6 +1234,7 @@ class results {
             'editall' => $diary->editall,
             'editdates' => $diary->editdates,
             'enabletitles' => $diary->enabletitles,
+            'autosave' => !empty($entry),
             'action' => $action,
             'firstkey' => $firstkey,
             'context' => $context,
@@ -1257,7 +1457,7 @@ class results {
             } else {
                 $studentrating = '';
             }
-            $studentcomment = clean_text($vals['c'], FORMAT_PLAIN);
+            $studentcomment = clean_text($vals['c'], FORMAT_HTML);
 
             if ($studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;

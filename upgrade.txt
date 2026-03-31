@@ -1,13 +1,19 @@
-This file describes changes and other work in the diary code.
+This files describes API changes and other work in the diary code.
+
+Upgrade.txt working notes:
+- Keep entries in chronological order within the appropriate section.
+- Ticket line format: YYYYMMDD iContent_NNNN[suffix] - short summary.
+- Status suffixes used here: bt = being tested, r = resolved, w = not fixed but waiting.
+- For a verification pass: confirm the fix in current code first, then change bt to r.
+- Add a dated follow-up verification line under the ticket: YYYYMMDDNN - iContent_NNNN: Verified in current code; concise evidence summary.
+- Keep verification notes factual and brief; mention key files, functions, or behaviors only as needed.
+- Preserve prior history lines; append follow-up notes instead of rewriting older notes unless the status itself changes.
+- Add new unreleased tickets to the Deferred section or the appropriate pending version section.
+
 Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 === Deferred until fixed. ===
-20200601 Diary_526r - Make toggle to allow grade and feedback for users with no entry.
-    Making changes in the results.php file. Currently the code is just, text, based on
-    the diary activity availability.
 20201006 Diary_627 - Included files are not restored correctly.
 20210515 Diary_719 - Media files are NOT there after a restore.
-20210815 Diary_736 - Need a way to selectively turn off autosave. It is not
-    needed when starting a totally new entry. Note: Same for tags.
 20210815 Diary_737 - Config settings are not all named the same. Added mod_ to
     the four items that were missing it. As of 20220828 still have three.
 20220228 Diary_824 - The Moodle Mobile app is not supported. Link to Diary_1399.
@@ -27,10 +33,6 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     $string['evententrydeleted'] = 'Diary entry deleted';
 20250211 Diary_1370 - Feature request - Need a new mdl_diary_entries field such as,
     mailedsubmission.
-20250211 Diary_1371 - Feature request - Send email to student when teacher clicks,
-    Clear feedback, on report pages.
-20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses,
-    Clear feedback.
 20260206 Diary_1403 - Issue #51 - Feature request - Upgrade possible for Global Search Index #51.
 20260225 Diary_1414 - CSS theming support: replace hardcoded styling with classes and allow
     theme-level control. 
@@ -40,10 +42,60 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     color selectors.
 20260327 Diary_1454 - Feature Request -Modify the prompt system to allow for other than
     just sequential use.
+20260331 Diary_1458 - Feature Request - Settings to require meeting certain automatic
+    results limits.
+20260331Diary_1460 - Feature Request - Optional menu to control showing required
+    auto-graded phrases.
 
 === 5.0.0 === pending
+20200601 Diary_526 - Make toggle to allow grade and feedback for users with no
+    entry.
+    2026033109 Progress - Reopened and moved into 5.0.0 pending for a modern
+    rework targeting report.php behavior.
+    2026033110 Progress - report.php now provides an Assign zero and create
+    entry action for users with no submission, creating a teacher-marked
+    placeholder entry with zero grade so feedback/grading can proceed.
+    2026033111 Progress - Fixed report.php regression: list show/hide selector
+    no longer triggers unintended feedback-save processing, and feedback HTML
+    styling is preserved during Save all feedback updates.
+    2026033112 Progress - Emergency hotfix: removed stray pre-bootstrap
+    optional_param() calls in report.php that caused fatal page load failures;
+    report page now loads correctly in production checks.
+    2026033113 Progress - Restored anchor-jump behavior for the no-entry
+    Assign zero and create entry action by persisting the newly created
+    entry ID for post-submit scroll targeting.
+    2026033114 Progress - Restored compact inline rendering for the report.php
+    Show users without entries selector so it no longer stretches full width
+    of the page.
+20210815 Diary_736 - Need a way to selectively turn off autosave. It is not
+    needed when starting a totally new entry. Note: Same for tags.
+    2026033102 Progress - Desktop new-entry editor now disables autosave while
+    existing-entry editing keeps normal autosave behavior.
+20250211 Diary_1371 - Feature request - Send email to student when teacher clicks,
+    Clear feedback, on report pages.
+    2026033105 Progress - Clear feedback now sends a student notification email
+    using the diary_entry_confirmation provider when studentemail is enabled.
+    2026033107 Progress - Improved clear-feedback email formatting (plain + HTML)
+    and fixed the review-entry link generation to use the resolved diary cmid URL.
 20250803 Diary_1381 - Email message is not working.
+    2026033101 Progress - Fixed teacher notification delivery defaults so
+    immediate mode no longer depends on unset user preference, and updated
+    cron to keep entries in queue when any send fails (retry on next run).
+20250808 Diary_1383 - Feature Request - Email message needs to be sent when teacher uses,
+    Clear feedback.
+    2026033106 Progress - Consolidated with Diary_1371: report.php,
+    reportsingle.php, and reportone.php now use idempotent clear-feedback
+    handling to prevent duplicate mail from repeated clicks and send one
+    student notification per actual clear action.
+    2026033108 Progress - Follow-up polish: corrected clear-feedback email body
+    formatting and fixed the student review-entry link target.
 20260326 Diary_1451 - Mobile edits top of the list instead of starting a new entry.
+    2026033001 Progress - mobile_entry_edit now mirrors desktop currententry behavior:
+    when editdates is enabled, it starts a new entry (entryid 0) instead of loading
+    the latest entry; also starts a new entry when the previous one is from a prior day.
+    2026033002 Progress - Added mobile entry picker list in student view so older
+    entries can be opened directly for editing. mobile_entry_edit now accepts an
+    explicit entryid and loads that specific user-owned entry.
 20260326 Diary_1452 - Feature Request - Add prompt autograde rules capability to each prompt
     as desired.
     2026032601 Progress - Phase 1 completed: added new table
@@ -68,6 +120,15 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026032606 Progress - Fixed regression from 2026032605: restored full non-prompt
     min/max Notes output and kept the edit-open-cap guidance line inside the
     bordered prompt block when a prompt is in use.
+20260331 Diary_1459 - Feature Request - Add a button for, Save and continue editing.
+    2026033103 Progress - Added Save and continue editing to desktop edit_form/edit.php,
+    and mobile edit templates now include a continue-edit button with entryid sync
+    after save so continued edits update the same mobile entry.
+20260331 Diary_1461 - Feature request - Tag should be empty for new entries for normal
+    or mobile use.
+    2026033104 Progress - Desktop edit.php now loads tags from the actual entryid in
+    context and forces empty tags for brand-new entries, preventing carry-over from
+    previously edited entries.
 
 
 === 4.0.1 === 2026022601

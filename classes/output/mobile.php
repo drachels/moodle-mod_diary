@@ -126,6 +126,11 @@ class mobile {
 
         self::populate_student_view($data, $cm, $context, $course, $diary, $USER->id, $OUTPUT);
 
+        if (!$showgrading && $canadd && $isopen) {
+            $data['editableentries'] = self::build_user_editable_entries($diary, $USER->id);
+            $data['haseditableentries'] = !empty($data['editableentries']);
+        }
+
         $js = <<<'JS'
 this.scrollToSavedDiaryAnchor = function(retriesLeft) {
     var self = this;
@@ -289,6 +294,7 @@ JS;
 
         $cmid = (int)($args['cmid'] ?? 0);
         $courseid = (int)($args['courseid'] ?? 0);
+        $requestedentryid = (int)($args['entryid'] ?? 0);
 
         $cm = get_coursemodule_from_id('diary', $cmid, 0, false, MUST_EXIST);
         $course = $courseid ? $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST)
@@ -301,14 +307,36 @@ JS;
         $canadd = has_capability('mod/diary:addentries', $context);
         [$isopen, $warning, $info] = self::get_open_status($diary, $course, $cm);
 
-        $entry = $DB->get_record_sql(
-            "SELECT *
-               FROM {diary_entries}
-              WHERE diary = :diaryid AND userid = :userid
-           ORDER BY timemodified DESC",
-            ['diaryid' => $diary->id, 'userid' => $USER->id],
-            IGNORE_MULTIPLE
-        );
+        if ($requestedentryid > 0) {
+            $entry = $DB->get_record('diary_entries', [
+                'id' => $requestedentryid,
+                'diary' => $diary->id,
+                'userid' => $USER->id,
+            ]);
+
+            if (!$entry) {
+                throw new \moodle_exception('invalidaccess', 'diary');
+            }
+        } else {
+            $entry = $DB->get_record_sql(
+                "SELECT *
+                   FROM {diary_entries}
+                  WHERE diary = :diaryid AND userid = :userid
+               ORDER BY timemodified DESC",
+                ['diaryid' => $diary->id, 'userid' => $USER->id],
+                IGNORE_MULTIPLE
+            );
+
+            // Match desktop edit.php 'currententry' behavior:
+            // - if editdates is enabled, always start a new entry,
+            // - otherwise start a new entry when the last one is from a previous day.
+            if ($entry) {
+                $newdaystarted = strtotime('today midnight') > (int)$entry->timecreated;
+                if (!empty($diary->editdates) || $newdaystarted) {
+                    $entry = null;
+                }
+            }
+        }
 
         $textplain = '';
         $entryid = 0;
@@ -339,14 +367,83 @@ JS;
             'text_plain' => $textplain,
         ];
 
+        $js = <<<'JS'
+this.onDiaryEntrySaved = function(result) {
+    try {
+        var entryid = parseInt(result && result.entryid ? result.entryid : 0, 10);
+        if (!entryid) {
+            return;
+        }
+
+        var form = document.querySelector('form[id^="diary-entry-form-"]');
+        if (!form) {
+            return;
+        }
+
+        var entryinput = form.querySelector('input[name="entryid"]');
+        if (entryinput) {
+            entryinput.value = String(entryid);
+        }
+    } catch (e) {
+        // Ignore malformed payloads in older app builds.
+    }
+};
+JS;
+
         return [
             'templates' => [[
                 'id' => 'main',
                 'html' => $OUTPUT->render_from_template('mod_diary/mobileapp/mobile_edit_entry', $data),
             ]],
-            'javascript' => '',
+            'javascript' => $js,
             'otherdata' => json_encode([]),
         ];
+    }
+
+    /**
+     * Build a list of the current user's entries that can be opened for editing.
+     *
+     * @param \stdClass $diary Diary record.
+     * @param int $userid User id.
+     * @return array
+     */
+    protected static function build_user_editable_entries($diary, $userid) {
+        global $DB;
+
+        $entries = $DB->get_records_sql(
+            "SELECT id, title, text, format, timecreated, timemodified
+               FROM {diary_entries}
+              WHERE diary = :diaryid AND userid = :userid
+           ORDER BY timemodified DESC",
+            ['diaryid' => $diary->id, 'userid' => $userid]
+        );
+
+        if (empty($entries)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($entries as $entry) {
+            $title = trim((string)$entry->title);
+            if ($title === '') {
+                $title = userdate((int)$entry->timemodified ?: (int)$entry->timecreated);
+            }
+
+            $plain = trim(html_to_text((string)$entry->text, 0, false));
+            $plain = str_replace("\xc2\xa0", ' ', $plain);
+            if (\core_text::strlen($plain) > 120) {
+                $plain = \core_text::substr($plain, 0, 120) . '...';
+            }
+
+            $result[] = [
+                'entryid' => (int)$entry->id,
+                'title' => $title,
+                'preview' => $plain,
+                'timemodified' => userdate((int)$entry->timemodified ?: (int)$entry->timecreated),
+            ];
+        }
+
+        return $result;
     }
 
     /**

@@ -108,7 +108,12 @@ class mod_diary_entry_form extends moodleform {
         $mform->addElement('hidden', 'promptid');
         $mform->setType('promptid', PARAM_INT);
 
-        $this->add_action_buttons();
+        $buttonarray = [];
+        $buttonarray[] = &$mform->createElement('submit', 'saveandcontinue', get_string('saveandcontinueediting', 'diary'));
+        $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
+        $buttonarray[] = &$mform->createElement('cancel');
+        $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
+        $mform->closeHeaderBefore('buttonar');
         $this->set_data($currententry);
     }
 }

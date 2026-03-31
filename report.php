@@ -194,7 +194,24 @@ if ($eee) {
 }
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
-    results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
+    $postdata = (array)$data;
+
+    // Report-page only action: create a zero-grade placeholder entry for users with no entry.
+    results::create_zero_entries_from_report_submission(
+        $cm,
+        $context,
+        $course,
+        $diary,
+        $postdata,
+        $users,
+        $entrybyuser,
+        $entrybyentry
+    );
+
+    // Only run full feedback persistence on explicit Save-all submit.
+    if (!empty($postdata['saveallfeedback'])) {
+        results::diary_entries_feedback_update($cm, $context, $diary, $data, $entrybyuser, $entrybyentry);
+    }
 
     // 20260215 Re-fetch entries from database to display updated values after feedback save.
     $eee = $DB->get_records('diary_entries', ['diary' => $diary->id]);
@@ -362,7 +379,7 @@ if (!$users) {
     $saveallbutton = '<p class="feedbacksave">';
     $saveallbutton .= '<input type="hidden" name="id" value="' . $cm->id . '" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
-    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
+    $saveallbutton .= '<input type="submit" name="saveallfeedback" class="btn btn-primary" style="border-radius: 8px" value="'
         . get_string("saveallfeedback", "diary") . '" />';
     // 20200421 Added a return button.
     // 20230810 Changed based on pull request #29.
@@ -422,12 +439,15 @@ if (!$users) {
             'listpreference',
             $listpreference,
             false,
-            ['id' => 'pref_lists', 'class' => 'custom-select']
+            [
+                'id' => 'pref_lists',
+                'class' => 'custom-select',
+                'style' => 'width: auto; max-width: 20rem; display: inline-block;',
+                'onchange' => 'this.form.submit()'
+            ]
         );
 
-        echo get_string('showlistpreference', 'diary') . ': <select onchange="this.form.submit()" name="listpreference">';
-        echo '<option selected="true" value="' . $selection . '</option>';
-        echo '</select>';
+        echo get_string('showlistpreference', 'diary') . ': ' . $selection;
     }
 
     // 20231103 If user preference is 1 then show users without an entry.
@@ -444,7 +464,8 @@ if (!$users) {
                 $user,
                 null,
                 $teachers,
-                $grades
+                $grades,
+                true
             );
             echo '</div><br>';
         }
