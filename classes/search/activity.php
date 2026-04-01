@@ -52,9 +52,6 @@ class activity extends \core_search\base_activity {
         $fileareas =
             [
                 'intro',
-                // phpcs:ignore
-                // ...DIARY_INTROATTACHMENT_FILEAREA,...
-                'content',
             ]; // Fileareas.
         return $fileareas;
     }

@@ -346,3 +346,157 @@
 #page-mod-diary-reportone .generaltable td.table-warning {
     background-color: #fff3cd;
 }
+
+/* Prompt autograde rules — visual parity with Essay target-phrase rows. */
+
+/* Rule list container */
+#page-mod-diary-prompt-edit .diary-targetphrases,
+#page-mod-diary-prompt_edit .diary-targetphrases {
+    margin-bottom: 1rem;
+}
+
+/* Each rule: two-column flex (label | body), row dividers instead of cards. */
+#page-mod-diary-prompt-edit .diary-targetphrase-rule,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule {
+    display: flex;
+    gap: 0 1rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid #dee2e6;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-rule:last-child,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule:last-child {
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Left label column */
+#page-mod-diary-prompt-edit .diary-targetphrase-rule__label,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule__label {
+    width: 10rem;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-rule__title,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule__title {
+    font-weight: 600;
+    display: block;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-rule__actions,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule__actions {
+    font-size: 0.875rem;
+}
+
+/* Right body column */
+#page-mod-diary-prompt-edit .diary-targetphrase-rule__body,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule__body {
+    flex: 1;
+    min-width: 0;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-rule__line,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule__line {
+    margin-bottom: 0.3rem;
+}
+
+/* Behavior token row */
+#page-mod-diary-prompt-edit .diary-targetphrase-rule__behavior,
+#page-mod-diary-prompt_edit .diary-targetphrase-rule__behavior {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.4rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Muted dot separator between behavior tokens */
+#page-mod-diary-prompt-edit .diary-targetphrase-sep,
+#page-mod-diary-prompt_edit .diary-targetphrase-sep {
+    color: #adb5bd;
+    user-select: none;
+}
+
+/* Edit / add form panel */
+#page-mod-diary-prompt-edit .diary-targetphrase-editor,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.875rem 1rem;
+    margin-top: 0.75rem;
+}
+
+/* Phrase sentence row: "If [input] is used, award [N] % of the entry grade." */
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__phraseline,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__phraseline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.6rem;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__phrasetext,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__phrasetext {
+    width: 220px !important;
+    flex: 0 0 auto;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__pctinput,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__pctinput {
+    width: 72px !important;
+    flex: 0 0 auto;
+}
+
+/* Behavior selects row: inline auto-width dropdowns */
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__behaviorline,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__behaviorline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__behaviorline .form-select,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__behaviorline .form-select {
+    width: auto;
+    flex: 0 0 auto;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__sortlabel,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__sortlabel {
+    font-size: 0.875rem;
+    color: #495057;
+    white-space: nowrap;
+}
+
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__sortinput,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__sortinput {
+    width: 70px !important;
+    flex: 0 0 auto;
+}
+
+/* Submit button row */
+#page-mod-diary-prompt-edit .diary-targetphrase-editor__formactions,
+#page-mod-diary-prompt_edit .diary-targetphrase-editor__formactions {
+    margin-top: 0.5rem;
+}
+
+/* 20260401 Error behavior form group: keep three selectors on one line in all themes */
+#page-mod-diary-mod #id_errorbehavior {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#page-mod-diary-mod #id_errorbehavior .form-select {
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 140px;
+}

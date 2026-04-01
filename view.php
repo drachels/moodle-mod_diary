@@ -37,6 +37,7 @@ $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete 
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST); // Complete details about this course.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
 $promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
+$jumpuser = optional_param('jumpuser', 0, PARAM_INT); // Selected user for reportsingle jump.
 
 $context = context_module::instance($cm->id);
 
@@ -67,6 +68,30 @@ $completion->set_module_viewed($cm);
 
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
 $promptid = prompts::get_current_promptid($diary);
+
+$currentgroup = groups_get_activity_group($cm, true);
+$groupfilter = $currentgroup ? $currentgroup : '';
+$reportjumpusers = [];
+if ($entriesmanager) {
+    $reportjumpusers = get_users_by_capability(
+        $context,
+        'mod/diary:addentries',
+        '',
+        'lastname ASC, firstname ASC',
+        '',
+        '',
+        $groupfilter
+    );
+}
+
+if ($entriesmanager && $jumpuser > 0 && isset($reportjumpusers[$jumpuser])) {
+    $singleurl = new moodle_url('/mod/diary/reportsingle.php', [
+        'id' => $cm->id,
+        'user' => $jumpuser,
+        'action' => 'allentries',
+    ]);
+    redirect($singleurl);
+}
 
 if (!$cw = $DB->get_record('course_sections', ['id' => $cm->section])) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -198,7 +223,6 @@ if (prompts::diary_available($diary)) {
 if ($entriesmanager) {
     // Check to see if groups are being used here.
     $groupmode = groups_get_activity_groupmode($cm);
-    $currentgroup = groups_get_activity_group($cm, true);
     $ouput = groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/view.php?id=$cm->id");
     // 20230131 Ticket, Diary_954, fixes entry count shown for selected group.
     $entrycount = results::diary_count_entries($diary, $currentgroup);
@@ -211,6 +235,29 @@ if ($entriesmanager) {
         get_string('viewalldiaries', 'diary') . '</a>';
     $temp .= '</a></span>';
     echo $temp;
+
+    if (!empty($reportjumpusers)) {
+        $useroptions = [0 => get_string('selectuserforreport', 'diary')];
+        foreach ($reportjumpusers as $reportuser) {
+            $useroptions[(int)$reportuser->id] = fullname($reportuser);
+        }
+
+        echo '<form method="get" action="view.php" style="display:inline-block; margin-left:0.75rem;">';
+        echo '<input type="hidden" name="id" value="' . $cm->id . '">';
+        echo html_writer::select(
+            $useroptions,
+            'jumpuser',
+            0,
+            false,
+            [
+                'id' => 'jumpuserview',
+                'class' => 'custom-select',
+                'style' => 'display:inline-block;width:auto;max-width:20rem;',
+                'onchange' => 'if (this.value > 0) { this.form.submit(); }',
+            ]
+        );
+        echo '</form>';
+    }
 } else {
     // 20200831 Added to show link to only index.php page for students. 20210501 modified to remove div.
     echo '<a class="reportlink" href="index.php?id=' . $course->id . '">' . get_string('viewalldiaries', 'diary') . '</a>';

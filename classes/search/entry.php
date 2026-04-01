@@ -101,7 +101,7 @@ class entry extends \core_search\base_mod {
         $doc->set('contextid', $context->id);
         $doc->set('courseid', $entry->course);
         $doc->set('userid', $entry->userid);
-        $doc->set('owneruserid', \core_search\manager::NO_OWNER_ID);
+        $doc->set('owneruserid', $entry->userid);
         $doc->set('modified', $entry->timemodified);
         $doc->set('description1', content_to_text('Feedback: ' . $entry->entrycomment, $entry->format));
 
@@ -157,17 +157,13 @@ class entry extends \core_search\base_mod {
 
         $entryuserid = $doc->get('userid');
         if ($entryuserid == $USER->id) {
-            $url = '/mod/diary/view.php';
+            return new \moodle_url('/mod/diary/view.php', ['id' => $contextmodule->instanceid]);
         } else {
             // Teachers see student's entries in the report page.
-            $url = '/mod/diary/report.php#entry-' . $entryuserid;
+            $url = new \moodle_url('/mod/diary/report.php', ['id' => $contextmodule->instanceid]);
+            $url->set_anchor('user-anchor-' . $entryuserid);
+            return $url;
         }
-        return new \moodle_url(
-            $url,
-            [
-                'id' => $contextmodule->instanceid,
-            ]
-        );
     }
 
     /**

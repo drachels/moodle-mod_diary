@@ -178,7 +178,7 @@ if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) 
     if ($ruleaction === 'delete' && !empty($ruleid)) {
         prompts::delete_autograde_rule((int)$ruleid, (int)$targetpromptid);
         $deleteurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
-        $deleteurl->set_anchor('prompteditor');
+        $deleteurl->set_anchor('promptautograderules');
         redirect($deleteurl, get_string('autograderuledeleted', 'diary'));
     }
 
@@ -186,7 +186,7 @@ if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) 
         $phrase = trim((string)optional_param('rulephrase', '', PARAM_TEXT));
         if ($phrase === '') {
             $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
-            $saveurl->set_anchor('prompteditor');
+            $saveurl->set_anchor('promptautograderules');
             redirect($saveurl, get_string('autograderulephraseempty', 'diary'), null, \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -207,7 +207,7 @@ if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) 
 
         prompts::save_autograde_rule($rule);
         $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
-        $saveurl->set_anchor('prompteditor');
+        $saveurl->set_anchor('promptautograderules');
         redirect($saveurl, get_string('autograderulesaved', 'diary'));
     }
 }
@@ -618,17 +618,13 @@ if (!empty($data->entryid)) {
         $ruleedit->sortorder = prompts::next_autograde_rule_sortorder((int)$data->entryid);
     }
 
+    echo '<a id="promptautograderules"></a>';
     echo $OUTPUT->heading(get_string('autograderulesheading', 'diary'), 4);
     echo '<p>' . get_string('autograderulesintro', 'diary') . '</p>';
 
     if (!empty($rules)) {
-        echo '<table class="generaltable" cellpadding="5"><thead><tr>'
-            . '<th>' . get_string('autograderulephrase', 'diary') . '</th>'
-            . '<th>' . get_string('autograderulematchtype', 'diary') . '</th>'
-            . '<th>' . get_string('autograderuleweightpercent', 'diary') . '</th>'
-            . '<th>' . get_string('autograderulerequired', 'diary') . '</th>'
-            . '<th>' . get_string('autograderulesortorder', 'diary') . '</th>'
-            . '<th>' . get_string('tablecolumnedit', 'diary') . '</th></tr></thead><tbody>';
+        echo '<div class="diary-targetphrases">';
+        $rulenum = 1;
 
         foreach ($rules as $rule) {
             $editurl = new moodle_url('/mod/diary/prompt_edit.php', [
@@ -637,7 +633,7 @@ if (!empty($data->entryid)) {
                 'promptid' => (int)$data->entryid,
                 'ruleeditid' => (int)$rule->id,
             ]);
-            $editurl->set_anchor('prompteditor');
+            $editurl->set_anchor('promptautograderules');
 
             $delurl = new moodle_url('/mod/diary/prompt_edit.php', [
                 'id' => $cm->id,
@@ -647,23 +643,48 @@ if (!empty($data->entryid)) {
                 'ruleid' => (int)$rule->id,
                 'sesskey' => sesskey(),
             ]);
-            $delurl->set_anchor('prompteditor');
+            $delurl->set_anchor('promptautograderules');
 
             $requiredlabel = empty($rule->required) ? get_string('no') : get_string('yes');
             $matchlabel = $matchtypes[(int)$rule->matchtype] ?? $matchtypes[0];
+            $fullmatchlabel = !empty($rule->fullmatch) ? get_string('autograderulefullmatch', 'diary') : get_string('autograderulematchcontains', 'diary');
+            $caselabel = !empty($rule->casesensitive) ? get_string('autograderulecasesensitive', 'diary') : get_string('autograderulecaseinsensitive', 'diary');
+            $breaklabel = !empty($rule->ignorebreaks) ? get_string('autograderuleignorebreaks', 'diary') : get_string('autograderulerecognizebreaks', 'diary');
 
-            echo '<tr>'
-                . '<td>' . s($rule->phrase) . '</td>'
-                . '<td>' . s($matchlabel) . '</td>'
-                . '<td>' . (int)$rule->weightpercent . '</td>'
-                . '<td>' . s($requiredlabel) . '</td>'
-                . '<td>' . (int)$rule->sortorder . '</td>'
-                . '<td><a href="' . $editurl->out(false) . '">' . get_string('edit') . '</a>'
+            echo '<div class="diary-targetphrase-rule">';
+            echo '<div class="diary-targetphrase-rule__label">';
+            echo '<span class="diary-targetphrase-rule__title">' . get_string('autograderulephrase', 'diary')
+                . ' [' . $rulenum . ']</span>';
+            echo '<div class="diary-targetphrase-rule__actions">'
+                . '<a href="' . $editurl->out(false) . '">' . get_string('edit') . '</a>'
                 . ' | <a onclick="return confirm(\'' . get_string('deleteexconfirm', 'diary')
-                . (int)$rule->id . '\')" href="' . $delurl->out(false) . '">' . get_string('delete') . '</a></td>'
-                . '</tr>';
+                . (int)$rule->id . '\')" href="' . $delurl->out(false) . '">' . get_string('delete') . '</a></div>';
+            echo '</div>';
+
+            echo '<div class="diary-targetphrase-rule__body">';
+            echo '<div class="diary-targetphrase-rule__line">'
+                . get_string('autograderulelineif', 'diary') . ' <strong>' . s($rule->phrase) . '</strong> '
+                . get_string('autograderulelineusedaward', 'diary') . ' <strong>' . (int)$rule->weightpercent . '%</strong> '
+                . get_string('autograderulelineofgrade', 'diary') . '</div>';
+
+            echo '<div class="diary-targetphrase-rule__behavior">';
+            echo '<span>' . s($matchlabel) . '</span>';
+            echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
+            echo '<span>' . s($fullmatchlabel) . '</span>';
+            echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
+            echo '<span>' . s($caselabel) . '</span>';
+            echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
+            echo '<span>' . s($breaklabel) . '</span>';
+            echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
+            echo '<span>' . get_string('autograderulerequired', 'diary') . ': ' . s($requiredlabel) . '</span>';
+            echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
+            echo '<span>' . get_string('autograderulesortorder', 'diary') . ': ' . (int)$rule->sortorder . '</span>';
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+            $rulenum++;
         }
-        echo '</tbody></table>';
+        echo '</div>';
     }
 
     $saveurl = new moodle_url('/mod/diary/prompt_edit.php', [
@@ -671,47 +692,64 @@ if (!empty($data->entryid)) {
         'action' => 'edit',
         'promptid' => (int)$data->entryid,
     ]);
-    $saveurl->set_anchor('prompteditor');
+    $saveurl->set_anchor('promptautograderules');
 
-    echo '<form method="post" action="' . $saveurl->out(false) . '">';
+    echo '<form method="post" action="' . $saveurl->out(false) . '" class="diary-targetphrase-editor">';
     echo '<input type="hidden" name="sesskey" value="' . sesskey() . '">';
     echo '<input type="hidden" name="ruleaction" value="save">';
     echo '<input type="hidden" name="ruleid" value="' . (int)$ruleedit->id . '">';
 
-    echo '<div><label for="rulephrase"><strong>' . get_string('autograderulephrase', 'diary') . '</strong></label><br>';
-    echo '<input type="text" id="rulephrase" name="rulephrase" value="' . s($ruleedit->phrase) . '" size="70"></div><br>';
+    echo '<div class="diary-targetphrase-editor__phraseline">';
+    echo '<span>' . get_string('autograderulelineif', 'diary') . '</span>';
+    echo '<input type="text" id="rulephrase" name="rulephrase" value="' . s($ruleedit->phrase) . '"'
+        . ' class="form-control diary-targetphrase-editor__phrasetext">';
+    echo '<span>' . get_string('autograderulelineusedaward', 'diary') . '</span>';
+    echo '<input type="number" id="ruleweightpercent" name="ruleweightpercent" min="0" max="100" value="'
+        . (int)$ruleedit->weightpercent . '" class="form-control diary-targetphrase-editor__pctinput">';
+    echo '<span>% ' . get_string('autograderulelineofgrade', 'diary') . '</span>';
+    echo '</div>';
 
-    echo '<div><label for="rulematchtype"><strong>' . get_string('autograderulematchtype', 'diary') . '</strong></label><br>';
-    echo '<select id="rulematchtype" name="rulematchtype">';
+    echo '<div class="diary-targetphrase-editor__behaviorline">';
+    echo '<select id="rulematchtype" name="rulematchtype" class="form-select"'
+        . ' title="' . get_string('autograderulematchtype', 'diary') . '">';
     foreach ($matchtypes as $matchvalue => $matchlabel) {
         $selected = ((int)$ruleedit->matchtype === (int)$matchvalue) ? ' selected' : '';
         echo '<option value="' . (int)$matchvalue . '"' . $selected . '>' . s($matchlabel) . '</option>';
     }
-    echo '</select></div><br>';
+    echo '</select>';
 
-    echo '<div><label><input type="checkbox" name="rulecasesensitive" value="1"'
-        . (!empty($ruleedit->casesensitive) ? ' checked' : '') . '> '
-        . get_string('autograderulecasesensitive', 'diary') . '</label></div>';
-    echo '<div><label><input type="checkbox" name="rulefullmatch" value="1"'
-        . (!empty($ruleedit->fullmatch) ? ' checked' : '') . '> '
-        . get_string('autograderulefullmatch', 'diary') . '</label></div>';
-    echo '<div><label><input type="checkbox" name="ruleignorebreaks" value="1"'
-        . (!empty($ruleedit->ignorebreaks) ? ' checked' : '') . '> '
-        . get_string('autograderuleignorebreaks', 'diary') . '</label></div>';
-    echo '<div><label><input type="checkbox" name="rulerequired" value="1"'
-        . (!empty($ruleedit->required) ? ' checked' : '') . '> '
-        . get_string('autograderulerequired', 'diary') . '</label></div><br>';
+    echo '<select id="rulefullmatch" name="rulefullmatch" class="form-select"'
+        . ' title="' . get_string('autograderulefullmatch', 'diary') . '">'
+        . '<option value="0"' . (empty($ruleedit->fullmatch) ? ' selected' : '') . '>' . get_string('autograderulematchcontains', 'diary') . '</option>'
+        . '<option value="1"' . (!empty($ruleedit->fullmatch) ? ' selected' : '') . '>' . get_string('autograderulefullmatch', 'diary') . '</option>'
+        . '</select>';
 
-    echo '<div><label for="ruleweightpercent"><strong>' . get_string('autograderuleweightpercent', 'diary') . '</strong></label><br>';
-    echo '<input type="number" id="ruleweightpercent" name="ruleweightpercent" min="0" max="100" value="'
-        . (int)$ruleedit->weightpercent . '"></div><br>';
+    echo '<select id="rulecasesensitive" name="rulecasesensitive" class="form-select"'
+        . ' title="' . get_string('autograderulecasesensitive', 'diary') . '">'
+        . '<option value="0"' . (empty($ruleedit->casesensitive) ? ' selected' : '') . '>' . get_string('autograderulecaseinsensitive', 'diary') . '</option>'
+        . '<option value="1"' . (!empty($ruleedit->casesensitive) ? ' selected' : '') . '>' . get_string('autograderulecasesensitive', 'diary') . '</option>'
+        . '</select>';
 
-    echo '<div><label for="rulesortorder"><strong>' . get_string('autograderulesortorder', 'diary') . '</strong></label><br>';
+    echo '<select id="ruleignorebreaks" name="ruleignorebreaks" class="form-select"'
+        . ' title="' . get_string('autograderuleignorebreaks', 'diary') . '">'
+        . '<option value="0"' . (empty($ruleedit->ignorebreaks) ? ' selected' : '') . '>' . get_string('autograderulerecognizebreaks', 'diary') . '</option>'
+        . '<option value="1"' . (!empty($ruleedit->ignorebreaks) ? ' selected' : '') . '>' . get_string('autograderuleignorebreaks', 'diary') . '</option>'
+        . '</select>';
+
+    echo '<select id="rulerequired" name="rulerequired" class="form-select"'
+        . ' title="' . get_string('autograderulerequired', 'diary') . '">'
+        . '<option value="0"' . (empty($ruleedit->required) ? ' selected' : '') . '>' . get_string('no') . '</option>'
+        . '<option value="1"' . (!empty($ruleedit->required) ? ' selected' : '') . '>' . get_string('yes') . '</option>'
+        . '</select>';
+
+    echo '<span class="diary-targetphrase-editor__sortlabel">' . get_string('autograderulesortorder', 'diary') . '</span>';
     echo '<input type="number" id="rulesortorder" name="rulesortorder" min="1" value="'
-        . max(1, (int)$ruleedit->sortorder) . '"></div><br>';
+        . max(1, (int)$ruleedit->sortorder) . '" class="form-control diary-targetphrase-editor__sortinput">';
+    echo '</div>';
 
     $submitlabel = empty($ruleedit->id) ? get_string('autograderuleadd', 'diary') : get_string('autograderuleupdate', 'diary');
-    echo '<button type="submit" class="btn btn-primary">' . s($submitlabel) . '</button>';
+    echo '<div class="diary-targetphrase-editor__formactions"><button type="submit" class="btn btn-primary">'
+        . s($submitlabel) . '</button></div>';
     echo '</form><br>';
 }
 

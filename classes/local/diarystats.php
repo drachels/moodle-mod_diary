@@ -135,7 +135,13 @@ class diarystats {
             $entryids = [];
             if ($entries = $DB->get_records('glossary_entries', ['glossaryid' => $cm->instance], 'concept')) {
                 foreach ($entries as $entry) {
-                    if ($match = self::glossary_diaryentry_search_text($entry, $entry->concept, $text)) {
+                    if ($match = self::glossary_diaryentry_search_text(
+                        $entry->concept,
+                        $text,
+                        (int)$diary->errorfullmatch,
+                        (int)$diary->errorcasesensitive,
+                        (int)$diary->errorignorebreaks
+                    )) {
                         [$pos, $length, $match] = $match;
                         $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
                         $matches[$pos] = (object)['pos' => $pos, 'length' => $length, 'match' => $match];
@@ -150,7 +156,13 @@ class diarystats {
                 if ($aliases = $DB->get_records_select('glossary_alias', "entryid $select", $params)) {
                     foreach ($aliases as $alias) {
                         $entry = $entries[$alias->entryid];
-                        if ($match = self::glossary_diaryentry_search_text($entry, $alias->alias, $text)) {
+                        if ($match = self::glossary_diaryentry_search_text(
+                            $alias->alias,
+                            $text,
+                            (int)$diary->errorfullmatch,
+                            (int)$diary->errorcasesensitive,
+                            (int)$diary->errorignorebreaks
+                        )) {
                             [$pos, $length, $match] = $match;
                             $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
                             $matches[$pos] = (object)['pos' => $pos, 'length' => $length, 'match' => $match];
@@ -199,13 +211,21 @@ class diarystats {
     /**
      * glossary_diaryentry_search_text
      *
-     * @param object $entry
      * @param string $search
      * @param string $text
+     * @param int $fullmatch
+     * @param int $casesensitive
+     * @param int $ignorebreaks
      * @return string the matching substring in $text or ""
      */
-    public static function glossary_diaryentry_search_text($entry, $search, $text) {
-        return self::search_text($search, $text, $entry->fullmatch, $entry->casesensitive);
+    public static function glossary_diaryentry_search_text(
+        $search,
+        $text,
+        $fullmatch = 0,
+        $casesensitive = 0,
+        $ignorebreaks = 0
+    ) {
+        return self::search_text($search, $text, $fullmatch, $casesensitive, $ignorebreaks);
     }
 
     /**

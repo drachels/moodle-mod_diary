@@ -49,6 +49,7 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
 }
 $diaryid = optional_param('diary', $diary->id, PARAM_INT);
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
+$jumpuser = optional_param('jumpuser', 0, PARAM_INT);
 // 20201016 Get the name for this diary activity.
 $diaryname = format_string($diary->name, true, ['context' => $context]);
 
@@ -155,21 +156,6 @@ $PAGE->navbar->add((get_string("rate", "diary")) . ' ' . (get_string("entries", 
 $PAGE->set_title($diaryname);
 $PAGE->set_heading($course->fullname);
 
-echo $OUTPUT->header();
-echo $OUTPUT->heading($diaryname);
-
-// 20240927 Working on new filter for user firstname and lastname. This from moodle/user/index.php file line 103.
-$participanttable = new \core_user\table\participants("user-index-participants-{$course->id}");
-
-// 20210511 Changed to using div and span.
-echo '<div class="sortandaggregate">';
-echo ('<span>' . get_string('sortorder', "diary"));
-echo (get_string($stringlable, "diary") . '</span>');
-
-// 20200827 Added link to index.php page. 20210501 Moved to here.
-echo '<span><a style="float: right;" href="index.php?id=' . $course->id . '">'
-    . get_string('viewalldiaries', 'diary') . '</a></span></div>';
-
 // Get a list of groups for this course.
 $currentgroup = groups_get_activity_group($cm, true);
 if ($currentgroup) {
@@ -180,6 +166,15 @@ if ($currentgroup) {
 
 // Get a sorted list of users in the current group to use for processing the report.
 $users = get_users_by_capability($context, 'mod/diary:addentries', '', $sort = 'lastname ASC, firstname ASC', '', '', $groups);
+
+if ($jumpuser > 0 && isset($users[$jumpuser])) {
+    $singleurl = new moodle_url('/mod/diary/reportsingle.php', [
+        'id' => $id,
+        'user' => $jumpuser,
+        'action' => 'allentries',
+    ]);
+    redirect($singleurl);
+}
 
 if ($eee) {
     // Now, filter down to get entry by any user who has made at least one entry.
@@ -195,9 +190,16 @@ if ($eee) {
 // Process incoming data if there is any.
 if ($data = data_submitted()) {
     $postdata = (array)$data;
+    $createzerouserid = 0;
+    foreach ($postdata as $postkey => $postvalue) {
+        if (strpos((string)$postkey, 'createzero') === 0 && !empty($postvalue)) {
+            $createzerouserid = (int)substr((string)$postkey, strlen('createzero'));
+            break;
+        }
+    }
 
     // Report-page only action: create a zero-grade placeholder entry for users with no entry.
-    results::create_zero_entries_from_report_submission(
+    $createdentryid = results::create_zero_entries_from_report_submission(
         $cm,
         $context,
         $course,
@@ -207,6 +209,55 @@ if ($data = data_submitted()) {
         $entrybyuser,
         $entrybyentry
     );
+
+    // Deterministic anchor landing for create-zero actions: POST -> redirect with explicit fragment.
+    if ($createdentryid > 0) {
+        $redirectanchor = '';
+        $returnurl = new moodle_url('/mod/diary/report.php', [
+            'id' => $id,
+            'diary' => $diaryid,
+            'action' => $action,
+        ]);
+
+        if ($createzerouserid > 0) {
+            $foundclickeduser = false;
+            $lastremainingnoentryuserid = 0;
+            foreach ($users as $candidateuser) {
+                $candidateuserid = (int)$candidateuser->id;
+                if ($candidateuserid !== $createzerouserid && !isset($entrybyuser[$candidateuserid])) {
+                    $lastremainingnoentryuserid = $candidateuserid;
+                }
+
+                if (!$foundclickeduser) {
+                    if ($candidateuserid === $createzerouserid) {
+                        $foundclickeduser = true;
+                    }
+                    continue;
+                }
+
+                if (!isset($entrybyuser[$candidateuserid])) {
+                    $redirectanchor = 'user-anchor-' . $candidateuserid;
+                    break;
+                }
+            }
+
+            if ($redirectanchor === '') {
+                if ($lastremainingnoentryuserid > 0) {
+                    $redirectanchor = 'user-anchor-' . $lastremainingnoentryuserid;
+                } else {
+                    $redirectanchor = 'report-bottom-actions';
+                }
+            }
+        }
+
+        if ($redirectanchor !== '') {
+            $returnurl->set_anchor($redirectanchor);
+        } else {
+            $returnurl->set_anchor('report-bottom-actions');
+        }
+
+        redirect($returnurl);
+    }
 
     // Only run full feedback persistence on explicit Save-all submit.
     if (!empty($postdata['saveallfeedback'])) {
@@ -246,6 +297,21 @@ if ($data = data_submitted()) {
     $event->add_record_snapshot('diary', $diary);
     $event->trigger();
 }
+
+echo $OUTPUT->header();
+echo $OUTPUT->heading($diaryname);
+
+// 20240927 Working on new filter for user firstname and lastname. This from moodle/user/index.php file line 103.
+$participanttable = new \core_user\table\participants("user-index-participants-{$course->id}");
+
+// 20210511 Changed to using div and span.
+echo '<div class="sortandaggregate">';
+echo ('<span>' . get_string('sortorder', "diary"));
+echo (get_string($stringlable, "diary") . '</span>');
+
+// 20200827 Added link to index.php page. 20210501 Moved to here.
+echo '<span><a style="float: right;" href="index.php?id=' . $course->id . '">'
+    . get_string('viewalldiaries', 'diary') . '</a></span></div>';
 
 if (!$users) {
     echo $OUTPUT->heading(get_string("nousersyet"));
@@ -353,8 +419,33 @@ if (!$users) {
         );
 
         // 20210511 Reorganized group and toolbar output. 20220102 Added action.
-        echo '<span>' . groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id&action=currententry")
-            . '</span><span style="float: right;">' . get_string('toolbar', 'diary') . $output . '</span>';
+        echo '<span>' . groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id&action=currententry") . '</span>';
+
+        if (!empty($users)) {
+            $useroptions = [0 => get_string('selectuserforreport', 'diary')];
+            foreach ($users as $reportuser) {
+                $useroptions[(int)$reportuser->id] = fullname($reportuser);
+            }
+
+            echo '<form method="get" action="report.php" style="display:inline-block; margin-left:0.75rem;">';
+            echo '<input type="hidden" name="id" value="' . $cm->id . '">';
+            echo '<input type="hidden" name="action" value="' . s($action) . '">';
+            echo html_writer::select(
+                $useroptions,
+                'jumpuser',
+                0,
+                false,
+                [
+                    'id' => 'jumpuserreport',
+                    'class' => 'custom-select',
+                    'style' => 'display:inline-block;width:auto;max-width:20rem;',
+                    'onchange' => 'if (this.value > 0) { this.form.submit(); }',
+                ]
+            );
+            echo '</form>';
+        }
+
+        echo '<span style="float: right;">' . get_string('toolbar', 'diary') . $output . '</span>';
     }
 
     // Next line is different from Journal line 171 202. Difference is $journal->grade.
@@ -473,8 +564,13 @@ if (!$users) {
         // 20210609 Check for empty list to prevent two sets of buttons at bottom of the report page.
         if ($users) {
             // Add a, Save all my feedback, button at the bottom of the page/list of users with no entries.
+            echo '<div id="report-bottom-actions"></div>';
             echo $saveallbutton;
         }
+    }
+
+    if (empty($users)) {
+        echo '<div id="report-bottom-actions"></div>';
     }
 
     // End the page area where feedback and grades are added and will need to be saved.

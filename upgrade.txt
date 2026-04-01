@@ -24,28 +24,20 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 20230831 Diary_1069 - Would be nice if current prompt info was added to the activity
     description in the course topic.
 20240221 Diary_1211 - Feature request - Would be nice to be able to use a grading rubric.
-20240426 Diary_1237 - New feature request - show individual names for selection in the,
-    Visible groups dropdown.
-20250113 Diary_1351 - Feature Request - Need to have new entry fields for feedback and text
-    background colors.
 20250123 - Feature needed - Need an event, class entry_deleted extends \core\event\base {.
     Created event file and it's contents, entry_deleted.php. Added new string,
     $string['evententrydeleted'] = 'Diary entry deleted';
 20250211 Diary_1370 - Feature request - Need a new mdl_diary_entries field such as,
     mailedsubmission.
-20260206 Diary_1403 - Issue #51 - Feature request - Upgrade possible for Global Search Index #51.
 20260225 Diary_1414 - CSS theming support: replace hardcoded styling with classes and allow
     theme-level control. 
     Requests: remove borders, allow theme color overrides, show dates/statistics on one line,
     and render dates/statistics text as non-bold via CSS.
-20260323 Diary_1449 - Feature request - Change activity Appearance color inputs to use
-    color selectors.
 20260327 Diary_1454 - Feature Request -Modify the prompt system to allow for other than
     just sequential use.
 20260331 Diary_1458 - Feature Request - Settings to require meeting certain automatic
     results limits.
-20260331Diary_1460 - Feature Request - Optional menu to control showing required
-    auto-graded phrases.
+
 
 === 5.0.0 === pending
 20200601 Diary_526 - Make toggle to allow grade and feedback for users with no
@@ -67,10 +59,38 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026033114 Progress - Restored compact inline rendering for the report.php
     Show users without entries selector so it no longer stretches full width
     of the page.
+    2026040101 Progress - Hardened anchor restore for Assign zero and create
+    entry by switching to a post-submit redirect that includes the exact
+    rating-anchor-ENTRYID fragment.
+    2026040102 Progress - Fixed redirect timing notice in report.php by
+    moving page output to run after submission processing, so create-zero
+    redirects occur before any output is sent.
+    2026040103 Progress - Stabilized create-zero landing by redirecting to a
+    per-user anchor (user-anchor-USERID) instead of relying only on
+    entry-id anchors, eliminating intermittent off-target scroll positions.
+    2026040104 Progress - Updated create-zero landing behavior to target the
+    next user-without-entry anchor when available; otherwise fall back to a
+    bottom-of-report anchor near final controls for continued grading flow.
+    2026040105 Progress - Refined create-zero fallback targeting so when the
+    clicked user is the last no-entry item with others still above, landing
+    goes to the last remaining no-entry user instead of the bottom controls.
 20210815 Diary_736 - Need a way to selectively turn off autosave. It is not
     needed when starting a totally new entry. Note: Same for tags.
     2026033102 Progress - Desktop new-entry editor now disables autosave while
     existing-entry editing keeps normal autosave behavior.
+20240426 Diary_1237 - New feature request - show individual names for selection in the,
+    Visible groups dropdown.
+    2026040101 Progress - Added manager/teacher user selectors on view.php
+    and report.php that jump directly to reportsingle.php for the selected
+    user (respecting current group filtering).
+20250113 Diary_1351 - Feature Request - Need to have new entry fields for feedback and text
+    background colors. Existing settings already exist; converted from plain text inputs
+    to color selector controls.
+    2026040101 Progress - Converted entrybgc and entrytextbgc in mod_form.php from
+    plain text inputs to native color pickers using the same inline-script technique
+    as prompts_form.php, matching the admin_setting_configcolourpicker already used
+    in settings.php. Diary_1449 (20260323) is a duplicate of this ticket and has
+    been folded in.
 20250211 Diary_1371 - Feature request - Send email to student when teacher clicks,
     Clear feedback, on report pages.
     2026033105 Progress - Clear feedback now sends a student notification email
@@ -89,6 +109,15 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     student notification per actual clear action.
     2026033108 Progress - Follow-up polish: corrected clear-feedback email body
     formatting and fixed the student review-entry link target.
+20260206 Diary_1403 - Issue #51 - Feature request - Upgrade possible for Global Search Index.
+    2026040101 Progress - Fixed get_doc_url() in search/entry.php: replaced
+    fragment-in-path URL construction with moodle_url + set_anchor(), updated
+    anchor name to user-anchor-USERID matching current report.php scheme.
+    Set owneruserid to entry->userid so per-user search privacy filtering works.
+    Fixed activity.php get_search_fileareas() to remove the non-existent 'content'
+    file area (only 'intro' is valid at activity level for Diary).
+20260323 Diary_1449 - Feature Request - Change activity Appearance color inputs to use color
+    selectors. Duplicate of Diary_1351; primary fix information posted there.
 20260326 Diary_1451 - Mobile edits top of the list instead of starting a new entry.
     2026033001 Progress - mobile_entry_edit now mirrors desktop currententry behavior:
     when editdates is enabled, it starts a new entry (entryid 0) instead of loading
@@ -124,11 +153,37 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026033103 Progress - Added Save and continue editing to desktop edit_form/edit.php,
     and mobile edit templates now include a continue-edit button with entryid sync
     after save so continued edits update the same mobile entry.
+20260331 Diary_1460 - Feature Request - Optional menu to control showing required
+    auto-graded phrases.
+    2026040101 Progress - Prompt autograde rules editor in prompt_edit.php
+    now uses a band-style layout (grouped rule cards + grouped edit fields)
+    to align more closely with Essay autograde UI expectations.
+    2026040102 Progress - Refined prompt_edit.php target phrase UI to follow
+    Essay-style phrasing blocks and behavior controls more closely, including
+    sentence-style rule display and grouped behavior selectors.
+    2026040103 Progress - Tighter Essay visual parity pass: rule list switched
+    from cards to col-label/col-body row-divider layout; behavior controls
+    flattened to one inline select row with auto widths and dot separators;
+    "of the entry grade." phrasing adopted; form-control/form-select Bootstrap
+    classes applied to all edit inputs and selects.
 20260331 Diary_1461 - Feature request - Tag should be empty for new entries for normal
     or mobile use.
     2026033104 Progress - Desktop edit.php now loads tags from the actual entryid in
     context and forces empty tags for brand-new entries, preventing carry-over from
     previously edited entries.
+20260401 Diary_1462 - There are two more settings for Glossary of Common Errors that
+    are missing.
+    2026040101 Progress - Added missing Common errors matching selectors in mod_form.php
+    (Case sensitive and Ignore line breaks), and updated diarystats glossary matching
+    to honor diary-level errorfullmatch, errorcasesensitive, and errorignorebreaks
+    settings during concept/alias matching.
+    2026040102 Progress - Refined Common errors UI in mod_form.php to match
+    Essay-style layout by rendering Full match, Case sensitive, and Ignore
+    line breaks selectors on one line under a single Error matching behavior label.
+    2026040103 Progress - Verified three selectors render on one line in Classic
+    and all tested non-Boost themes. Boost theme forces third selector to wrap
+    due to its fixed-width center layout constraint; this is a Boost-level
+    limitation beyond Diary plugin control. Feature complete and working as designed.
 
 
 === 4.0.1 === 2026022601

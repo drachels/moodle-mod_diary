@@ -56,7 +56,7 @@ class results {
      * @param array $users Users currently listed as having no entries.
      * @param array $entrybyuser Entry map keyed by userid.
      * @param array $entrybyentry Entry map keyed by entry id.
-     * @return int Number of created placeholder entries.
+     * @return int Created entry id for anchor targeting, or 0 if none.
      */
     public static function create_zero_entries_from_report_submission(
         $cm,
@@ -68,7 +68,7 @@ class results {
         array $entrybyuser,
         array $entrybyentry
     ) {
-        $createdcount = 0;
+        $createdentryid = 0;
         foreach ($data as $key => $value) {
             if (strpos((string)$key, 'createzero') !== 0 || empty($value)) {
                 continue;
@@ -82,12 +82,14 @@ class results {
                 continue;
             }
 
-            if (self::create_zero_placeholder_entry($cm, $context, $course, $diary, $users[$userid])) {
-                $createdcount++;
+            $newentryid = self::create_zero_placeholder_entry($cm, $context, $course, $diary, $users[$userid]);
+            if ($newentryid > 0) {
+                // Keep the most recently created entry id for reliable post-submit anchor targeting.
+                $createdentryid = $newentryid;
             }
         }
 
-        return $createdcount;
+        return $createdentryid;
     }
 
     /**
@@ -699,6 +701,9 @@ class results {
         require_once($CFG->dirroot . '/rating/lib.php');
         // 20210705 Added new activity color setting.
         $dcolor4 = $diary->entrytextbgc;
+
+        // Stable per-user anchor used by report.php redirects after create-zero actions.
+        echo '<a id="user-anchor-' . $user->id . '"></a>';
 
         // Create a table for the current users entry with area for teacher feedback.
         echo '<table id="entry-' . $user->id . '" class="diaryuserentry">';
