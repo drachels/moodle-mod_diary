@@ -759,6 +759,7 @@ class prompts {
         $entry = $DB->get_record('diary_entries', ['id' => $firstkey, 'diary' => $diary->id]);
         $promptsall = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart ASC, datestop ASC');
         $promptsone = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id]);
+        $bordercssvars = \diary_get_border_css_vars((int)$diary->id);
 
         $diary->intro = '';
         // If there are any prompts for this diary, create a list of them.
@@ -800,8 +801,8 @@ class prompts {
                     $start = '<td>' . userdate($data->datestart) . '</td>';
                     $stop = '<td>' . userdate($data->datestop) . '</td>';
 
-                    $prompttext = '<div class="promptentry" style="background: ' .
-                        $data->promptbgc . ';"><td>' .
+                    $prompttext = '<div class="promptentry diary-prompt-themed" style="--diary-prompt-bg: '
+                        . s($data->promptbgc) . ';' . s($bordercssvars) . '"><td>' .
                         get_string(
                             'writingpromptlable',
                             'diary',
@@ -872,8 +873,8 @@ class prompts {
                     $start = '<td>' . userdate($data->datestart) . '</td>';
                     $stop = '<td>' . userdate($data->datestop) . '</td>';
 
-                    $prompttext = '<div class="promptentry" style="background: ' .
-                        $data->promptbgc . ';"><b><td>' .
+                    $prompttext = '<div class="promptentry diary-prompt-themed" style="--diary-prompt-bg: '
+                        . s($data->promptbgc) . ';' . s($bordercssvars) . '"><b><td>' .
                         get_string(
                             'writingpromptlable',
                             'diary',

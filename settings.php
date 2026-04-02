@@ -134,6 +134,38 @@ if ($ADMIN->fulltree) {
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
+    // Diary entry/prompt border toggle default.
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/enableborders',
+        get_string('enableborders_title', 'diary'),
+        get_string('enableborders_descr', 'diary'),
+        0,
+        [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/borderstyle',
+        get_string('borderstyle_title', 'diary'),
+        get_string('borderstyle_descr', 'diary'),
+        'none',
+        [
+            'none' => get_string('borderstylenone', 'diary'),
+            'thin' => get_string('borderstylethin', 'diary'),
+            'double' => get_string('borderstyledouble', 'diary'),
+        ]
+    ));
+
+    $name = 'mod_diary/bordercolor';
+    $title = get_string('bordercolor_title', 'diary');
+    $description = get_string('bordercolor_descr', 'diary');
+    $default = get_string('bordercolor_default', 'diary');
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+
     // Diary entry text background colour setting.
     $name = 'mod_diary/entrytextbgc';
     $title = get_string('entrytextbgc_title', 'diary');

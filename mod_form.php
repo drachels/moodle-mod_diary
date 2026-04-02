@@ -217,10 +217,39 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->addElement('text', $name, $label, ['id' => 'diary_entrytextbgc_picker']);
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setDefault($name, $diaryconfig->entrytextbgc);
+
+        // Entry/prompt border toggle for this activity.
+        $name = 'enableborders';
+        $label = get_string('enableborders', 'diary');
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, (int)($diaryconfig->enableborders ?? 0));
+
+        $name = 'borderstyle';
+        $label = get_string('borderstyle', 'diary');
+        $mform->addElement('select', $name, $label, [
+            'none' => get_string('borderstylenone', 'diary'),
+            'thin' => get_string('borderstylethin', 'diary'),
+            'double' => get_string('borderstyledouble', 'diary'),
+        ]);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_ALPHANUMEXT);
+        $mform->setDefault($name, $diaryconfig->borderstyle ?? 'none');
+        $mform->disabledIf($name, 'enableborders', 'eq', 0);
+
+        $name = 'bordercolor';
+        $label = get_string('bordercolor', 'diary');
+        $mform->addElement('text', $name, $label, ['id' => 'diary_bordercolor_picker']);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_TEXT);
+        $mform->setDefault($name, $diaryconfig->bordercolor ?? get_string('bordercolor_default', 'diary'));
+        $mform->disabledIf($name, 'enableborders', 'eq', 0);
+
         $mform->addElement('html', "
             <script>
                 (function() {
-                    var ids = ['diary_entrybgc_picker', 'diary_entrytextbgc_picker'];
+                    var ids = ['diary_entrybgc_picker', 'diary_entrytextbgc_picker', 'diary_bordercolor_picker'];
                     var colors = {
                         'red': '#ff0000', 'blue': '#0000ff', 'green': '#008000',
                         'yellow': '#ffff00', 'pink': '#ffc0cb', 'white': '#ffffff',
@@ -509,6 +538,32 @@ class mod_diary_mod_form extends moodleform_mod {
 
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
+    }
+
+    /**
+     * Preprocess form data before rendering.
+     *
+     * Loads per-activity border setting stored in plugin config.
+     *
+     * @param array $defaultvalues
+     * @return void
+     */
+    public function data_preprocessing(&$defaultvalues) {
+        if (!empty($defaultvalues['instance'])) {
+            $instanceid = (int)$defaultvalues['instance'];
+            $stored = get_config('mod_diary', 'enableborders_' . $instanceid);
+            if ($stored !== false && $stored !== null && $stored !== '') {
+                $defaultvalues['enableborders'] = (int)$stored;
+            }
+            $storedstyle = get_config('mod_diary', 'borderstyle_' . $instanceid);
+            if ($storedstyle !== false && $storedstyle !== null && $storedstyle !== '') {
+                $defaultvalues['borderstyle'] = (string)$storedstyle;
+            }
+            $storedcolor = get_config('mod_diary', 'bordercolor_' . $instanceid);
+            if ($storedcolor !== false && $storedcolor !== null && $storedcolor !== '') {
+                $defaultvalues['bordercolor'] = (string)$storedcolor;
+            }
+        }
     }
 
     /**

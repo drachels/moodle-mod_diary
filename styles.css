@@ -104,13 +104,13 @@
 #page-mod-diary-report .entry,
 #page-mod-diary-reportsingle .entry,
 #page-mod-diary-reportone .entry {
+    --diary-entry-bg-default: var(--diary-entry-bg-default, #f9f5f0);
+    --diary-entry-border: var(--diary-entry-border, 0);
     text-align: left;
     font-size: 1em;
     padding: 5px;
-    /*font-weight: bold;*/
-    background: #f9f5f0;
-    /*border: 2px solid grey;*/
-    border-style: double;
+    background: var(--diary-entry-bg, var(--diary-entry-bg-default));
+    border: var(--diary-entry-border);
     -webkit-border-radius: 16px;
     -moz-border-radius: 16px;
     border-radius: 16px;
@@ -140,6 +140,35 @@
 #page-mod-diary-report .reportlink {
     float: right;
     padding: 15px;
+}
+
+.diary-link-right,
+.diary-toolbar-right {
+    float: right;
+}
+
+.diary-inline-form {
+    display: inline-block;
+    margin-left: 0.75rem;
+}
+
+.diary-inline-select {
+    display: inline-block;
+    width: auto;
+    max-width: 20rem;
+}
+
+.diary-btn-rounded {
+    border-radius: 8px;
+}
+
+.diary-intro-highlight {
+    font-weight: 600;
+}
+
+.diary-blankentry {
+    text-align: center;
+    font-weight: 600;
 }
 
 #page-mod-diary-report .diaryuserentry {
@@ -213,19 +242,68 @@
 }
 
 .promptentry {
+    --diary-prompt-bg-default: transparent;
+    --diary-prompt-border: 0;
     text-align: left;
     font-size: 1em;
     padding: 5px;
-    border-style: double;
+    border: var(--diary-prompt-border);
     border-radius: 16px;
+    background: var(--diary-prompt-bg, var(--diary-prompt-bg-default));
 }
 
 .entry {
+    --diary-entry-bg-default: transparent;
+    --diary-entry-border: 0;
     text-align: left;
     font-size: 1em;
     padding: 5px;
-    border-style: double;
+    border: var(--diary-entry-border);
     border-radius: 16px;
+    background: var(--diary-entry-bg, var(--diary-entry-bg-default));
+}
+
+.diary-entry-themed {
+    background: var(--diary-entry-bg, var(--diary-entry-bg-default));
+}
+
+.diary-prompt-themed {
+    background: var(--diary-prompt-bg, var(--diary-prompt-bg-default));
+}
+
+.diary-col-narrow {
+    width: 35px;
+}
+
+.diary-col-actions {
+    width: 55px;
+}
+
+.diary-stat-highlight {
+    background-color: var(--diary-stat-highlight-bg, #fff3a6);
+}
+
+.diary-stats-table .diary-stats-meta td {
+    white-space: normal;
+    font-weight: 400;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+.diary-stats-table .diary-stats-col {
+    width: 25%;
+}
+
+.diary-stats-table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+}
+
+.diary-stats-table td,
+.diary-stats-table th {
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* View prompt indcators. */

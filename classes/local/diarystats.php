@@ -621,7 +621,7 @@ class diarystats {
                     ((max($settingsused->minchar - $diarystats->characters, 0))
                     * $settingsused->minmaxcharpercent) <> 0
                 ) {
-                    $autocharacters = '<span style="background-color:yellow">' . get_string(
+                    $autocharacters = '<span class="diary-stat-highlight">' . get_string(
                         'autoratingbelowmaxitemdetails',
                         'diary',
                         ['one' => $settingsused->minchar,
@@ -650,7 +650,7 @@ class diarystats {
                 }
             }
             if ($diary->enableautorating && $settingsused->maxchar > 0 && $diarystats->characters > $settingsused->maxchar) {
-                $autocharacters = '<span style="background-color:yellow">' . get_string(
+                $autocharacters = '<span class="diary-stat-highlight">' . get_string(
                     'autoratingovermaxitemdetails',
                     'diary',
                     ['one' => $settingsused->maxchar,
@@ -673,7 +673,7 @@ class diarystats {
             $item = 'words';
             if ($diary->enableautorating && $settingsused->minword > 0 && $diarystats->words) {
                 if (((max($settingsused->minword - $diarystats->words, 0)) * $settingsused->minmaxwordpercent) <> 0) {
-                    $autowords = '<span style="background-color:yellow">' . get_string(
+                    $autowords = '<span class="diary-stat-highlight">' . get_string(
                         'autoratingbelowmaxitemdetails',
                         'diary',
                         ['one' => $settingsused->minword,
@@ -702,7 +702,7 @@ class diarystats {
                 }
             }
             if ($diary->enableautorating && $settingsused->maxword > 0 && $diarystats->words > $settingsused->maxword) {
-                $autowords = '<span style="background-color:yellow">' . get_string(
+                $autowords = '<span class="diary-stat-highlight">' . get_string(
                     'autoratingovermaxitemdetails',
                     'diary',
                     ['one' => $settingsused->maxword,
@@ -728,7 +728,7 @@ class diarystats {
                     ((max($settingsused->minsentence - $diarystats->sentences, 0))
                     * $settingsused->minmaxsentencepercent) <> 0
                 ) {
-                    $autosentences = '<span style="background-color:yellow">' . get_string(
+                    $autosentences = '<span class="diary-stat-highlight">' . get_string(
                         'autoratingbelowmaxitemdetails',
                         'diary',
                         ['one' => $settingsused->minsentence,
@@ -761,7 +761,7 @@ class diarystats {
                 && $settingsused->maxsentence > 0
                 && $diarystats->sentences > $settingsused->maxsentence
             ) {
-                    $autosentences = '<span style="background-color:yellow">' . get_string(
+                    $autosentences = '<span class="diary-stat-highlight">' . get_string(
                         'autoratingovermaxitemdetails',
                         'diary',
                         ['one' => $settingsused->maxsentence,
@@ -787,7 +787,7 @@ class diarystats {
                     ((max($settingsused->minparagraph - $diarystats->paragraphs, 0))
                     * $settingsused->minmaxparagraphpercent) <> 0
                 ) {
-                    $autoparagraphs = '<span style="background-color:yellow">' . get_string(
+                    $autoparagraphs = '<span class="diary-stat-highlight">' . get_string(
                         'autoratingbelowmaxitemdetails',
                         'diary',
                         ['one' => $settingsused->minparagraph,
@@ -820,7 +820,7 @@ class diarystats {
                 && $settingsused->maxparagraph > 0
                 && $diarystats->paragraphs > $settingsused->maxparagraph
             ) {
-                $autoparagraphs = '<span style="background-color:yellow">' . get_string(
+                $autoparagraphs = '<span class="diary-stat-highlight">' . get_string(
                     'autoratingovermaxitemdetails',
                     'diary',
                     ['one' => $settingsused->maxparagraph,
@@ -838,30 +838,24 @@ class diarystats {
             // 20210703 Consolidated the table here so using one instance instead of two.
             // 20221021 Changed td 3 to show prompt ID or not in use status. Moved percents to td 4.
             // 20210703 Consolidated the table here so using one instance instead of two.
-            $currentstats = '<table class="generaltable">'
-                . '<tr><td style="width: 25%">' . get_string('timecreated', 'diary') . ' ' . userdate($entry->timecreated) . '</td>'
-                    . '<td style="width: 25%">' . get_string('lastedited') . ' ' . userdate($entry->timemodified) . '</td>'
-                    . '<td style="width: 25%">' . $settingsused->promptused
-                        . '<br>C' . $settingsused->minchar
-                        . ', C ' . $settingsused->maxchar
-                        . ', C ' . $settingsused->minmaxcharpercent . '%'
-                        . ', W ' . $settingsused->minword
-                        . ', W ' . $settingsused->maxword
-                        . ', W ' . $settingsused->minmaxwordpercent . '%'
-                        . '<br>S ' . $settingsused->minsentence
-                        . ', S ' . $settingsused->maxsentence
-                        . ', S ' . $settingsused->minmaxsentencepercent . '%'
-                        . ', P ' . $settingsused->minparagraph
-                        . ', P ' . $settingsused->maxparagraph
-                        . ', P ' . $settingsused->minmaxparagraphpercent . '%'
-                    . '</td>'
-                    . '<td style="width: 25%">' . get_string('autoratingitempercentset', 'diary', (
-                        '<br>C ' . $settingsused->minmaxcharpercent
-                        . '%, W ' . $settingsused->minmaxwordpercent
-                        . '%, S ' . $settingsused->minmaxsentencepercent
-                        . '%, P ' . $settingsused->minmaxparagraphpercent)) . ' <br>'
-                        . get_string('commonerrorpercentset', 'diary', (
-                        '<br> Ce ' . $diary->errorpercent)) . ' </td></tr>';
+            $limitssummary = 'C ' . $settingsused->minchar . '/' . $settingsused->maxchar . ' (' . $settingsused->minmaxcharpercent . '%), '
+                . 'W ' . $settingsused->minword . '/' . $settingsused->maxword . ' (' . $settingsused->minmaxwordpercent . '%), '
+                . 'S ' . $settingsused->minsentence . '/' . $settingsused->maxsentence . ' (' . $settingsused->minmaxsentencepercent . '%), '
+                . 'P ' . $settingsused->minparagraph . '/' . $settingsused->maxparagraph . ' (' . $settingsused->minmaxparagraphpercent . '%)';
+            $percentsummary = 'C ' . $settingsused->minmaxcharpercent
+                . '%, W ' . $settingsused->minmaxwordpercent
+                . '%, S ' . $settingsused->minmaxsentencepercent
+                . '%, P ' . $settingsused->minmaxparagraphpercent
+                . '%, Ce ' . $diary->errorpercent . '%';
+
+            $currentstats = '<table class="generaltable diary-stats-table">'
+                . '<tr class="diary-stats-meta">'
+                . '<td class="diary-stats-col">' . get_string('timecreated', 'diary') . ': ' . userdate($entry->timecreated) . '</td>'
+                . '<td class="diary-stats-col">' . get_string('lastedited') . ': ' . userdate($entry->timemodified) . '</td>'
+                . '<td class="diary-stats-col">' . $settingsused->promptused . '; ' . $limitssummary . '</td>'
+                . '<td class="diary-stats-col">' . get_string('autoratingitempercentset', 'diary', $percentsummary)
+                . '; ' . get_string('commonerrorpercentset', 'diary', $diary->errorpercent)
+                . '</td></tr>';
 
             // 20211007 An output experiment check to see if there is any text.
             if ($diarystats->uniquewords > 0) {
@@ -929,7 +923,7 @@ class diarystats {
                 // 20211224 Moved return to prevent undefined variable: currentstats warning.
                 return $currentstats;
             } else {
-                $currentstats = '<table class="generaltable">';
+                $currentstats = '<table class="generaltable diary-stats-table">';
                 $currentstats .= '<tr><td>' . get_string('notextdetected', 'diary') . '</td><td> </td><td> </td><td> </td></tr>';
                 return $currentstats;
             }
@@ -994,7 +988,7 @@ class diarystats {
             }
 
             // 20211028 Put the info in a variable for later use. 20211208 Converted from hardcoded text to string.
-            $usercommonerrors = '<tr class="table-warning"><td colspan="4" style="background-color: #fff3cd;">'
+            $usercommonerrors = '<tr class="table-warning"><td colspan="4">'
                                 . get_string(
                                     'detectcommonerror',
                                     'diary',
@@ -1015,7 +1009,7 @@ class diarystats {
                 $missingphrases .= $x . '. ' . s($missingphrase) . ' ';
                 ++$x;
             }
-            $usercommonerrors .= '<tr class="table-warning"><td colspan="4" style="background-color: #fff3cd;">'
+            $usercommonerrors .= '<tr class="table-warning"><td colspan="4">'
                 . get_string(
                     'detectmissingphrase',
                     'diary',

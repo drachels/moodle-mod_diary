@@ -701,6 +701,7 @@ class results {
         require_once($CFG->dirroot . '/rating/lib.php');
         // 20210705 Added new activity color setting.
         $dcolor4 = $diary->entrytextbgc;
+        $bordercssvars = diary_get_border_css_vars($diary->id);
 
         // Stable per-user anchor used by report.php redirects after create-zero actions.
         echo '<a id="user-anchor-' . $user->id . '"></a>';
@@ -723,7 +724,7 @@ class results {
             // 20231110 Add a title for the entry, only if there is one.
             if ($entry->title) {
                 echo '<tr>';
-                echo '<td style="width:35px;"><h6>' . get_string('diarytitle', 'diary') . ':</h6></td>';
+                echo '<td class="diary-col-narrow"><h6>' . get_string('diarytitle', 'diary') . ':</h6></td>';
                 echo '<td><h6>' . $entry->title . '</h6></td>';
                 echo '<td></td>';
                 echo '</tr>';
@@ -738,9 +739,10 @@ class results {
                 // 20240116 Added code to use a prompt background color.
                 // 20240117 Gave promptentry it's own class name to enable
                 echo '<tr>';
-                echo '<td style="width:35px;"><h6>' . get_string('prompttext', 'diary') . ':</h6></td>';
-                echo '<td><div class="promptentry" style="background: ' .
-                    $prompt->promptbgc .
+                echo '<td class="diary-col-narrow"><h6>' . get_string('prompttext', 'diary') . ':</h6></td>';
+                echo '<td><div class="promptentry diary-prompt-themed" style="--diary-prompt-bg: ' .
+                    s($prompt->promptbgc) .
+                    ';' . s($bordercssvars) .
                     ';">' .
                     $prompt->text .
                     '</div></td>';
@@ -757,7 +759,7 @@ class results {
 
             // Add an entry label followed by the date of the entry.
             echo '<tr>';
-            echo '<td style="width:35px;">' . get_string('entry', 'diary') . ':</td>';
+            echo '<td class="diary-col-narrow">' . get_string('entry', 'diary') . ':</td>';
 
             if (has_capability('mod/diary:manageentries', $context)) {
                 // 20241204 Added delete entry check enabled code.
@@ -788,12 +790,12 @@ class results {
         );
         echo '</td>';
         echo '<td class="userfullname">' . fullname($user) . '<br>';
-        echo '</td><td style="width:55px;"></td>';
+        echo '</td><td class="diary-col-actions"></td>';
         echo '</tr>';
 
         // Add the second of two rows, this one containing the users text for this entry.
         echo '<tr><td>';
-        echo '<div class="entry" style="background: ' . $dcolor4 . ';">';
+        echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($dcolor4) . ';' . s($bordercssvars) . '">';
 
         // If there is a user entry, format it and show it.
         if ($entry) {
@@ -811,7 +813,7 @@ class results {
                 'diary-tags'
             );
             // 20210701 Moved copy 1 of 2 here due to new stats.
-            echo '</div></td><td style="width:55px;"></td></tr>';
+            echo '</div></td><td class="diary-col-actions"></td></tr>';
 
             // 20210703 Moved to here from up above so the table gets rendered in the right spot.
             $statsdata = diarystats::get_diary_stats($temp, $diary);
@@ -840,16 +842,15 @@ class results {
             }
 
             if ($allowemptygrading && has_capability('mod/diary:manageentries', $context)) {
-                echo '<p><input class="btn btn-warning btn-sm"
-                        role="button"
-                        style="border-radius: 8px"
+                echo '<p><input class="btn btn-warning btn-sm diary-btn-rounded"
+                    role="button"
                         name="createzero' . $user->id . '"
                         type="submit"
                         value="' . get_string('assignzeronoentry', 'diary') . '"></input></p>';
             }
 
             // 20210701 Moved copy 2 of 2 here due to new stats.
-            echo '</div></td><td style="width:55px;"></td></tr>';
+            echo '</div></td><td class="diary-col-actions"></td></tr>';
         }
 
         echo '</table>';
@@ -902,16 +903,14 @@ class results {
             // 20210707 Added teachers name to go with their picture.
             // 20211027 Added button to insert auto grade stats and rating to feedback.
             // Also added button to remove anything in the feedback text area.
-            echo '<td>' . $teachers[$entry->teacher]->firstname . ' ' . $teachers[$entry->teacher]->lastname .
-                ' <input class="btn btn-warning btn-sm"
-                        role="button"
-                        style="border-radius: 8px"
+                echo '<td>' . $teachers[$entry->teacher]->firstname . ' ' . $teachers[$entry->teacher]->lastname .
+                ' <input class="btn btn-warning btn-sm diary-btn-rounded"
+                    role="button"
                         name="button1' . $entry->id . '"
                         type="submit"
                         value="' . get_string('addtofeedback', 'diary') . '"></input> ' .
 
-                '<input class="btn btn-warning  btn-sm"
-                        style="border-radius: 8px"
+                '<input class="btn btn-warning btn-sm diary-btn-rounded"
                         name="button2' . $entry->id . '"
                         type="submit"
                         value="' . get_string('clearfeedback', 'diary') . '"></input>';

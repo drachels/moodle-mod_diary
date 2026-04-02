@@ -61,6 +61,7 @@ $diary = $DB->get_record('diary', ['id' => $cm->instance], '*', MUST_EXIST);
 // 20210705 Added new activity color setting. Gets the setting for the correct Diary activity.
 $color3 = $diary->entrybgc;
 $color4 = $diary->entrytextbgc;
+$bordercssvars = diary_get_border_css_vars($diary->id);
 
 // 20230511 Following two lines are for View, Automatic Completion marking.
 $completion = new completion_info($course);
@@ -176,14 +177,14 @@ if (prompts::diary_available($diary)) {
         // 20230810 Changed via pull request #29.
         $url1 = new moodle_url($CFG->wwwroot . '/mod/diary/prompt_edit.php', ['id' => $cm->id, 'jumptocurrent' => 1]);
         echo '</a> <a href="' . $url1->out(true)
-            . '" class="btn btn-success" style="border-radius: 8px">'
+            . '" class="btn btn-success diary-btn-rounded">'
             . get_string('warning', 'diary', $current)
             . '</a> ';
         die;
     } else {
         $status = prompts::prompts_viewcurrent($diary, $action, $promptid);
         // Show the current prompt.
-        echo '<b>' . $diary->intro . '</b>';
+        echo '<span class="diary-intro-highlight">' . $diary->intro . '</span>';
     }
     echo get_string('tcount', 'diary', $tcount);
     echo get_string('promptinfo', 'diary', ['past' => $past, 'current' => $current, 'future' => $future]);
@@ -242,7 +243,7 @@ if ($entriesmanager) {
             $useroptions[(int)$reportuser->id] = fullname($reportuser);
         }
 
-        echo '<form method="get" action="view.php" style="display:inline-block; margin-left:0.75rem;">';
+        echo '<form method="get" action="view.php" class="diary-inline-form">';
         echo '<input type="hidden" name="id" value="' . $cm->id . '">';
         echo html_writer::select(
             $useroptions,
@@ -251,8 +252,7 @@ if ($entriesmanager) {
             false,
             [
                 'id' => 'jumpuserview',
-                'class' => 'custom-select',
-                'style' => 'display:inline-block;width:auto;max-width:20rem;',
+                'class' => 'custom-select diary-inline-select',
                 'onchange' => 'if (this.value > 0) { this.form.submit(); }',
             ]
         );
@@ -356,7 +356,7 @@ if ($timenow > $timestart) {
                 $options['firstkey'] = $firstkey;
                 $options['action'] = 'editentry';
                 $options['promptid'] = $firstpromptid;
-                echo '<span style="float: right;">' . get_string('usertoolbar', 'diary');
+                echo '<span class="diary-toolbar-right">' . get_string('usertoolbar', 'diary');
                 echo $output->toolbar(
                     $firstkey,
                     $options
@@ -487,11 +487,11 @@ if ($timenow > $timestart) {
         }
         foreach ($entries as $entry) {
             if (empty($entry->text)) {
-                echo '<p align="center"><b>' . get_string('blankentry', 'diary') . '</b></p>';
+                echo '<p class="diary-blankentry">' . get_string('blankentry', 'diary') . '</p>';
             } else if ($thispage <= $perpage) {
                 $thispage++;
                 // 20210501 Changed to class, start a division to contain the overall entry.
-                echo '<div class="entry" style="background: ' . $color3 . ';">';
+                echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($color3) . ';' . s($bordercssvars) . '">';
 
                 $date1 = new DateTime(date('Y-m-d G:i:s', time()));
                 $date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
@@ -572,7 +572,7 @@ if ($timenow > $timestart) {
                     // 20230321 Added capability to use contrasting color for the prompt background.
                     // 20240116 Added code to use a prompt background color.
                     // 20240117 Gave promptentry it's own class name to enable
-                    echo '<div class="promptentry" style="background: ' . $prompt->promptbgc . ';">';
+                    echo '<div class="promptentry diary-prompt-themed" style="--diary-prompt-bg: ' . s($prompt->promptbgc) . ';' . s($bordercssvars) . '">';
                     echo '<strong>Prompt ID-' . $prompt->id . ', ' . get_string('prompttext', 'diary')
                         . '</strong>: ' . $prompt->text . '</div>';
                 }
@@ -587,7 +587,7 @@ if ($timenow > $timestart) {
 
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
-                echo '<div class="entry" style="background: ' . $color4 . ';">';
+                echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($color4) . ';' . s($bordercssvars) . '">';
 
                 // 20250122 Modified the entry text division to add tags right at the end of the entry.
                 echo results::diary_format_entry_text($entry, $course, $cm);
@@ -632,7 +632,7 @@ if ($timenow > $timestart) {
                     } else {
                         print_string('noentry', 'diary');
                         // 20210701 Moved copy 2 of 2 here due to new stats.
-                        echo '</div></td><td style="width:55px;"></td></tr>';
+                        echo '</div></td><td class="diary-col-actions"></td></tr>';
                     }
 
                     echo '</table>';

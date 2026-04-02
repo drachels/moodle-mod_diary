@@ -151,7 +151,7 @@ echo '<div>' . (get_string('sortorder', "diary"));
 echo (get_string($stringlable, "diary"));
 
 // 20200827 Added link to index.php page.
-echo '<span style="float: right;"><a href="index.php?id=' . $course->id . '">'
+echo '<span class="diary-toolbar-right"><a href="index.php?id=' . $course->id . '">'
     . get_string('viewalldiaries', 'diary') . '</a></span></div>';
 
 // Save our current user id and also get his details. CHECK - might not need this.
@@ -297,7 +297,7 @@ if (! $users) {
         // 20210511 Reorganized group and toolbar output. 20220102 Added action.
         echo '<span>' .
             groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/reportsingle.php?id=$cm->id&action=currententry")
-            . '</span><span style="float: right;">' .
+            . '</span><span class="diary-toolbar-right">' .
             get_string('toolbar', 'diary') .
             $output .
             '</span>';
@@ -326,7 +326,7 @@ if (! $users) {
     $saveallbutton = '<p class="feedbacksavereturn">';
     $saveallbutton .= '<input type="hidden" name="id" value="' . $cm->id . '" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
-    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
+    $saveallbutton .= '<input type="submit" class="btn btn-primary diary-btn-rounded" value="'
                       . get_string('saveallfeedback', 'diary') . '" />';
 
     // phpcs:ignore
@@ -336,7 +336,7 @@ if (! $users) {
     $saveallbutton .= ' <a href="'.$url.' class="feedbacksavestay">';
     $saveallbutton .= '<input type="hidden" name="id" value="'.$cm->id.'" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
-    $saveallbutton .= '<input type="submit" class="btn btn-primary" style="border-radius: 8px" value="'
+    $saveallbutton .= '<input type="submit" class="btn btn-primary diary-btn-rounded" value="'
                       .get_string('addtofeedback', 'diary').'"</a>';
     */
 
@@ -345,7 +345,7 @@ if (! $users) {
     // 20230810 Made changes based on pull request#29.
     $url2 = new moodle_url($CFG->wwwroot . '/mod/diary/report.php', ['id' => $id, 'action' => 'currententry']);
     $saveallbutton .= ' <a href="' . $url2->out(true)
-                     . '" class="btn btn-secondary" role="button" style="border-radius: 8px">'
+                     . '" class="btn btn-secondary diary-btn-rounded" role="button">'
                      . get_string('returntoreport', 'diary', $diary->name)
                      . '</a>';
 
@@ -355,9 +355,10 @@ if (! $users) {
     echo $saveallbutton;
     // 20210705 Added new activity color setting. Only need to set the overall background color here.
     $dcolor3 = $diary->entrybgc;
+    $bordercssvars = diary_get_border_css_vars($diary->id);
     foreach ($eee as $ee) {
         // 20210511 Changed to using class.
-        echo '<div class="entry" style="background: ' . $dcolor3 . '">';
+        echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($dcolor3) . ';' . s($bordercssvars) . '">';
         // Based on the single selected user, print all their entries on screen.
         echo results::diary_print_user_entry(
             $context,

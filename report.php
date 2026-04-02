@@ -310,7 +310,7 @@ echo ('<span>' . get_string('sortorder', "diary"));
 echo (get_string($stringlable, "diary") . '</span>');
 
 // 20200827 Added link to index.php page. 20210501 Moved to here.
-echo '<span><a style="float: right;" href="index.php?id=' . $course->id . '">'
+echo '<span><a class="diary-link-right" href="index.php?id=' . $course->id . '">'
     . get_string('viewalldiaries', 'diary') . '</a></span></div>';
 
 if (!$users) {
@@ -427,7 +427,7 @@ if (!$users) {
                 $useroptions[(int)$reportuser->id] = fullname($reportuser);
             }
 
-            echo '<form method="get" action="report.php" style="display:inline-block; margin-left:0.75rem;">';
+            echo '<form method="get" action="report.php" class="diary-inline-form">';
             echo '<input type="hidden" name="id" value="' . $cm->id . '">';
             echo '<input type="hidden" name="action" value="' . s($action) . '">';
             echo html_writer::select(
@@ -437,15 +437,14 @@ if (!$users) {
                 false,
                 [
                     'id' => 'jumpuserreport',
-                    'class' => 'custom-select',
-                    'style' => 'display:inline-block;width:auto;max-width:20rem;',
+                    'class' => 'custom-select diary-inline-select',
                     'onchange' => 'if (this.value > 0) { this.form.submit(); }',
                 ]
             );
             echo '</form>';
         }
 
-        echo '<span style="float: right;">' . get_string('toolbar', 'diary') . $output . '</span>';
+        echo '<span class="diary-toolbar-right">' . get_string('toolbar', 'diary') . $output . '</span>';
     }
 
     // Next line is different from Journal line 171 202. Difference is $journal->grade.
@@ -470,13 +469,13 @@ if (!$users) {
     $saveallbutton = '<p class="feedbacksave">';
     $saveallbutton .= '<input type="hidden" name="id" value="' . $cm->id . '" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
-    $saveallbutton .= '<input type="submit" name="saveallfeedback" class="btn btn-primary" style="border-radius: 8px" value="'
+    $saveallbutton .= '<input type="submit" name="saveallfeedback" class="btn btn-primary diary-btn-rounded" value="'
         . get_string("saveallfeedback", "diary") . '" />';
     // 20200421 Added a return button.
     // 20230810 Changed based on pull request #29.
     $url = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $id]);
     $saveallbutton .= ' <a href="' . $url->out(false)
-                     . '" class="btn btn-secondary" role="button" style="border-radius: 8px">'
+                     . '" class="btn btn-secondary diary-btn-rounded" role="button">'
                      . get_string('returnto', 'diary', $diary->name)
                      . '</a>';
 
@@ -487,11 +486,12 @@ if (!$users) {
 
     // 20210705 Added new activity color setting. Only the overall background here. Entry text bgc is in results.
     $dcolor3 = $diary->entrybgc;
+    $bordercssvars = diary_get_border_css_vars($diary->id);
 
     // Print a list of users who have completed at least one entry.
     if ($usersdone = diary_get_users_done($diary, $currentgroup, $sortoption)) {
         foreach ($usersdone as $user) {
-            echo '<div class="entry" style="background: ' . $dcolor3 . '">';
+            echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($dcolor3) . ';' . s($bordercssvars) . '">';
 
             // Based on toolbutton and on list of users with at least one entry, print the entries on screen.
             echo results::diary_print_user_entry(
@@ -532,8 +532,7 @@ if (!$users) {
             false,
             [
                 'id' => 'pref_lists',
-                'class' => 'custom-select',
-                'style' => 'width: auto; max-width: 20rem; display: inline-block;',
+                'class' => 'custom-select diary-inline-select',
                 'onchange' => 'this.form.submit()'
             ]
         );
@@ -546,7 +545,7 @@ if (!$users) {
         // List remaining users with no entries.
         foreach ($users as $user) {
             // 20210511 Changed to class.
-            echo '<div class="entry" style="background: ' . $dcolor3 . '">';
+            echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($dcolor3) . ';' . s($bordercssvars) . '">';
 
             echo results::diary_print_user_entry(
                 $context,

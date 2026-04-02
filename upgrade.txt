@@ -31,6 +31,24 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     theme-level control. 
     Requests: remove borders, allow theme color overrides, show dates/statistics on one line,
     and render dates/statistics text as non-bold via CSS.
+    2026040201 Progress - Replaced inline styling in view/report/results/diarystats paths with
+    class-based hooks; added themeable CSS variables for entry/prompt colors and border removal,
+    and updated stats/date meta rendering to one-line, non-bold CSS-driven output.
+    2026040202 Progress - Added border visibility as a configurable setting (site default +
+    per-activity override) and wired border CSS variables through view/report/results rendering
+    so borders can be toggled independently from entry/prompt color settings.
+    2026040203 Progress - Added border style (Thin/Double) and border color settings
+    (site default + per-activity override), applied to both entry and prompt borders
+    through shared border CSS-variable output in view/report/results paths.
+    2026040204 Progress - Added a third border style option (None) in both site defaults
+    and per-activity settings, while retaining the explicit border on/off toggle plus
+    style/color controls; border CSS vars now treat style=None as no border.
+    2026040205 Progress - Updated border style defaults to None (site setting default,
+    activity form fallback, and runtime helper fallback) so new Diary instances align
+    with typical borderless Moodle plugin presentation.
+    2026040206 Progress - Fixed two follow-ups: current prompt block on view.php now
+    uses the shared prompt border CSS-variable path (matching needed-prompt blocks),
+    and stats/autorating tables now wrap and constrain width to prevent right-edge overflow.
 20260327 Diary_1454 - Feature Request -Modify the prompt system to allow for other than
     just sequential use.
 20260331 Diary_1458 - Feature Request - Settings to require meeting certain automatic
@@ -95,6 +113,12 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     single active prompt now displays with explicit "Current writing prompt:"
     label; multiple active prompts display "Current writing prompts: X to
     choose from." to avoid implying only one prompt applies.
+    2026040206 Progress - Re-verified current code path for course topics:
+    lib.php diary_get_coursemodule_info() appends current-prompt output with
+    single/multiple active prompt handling, using language strings and CSS hook.
+    2026040207 Progress - Fixed modinfo/cache build notice in
+    diary_get_coursemodule_info(): disabled text filters when formatting the
+    current prompt for course-topic summary output so PAGE context is not required.
 20240426 Diary_1237 - New feature request - show individual names for selection in the,
     Visible groups dropdown.
     2026040101 Progress - Added manager/teacher user selectors on view.php
