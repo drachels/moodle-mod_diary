@@ -225,6 +225,10 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     and all tested non-Boost themes. Boost theme forces third selector to wrap
     due to its fixed-width center layout constraint; this is a Boost-level
     limitation beyond Diary plugin control. Feature complete and working as designed.
+20260402 Diary_1463 - Issue #45 - came across a small flaw regarding permission settings.
+    2026040201 Progress - Enforced mod/diary:rate separation in shared report logic
+    (classes/local/results.php): rating selector and rating writes now require rate
+    capability, while manageentries-only users can still update feedback text.
 
 
 === 4.0.1 === 2026022601

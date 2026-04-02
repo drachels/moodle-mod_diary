@@ -699,6 +699,7 @@ class results {
         // 20210605 Changed to this format.
         require_once(__DIR__ . '/../../../../lib/gradelib.php');
         require_once($CFG->dirroot . '/rating/lib.php');
+        $canrate = has_capability('mod/diary:rate', $context);
         // 20210705 Added new activity color setting.
         $dcolor4 = $diary->entrytextbgc;
         $bordercssvars = diary_get_border_css_vars($diary->id);
@@ -930,8 +931,10 @@ class results {
             // 20241203 Modified to work for the three report pages.
             // 20260209 Modified to update the system rating based on the rating for this entry.
             if ($param1 == get_string('addtofeedback', 'diary')) {
-                // Set rating from autorating calculation.
-                $entry->rating = $currentratingdata;
+                if ($canrate && $diary->assessed > 0) {
+                    // Set rating from autorating calculation.
+                    $entry->rating = $currentratingdata;
+                }
 
                 // Build and append the feedback text.
                 $feedbacktext .= $statsdata . $comerrdata . $autoratingdata;
@@ -940,38 +943,40 @@ class results {
                 // Save changes to the diary entry.
                 $DB->update_record('diary_entries', $entry, $bulk = false);
 
-                // Ensure core mdl_rating record exists/updated (using the existing $context).
-                global $USER;  // The teacher.
+                if ($canrate && $diary->assessed > 0) {
+                    // Ensure core mdl_rating record exists/updated (using the existing $context).
+                    global $USER;  // The teacher.
 
-                $ratingdata = new stdClass();
-                $ratingdata->contextid    = $context->id;
-                $ratingdata->component    = 'mod_diary';
-                $ratingdata->ratingarea   = 'entry';
-                $ratingdata->itemid       = $entry->id;
-                $ratingdata->scaleid      = $diary->scale;
-                $ratingdata->rating       = $currentratingdata;
-                $ratingdata->userid       = $user->id;
-                $ratingdata->timemodified = time();
+                    $ratingdata = new stdClass();
+                    $ratingdata->contextid    = $context->id;
+                    $ratingdata->component    = 'mod_diary';
+                    $ratingdata->ratingarea   = 'entry';
+                    $ratingdata->itemid       = $entry->id;
+                    $ratingdata->scaleid      = $diary->scale;
+                    $ratingdata->rating       = $currentratingdata;
+                    $ratingdata->userid       = $user->id;
+                    $ratingdata->timemodified = time();
 
-                // Look for an existing rating of this entry.
-                $existing = $DB->get_record('rating', [
-                    'contextid'  => $context->id,
-                    'component'  => 'mod_diary',
-                    'ratingarea' => 'entry',
-                    'itemid'     => $entry->id,
-                    'userid'     => $user->id, // Match on student's ID.
-                ]);
+                    // Look for an existing rating of this entry.
+                    $existing = $DB->get_record('rating', [
+                        'contextid'  => $context->id,
+                        'component'  => 'mod_diary',
+                        'ratingarea' => 'entry',
+                        'itemid'     => $entry->id,
+                        'userid'     => $user->id, // Match on student's ID.
+                    ]);
 
-                if ($existing) {
-                    $ratingdata->id = $existing->id;
-                    $DB->update_record('rating', $ratingdata);
-                } else {
-                    $ratingdata->timecreated = time();
-                    $DB->insert_record('rating', $ratingdata);
+                    if ($existing) {
+                        $ratingdata->id = $existing->id;
+                        $DB->update_record('rating', $ratingdata);
+                    } else {
+                        $ratingdata->timecreated = time();
+                        $DB->insert_record('rating', $ratingdata);
+                    }
+
+                    // Recalculate grade (now with rating in place).
+                    diary_update_grades($diary, $entry->userid);
                 }
-
-                // Recalculate grade (now with rating in place).
-                diary_update_grades($diary, $entry->userid);
 
                 // 20260211 Added due to Grok recommendation.
                 $SESSION->diary_clicked_entry = $entry->id;
@@ -983,31 +988,37 @@ class results {
                 $currententry = $DB->get_record('diary_entries', ['id' => $entry->id]);
                 if ($currententry) {
                     $hadfeedback = trim(strip_tags((string)$currententry->entrycomment)) !== '';
-                    $hadrating = $currententry->rating !== null && $currententry->rating !== '';
+                    $hadrating = $canrate && $currententry->rating !== null && $currententry->rating !== '';
 
                     // Only clear and notify when there is something to clear.
                     if ($hadfeedback || $hadrating) {
                         $clearupdate = new StdClass();
                         $clearupdate->id = $currententry->id;
-                        $clearupdate->rating = null;
                         $clearupdate->entrycomment = null;
+                        if ($canrate) {
+                            $clearupdate->rating = null;
+                        }
                         $clearupdate->teacher = $USER->id;
                         $clearupdate->timemarked = time();
                         $clearupdate->mailed = 0;
                         $DB->update_record('diary_entries', $clearupdate, false);
 
-                        $DB->delete_records('rating', [
-                            'contextid' => $context->id,
-                            'component' => 'mod_diary',
-                            'ratingarea' => 'entry',
-                            'itemid' => $entry->id,
-                            'userid' => $entry->userid,
-                        ]);
+                        if ($canrate) {
+                            $DB->delete_records('rating', [
+                                'contextid' => $context->id,
+                                'component' => 'mod_diary',
+                                'ratingarea' => 'entry',
+                                'itemid' => $entry->id,
+                                'userid' => $entry->userid,
+                            ]);
 
-                        diary_update_grades($diary, $entry->userid);
+                            diary_update_grades($diary, $entry->userid);
+                        }
                         self::send_feedback_cleared_notification($context, $course, $diary, $entry);
 
-                        $entry->rating = null;
+                        if ($canrate) {
+                            $entry->rating = null;
+                        }
                         $entry->entrycomment = null;
                         $feedbacktext = null;
                     }
@@ -1063,7 +1074,12 @@ class results {
             }
 
             if ($diary->assessed > 0) {
-                echo html_writer::select($grades, 'r' . $entry->id, $entry->rating, get_string("nograde") . '...', $attrs);
+                if ($canrate) {
+                    echo html_writer::select($grades, 'r' . $entry->id, $entry->rating, get_string("nograde") . '...', $attrs);
+                } else {
+                    // Keep current value stable for non-raters while allowing feedback saves.
+                    $hiddengradestr = '<input type="hidden" name="r' . $entry->id . '" value="' . $entry->rating . '"/>';
+                }
             }
             echo $hiddengradestr;
 
@@ -1432,6 +1448,7 @@ class results {
         global $DB, $CFG, $OUTPUT, $USER, $SESSION;
 
         confirm_sesskey();
+        $canrate = has_capability('mod/diary:rate', $context);
         $feedback = [];
         $data = (array) $data;
         // My single data entry contains id, sesskey, and three other items, entry, feedback, and ???
@@ -1456,14 +1473,14 @@ class results {
             // Only update entries where feedback has actually changed.
             $ratingchanged = false;
             $commentchanged = false;
-            if ($diary->assessed != RATING_AGGREGATE_NONE) {
+            if ($diary->assessed != RATING_AGGREGATE_NONE && $canrate && array_key_exists('r', $vals)) {
                 $studentrating = clean_param($vals['r'], PARAM_INT);
             } else {
-                $studentrating = '';
+                $studentrating = $entry->rating;
             }
             $studentcomment = clean_text($vals['c'], FORMAT_HTML);
 
-            if ($studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
+            if ($canrate && $studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;
             }
 
@@ -1473,7 +1490,9 @@ class results {
 
             if ($ratingchanged || $commentchanged) {
                 $newentry = new StdClass();
-                $newentry->rating = $studentrating;
+                if ($canrate) {
+                    $newentry->rating = $studentrating;
+                }
                 $newentry->entrycomment = $studentcomment;
                 $newentry->teacher = $USER->id;
                 $newentry->timemarked = $timenow;
@@ -1484,7 +1503,9 @@ class results {
                 } else {
                     $count++;
                 }
-                $entrybyuser[$entry->userid]->rating = $studentrating;
+                if ($canrate) {
+                    $entrybyuser[$entry->userid]->rating = $studentrating;
+                }
                 $entrybyuser[$entry->userid]->entrycomment = $studentcomment;
                 $entrybyuser[$entry->userid]->teacher = $USER->id;
                 $entrybyuser[$entry->userid]->timemarked = $timenow;
@@ -1492,7 +1513,7 @@ class results {
                 $records[$entry->id] = $entrybyuser[$entry->userid];
 
                 // Compare to database view.php line 465.
-                if ($diary->assessed != RATING_AGGREGATE_NONE) {
+                if ($diary->assessed != RATING_AGGREGATE_NONE && $canrate) {
                     // 20200812 Added rating code and got it working.
                     $ratingoptions = new stdClass();
                     $ratingoptions->contextid = $context->id;
