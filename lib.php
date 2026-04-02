@@ -202,6 +202,74 @@ function diary_supports($feature) {
 }
 
 /**
+ * Returns cached module information for course pages.
+ *
+ * Appends the current prompt text to the Diary description shown in course topics
+ * when the module is configured to show its description.
+ *
+ * @param stdClass $coursemodule Course module record from {course_modules}.
+ * @return cached_cm_info|null
+ */
+function diary_get_coursemodule_info($coursemodule) {
+    global $DB;
+
+    $diary = $DB->get_record('diary', ['id' => $coursemodule->instance],
+        'id,name,intro,introformat', IGNORE_MISSING);
+    if (!$diary) {
+        return null;
+    }
+
+    $info = new cached_cm_info();
+    $info->name = $diary->name;
+
+    if (!empty($coursemodule->showdescription)) {
+        $context = \context_module::instance($coursemodule->id);
+        $content = '';
+
+        if (trim(strip_tags($diary->intro)) !== '') {
+            $content = format_module_intro('diary', $diary, $coursemodule->id, false);
+        }
+
+        $now = time();
+        $params = ['diaryid' => $diary->id, 'startnow' => $now, 'finishnow' => $now];
+        $activesql = "diaryid = :diaryid AND datestart <= :startnow AND datestop >= :finishnow";
+        $activepromptcount = $DB->count_records_select('diary_prompts', $activesql, $params);
+
+        if ($activepromptcount > 1) {
+            $promptlabel = \html_writer::tag('strong', get_string('coursetopiccurrentpromptcount', 'diary', $activepromptcount));
+            $content .= \html_writer::div($promptlabel, 'diary-course-topic-currentprompt');
+        } else if ($activepromptcount === 1) {
+            $sql = "SELECT id, text, format
+                      FROM {diary_prompts}
+                     WHERE diaryid = :diaryid
+                       AND datestart <= :startnow
+                       AND datestop >= :finishnow
+                  ORDER BY datestart DESC, id DESC";
+            $currentprompt = $DB->get_record_sql($sql, $params, IGNORE_MULTIPLE);
+
+            if (!empty($currentprompt)) {
+                $prompttext = format_text($currentprompt->text, $currentprompt->format, [
+                    'context' => $context,
+                    'overflowdiv' => true,
+                    'para' => false,
+                ]);
+                $promptlabel = \html_writer::tag('strong', get_string('coursetopiccurrentpromptlabel', 'diary'));
+                $content .= \html_writer::div(
+                    $promptlabel . $prompttext,
+                    'diary-course-topic-currentprompt'
+                );
+            }
+        }
+
+        if ($content !== '') {
+            $info->content = $content;
+        }
+    }
+
+    return $info;
+}
+
+/**
  * List the actions that correspond to a view of this module.
  * This is used by the participation report.
  *
