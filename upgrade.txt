@@ -21,8 +21,6 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     access or completion.
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
-20230831 Diary_1069 - Would be nice if current prompt info was added to the activity
-    description in the course topic.
 20240221 Diary_1211 - Feature request - Would be nice to be able to use a grading rubric.
 20250123 - Feature needed - Need an event, class entry_deleted extends \core\event\base {.
     Created event file and it's contents, entry_deleted.php. Added new string,
@@ -78,6 +76,25 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     needed when starting a totally new entry. Note: Same for tags.
     2026033102 Progress - Desktop new-entry editor now disables autosave while
     existing-entry editing keeps normal autosave behavior.
+20230831 Diary_1069 - Would be nice if current prompt info was added to the activity
+    description in the course topic.
+    2026040201 Progress - Verified current-prompt details are injected into Diary
+    description output paths: view.php prints prompts_viewcurrent() with prompt
+    counts, and diarystats::get_minmaxes() appends current-prompt text and prompt
+    totals to diary intro content for edit-related flows.
+    2026040202 Progress - Added diary_get_coursemodule_info() in lib.php so when
+    Show description is enabled, course topic cards append the current prompt text
+    (if one is active by date window) under the Diary description.
+    2026040203 Progress - Fixed DML parameter mismatch in the new
+    course-topic current-prompt query by using distinct named placeholders
+    for start/end date comparisons (startnow, finishnow).
+    2026040204 Progress - Fixed course-topic current-prompt query to use
+    diary_prompts.datestop (actual schema field) instead of non-existent
+    datefinish.
+    2026040205 Progress - Refined course-topic prompt messaging for clarity:
+    single active prompt now displays with explicit "Current writing prompt:"
+    label; multiple active prompts display "Current writing prompts: X to
+    choose from." to avoid implying only one prompt applies.
 20240426 Diary_1237 - New feature request - show individual names for selection in the,
     Visible groups dropdown.
     2026040101 Progress - Added manager/teacher user selectors on view.php
