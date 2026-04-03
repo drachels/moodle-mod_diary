@@ -175,12 +175,22 @@
     /*border: 1px solid #000000;*/
     border-collapse: collapse;
     border-spacing: 0;
+    width: 100%;
+    table-layout: auto;
 }
 
-#page-mod-diary-report .diaryuserentry td {
+#page-mod-diary-report .diaryuserentry td,
+#page-mod-diary-reportsingle .diaryuserentry td,
+#page-mod-diary-reportone .diaryuserentry td {
     padding: 10px;
     vertical-align: top;
+    width: auto;
+}
+
+#page-mod-diary-reportsingle .diaryuserentry,
+#page-mod-diary-reportone .diaryuserentry {
     width: 100%;
+    table-layout: auto;
 }
 
 /* Keep report table layers transparent so configured Diary entry colors remain visible. */
@@ -207,6 +217,24 @@
 
 #page-mod-diary-report .diaryuserentry td.userfullname {
     white-space: nowrap;
+}
+
+#page-mod-diary-report .diaryuserentry tr > td:nth-child(1),
+#page-mod-diary-reportsingle .diaryuserentry tr > td:nth-child(1),
+#page-mod-diary-reportone .diaryuserentry tr > td:nth-child(1) {
+    width: 35px;
+}
+
+#page-mod-diary-report .diaryuserentry tr > td:nth-child(2),
+#page-mod-diary-reportsingle .diaryuserentry tr > td:nth-child(2),
+#page-mod-diary-reportone .diaryuserentry tr > td:nth-child(2) {
+    width: 100%;
+}
+
+#page-mod-diary-report .diaryuserentry tr > td:nth-child(3),
+#page-mod-diary-reportsingle .diaryuserentry tr > td:nth-child(3),
+#page-mod-diary-reportone .diaryuserentry tr > td:nth-child(3) {
+    width: 55px;
 }
 
 #page-mod-diary-report .diaryuserentry td .lastedit {

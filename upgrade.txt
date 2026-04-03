@@ -156,6 +156,20 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026040206 Progress - Fixed two follow-ups: current prompt block on view.php now
     uses the shared prompt border CSS-variable path (matching needed-prompt blocks),
     and stats/autorating tables now wrap and constrain width to prevent right-edge overflow.
+    2026040207 Progress - Follow-up reminder: on a Moodle 4.5 demo site, report.php
+    entries appeared squeezed into a narrow right-side column; needs investigation
+    next session.
+    2026040301 Progress - Fixed report entry/table squeeze for report.php,
+    reportsingle.php, and reportone.php by removing forced width:100% from
+    diaryuserentry table cells and using auto column sizing so title/entry and
+    autorating/math blocks can use the full content column width.
+    2026040302 Progress - Added explicit 3-column sizing (narrow/user content/
+    actions) for diaryuserentry rows so layout remains stable when optional
+    autograding/math output is enabled or disabled by Diary settings.
+    2026040303 Progress - Verified current code paths: report.php,
+    reportsingle.php, and reportone.php all render entry blocks via
+    classes/local/results.php diary_print_user_entry(), and styles.css
+    applies matching 3-column td sizing selectors for all three page ids.
 20260323 Diary_1449 - Feature Request - Change activity Appearance color inputs to use color
     selectors. Duplicate of Diary_1351; primary fix information posted there.
 20260326 Diary_1451 - Mobile edits top of the list instead of starting a new entry.
