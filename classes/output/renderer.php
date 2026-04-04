@@ -202,6 +202,7 @@ class renderer extends plugin_renderer_base {
         $data->cmid        = $cm->id;
         $data->diaryname   = format_string($diary->name, true, ['context' => $context]);
         $data->entrybgc    = $diary->entrybgc ?? '#ffffff'; // Default white if unset.
+        $data->bordercssvars = \diary_get_border_css_vars($diary->id);
         $data->sesskey     = sesskey();
         $data->formaction  = (new moodle_url('/mod/diary/reportone.php', [
             'id' => $cm->id, 'user' => $user->id, 'entryid' => $entry ? $entry->id : 0, 'action' => 'currententry',

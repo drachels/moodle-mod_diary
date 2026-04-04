@@ -179,12 +179,10 @@ $string['enablestats'] = 'Enable statistics';
 $string['enablestats_descr'] = 'If enabled, the statistics for each entry will be shown.';
 $string['enablestats_help'] = 'Enable, or disable, viewing statistics for each entry.';
 $string['enablestats_title'] = 'Enable statistics';
-
 $string['enabletitles'] = 'Enable titles';
 $string['enabletitles_descr'] = 'If enabled, the titles for each entry will be required and shown.';
 $string['enabletitles_help'] = 'Enable, or disable, requiring titles for each entry.';
 $string['enabletitles_title'] = 'Enable titles';
-
 $string['entries'] = 'Entries';
 $string['entry'] = 'Entry';
 $string['entrybgc'] = 'Diary entry/feedback background color';
@@ -330,12 +328,9 @@ $string['mediumwords_help'] = 'Medium words are words that have two syllables. N
 $string['messagegreeting'] = 'Hi there ';
 $string['messageprovider:diary_entries_due'] = 'Diary is due in 7 days';
 $string['messageprovider:diary_entries_due_soon'] = 'Your Diary entry is due soon';
-
 $string['messageprovider:diary_entries_overdue'] = 'Warning when your Diary attempt becomes overdue';
 $string['messageprovider:diary_entry_confirmation'] = 'Diary entry confirmation';
 $string['messageprovider:diary_entry_notification'] = 'Notify teacher that a user has submitted a Diary entry';
-
-
 $string['min'] = ' min';
 $string['minc'] = ' Min: ';
 $string['minchar'] = 'Character count minimum';
@@ -437,7 +432,6 @@ $string['promptbgc'] = 'Background color for this prompt';
 $string['promptbgc_help'] = 'This sets the overall background color for this prompt.';
 $string['promptmaxeditopens'] = 'Prompt edit opening override';
 $string['promptmaxeditopens_help'] = 'Set prompt-specific edit opening behavior for existing entries. Use -1 to inherit the diary setting, 0 for one-and-done (no re-open), or a positive number to limit edit openings for this prompt.';
-
 $string['promptid'] = 'Prompt id';
 $string['promptinfo'] = 'There are {$a->past} past prompts, {$a->current} current prompt, and {$a->future} future prompts for this diary activity.<br>';
 $string['promptmaxc'] = 'Char max';
