@@ -15,5 +15,6 @@ Feature: Diary notification message provider
 
   Scenario: Diary message provider language string is registered
     Given I log in as "admin"
-    When I navigate to "Notifications > Notification settings" in site administration
-    Then I should see "Diary" in the "Providers" region
+    When I open diary notification preferences
+    Then I should see "Notification preferences"
+    And I should see "Diary entry confirmation"

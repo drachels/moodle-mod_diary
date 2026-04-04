@@ -419,7 +419,10 @@ if (!$users) {
         );
 
         // 20210511 Reorganized group and toolbar output. 20220102 Added action.
-        echo '<span>' . groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id&action=currententry") . '</span>';
+        echo '<span>' . groups_print_activity_menu(
+            $cm,
+            $CFG->wwwroot . "/mod/diary/report.php?id=$cm->id&action=currententry"
+        ) . '</span>';
 
         if (!empty($users)) {
             $useroptions = [0 => get_string('selectuserforreport', 'diary')];
@@ -533,7 +536,7 @@ if (!$users) {
             [
                 'id' => 'pref_lists',
                 'class' => 'custom-select diary-inline-select',
-                'onchange' => 'this.form.submit()'
+                'onchange' => 'this.form.submit()',
             ]
         );
 

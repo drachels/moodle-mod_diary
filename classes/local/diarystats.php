@@ -135,13 +135,15 @@ class diarystats {
             $entryids = [];
             if ($entries = $DB->get_records('glossary_entries', ['glossaryid' => $cm->instance], 'concept')) {
                 foreach ($entries as $entry) {
-                    if ($match = self::glossary_diaryentry_search_text(
-                        $entry->concept,
-                        $text,
-                        (int)$diary->errorfullmatch,
-                        (int)$diary->errorcasesensitive,
-                        (int)$diary->errorignorebreaks
-                    )) {
+                    if (
+                        $match = self::glossary_diaryentry_search_text(
+                            $entry->concept,
+                            $text,
+                            (int)$diary->errorfullmatch,
+                            (int)$diary->errorcasesensitive,
+                            (int)$diary->errorignorebreaks
+                        )
+                    ) {
                         [$pos, $length, $match] = $match;
                         $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
                         $matches[$pos] = (object)['pos' => $pos, 'length' => $length, 'match' => $match];
@@ -156,13 +158,15 @@ class diarystats {
                 if ($aliases = $DB->get_records_select('glossary_alias', "entryid $select", $params)) {
                     foreach ($aliases as $alias) {
                         $entry = $entries[$alias->entryid];
-                        if ($match = self::glossary_diaryentry_search_text(
-                            $alias->alias,
-                            $text,
-                            (int)$diary->errorfullmatch,
-                            (int)$diary->errorcasesensitive,
-                            (int)$diary->errorignorebreaks
-                        )) {
+                        if (
+                            $match = self::glossary_diaryentry_search_text(
+                                $alias->alias,
+                                $text,
+                                (int)$diary->errorfullmatch,
+                                (int)$diary->errorcasesensitive,
+                                (int)$diary->errorignorebreaks
+                            )
+                        ) {
                             [$pos, $length, $match] = $match;
                             $errors[$match] = self::glossary_entry_link($cm->name, $entry, $match);
                             $matches[$pos] = (object)['pos' => $pos, 'length' => $length, 'match' => $match];
@@ -452,7 +456,13 @@ class diarystats {
                 }
                 $matched = (core_text::strpos($haystack, $needle) !== false);
             } else {
-                $matched = !empty(self::search_text($phrase, $text, (int)$rule->fullmatch, $rule->casesensitive, $rule->ignorebreaks));
+                $matched = !empty(self::search_text(
+                    $phrase,
+                    $text,
+                    (int)$rule->fullmatch,
+                    $rule->casesensitive,
+                    $rule->ignorebreaks
+                ));
             }
 
             if ($matched) {
@@ -838,10 +848,15 @@ class diarystats {
             // 20210703 Consolidated the table here so using one instance instead of two.
             // 20221021 Changed td 3 to show prompt ID or not in use status. Moved percents to td 4.
             // 20210703 Consolidated the table here so using one instance instead of two.
-            $limitssummary = 'C ' . $settingsused->minchar . '/' . $settingsused->maxchar . ' (' . $settingsused->minmaxcharpercent . '%), '
-                . 'W ' . $settingsused->minword . '/' . $settingsused->maxword . ' (' . $settingsused->minmaxwordpercent . '%), '
-                . 'S ' . $settingsused->minsentence . '/' . $settingsused->maxsentence . ' (' . $settingsused->minmaxsentencepercent . '%), '
-                . 'P ' . $settingsused->minparagraph . '/' . $settingsused->maxparagraph . ' (' . $settingsused->minmaxparagraphpercent . '%)';
+            $limitssummary =
+                'C ' . $settingsused->minchar . '/' . $settingsused->maxchar
+                . ' (' . $settingsused->minmaxcharpercent . '%), '
+                . 'W ' . $settingsused->minword . '/' . $settingsused->maxword
+                . ' (' . $settingsused->minmaxwordpercent . '%), '
+                . 'S ' . $settingsused->minsentence . '/' . $settingsused->maxsentence
+                . ' (' . $settingsused->minmaxsentencepercent . '%), '
+                . 'P ' . $settingsused->minparagraph . '/' . $settingsused->maxparagraph
+                . ' (' . $settingsused->minmaxparagraphpercent . '%)';
             $percentsummary = 'C ' . $settingsused->minmaxcharpercent
                 . '%, W ' . $settingsused->minmaxwordpercent
                 . '%, S ' . $settingsused->minmaxsentencepercent
@@ -850,10 +865,15 @@ class diarystats {
 
             $currentstats = '<table class="generaltable diary-stats-table">'
                 . '<tr class="diary-stats-meta">'
-                . '<td class="diary-stats-col">' . get_string('timecreated', 'diary') . ': ' . userdate($entry->timecreated) . '</td>'
-                . '<td class="diary-stats-col">' . get_string('lastedited') . ': ' . userdate($entry->timemodified) . '</td>'
+                . '<td class="diary-stats-col">'
+                . get_string('timecreated', 'diary') . ': ' . userdate($entry->timecreated)
+                . '</td>'
+                . '<td class="diary-stats-col">'
+                . get_string('lastedited') . ': ' . userdate($entry->timemodified)
+                . '</td>'
                 . '<td class="diary-stats-col">' . $settingsused->promptused . '; ' . $limitssummary . '</td>'
-                . '<td class="diary-stats-col">' . get_string('autoratingitempercentset', 'diary', $percentsummary)
+                . '<td class="diary-stats-col">'
+                . get_string('autoratingitempercentset', 'diary', $percentsummary)
                 . '; ' . get_string('commonerrorpercentset', 'diary', $diary->errorpercent)
                 . '</td></tr>';
 
@@ -1215,7 +1235,13 @@ class diarystats {
                                    . $autoratesentences . '(sent) - '
                                    . $autorateparagraphs . '(para) - '
                                    . $phrasepenalty . '(phrase) = '
-                                   . ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs + $phrasepenalty);
+                                   . (
+                                       $autoratecharacters
+                                       + $autoratewords
+                                       + $autoratesentences
+                                       + $autorateparagraphs
+                                       + $phrasepenalty
+                                   );
 
             $currentratingdisp = $diary->scale . ' - '
                                  . $autoratecharacters . '(char) - '

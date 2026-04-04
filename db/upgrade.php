@@ -671,7 +671,16 @@ function xmldb_diary_upgrade($oldversion = 0) {
     if ($oldversion < 2026032800) {
         // Define field maxeditopens to be added to diary_prompts.
         $table = new xmldb_table('diary_prompts');
-        $field = new xmldb_field('maxeditopens', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '-1', 'minmaxparagraphpercent');
+        $field = new xmldb_field(
+            'maxeditopens',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '-1',
+            'minmaxparagraphpercent'
+        );
 
         // Conditionally launch add field maxeditopens.
         if (!$dbman->field_exists($table, $field)) {

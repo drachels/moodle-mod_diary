@@ -325,8 +325,12 @@ function diary_supports($feature) {
 function diary_get_coursemodule_info($coursemodule) {
     global $DB;
 
-    $diary = $DB->get_record('diary', ['id' => $coursemodule->instance],
-        'id,name,intro,introformat', IGNORE_MISSING);
+    $diary = $DB->get_record(
+        'diary',
+        ['id' => $coursemodule->instance],
+        'id,name,intro,introformat',
+        IGNORE_MISSING
+    );
     if (!$diary) {
         return null;
     }

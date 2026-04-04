@@ -205,7 +205,9 @@ this.bindDiaryFeedbackActions = function() {
     document.addEventListener('click', function(e) {
         try {
             var target = e.target;
-            var button = target && target.closest ? target.closest('ion-button.diary-feedback-action[data-entryid][data-action]') : null;
+            var button = target && target.closest
+                ? target.closest('ion-button.diary-feedback-action[data-entryid][data-action]')
+                : null;
             if (!button) {
                 return;
             }

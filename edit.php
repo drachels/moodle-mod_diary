@@ -59,7 +59,7 @@ if (!$diary = $DB->get_record('diary', ['id' => $cm->instance])) {
 $entriesmanager = has_capability('mod/diary:manageentries', $context);
 $canbypasseditlimit = $entriesmanager || is_siteadmin();
 
-$resolveeditlimit = function($entryrecord) use ($DB, $diary) {
+$resolveeditlimit = function ($entryrecord) use ($DB, $diary) {
     $resolved = (object)[
         'limit' => max(0, (int)($diary->maxeditopens ?? 0)),
         'source' => 'diary',
@@ -305,13 +305,23 @@ $data->id = $cm->id;
 
             // Re-check limit for safety in case a direct post bypasses normal editor open flow.
             if (!$canbypasseditlimit) {
-                $entryforlimit = $DB->get_record('diary_entries', ['id' => $fromform->entryid, 'userid' => $USER->id], 'id,promptid,editcount', MUST_EXIST);
+                $entryforlimit = $DB->get_record(
+                    'diary_entries',
+                    ['id' => $fromform->entryid, 'userid' => $USER->id],
+                    'id,promptid,editcount',
+                    MUST_EXIST
+                );
                 $resolvedlimit = $resolveeditlimit($entryforlimit);
-                if (($resolvedlimit->source === 'prompt' && (int)$resolvedlimit->limit === 0)
-                    || ((int)$resolvedlimit->limit > 0 && (int)$entryforlimit->editcount > (int)$resolvedlimit->limit)) {
+                if (
+                    ($resolvedlimit->source === 'prompt' && (int)$resolvedlimit->limit === 0)
+                    || ((int)$resolvedlimit->limit > 0 && (int)$entryforlimit->editcount > (int)$resolvedlimit->limit)
+                ) {
                     redirect(
                         $CFG->wwwroot . '/mod/diary/view.php?id=' . $cm->id,
-                        get_string('editlimitreached', 'diary', ['one' => (int)$entryforlimit->editcount, 'two' => (int)$resolvedlimit->limit]),
+                        get_string('editlimitreached', 'diary', [
+                            'one' => (int)$entryforlimit->editcount,
+                            'two' => (int)$resolvedlimit->limit,
+                        ]),
                         null,
                         \core\output\notification::NOTIFY_WARNING
                     );

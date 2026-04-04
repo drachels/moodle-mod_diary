@@ -491,7 +491,8 @@ if ($timenow > $timestart) {
             } else if ($thispage <= $perpage) {
                 $thispage++;
                 // 20210501 Changed to class, start a division to contain the overall entry.
-                echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($color3) . ';' . s($bordercssvars) . '">';
+                echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: '
+                    . s($color3) . ';' . s($bordercssvars) . '">';
 
                 $date1 = new DateTime(date('Y-m-d G:i:s', time()));
                 $date2 = new DateTime(date('Y-m-d G:i:s', $entry->timecreated));
@@ -523,10 +524,12 @@ if ($timenow > $timestart) {
 
                 // 20200901 If editing time has expired, remove the edit toolbutton from the title.
                 // 20201015 Enable/disable check of the edit old entries editing tool.
-                $editlimitreached = (!is_siteadmin()
+                $editlimitreached = (
+                    !is_siteadmin()
                     && !$entriesmanager
                     && (($effectiveeditlimit === 0 && !empty($entry->promptid))
-                        || ($effectiveeditlimit > 0 && (int)($entry->editcount ?? 0) >= $effectiveeditlimit)));
+                        || ($effectiveeditlimit > 0 && (int)($entry->editcount ?? 0) >= $effectiveeditlimit))
+                );
 
                 if ((($timenow < $timefinish && $diary->editall) || (is_siteadmin())) && !$editlimitreached) {
                     $editthisentry = html_writer::link(
@@ -557,8 +560,9 @@ if ($timenow > $timestart) {
 
                         // 20250122 I think this might be what I need!
                         $deletethisentry = ' <a onclick="return confirm(\''
-                            . get_string('deleteentryconfirm', 'diary') . $entry->id . ' and ' . $tagcount . ' tags' .
-                            '\')" href="' . $updateurl . '" title="' . $alt . '">' . $pix . '</a>';
+                            . get_string('deleteentryconfirm', 'diary')
+                            . $entry->id . ' and ' . $tagcount . ' tags'
+                            . '\')" href="' . $updateurl . '" title="' . $alt . '">' . $pix . '</a>';
                     }
                 } else {
                     $editthisentry = ' ';
@@ -572,7 +576,8 @@ if ($timenow > $timestart) {
                     // 20230321 Added capability to use contrasting color for the prompt background.
                     // 20240116 Added code to use a prompt background color.
                     // 20240117 Gave promptentry it's own class name to enable
-                    echo '<div class="promptentry diary-prompt-themed" style="--diary-prompt-bg: ' . s($prompt->promptbgc) . ';' . s($bordercssvars) . '">';
+                    echo '<div class="promptentry diary-prompt-themed" style="--diary-prompt-bg: '
+                        . s($prompt->promptbgc) . ';' . s($bordercssvars) . '">';
                     echo '<strong>Prompt ID-' . $prompt->id . ', ' . get_string('prompttext', 'diary')
                         . '</strong>: ' . $prompt->text . '</div>';
                 }
@@ -587,7 +592,8 @@ if ($timenow > $timestart) {
 
                 // 20210511 Start an inner division for the user's text entry container.
                 // 20210705 Added new activity color setting. 20210704 Switched to a setting.
-                echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: ' . s($color4) . ';' . s($bordercssvars) . '">';
+                echo '<div class="entry diary-entry-themed" style="--diary-entry-bg: '
+                    . s($color4) . ';' . s($bordercssvars) . '">';
 
                 // 20250122 Modified the entry text division to add tags right at the end of the entry.
                 echo results::diary_format_entry_text($entry, $course, $cm);

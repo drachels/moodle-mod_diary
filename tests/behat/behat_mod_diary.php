@@ -44,4 +44,13 @@ class behat_mod_diary extends behat_base {
     public function wait($seconds) {
         sleep($seconds);
     }
+
+    /**
+     * Opens the notification preferences page.
+     *
+     * @When I open diary notification preferences
+     */
+    public function i_open_diary_notification_preferences() {
+        $this->getSession()->visit($this->locate_path('/message/notificationpreferences.php'));
+    }
 }

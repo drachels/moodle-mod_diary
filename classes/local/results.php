@@ -326,8 +326,10 @@ class results {
         try {
             message_send($message);
         } catch (\Throwable $e) {
-            debugging('mod_diary clear-feedback notification failed for entry ' . $entry->id . ': ' . $e->getMessage(),
-                DEBUG_DEVELOPER);
+            debugging(
+                'mod_diary clear-feedback notification failed for entry ' . $entry->id . ': ' . $e->getMessage(),
+                DEBUG_DEVELOPER
+            );
         }
     }
 
@@ -688,11 +690,26 @@ class results {
      * @param array $teachers
      * @param array $grades
      */
-    public static function diary_print_user_entry($context, $course, $diary, $user, $entry, $teachers, $grades, $allowemptygrading = false) {
+    public static function diary_print_user_entry(
+        $context,
+        $course,
+        $diary,
+        $user,
+        $entry,
+        $teachers,
+        $grades,
+        $allowemptygrading = false
+    ) {
         global $CFG, $DB, $OUTPUT, $SESSION, $USER;
         $id = required_param('id', PARAM_INT); // Course module.
         // 20241204 Added $cm for delete entry code.
-        $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
+        $cm = get_coursemodule_from_id(
+            'diary',
+            $id,
+            0,
+            false,
+            MUST_EXIST
+        ); // Complete details for cmid.
         $diaryid = optional_param('diary', $diary->id, PARAM_INT); // Diaryid.
         $action = optional_param('action', '', PARAM_ALPHANUMEXT); // Current sort Action.
 

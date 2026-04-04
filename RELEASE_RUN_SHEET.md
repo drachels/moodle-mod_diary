@@ -23,6 +23,17 @@ Use this for each release (example: v4.0.0).
 - [ ] `mod/diary` PHPCS check passes
 - [ ] Upgrade notes reviewed for deferred/known items
 
+## Behat Safety Toggle (moodledev)
+- [ ] Before Behat: confirm canonical URLs in config
+  - [ ] `wwwroot = https://drachels.net/moodledev`
+  - [ ] `behat_wwwroot = http://drachels.net/moodledev`
+- [ ] Enable Behat only for test window:
+  - [ ] `php admin/tool/behat/cli/util.php --enable`
+- [ ] After Behat (required before release/use):
+  - [ ] `php admin/tool/behat/cli/util.php --disable`
+- [ ] Verify site login URL returns normally:
+  - [ ] `https://drachels.net/moodledev/login/index.php`
+
 ## Student Smoke (Core)
 - [ ] Open Diary and create new entry
 - [ ] Save succeeds and content persists after reload

@@ -11,10 +11,10 @@ Feature: Teacher can view, comment and grade students entries
       | Course 2 | C2        | 0        | 1         |
       | Course 3 | C3        | 0        | 1         |
     And the following "activities" exist:
-      | activity | course | idnumber  | name              | intro                    |
-      | diary    | C1     | diary1    | Test diary name 1 | Test diary description 1 |
-      | diary    | C2     | diary2    | Test diary name 2 | Test diary description 2 |
-      | diary    | C3     | diary3    | Test diary name 3 | Test diary description 3 |
+      | activity | course | idnumber  | name              | intro                    | assessed | scale |
+      | diary    | C1     | diary1    | Test diary name 1 | Test diary description 1 | 1        | 100   |
+      | diary    | C2     | diary2    | Test diary name 2 | Test diary description 2 | 1        | 100   |
+      | diary    | C3     | diary3    | Test diary name 3 | Test diary description 3 | 1        | 100   |
     And the following "users" exist:
       | username | firstname | lastname | email                |
       | teacher1 | Teacher   | 1        | teacher1@example.com |
@@ -63,13 +63,11 @@ Feature: Teacher can view, comment and grade students entries
     And I am on "Course 1" course homepage
 
   Scenario: Teacher can access students entries from the diaries list page
-    When I follow "Course 1"
-    And I turn editing mode on
+    When I turn editing mode on
     And I add the "Activities" block
     And I click on "Diaries" "link" in the "Activities" "block"
-    Then I should see "Test diary description 1" in the "Test diary name 1" "table_row"
-    And I should see "View 2 diary entries" in the "Test diary name 1" "table_row"
-    And I follow "View 2 diary entries"
+    Then I should see "2 of 3" in the "Test diary name 1" "table_row"
+    And I follow "2 of 3"
 
   Scenario: Teacher grades and adds/edits feedback to student's entries
     When I follow "Test diary name 1"
@@ -91,7 +89,7 @@ Feature: Teacher can view, comment and grade students entries
     And I set the field "Student 1 Grade" to "100"
     And I set the field "Student 1 Feedback" to "You could not do it better"
     And I press "Save all my feedback"
-    And I should see "Feedback updated for 1 entries"
+    And I should see "Feedback updated for 2 entries"
     And the field "Student 1 Feedback" matches value "You could not do it better"
     And the field "Student 1 Grade" matches value "100"
     And the field "Student 2 Feedback" matches value "Well done macho man"
@@ -104,13 +102,13 @@ Feature: Teacher can view, comment and grade students entries
     And I set the following fields to these values:
       | Entry | Student 1 edited first reply |
     And I press "Save changes"
-    And I should see "Entry has changed since last feedback was saved"
+    And I should see "This entry has changed since feedback or a rating was given."
     And I log out
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Test diary name 1"
     And I follow "View 2 diary entries"
-    And I should see "Entry has changed since last feedback was saved" in the "//table[@class='diaryuserentry'][contains(., 'Student 1')]" "xpath_element"
+    And I should see "This entry has changed since feedback or a rating was given."
     And I should see "Student 1 edited first reply" in the "//table[@class='diaryuserentry'][contains(., 'Student 1')]" "xpath_element"
     And I should not see "Entry has changed since last feedback was saved" in the "//table[@class='diaryuserentry'][contains(., 'Student 2')]" "xpath_element"
     And I should see "Student 2 first reply" in the "//table[@class='diaryuserentry'][contains(., 'Student 2')]" "xpath_element"

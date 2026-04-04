@@ -177,7 +177,11 @@ if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) 
 
     if ($ruleaction === 'delete' && !empty($ruleid)) {
         prompts::delete_autograde_rule((int)$ruleid, (int)$targetpromptid);
-        $deleteurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
+        $deleteurl = new moodle_url('/mod/diary/prompt_edit.php', [
+            'id' => $cm->id,
+            'action' => 'edit',
+            'promptid' => $targetpromptid,
+        ]);
         $deleteurl->set_anchor('promptautograderules');
         redirect($deleteurl, get_string('autograderuledeleted', 'diary'));
     }
@@ -185,9 +189,18 @@ if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) 
     if ($ruleaction === 'save') {
         $phrase = trim((string)optional_param('rulephrase', '', PARAM_TEXT));
         if ($phrase === '') {
-            $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
+            $saveurl = new moodle_url('/mod/diary/prompt_edit.php', [
+                'id' => $cm->id,
+                'action' => 'edit',
+                'promptid' => $targetpromptid,
+            ]);
             $saveurl->set_anchor('promptautograderules');
-            redirect($saveurl, get_string('autograderulephraseempty', 'diary'), null, \core\output\notification::NOTIFY_ERROR);
+            redirect(
+                $saveurl,
+                get_string('autograderulephraseempty', 'diary'),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
         }
 
         $rule = new stdClass();
@@ -206,7 +219,11 @@ if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) 
         $rule->sortorder = optional_param('rulesortorder', 0, PARAM_INT);
 
         prompts::save_autograde_rule($rule);
-        $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'edit', 'promptid' => $targetpromptid]);
+        $saveurl = new moodle_url('/mod/diary/prompt_edit.php', [
+            'id' => $cm->id,
+            'action' => 'edit',
+            'promptid' => $targetpromptid,
+        ]);
         $saveurl->set_anchor('promptautograderules');
         redirect($saveurl, get_string('autograderulesaved', 'diary'));
     }
@@ -647,9 +664,15 @@ if (!empty($data->entryid)) {
 
             $requiredlabel = empty($rule->required) ? get_string('no') : get_string('yes');
             $matchlabel = $matchtypes[(int)$rule->matchtype] ?? $matchtypes[0];
-            $fullmatchlabel = !empty($rule->fullmatch) ? get_string('autograderulefullmatch', 'diary') : get_string('autograderulematchcontains', 'diary');
-            $caselabel = !empty($rule->casesensitive) ? get_string('autograderulecasesensitive', 'diary') : get_string('autograderulecaseinsensitive', 'diary');
-            $breaklabel = !empty($rule->ignorebreaks) ? get_string('autograderuleignorebreaks', 'diary') : get_string('autograderulerecognizebreaks', 'diary');
+            $fullmatchlabel = !empty($rule->fullmatch)
+                ? get_string('autograderulefullmatch', 'diary')
+                : get_string('autograderulematchcontains', 'diary');
+            $caselabel = !empty($rule->casesensitive)
+                ? get_string('autograderulecasesensitive', 'diary')
+                : get_string('autograderulecaseinsensitive', 'diary');
+            $breaklabel = !empty($rule->ignorebreaks)
+                ? get_string('autograderuleignorebreaks', 'diary')
+                : get_string('autograderulerecognizebreaks', 'diary');
 
             echo '<div class="diary-targetphrase-rule">';
             echo '<div class="diary-targetphrase-rule__label">';
@@ -720,20 +743,26 @@ if (!empty($data->entryid)) {
 
     echo '<select id="rulefullmatch" name="rulefullmatch" class="form-select"'
         . ' title="' . get_string('autograderulefullmatch', 'diary') . '">'
-        . '<option value="0"' . (empty($ruleedit->fullmatch) ? ' selected' : '') . '>' . get_string('autograderulematchcontains', 'diary') . '</option>'
-        . '<option value="1"' . (!empty($ruleedit->fullmatch) ? ' selected' : '') . '>' . get_string('autograderulefullmatch', 'diary') . '</option>'
+        . '<option value="0"' . (empty($ruleedit->fullmatch) ? ' selected' : '')
+        . '>' . get_string('autograderulematchcontains', 'diary') . '</option>'
+        . '<option value="1"' . (!empty($ruleedit->fullmatch) ? ' selected' : '')
+        . '>' . get_string('autograderulefullmatch', 'diary') . '</option>'
         . '</select>';
 
     echo '<select id="rulecasesensitive" name="rulecasesensitive" class="form-select"'
         . ' title="' . get_string('autograderulecasesensitive', 'diary') . '">'
-        . '<option value="0"' . (empty($ruleedit->casesensitive) ? ' selected' : '') . '>' . get_string('autograderulecaseinsensitive', 'diary') . '</option>'
-        . '<option value="1"' . (!empty($ruleedit->casesensitive) ? ' selected' : '') . '>' . get_string('autograderulecasesensitive', 'diary') . '</option>'
+        . '<option value="0"' . (empty($ruleedit->casesensitive) ? ' selected' : '')
+        . '>' . get_string('autograderulecaseinsensitive', 'diary') . '</option>'
+        . '<option value="1"' . (!empty($ruleedit->casesensitive) ? ' selected' : '')
+        . '>' . get_string('autograderulecasesensitive', 'diary') . '</option>'
         . '</select>';
 
     echo '<select id="ruleignorebreaks" name="ruleignorebreaks" class="form-select"'
         . ' title="' . get_string('autograderuleignorebreaks', 'diary') . '">'
-        . '<option value="0"' . (empty($ruleedit->ignorebreaks) ? ' selected' : '') . '>' . get_string('autograderulerecognizebreaks', 'diary') . '</option>'
-        . '<option value="1"' . (!empty($ruleedit->ignorebreaks) ? ' selected' : '') . '>' . get_string('autograderuleignorebreaks', 'diary') . '</option>'
+        . '<option value="0"' . (empty($ruleedit->ignorebreaks) ? ' selected' : '')
+        . '>' . get_string('autograderulerecognizebreaks', 'diary') . '</option>'
+        . '<option value="1"' . (!empty($ruleedit->ignorebreaks) ? ' selected' : '')
+        . '>' . get_string('autograderuleignorebreaks', 'diary') . '</option>'
         . '</select>';
 
     echo '<select id="rulerequired" name="rulerequired" class="form-select"'
