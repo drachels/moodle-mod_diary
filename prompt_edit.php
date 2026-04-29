@@ -40,6 +40,7 @@ $promptid = optional_param('promptid', '', PARAM_INT); // Prompt ID.
 $ruleaction = optional_param('ruleaction', '', PARAM_ALPHANUMEXT); // Rule action.
 $ruleid = optional_param('ruleid', 0, PARAM_INT); // Rule id.
 $ruleeditid = optional_param('ruleeditid', 0, PARAM_INT); // Rule id to prefill edit form.
+$saveandcontinue = optional_param('saveandcontinue', '', PARAM_RAW_TRIMMED);
 $promptbgc = optional_param('promptbgc', '#ffffff', PARAM_TEXT); // Prompt bgc default to fix undefined error down around line 322.
 if (!preg_match('/^#[0-9a-fA-F]{6}$/', $promptbgc)) {
     $promptbgc = '#ffffff';
@@ -216,6 +217,7 @@ if (!empty($ruleaction) && has_capability('mod/diary:manageentries', $context)) 
         $rule->ignorebreaks = optional_param('ruleignorebreaks', 0, PARAM_INT);
         $rule->weightpercent = optional_param('ruleweightpercent', 0, PARAM_INT);
         $rule->required = optional_param('rulerequired', 0, PARAM_INT);
+        $rule->studentvisible = optional_param('rulestudentvisible', 1, PARAM_INT);
         $rule->sortorder = optional_param('rulesortorder', 0, PARAM_INT);
 
         prompts::save_autograde_rule($rule);
@@ -334,6 +336,7 @@ if ($prompts && $view == 0) {
         $data->maxparagraph = $prompt->maxparagraph;
         $data->minmaxparagraphpercent = $prompt->minmaxparagraphpercent;
         $data->promptmaxeditopens = isset($prompt->maxeditopens) ? (int)$prompt->maxeditopens : -1;
+        $data->title = $prompt->title ?? '';
 
         // If user can edit, create a delete link to the current prompt.
         // 20230810 Changed based on pull request #29.
@@ -364,12 +367,16 @@ if ($prompts && $view == 0) {
                 . userdate($data->datestop, get_string('strftimedateshort'));
             $rows .= '<tr id="' . $rowanchor . '"><td>' . $status . '</td><td colspan="8">' . $promptsummary . '</td></tr>';
         } else {
+            $titledisplay = !empty($data->title)
+                ? '<br>' . get_string('prompttitle', 'diary') . ': <em>' . s(trim($data->title)) . '</em>'
+                : '';
             $prompttext = '<div class="promptentry" style="background: '
                       . $data->promptbgc
-                      . ';">'
+                      . ';">' 
                       . get_string('writingpromptlable2', 'diary')
                       . $displaycounter
                       . get_string('idlable', 'diary', $data->entryid)
+                      . $titledisplay
                       . '<br>' . $data->text . '</div>';
             $promptbgc = '<td>' . $data->promptbgc . '</td>';
             $start = '<td>' . userdate($data->datestart) . '</td>';
@@ -553,6 +560,7 @@ if ($form->is_cancelled()) {
     $newentry->maxparagraph = $fromform->maxparagraph;
     $newentry->minmaxparagraphpercent = $fromform->minmaxparagraphpercent;
     $newentry->maxeditopens = (int)$fromform->promptmaxeditopens;
+    $newentry->title = isset($fromform->title) ? trim((string)$fromform->title) : '';
 
     if ($fromform->entryid) {
         $newentry->id = $fromform->entryid;
@@ -597,6 +605,16 @@ if ($form->is_cancelled()) {
     $newentry->minmaxparagraphpercent = $fromform->minmaxparagraphpercent;
 
     $DB->update_record('diary_prompts', $newentry);
+    if (!empty($saveandcontinue)) {
+        $continueurl = new moodle_url('/mod/diary/prompt_edit.php', [
+            'id' => $cm->id,
+            'action' => 'edit',
+            'promptid' => $newentry->id,
+        ]);
+        $continueurl->set_anchor('prompteditor');
+        redirect($continueurl);
+    }
+
     // 20230810 Changed based on pull request #29.
     $saveurl = new moodle_url('/mod/diary/prompt_edit.php', ['id' => $cm->id, 'promptid' => $newentry->id]);
     $saveurl->set_anchor('prompt-' . $newentry->id);
@@ -632,6 +650,7 @@ if (!empty($data->entryid)) {
         $ruleedit->ignorebreaks = 0;
         $ruleedit->weightpercent = 0;
         $ruleedit->required = 0;
+        $ruleedit->studentvisible = 1;
         $ruleedit->sortorder = prompts::next_autograde_rule_sortorder((int)$data->entryid);
     }
 
@@ -701,6 +720,12 @@ if (!empty($data->entryid)) {
             echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
             echo '<span>' . get_string('autograderulerequired', 'diary') . ': ' . s($requiredlabel) . '</span>';
             echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
+            echo '<span>' . get_string('autograderulevisible', 'diary') . ': '
+                . s(empty($rule->studentvisible)
+                    ? get_string('autograderulevisiblehidden', 'diary')
+                    : get_string('autograderulevisiblevisible', 'diary'))
+                . '</span>';
+            echo '<span class="diary-targetphrase-sep" aria-hidden="true">·</span>';
             echo '<span>' . get_string('autograderulesortorder', 'diary') . ': ' . (int)$rule->sortorder . '</span>';
             echo '</div>';
             echo '</div>';
@@ -769,6 +794,15 @@ if (!empty($data->entryid)) {
         . ' title="' . get_string('autograderulerequired', 'diary') . '">'
         . '<option value="0"' . (empty($ruleedit->required) ? ' selected' : '') . '>' . get_string('no') . '</option>'
         . '<option value="1"' . (!empty($ruleedit->required) ? ' selected' : '') . '>' . get_string('yes') . '</option>'
+        . '</select>';
+
+    $visibleselected = isset($ruleedit->studentvisible) ? (int)$ruleedit->studentvisible : 1;
+    echo '<select id="rulestudentvisible" name="rulestudentvisible" class="form-select"'
+        . ' title="' . get_string('autograderulevisible', 'diary') . '">'
+        . '<option value="1"' . ($visibleselected ? ' selected' : '') . '>'
+        . get_string('autograderulevisiblevisible', 'diary') . '</option>'
+        . '<option value="0"' . (!$visibleselected ? ' selected' : '') . '>'
+        . get_string('autograderulevisiblehidden', 'diary') . '</option>'
         . '</select>';
 
     echo '<span class="diary-targetphrase-editor__sortlabel">' . get_string('autograderulesortorder', 'diary') . '</span>';

@@ -690,5 +690,81 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2026032800, 'diary');
     }
+
+    if ($oldversion < 2026042901) {
+        $table = new xmldb_table('diary');
+
+        // Define field promptmode to be added to diary.
+        $field = new xmldb_field('promptmode', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'editdates');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field requiredpromptcount to be added to diary.
+        $field = new xmldb_field(
+            'requiredpromptcount',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'promptmode'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Normalize legacy/invalid values to non-breaking defaults.
+        $DB->execute("UPDATE {diary} SET promptmode = 0 WHERE promptmode < 0 OR promptmode > 4");
+        $DB->execute("UPDATE {diary} SET requiredpromptcount = 0 WHERE requiredpromptcount < 0");
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026042901, 'diary');
+    }
+
+    if ($oldversion < 2026042902) {
+        $table = new xmldb_table('diary_prompts');
+
+        // Define optional title field to be added to diary_prompts.
+        $field = new xmldb_field(
+            'title',
+            XMLDB_TYPE_CHAR,
+            '255',
+            null,
+            null,  // NOTNULL = false (nullable).
+            null,
+            null,
+            'maxeditopens'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026042902, 'diary');
+    }
+
+    if ($oldversion < 2026042903) {
+        $table = new xmldb_table('diary_prompt_autograde_rules');
+
+        // Add studentvisible field: 1 = shown to student in feedback, 0 = hidden (still scores).
+        $field = new xmldb_field(
+            'studentvisible',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '1',
+            'required'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026042903, 'diary');
+    }
     return true;
 }

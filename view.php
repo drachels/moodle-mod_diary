@@ -36,7 +36,7 @@ $id = required_param('id', PARAM_INT); // Course Module ID (cmid).
 $cm = get_coursemodule_from_id('diary', $id, 0, false, MUST_EXIST); // Complete details for cmid.
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST); // Complete details about this course.
 $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
-$promptid = optional_param('promptid', '', PARAM_INT); // Current entries promptid.
+$requestedpromptid = optional_param('promptid', 0, PARAM_INT); // Requested promptid for current view.
 $jumpuser = optional_param('jumpuser', 0, PARAM_INT); // Selected user for reportsingle jump.
 
 $context = context_module::instance($cm->id);
@@ -68,7 +68,8 @@ $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
-$promptid = prompts::get_current_promptid($diary);
+$promptmode = prompts::get_prompt_mode($diary);
+$promptid = prompts::get_current_promptid($diary, $USER->id, $requestedpromptid);
 
 $currentgroup = groups_get_activity_group($cm, true);
 $groupfilter = $currentgroup ? $currentgroup : '';
@@ -172,8 +173,8 @@ if (($diary->intro) && ($CFG->branch < 400)) {
 // 20221008 Hide the prompts info if the Diary activity is not available.
 // 20221027 Halt and force a fix if too many current prompts.
 if (prompts::diary_available($diary)) {
-    [$tcount, $past, $current, $future] = prompts::diary_count_prompts($diary, $promptid);
-    if ($current > 1) {
+    [$tcount, $past, $current, $future] = prompts::diary_count_prompts($diary);
+    if ($promptmode === prompts::PROMPTMODE_SEQUENTIAL && $current > 1) {
         // 20230810 Changed via pull request #29.
         $url1 = new moodle_url($CFG->wwwroot . '/mod/diary/prompt_edit.php', ['id' => $cm->id, 'jumptocurrent' => 1]);
         echo '</a> <a href="' . $url1->out(true)

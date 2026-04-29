@@ -299,6 +299,120 @@
     background: var(--diary-prompt-bg, var(--diary-prompt-bg-default));
 }
 
+.diary-prompt-picker-wrap {
+    margin-bottom: 1rem;
+}
+
+.diary-prompt-picker-heading {
+    margin-bottom: 0.35rem;
+}
+
+.diary-prompt-picker {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.diary-prompt-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    position: relative;
+    max-width: 100%;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid #c7d2e0;
+    border-radius: 999px;
+    background: #ffffff;
+    font-size: 0.72rem;
+    cursor: default;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+/* Hover highlight only — no size change so flexbox layout stays stable */
+.diary-prompt-choice:hover {
+    border-color: #0a5aa0;
+    background: #d6eaff;
+    z-index: 10;
+}
+
+/* Full-text tooltip via ::after — absolutely positioned, no reflow */
+.diary-prompt-choice::after {
+    content: attr(data-pickertitle);
+    display: none;
+    position: absolute;
+    left: 0;
+    top: calc(100% + 0.3rem);
+    background: #eef4fb;
+    border: 1px solid #0f6cbf;
+    border-radius: 6px;
+    padding: 0.35rem 0.65rem;
+    white-space: normal;
+    min-width: 14rem;
+    max-width: 36rem;
+    z-index: 20;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    pointer-events: none;
+}
+
+.diary-prompt-choice:hover::after {
+    display: block;
+}
+
+.diary-prompt-choice.is-current {
+    border-color: #0f6cbf;
+    background: #e9f4ff;
+}
+
+.diary-prompt-choice.is-completed {
+    border-color: #6c8a5b;
+    background: #eef7e9;
+}
+
+.diary-prompt-choice.is-unavailable {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.diary-prompt-choice-link,
+.diary-prompt-choice-text {
+    display: inline-block;
+    max-width: 20rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: inherit;
+}
+
+.diary-prompt-choice-link {
+    cursor: pointer;
+}
+
+.diary-prompt-choice-badge {
+    display: inline-block;
+    padding: 0.1rem 0.35rem;
+    border-radius: 999px;
+    background: rgba(15, 108, 191, 0.12);
+    font-size: 0.75em;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.diary-prompt-choice-badge.is-future {
+    background: rgba(180, 140, 0, 0.15);
+    color: #7a5c00;
+}
+
+.diary-prompt-choice-badge.is-closed {
+    background: rgba(150, 30, 30, 0.12);
+    color: #8a2020;
+}
+
 .diary-col-narrow {
     width: 35px;
 }

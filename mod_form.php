@@ -192,6 +192,22 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, (int)($diaryconfig->maxeditopens ?? 0));
 
+        // Prompt assignment mode controls (Phase 1 plumbing, default keeps current behavior).
+        $name = 'promptmode';
+        $label = get_string($name, $plugin);
+        $mform->addElement('select', $name, $label, $this->get_promptmode_options($plugin));
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, 0);
+
+        $name = 'requiredpromptcount';
+        $label = get_string($name, $plugin);
+        $mform->addElement('text', $name, $label, $mediumtextoptions);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, 0);
+        $mform->disabledIf($name, 'promptmode', 'in', [0, 1, 2, 3]);
+
         // 20210704 Added heading for appearance options section.
         $name = 'appearancehdr';
         $label = get_string('appearance');
@@ -594,7 +610,39 @@ class mod_diary_mod_form extends moodleform_mod {
             );
         }
 
+        $promptmode = isset($data['promptmode']) ? (int)$data['promptmode'] : 0;
+        $requiredpromptcount = isset($data['requiredpromptcount']) ? (int)$data['requiredpromptcount'] : 0;
+
+        if ($promptmode < 0 || $promptmode > 5) {
+            $errors['promptmode'] = get_string('promptmodeinvalid', 'diary');
+        }
+
+        if ($requiredpromptcount < 0) {
+            $errors['requiredpromptcount'] = get_string('requiredpromptcountinvalid', 'diary');
+        }
+
+        if (!in_array($promptmode, [4, 5]) && $requiredpromptcount !== 0) {
+            $errors['requiredpromptcount'] = get_string('requiredpromptcountnonpartial', 'diary');
+        }
+
         return $errors;
+    }
+
+    /**
+     * Get array of prompt mode options.
+     *
+     * @param string $plugin name
+     * @return array
+     */
+    protected function get_promptmode_options($plugin) {
+        return [
+            0 => get_string('promptmodesequential', $plugin),
+            1 => get_string('promptmodechoice', $plugin),
+            2 => get_string('promptmoderandom', $plugin),
+            3 => get_string('promptmodecompleteall', $plugin),
+            4 => get_string('promptmodechoicecomplete', $plugin),
+            5 => get_string('promptmoderandomcomplete', $plugin),
+        ];
     }
 
     /**

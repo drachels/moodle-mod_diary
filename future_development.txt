@@ -346,7 +346,7 @@ Suggested implementation notes:
 Acceptance target:
 - Diary icon visual size matches adjacent activity icons without clipping or disproportionate scaling.
 
-Prompt Assignment Modes (Sequential, Choice, Random, Complete All)
+Prompt Assignment Modes (Sequential, Choice, Random, Complete All, Partial Complete x of xx)
 ==================================================================
 Date: 2026-03-27
 Ticket: Diary_1454
@@ -365,6 +365,7 @@ However, teachers often want more flexibility:
 - Assign a pool of prompts that students must complete in any order (for example, weekly writing workshop format).
 - Randomly assign prompts from a pool to distribute topic load.
 - Require all prompts to be completed but allow student ordering.
+- Require completion of a subset from the pool (for example complete 3 of 5 prompts).
 
 Feature Scope
 -------------
@@ -397,10 +398,19 @@ Mode 4: Complete All (any order)
 - Time windows ignored.
 - Good for thematic writing cycles or cumulative reflection assignments.
 
+Mode 5: Partial Complete x of xx (subset required)
+- All prompts in pool are visible.
+- Teacher sets required prompt count x, where 1 <= x <= pool size.
+- Student chooses which prompts to complete until required count is met.
+- Progress indicator should show completed/required (for example 2/3 complete).
+- Duplicate entries for the same prompt should not count as additional prompt completions.
+- Time windows ignored.
+
 Schema Changes Needed
 ---------------------
 mdl_diary table (additions):
-- promptmode (int): 0=sequential (default), 1=choice, 2=random, 3=completeall
+- promptmode (int): 0=sequential (default), 1=choice, 2=random, 3=completeall, 4=partialcomplete
+- requiredpromptcount (int, default 0): used only when promptmode=4; 0 means unset.
 - promptpoolid (int, null): FK to diary_prompt_pools.id (optional, for future grouping)
 
 Candidate future table (deferred):
@@ -419,7 +429,8 @@ Candidate table for tracking student progress (needed for modes 2, 3, 4):
   - timecreated
   - timemodified
 
-This would let us track whether a student has completed all required prompts in modes 2 and 4.
+This would let us track whether a student has completed all required prompts in modes 2 and 4,
+and whether requiredpromptcount has been satisfied in mode 5.
 
 Logic Changes Needed
 --------------------
@@ -428,26 +439,34 @@ Logic Changes Needed
    - Mode 0 (sequential): existing datestart/datestop logic unchanged.
    - Mode 1 (choice): show all non-expired prompts; let student pick one; store selection.
    - Mode 2 (random): auto-assign one prompt on entry create; don't show chooser.
-   - Mode 3 (completeall): show all prompts; prevent duplicate entries for same prompt.
+    - Mode 3 (completeall): show all prompts; prevent duplicate entries for same prompt.
+    - Mode 4 (partialcomplete): show all prompts; allow completion until requiredpromptcount
+       is met; prevent duplicate entries for same prompt from incrementing completion.
 
 2. Grading and reporting (mod/diary/reportone.php, mod/diary/reportsingle.php, mod/diary/classes/local/results.php):
    - Group entries by prompt instead of purely by date window.
    - In mode 3 (completeall), track completion status per student per prompt and highlight gaps.
+   - In mode 4 (partialcomplete), show completed/required progress and remaining needed count.
    - Show which prompts student has/hasn't answered.
 
 3. Teacher grading UI:
-   - In mode 1+ (choice/random/completeall), allow filtering/grouping entries by prompt.
+   - In mode 1+ (choice/random/completeall/partialcomplete), allow filtering/grouping entries by prompt.
    - Show completion matrix: student × prompt with entry count or completion badge.
 
 4. Availability checks:
    - Mode 0: continue using datestart/datestop + maxentries logic.
-   - Mode 1-3: datestart/datestop no longer apply; validate maxentries per diary only.
+   - Mode 1-4: datestart/datestop no longer apply; validate maxentries per diary only.
 
 Behavior Design Decisions Needed
 --------------------------------
-1. Required vs optional in modes 1-3:
-   - Can a student skip a prompt in choice/completeall mode, or are all required?
+1. Required vs optional in modes 1-4:
+   - Can a student skip a prompt in choice/completeall/partialcomplete mode, or are all required?
    - Add an "optional" flag per prompt?
+
+1a. Partial complete thresholds:
+   - Should x be constrained to 1..poolsize at save-time and runtime?
+   - If pool shrinks after entries exist, should requiredpromptcount auto-adjust?
+   - Should completed count be based on unique prompts only (recommended)?
 
 2. Constraints per prompt in choice mode:
    - Can student answer same prompt multiple times, or once per prompt?
@@ -464,6 +483,7 @@ Behavior Design Decisions Needed
 5. Student visibility:
    - In completeall mode, show a progress indicator (3 of 5 prompts completed)?
    - In choice mode, show which prompts student hasn't picked yet?
+   - In partialcomplete mode, show completed/required plus remaining prompts needed?
 
 Implementation Roadmap (Suggested)
 ----------------------------------
@@ -479,9 +499,10 @@ Phase 2: Choice mode UI and logic
 - Wire entry creation to record chosen promptid.
 - Add prompt selection to grading reports.
 
-Phase 3: Random and complete-all modes
+Phase 3: Random, complete-all, and partial-complete modes
 - Implement auto-assignment logic for mode 2.
 - Add prompt_status tracking for mode 3.
+- Add requiredpromptcount logic and threshold checks for mode 4.
 - Update reports to show completion matrix.
 
 Phase 4: Teacher workflow and reporting
@@ -489,7 +510,8 @@ Phase 4: Teacher workflow and reporting
 - Report enhancements: prompt-grouped view, completion badges, progress indicators.
 
 Phase 5: Mobile support
-- Extend mobile templates to show prompt chooser (mode 1) or completed status (mode 3).
+- Extend mobile templates to show prompt chooser (mode 1) and completion status
+   (mode 3 and mode 4 partial-complete progress).
 - Ensure WS endpoints return prompt list and mode context data.
 
 Testing Checklist (for all modes)
@@ -498,6 +520,8 @@ Testing Checklist (for all modes)
 - Choice mode: student can pick one of many; grading works; report shows picks.
 - Random mode: entries are assigned different prompts; assignments are durable (don't change on refresh).
 - Complete-all mode: student see completion progress; cannot duplicate prompt; all prompts eventually visible.
+- Partial-complete mode: student can complete any prompts until threshold x is met; progress and
+   remaining-needed count update correctly; duplicate prompt attempts do not increase completion.
 - Grading: all modes integrate with existing min/max/phrase autograde logic.
 - Backward compatibility: upgrading from current (implicitly mode 0) doesn't break existing entries/grades.
 - Privacy export includes prompt assignments and completion status.

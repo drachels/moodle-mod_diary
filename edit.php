@@ -92,7 +92,7 @@ $tempintro = $diary->intro;
 // 20240507 Added for testing and it appears to work for existing entry without a prompt.
 if (!($promptid > 0) && ($diary->timeopen < time()) && !($action == 'editentry' && $entry)) {
     // Need to call a prompt function that returns the current promptid, if there is one that is current.
-    $promptid = prompts::get_current_promptid($diary);
+    $promptid = prompts::get_current_promptid($diary, $USER->id, $promptid);
 }
 
 // 20210817 Add min/max info to the description so user can see them while editing an entry.
@@ -162,7 +162,7 @@ if ($action == 'currententry' && $entry) {
     // There are no entries for this user, so start the first one.
     $data->entryid = null;
     // 20250112 Testing promptid for new entry with a current prompt.
-    $data->promptid = prompts::get_current_promptid($diary);
+    $data->promptid = prompts::get_current_promptid($diary, $USER->id, $promptid);
     $data->timecreated = time();
     $data->title = '';
     $data->text = '';
@@ -273,7 +273,8 @@ $data->id = $cm->id;
             }
             $newentry->promptid = $originalpromptid;  // Or $fromform->promptid if you allow changes someday.
         } else {
-            $newentry->promptid = prompts::get_current_promptid($diary);
+            $requestedpromptid = !empty($fromform->promptid) ? (int)$fromform->promptid : 0;
+            $newentry->promptid = prompts::get_current_promptid($diary, $USER->id, $requestedpromptid);
         }
         $newentry->timecreated = $fromform->timecreated;
         $newentry->timemodified = $timenow;

@@ -36,6 +36,19 @@ use mod_diary\local\results;
 function diary_add_instance($diary) {
     global $DB;
 
+    $diary->promptmode = isset($diary->promptmode) ? (int)$diary->promptmode : 0;
+    if ($diary->promptmode < 0 || $diary->promptmode > 4) {
+        $diary->promptmode = 0;
+    }
+
+    $diary->requiredpromptcount = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+    if ($diary->requiredpromptcount < 0) {
+        $diary->requiredpromptcount = 0;
+    }
+    if ($diary->promptmode !== 4) {
+        $diary->requiredpromptcount = 0;
+    }
+
     $enableborders = isset($diary->enableborders)
         ? (int)$diary->enableborders
         : (int)get_config('mod_diary', 'enableborders');
@@ -88,6 +101,19 @@ function diary_add_instance($diary) {
  */
 function diary_update_instance($diary) {
     global $DB;
+
+    $diary->promptmode = isset($diary->promptmode) ? (int)$diary->promptmode : 0;
+    if ($diary->promptmode < 0 || $diary->promptmode > 4) {
+        $diary->promptmode = 0;
+    }
+
+    $diary->requiredpromptcount = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+    if ($diary->requiredpromptcount < 0) {
+        $diary->requiredpromptcount = 0;
+    }
+    if ($diary->promptmode !== 4) {
+        $diary->requiredpromptcount = 0;
+    }
 
     $enableborders = isset($diary->enableborders)
         ? (int)$diary->enableborders
@@ -328,7 +354,7 @@ function diary_get_coursemodule_info($coursemodule) {
     $diary = $DB->get_record(
         'diary',
         ['id' => $coursemodule->instance],
-        'id,name,intro,introformat',
+        'id,name,intro,introformat,promptmode,requiredpromptcount',
         IGNORE_MISSING
     );
     if (!$diary) {
@@ -378,6 +404,36 @@ function diary_get_coursemodule_info($coursemodule) {
                     'diary-course-topic-currentprompt'
                 );
             }
+        }
+
+        // Append prompt mode label when the diary has any prompts configured.
+        $totalprompts = $DB->count_records('diary_prompts', ['diaryid' => $diary->id]);
+        if ($totalprompts > 0) {
+            $mode = isset($diary->promptmode) ? (int)$diary->promptmode : 0;
+            $modelabels = [
+                0 => get_string('promptmodesequential', 'diary'),
+                1 => get_string('promptmodechoice', 'diary'),
+                2 => get_string('promptmoderandom', 'diary'),
+                3 => get_string('promptmodecompleteall', 'diary'),
+                4 => get_string('promptmodechoicecomplete', 'diary'),
+                5 => get_string('promptmoderandomcomplete', 'diary'),
+            ];
+            if ($mode === 4) {
+                $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+                $modedata = (object)['required' => $required, 'total' => $totalprompts];
+                $modelabel = get_string('coursetopiccurrentpromptmodechoicecomplete', 'diary', $modedata);
+            } else if ($mode === 5) {
+                $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+                $modedata = (object)['required' => $required, 'total' => $totalprompts];
+                $modelabel = get_string('coursetopiccurrentpromptmoderandomcomplete', 'diary', $modedata);
+            } else {
+                $modename = $modelabels[$mode] ?? $modelabels[0];
+                $modelabel = get_string('coursetopiccurrentpromptmode', 'diary', $modename);
+            }
+            $content .= \html_writer::div(
+                \html_writer::tag('strong', $modelabel),
+                'diary-course-topic-promptmode'
+            );
         }
 
         if ($content !== '') {

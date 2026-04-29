@@ -79,6 +79,11 @@ class prompts_form extends moodleform {
         $mform->addElement('date_time_selector', 'datestop', get_string('datestop', 'mod_diary', 'promptid'));
         $mform->setType('stopdate', PARAM_INT);
 
+        // Optional short title for the prompt picker.
+        $mform->addElement('text', 'title', get_string('prompttitle', 'mod_diary'), ['size' => 60, 'maxlength' => 255]);
+        $mform->setType('title', PARAM_TEXT);
+        $mform->addHelpButton('title', 'prompttitle', 'mod_diary');
+
         // Text editor settings.
         $name = 'prompt';
         $label = get_string($name, $plugin);
@@ -220,6 +225,12 @@ class prompts_form extends moodleform {
         // 20260111 Prompt works on .org but not here on .com, which had this missing.
         $mform->addElement('hidden', 'promptid');
         $mform->setType('promptid', PARAM_INT);
-        $this->add_action_buttons();
+
+        $buttonarray = [];
+        $buttonarray[] = &$mform->createElement('submit', 'saveandcontinue', get_string('saveandcontinueediting', 'diary'));
+        $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
+        $buttonarray[] = &$mform->createElement('cancel');
+        $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
+        $mform->closeHeaderBefore('buttonar');
     }
 }

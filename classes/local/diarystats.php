@@ -471,7 +471,10 @@ class diarystats {
             } else {
                 $result->missingcount++;
                 $result->penalty += $weight;
-                $result->missingphrases[] = $phrase;
+                // Only surface the phrase to students if the rule is not hidden.
+                if (!isset($rule->studentvisible) || !empty($rule->studentvisible)) {
+                    $result->missingphrases[] = $phrase;
+                }
                 if (!empty($rule->required)) {
                     $result->requiredmissing++;
                 }
@@ -1038,6 +1041,28 @@ class diarystats {
                         'two' => $missingphrases,
                     ]
                 ) . '</td></tr>';
+        } else if (!empty($phraseeval->rulecount)) {
+            $context = null;
+            if (!empty($diary->cmid)) {
+                $context = \context_module::instance((int)$diary->cmid);
+            } else if (!empty($diary->id)) {
+                $cm = get_coursemodule_from_instance('diary', (int)$diary->id);
+                if (!empty($cm->id)) {
+                    $context = \context_module::instance((int)$cm->id);
+                }
+            }
+            // Only show this positive confirmation to teachers/managers in report-like contexts.
+            if ($context && (has_capability('mod/diary:manageentries', $context)
+                    || has_capability('mod/diary:rate', $context))) {
+                $usercommonerrors .= '<tr class="table-success"><td colspan="4">'
+                    . get_string(
+                        'detectallphrasespresent',
+                        'diary',
+                        [
+                            'one' => $phraseeval->rulecount,
+                        ]
+                    ) . '</td></tr>';
+            }
         }
 
         return $usercommonerrors;

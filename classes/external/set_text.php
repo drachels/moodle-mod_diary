@@ -122,7 +122,7 @@ class set_text extends external_api {
             $newentry = (object)[
                 'userid' => $USER->id,
                 'diary' => $diary->id,
-                'promptid' => prompts::get_current_promptid($diary),
+                'promptid' => prompts::get_current_promptid($diary, $USER->id, 0),
                 'timecreated' => $timenow,
                 'timemodified' => $timenow,
                 'title' => '',

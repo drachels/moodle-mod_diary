@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/diary/db" VERSION="2026032800" COMMENT="XMLDB file for Moodle mod/diary"
+<XMLDB PATH="mod/diary/db" VERSION="2026042901" COMMENT="XMLDB file for Moodle mod/diary"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -22,6 +22,8 @@
         <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="editall" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Edit all comments setting."/>
         <FIELD NAME="editdates" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Edit any entry date."/>
+        <FIELD NAME="promptmode" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Prompt assignment mode. 0=sequential, 1=choice, 2=random, 3=complete all, 4=partial complete."/>
+        <FIELD NAME="requiredpromptcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Required prompt completions for partial-complete mode. 0 means unset/ignored."/>
         <FIELD NAME="maxeditopens" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Maximum number of times an existing entry can be opened for editing. 0 means unlimited."/>
         <FIELD NAME="deleteentry" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow users to delete an entry."/>
         <FIELD NAME="entrybgc" TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="#93FC84" SEQUENCE="false" COMMENT="Overall background color for an entry."/>
@@ -93,6 +95,7 @@
         <FIELD NAME="diaryid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="ID of the diary this prompt belongs to."/>
         <FIELD NAME="datestart" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Date for this prompt to start."/>
         <FIELD NAME="datestop" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Date for this prompt to end."/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Optional short title shown in prompt picker; falls back to truncated body text when blank."/>
         <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Text of this prompt."/>
         <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="promptbgc" TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="#93FC84" SEQUENCE="false"/>
@@ -127,6 +130,7 @@
         <FIELD NAME="ignorebreaks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="weightpercent" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="required" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="studentvisible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Whether this rule and its phrase are shown to students in feedback. 1=visible, 0=hidden. Hidden rules still affect scoring."/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

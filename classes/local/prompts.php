@@ -46,6 +46,21 @@ use calendar_event;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class prompts {
+    /** Prompt mode: keep existing time-window behavior. */
+    const PROMPTMODE_SEQUENTIAL = 0;
+    /** Prompt mode: user selects from prompt pool. */
+    const PROMPTMODE_CHOICE = 1;
+    /** Prompt mode: system assigns a random prompt. */
+    const PROMPTMODE_RANDOM = 2;
+    /** Prompt mode: user must complete all prompts in pool. */
+    const PROMPTMODE_COMPLETEALL = 3;
+    /** Prompt mode: user chooses X prompts from the pool. */
+    const PROMPTMODE_CHOICECOMPLETE = 4;
+    /** Backward-compatible alias for previous internal name. */
+    const PROMPTMODE_PARTIALCOMPLETE = self::PROMPTMODE_CHOICECOMPLETE;
+    /** Prompt mode: system assigns random prompts until X are completed. */
+    const PROMPTMODE_RANDOMCOMPLETE = 5;
+
     /**
      * Returns availability status.
      * Added 20200903.
@@ -661,6 +676,440 @@ class prompts {
     }
 
     /**
+     * Return normalized prompt mode value.
+     *
+     * @param stdClass $diary Diary settings.
+     * @return int
+     */
+    public static function get_prompt_mode($diary) {
+        $mode = isset($diary->promptmode) ? (int)$diary->promptmode : self::PROMPTMODE_SEQUENTIAL;
+        if ($mode < self::PROMPTMODE_SEQUENTIAL || $mode > self::PROMPTMODE_RANDOMCOMPLETE) {
+            $mode = self::PROMPTMODE_SEQUENTIAL;
+        }
+        return $mode;
+    }
+
+    /**
+     * Return all prompt ids for a diary, ordered consistently.
+     *
+     * @param int $diaryid Diary id.
+     * @return int[]
+     */
+    protected static function get_all_prompt_ids($diaryid) {
+        global $DB;
+
+        $records = $DB->get_records('diary_prompts', ['diaryid' => (int)$diaryid], 'datestart ASC, datestop ASC, id ASC', 'id');
+        if (!$records) {
+            return [];
+        }
+
+        return array_map('intval', array_keys($records));
+    }
+
+    /**
+     * Return prompt ids that are currently open (within date window) for this diary.
+     *
+     * A prompt is open when now >= datestart (or datestart is 0) AND now <= datestop (or datestop is 0).
+     *
+     * @param int $diaryid Diary id.
+     * @return int[]
+     */
+    protected static function get_open_prompt_ids($diaryid) {
+        global $DB;
+
+        $now = time();
+        $sql = "SELECT id FROM {diary_prompts}
+                 WHERE diaryid = :diaryid
+                   AND (datestart = 0 OR datestart <= :now1)
+                   AND (datestop = 0 OR datestop >= :now2)
+                 ORDER BY datestart ASC, datestop ASC, id ASC";
+        $params = ['diaryid' => (int)$diaryid, 'now1' => $now, 'now2' => $now];
+        $records = $DB->get_records_sql($sql, $params);
+        if (!$records) {
+            return [];
+        }
+
+        return array_map('intval', array_keys($records));
+    }
+
+    /**
+     * Return prompt ids completed by this user in this diary.
+     *
+     * Completion is based on entries linked to prompt ids.
+     *
+     * @param int $diaryid Diary id.
+     * @param int $userid User id.
+     * @return int[]
+     */
+    protected static function get_completed_prompt_ids($diaryid, $userid) {
+        global $DB;
+
+        if (empty($userid)) {
+            return [];
+        }
+
+        $sql = "SELECT DISTINCT promptid
+                  FROM {diary_entries}
+                 WHERE diary = :diaryid
+                   AND userid = :userid
+                   AND promptid > 0";
+        $params = ['diaryid' => (int)$diaryid, 'userid' => (int)$userid];
+        $records = $DB->get_records_sql($sql, $params);
+        if (!$records) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($records as $record) {
+            $ids[] = (int)$record->promptid;
+        }
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * Return the user preference key used for random prompt persistence.
+     *
+     * @param int $diaryid Diary id.
+     * @return string
+     */
+    protected static function get_random_prompt_preference_name($diaryid) {
+        return 'diary_randomprompt_' . (int)$diaryid;
+    }
+
+    /**
+     * Resolve a stable random prompt from the current available pool.
+     *
+     * @param stdClass $diary Diary settings.
+     * @param int $userid User id.
+     * @param array $allpromptids All prompt ids.
+     * @param array $remaining Remaining prompt ids.
+     * @param int $requestedpromptid Requested prompt id.
+     * @return int
+     */
+    protected static function resolve_random_promptid($diary, $userid, array $allpromptids, array $remaining, $requestedpromptid = 0) {
+        $pool = !empty($remaining) ? array_values($remaining) : array_values($allpromptids);
+        if (empty($pool)) {
+            return 0;
+        }
+
+        if (!empty($userid)) {
+            $preference = self::get_random_prompt_preference_name((int)$diary->id);
+            $assigned = (int)get_user_preferences($preference, 0, (int)$userid);
+            if ($assigned > 0 && in_array($assigned, $pool)) {
+                return $assigned;
+            }
+
+            shuffle($pool);
+            $assigned = (int)reset($pool);
+            set_user_preference($preference, $assigned, (int)$userid);
+            return $assigned;
+        }
+
+        shuffle($pool);
+        return (int)reset($pool);
+    }
+
+    /**
+     * Resolve the current prompt using configured prompt mode.
+     *
+     * @param stdClass $diary Diary settings.
+     * @param int $userid User id (optional).
+     * @param int $requestedpromptid Prompt id requested by user/input (optional).
+     * @return int
+     */
+    protected static function resolve_promptid_for_mode($diary, $userid = 0, $requestedpromptid = 0) {
+        $mode = self::get_prompt_mode($diary);
+
+        if ($mode === self::PROMPTMODE_SEQUENTIAL) {
+            return self::get_current_promptid_sequential($diary);
+        }
+
+        $allpromptids = self::get_all_prompt_ids((int)$diary->id);
+        if (empty($allpromptids)) {
+            return 0;
+        }
+
+        // For all non-sequential modes, limit the selectable pool to currently-open prompts.
+        $openpromptids = self::get_open_prompt_ids((int)$diary->id);
+
+        $requestedpromptid = (int)$requestedpromptid;
+        $completed = self::get_completed_prompt_ids((int)$diary->id, (int)$userid);
+        // Remaining = open prompts not yet completed.
+        $remaining = array_values(array_diff($openpromptids, $completed));
+
+        if ($mode === self::PROMPTMODE_CHOICE) {
+            if ($requestedpromptid > 0 && in_array($requestedpromptid, $openpromptids)) {
+                return $requestedpromptid;
+            }
+            // Fall back to first open prompt, else first of all prompts.
+            return !empty($openpromptids) ? (int)reset($openpromptids) : (int)reset($allpromptids);
+        }
+
+        if ($mode === self::PROMPTMODE_RANDOM) {
+            return self::resolve_random_promptid($diary, (int)$userid, $openpromptids, $remaining, $requestedpromptid);
+        }
+
+        if ($mode === self::PROMPTMODE_COMPLETEALL) {
+            if (empty($remaining)) {
+                return 0;
+            }
+            if ($requestedpromptid > 0 && in_array($requestedpromptid, $remaining)) {
+                return $requestedpromptid;
+            }
+            return (int)reset($remaining);
+        }
+
+        if ($mode === self::PROMPTMODE_CHOICECOMPLETE) {
+            $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+            if ($required < 0) {
+                $required = 0;
+            }
+
+            if ($required === 0) {
+                if ($requestedpromptid > 0 && in_array($requestedpromptid, $openpromptids)) {
+                    return $requestedpromptid;
+                }
+                return !empty($openpromptids) ? (int)reset($openpromptids) : (int)reset($allpromptids);
+            }
+
+            $required = min($required, count($allpromptids));
+            if (count($completed) >= $required) {
+                return 0;
+            }
+
+            if (empty($remaining)) {
+                return 0;
+            }
+
+            if ($requestedpromptid > 0 && in_array($requestedpromptid, $remaining)) {
+                return $requestedpromptid;
+            }
+
+            return (int)reset($remaining);
+        }
+
+        if ($mode === self::PROMPTMODE_RANDOMCOMPLETE) {
+            $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+            if ($required < 0) {
+                $required = 0;
+            }
+
+            if ($required === 0) {
+                return self::resolve_random_promptid($diary, (int)$userid, $openpromptids, $remaining, $requestedpromptid);
+            }
+
+            $required = min($required, count($allpromptids));
+            if (count($completed) >= $required) {
+                return 0;
+            }
+
+            if (empty($remaining)) {
+                return 0;
+            }
+
+            return self::resolve_random_promptid($diary, (int)$userid, $openpromptids, $remaining, $requestedpromptid);
+        }
+
+        return self::get_current_promptid_sequential($diary);
+    }
+
+    /**
+     * Return a short plain-text prompt summary for compact prompt listings.
+     *
+     * @param stdClass $prompt Prompt record.
+     * @return string
+     */
+    protected static function get_prompt_summary_text($prompt) {
+        // Prefer the optional title field when it is set and non-empty.
+        if (!empty($prompt->title)) {
+            return clean_param(trim((string)$prompt->title), PARAM_TEXT);
+        }
+        $summary = trim(preg_replace('/\s+/', ' ', strip_tags((string)$prompt->text)));
+        if ($summary === '') {
+            return get_string('writingpromptlable2', 'diary');
+        }
+        return shorten_text($summary, 90, true, '...');
+    }
+
+    /**
+     * Return the date-availability status of a prompt: 'open', 'future', or 'closed'.
+     *
+     * - 'future' : datestart is set and now is before it.
+     * - 'closed' : datestop is set and now is after it.
+     * - 'open'   : otherwise (no date constraints, or within the window).
+     *
+     * @param stdClass $prompt Prompt record.
+     * @return string 'open'|'future'|'closed'
+     */
+    protected static function get_prompt_date_status($prompt) {
+        $now = time();
+        if (!empty($prompt->datestart) && $now < (int)$prompt->datestart) {
+            return 'future';
+        }
+        if (!empty($prompt->datestop) && $now > (int)$prompt->datestop) {
+            return 'closed';
+        }
+        return 'open';
+    }
+
+    /**
+     * Render the compact prompt picker for non-sequential modes.
+     *
+     * @param stdClass $diary Diary settings.
+     * @param array $promptsall Prompt records keyed by id.
+     * @param int $selectedpromptid Selected/current prompt id.
+     * @param int $userid User id.
+     * @return string
+     */
+    protected static function render_prompt_picker($diary, array $promptsall, $selectedpromptid, $userid) {
+        $promptmode = self::get_prompt_mode($diary);
+        if ($promptmode === self::PROMPTMODE_SEQUENTIAL || empty($promptsall)) {
+            return '';
+        }
+
+        $completed = self::get_completed_prompt_ids((int)$diary->id, (int)$userid);
+        $allowselection = in_array($promptmode, [
+            self::PROMPTMODE_CHOICE,
+            self::PROMPTMODE_COMPLETEALL,
+            self::PROMPTMODE_CHOICECOMPLETE,
+        ]);
+
+        if ($promptmode === self::PROMPTMODE_CHOICE) {
+            $heading = get_string('promptmodepickerchoice', 'diary');
+        } else if ($promptmode === self::PROMPTMODE_RANDOM) {
+            $heading = get_string('promptmodepickerrandom', 'diary');
+        } else if ($promptmode === self::PROMPTMODE_COMPLETEALL) {
+            $heading = get_string('promptmodepickercompleteall', 'diary');
+        } else if ($promptmode === self::PROMPTMODE_CHOICECOMPLETE) {
+            $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+            $required = max(0, min($required, count($promptsall)));
+            $remainingrequired = max(0, $required - count($completed));
+            if ($remainingrequired > 0) {
+                $heading = get_string('promptmodepickerchoicecomplete', 'diary', [
+                    'remaining' => $remainingrequired,
+                    'required' => $required,
+                ]);
+            } else {
+                $heading = get_string('promptmodepickerdone', 'diary');
+            }
+        } else {
+            $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+            $required = max(0, min($required, count($promptsall)));
+            $remainingrequired = max(0, $required - count($completed));
+            if ($remainingrequired > 0) {
+                $heading = get_string('promptmodepickerrandomcomplete', 'diary', [
+                    'remaining' => $remainingrequired,
+                    'required' => $required,
+                ]);
+            } else {
+                $heading = get_string('promptmodepickerdone', 'diary');
+            }
+        }
+
+        $cmid = optional_param('id', 0, PARAM_INT);
+        $items = [];
+        $counter = 0;
+        foreach ($promptsall as $prompt) {
+            $counter++;
+            $currentpromptid = (int)$prompt->id;
+            $datestatus = self::get_prompt_date_status($prompt);
+            $isopen = $datestatus === 'open';
+            $classes = ['diary-prompt-choice'];
+            if ($currentpromptid === (int)$selectedpromptid) {
+                $classes[] = 'is-current';
+            }
+            if (in_array($currentpromptid, $completed)) {
+                $classes[] = 'is-completed';
+            }
+            if (!$isopen) {
+                $classes[] = 'is-unavailable';
+            }
+
+            // Pill label: use the optional title if set, otherwise "Prompt N".
+            if (!empty($prompt->title)) {
+                $pilllabel = clean_param(trim((string)$prompt->title), PARAM_TEXT);
+            } else {
+                $pilllabel = get_string('promptmodepickeritem', 'diary', [
+                    'counter' => $counter,
+                    'text' => self::get_prompt_summary_text($prompt),
+                ]);
+            }
+            $label = $pilllabel;
+
+            // Tooltip: always show a preview of the body text so hovering reveals the prompt content.
+            $bodypreview = trim(preg_replace('/\s+/', ' ', strip_tags((string)$prompt->text)));
+            $tooltiptext = shorten_text($bodypreview, 200, true, '...');
+
+            $badges = [];
+            if ($currentpromptid === (int)$selectedpromptid) {
+                $badges[] = html_writer::span(get_string('promptmodepickercurrent', 'diary'), 'diary-prompt-choice-badge');
+            }
+            if (in_array($currentpromptid, $completed)) {
+                $badges[] = html_writer::span(get_string('promptmodepickercompleted', 'diary'), 'diary-prompt-choice-badge');
+            }
+            if ($datestatus === 'future') {
+                $badges[] = html_writer::span(get_string('promptdatestatusfuture', 'diary'), 'diary-prompt-choice-badge is-future');
+            } else if ($datestatus === 'closed') {
+                $badges[] = html_writer::span(get_string('promptdatestatusclosed', 'diary'), 'diary-prompt-choice-badge is-closed');
+            }
+            $badgehtml = implode('', $badges);
+
+            // Only open, unselected, unfinished prompts are clickable links.
+            if ($allowselection && $cmid > 0 && $isopen && !in_array($currentpromptid, $completed)) {
+                $url = new \moodle_url('/mod/diary/view.php', [
+                    'id' => $cmid,
+                    'action' => 'currententry',
+                    'promptid' => $currentpromptid,
+                ]);
+                $content = html_writer::link($url, $label, ['class' => 'diary-prompt-choice-link']) . $badgehtml;
+            } else {
+                $content = html_writer::span($label, 'diary-prompt-choice-text') . $badgehtml;
+            }
+
+            $items[] = html_writer::tag('li', $content, [
+                'class' => implode(' ', $classes),
+                'data-pickertitle' => $tooltiptext,
+            ]);
+        }
+
+        $output = html_writer::div(
+            html_writer::tag('strong', $heading),
+            'diary-prompt-picker-heading'
+        );
+        $output .= html_writer::tag('ul', implode('', $items), ['class' => 'diary-prompt-picker']);
+        return html_writer::div($output, 'diary-prompt-picker-wrap');
+    }
+
+    /**
+     * Original sequential current-prompt resolver (date-window based).
+     *
+     * @param stdClass $diary Diary settings.
+     * @return int
+     */
+    protected static function get_current_promptid_sequential($diary) {
+        global $DB;
+
+        $promptid = 0;
+        $promptsall = $DB->get_records(
+            'diary_prompts',
+            ['diaryid' => $diary->id],
+            'datestart ASC, datestop ASC'
+        );
+
+        if (!$promptsall) {
+            return 0;
+        }
+
+        foreach ($promptsall as $prompts) {
+            if (($prompts->datestart < time()) && $prompts->datestop > time()) {
+                $promptid = (int)$prompts->id;
+            }
+        }
+
+        return $promptid;
+    }
+
+    /**
      * Remove the selected prompt.
      *
      * @param array $cm
@@ -741,12 +1190,19 @@ class prompts {
      * @return string
      */
     public static function prompts_viewcurrent($diary, $action, $promptid) {
-        global $CFG, $DB;
-        // 20240507 Added for testing.
-        $id = required_param('id', PARAM_INT); // Course Module ID.
-        $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action(default to current entry).
+        global $CFG, $DB, $USER;
+        // Prefer passed values, but keep request fallback for existing call patterns.
+        $requestaction = optional_param('action', '', PARAM_ALPHANUMEXT);
+        if (empty($action) && $requestaction !== '') {
+            $action = $requestaction;
+        }
+        if (empty($action)) {
+            $action = 'currententry';
+        }
         $firstkey = optional_param('firstkey', 0, PARAM_INT); // Which diary_entries id to edit.
-        $promptid = optional_param('promptid', 0, PARAM_INT); // Current entries promptid.
+        if (empty($promptid)) {
+            $promptid = optional_param('promptid', 0, PARAM_INT); // Current entries promptid.
+        }
 
         $data = new stdClass();
         $output = '';
@@ -759,9 +1215,16 @@ class prompts {
         $entry = $DB->get_record('diary_entries', ['id' => $firstkey, 'diary' => $diary->id]);
         $promptsall = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart ASC, datestop ASC');
         $promptsone = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id]);
+        $promptmode = self::get_prompt_mode($diary);
+        if ($promptmode !== self::PROMPTMODE_SEQUENTIAL && !empty($promptsone) && !empty($promptid)) {
+            $action = 'editentry';
+        }
         $bordercssvars = \diary_get_border_css_vars((int)$diary->id);
 
         $diary->intro = '';
+        if ($promptmode !== self::PROMPTMODE_SEQUENTIAL && !empty($promptsall)) {
+            $diary->intro .= self::render_prompt_picker($diary, $promptsall, (int)$promptid, (int)$USER->id);
+        }
         // If there are any prompts for this diary, create a list of them.
         if ($promptsall) {
             foreach ($promptsall as $prompts) {
@@ -992,6 +1455,7 @@ class prompts {
         $record->ignorebreaks = empty($rule->ignorebreaks) ? 0 : 1;
         $record->weightpercent = max(0, (int)($rule->weightpercent ?? 0));
         $record->required = empty($rule->required) ? 0 : 1;
+        $record->studentvisible = isset($rule->studentvisible) ? (empty($rule->studentvisible) ? 0 : 1) : 1;
         $record->sortorder = max(0, (int)($rule->sortorder ?? 0));
         $record->usermodified = (int)$USER->id;
         $record->timemodified = $now;
@@ -1047,38 +1511,7 @@ class prompts {
      * @param array $diary The settings for this diary activity.
      * @return int $promptid The current promptid or zero if not available.
      */
-    public static function get_current_promptid($diary) {
-        global $CFG, $DB;
-        $counter = 0;
-        $past = 0;
-        $current = 0;
-        $future = 0;
-        $promptid = 0;
-        if (
-            !$promptsall = $DB->get_records(
-                'diary_prompts',
-                [
-                    'diaryid' => $diary->id,
-                ],
-                $sort = 'datestart ASC, datestop ASC'
-            )
-        ) {
-            $promptid = new stdClass();
-            $promptid = 0;
-        } else {
-            foreach ($promptsall as $prompts) {
-                $status = '';
-                    $counter++;
-                if ($prompts->datestop < time()) {
-                    $past++;
-                } else if (($prompts->datestart < time()) && $prompts->datestop > time()) {
-                    $current++;
-                    $promptid = $prompts->id;
-                } else if ($prompts->datestart > time() && $prompts->datestop > time()) {
-                    $future++;
-                }
-            }
-        }
-        return $promptid;
+    public static function get_current_promptid($diary, $userid = 0, $requestedpromptid = 0) {
+        return self::resolve_promptid_for_mode($diary, (int)$userid, (int)$requestedpromptid);
     }
 }

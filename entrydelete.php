@@ -64,7 +64,7 @@ if ((!$promptid) && ($diary->timeopen < time())) {
     // 20240507 Added for testing and it appears to work for existing entry without a prompt.
     if ($promptid > 0) {
         // Need to call a prompt function that returns the current promptid, if there is one that is current.
-        $promptid = prompts::get_current_promptid($diary);
+        $promptid = prompts::get_current_promptid($diary, $USER->id, 0);
     }
 }
 

@@ -121,6 +121,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'maxparagraph',
                 'minmaxparagraphpercent',
                 'maxeditopens',
+                'title',
             ]
         );
 
@@ -140,6 +141,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'ignorebreaks',
                 'weightpercent',
                 'required',
+                'studentvisible',
                 'sortorder',
                 'timecreated',
                 'timemodified',
