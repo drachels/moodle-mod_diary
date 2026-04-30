@@ -384,6 +384,7 @@ class prompts {
                     $DB->delete_records('rating', ['itemid' => $entry->id]);
                     // 20220107 Recalculate the rating for this user for this diary activity.
                     diary_update_grades($diary, $entry->userid);
+                    diary_sync_completion_state($course, $cm, $entry->userid, $diary);
                 }
             }
 
@@ -687,6 +688,70 @@ class prompts {
             $mode = self::PROMPTMODE_SEQUENTIAL;
         }
         return $mode;
+    }
+
+    /**
+     * Return prompt-mode completion progress for a user.
+     *
+     * This is used to align UI completion indicators with prompt-mode progress
+     * for non-sequential prompt assignment modes.
+     *
+     * @param stdClass $diary Diary settings.
+     * @param int $userid User id.
+     * @return array{applies: bool, complete: bool, completed: int, required: int}
+     */
+    public static function get_prompt_completion_progress($diary, $userid) {
+        $mode = self::get_prompt_mode($diary);
+        $allpromptids = self::get_all_prompt_ids((int)$diary->id);
+
+        if ($mode === self::PROMPTMODE_SEQUENTIAL || empty($userid) || empty($allpromptids)) {
+            return [
+                'applies' => false,
+                'complete' => true,
+                'completed' => 0,
+                'required' => 0,
+            ];
+        }
+
+        $completed = self::get_completed_prompt_ids((int)$diary->id, (int)$userid);
+        $required = self::get_required_prompt_completion_target($diary, count($allpromptids));
+
+        return [
+            'applies' => $required > 0,
+            'complete' => count($completed) >= $required,
+            'completed' => count($completed),
+            'required' => $required,
+        ];
+    }
+
+    /**
+     * Return how many prompts must be completed for this prompt mode.
+     *
+     * @param stdClass $diary Diary settings.
+     * @param int $promptcount Total prompt count.
+     * @return int
+     */
+    protected static function get_required_prompt_completion_target($diary, $promptcount) {
+        $mode = self::get_prompt_mode($diary);
+
+        if ($promptcount <= 0) {
+            return 0;
+        }
+
+        if ($mode === self::PROMPTMODE_CHOICE || $mode === self::PROMPTMODE_RANDOM) {
+            return 1;
+        }
+
+        if ($mode === self::PROMPTMODE_COMPLETEALL) {
+            return $promptcount;
+        }
+
+        if ($mode === self::PROMPTMODE_CHOICECOMPLETE || $mode === self::PROMPTMODE_RANDOMCOMPLETE) {
+            $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
+            return max(1, min($required, $promptcount));
+        }
+
+        return 0;
     }
 
     /**

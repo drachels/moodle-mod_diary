@@ -337,6 +337,7 @@ $data->id = $cm->id;
         $newentry->tags = $fromform->tags;
 
         $DB->update_record('diary_entries', $newentry);
+        diary_sync_completion_state($course, $cm, $USER->id, $diary);
 
         // Do some other processing here,
         // If this is a new page (entry) you need to insert it in the DB and obtain id.

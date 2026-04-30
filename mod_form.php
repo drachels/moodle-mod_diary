@@ -26,6 +26,7 @@ use mod_diary\local\diarystats;
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 require_once($CFG->dirroot . '/rating/lib.php');
+require_once($CFG->dirroot . '/mod/diary/lib.php');
 
 /**
  * Diary settings form.
@@ -481,6 +482,35 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->disabledIf($name, 'enableautorating', 'eq', 0);
         $mform->disabledIf($name, 'enablestats', 'eq', 0);
 
+        // Optional completion requirements based on advanced writing metrics.
+        $name = 'completionmetricrequirementshdr';
+        $label = get_string('completionmetricrequirements', $plugin);
+        $mform->addElement('header', $name, $label);
+        $mform->setExpanded($name, false);
+        $mform->addElement('static', 'completionmetricrequirementshelp', '',
+            get_string('completionmetricrequirements_help', $plugin));
+
+        $operatoroptions = $this->get_metric_operator_options($plugin);
+        foreach ($this->get_metric_requirement_definitions() as $key => $stringkey) {
+            $metriclabel = get_string($stringkey, $plugin);
+            $enabledname = 'metricreq_enable_' . $key;
+            $operatorname = 'metricreq_op_' . $key;
+            $valuename = 'metricreq_val_' . $key;
+
+            $mform->addElement('advcheckbox', $enabledname, $metriclabel, '', [], [0, 1]);
+            $mform->setType($enabledname, PARAM_INT);
+            $mform->setDefault($enabledname, 0);
+
+            $mform->addElement('select', $operatorname, get_string('completionmetricoperator', $plugin), $operatoroptions);
+            $mform->setType($operatorname, PARAM_INT);
+            $mform->setDefault($operatorname, in_array($key, ['fkgrade', 'fogindex']) ? 1 : 0);
+            $mform->disabledIf($operatorname, $enabledname, 'eq', 0);
+
+            $mform->addElement('text', $valuename, get_string('completionmetricthreshold', $plugin), $mediumtextoptions);
+            $mform->setType($valuename, PARAM_RAW_TRIMMED);
+            $mform->disabledIf($valuename, $enabledname, 'eq', 0);
+        }
+
         // 20210703 Added the common errors header.
         $name = 'commonerrors';
         $label = get_string($name, $plugin);
@@ -579,6 +609,21 @@ class mod_diary_mod_form extends moodleform_mod {
             if ($storedcolor !== false && $storedcolor !== null && $storedcolor !== '') {
                 $defaultvalues['bordercolor'] = (string)$storedcolor;
             }
+
+            $metricrequirements = diary_get_metric_requirements($instanceid);
+            foreach ($this->get_metric_requirement_definitions() as $key => $unused) {
+                $enabledname = 'metricreq_enable_' . $key;
+                $operatorname = 'metricreq_op_' . $key;
+                $valuename = 'metricreq_val_' . $key;
+
+                if (isset($metricrequirements[$key])) {
+                    $defaultvalues[$enabledname] = 1;
+                    $defaultvalues[$operatorname] = (int)($metricrequirements[$key]['operator'] ?? 0);
+                    $defaultvalues[$valuename] = (string)($metricrequirements[$key]['value'] ?? '');
+                } else {
+                    $defaultvalues[$enabledname] = 0;
+                }
+            }
         }
     }
 
@@ -625,7 +670,57 @@ class mod_diary_mod_form extends moodleform_mod {
             $errors['requiredpromptcount'] = get_string('requiredpromptcountnonpartial', 'diary');
         }
 
+        foreach ($this->get_metric_requirement_definitions() as $key => $unused) {
+            $enabledname = 'metricreq_enable_' . $key;
+            $valuename = 'metricreq_val_' . $key;
+            if (!empty($data[$enabledname])) {
+                $rawvalue = $data[$valuename] ?? '';
+                if ($rawvalue === '' || !is_numeric($rawvalue)) {
+                    $errors[$valuename] = get_string('completionmetricinvalidnumber', 'diary');
+                }
+            }
+        }
+
         return $errors;
+    }
+
+    /**
+     * Metric requirement definitions in UI order.
+     *
+     * @return array<string, string>
+     */
+    protected function get_metric_requirement_definitions() {
+        return [
+            'uniquewords' => 'uniquewords',
+            'shortwords' => 'shortwords',
+            'mediumwords' => 'mediumwords',
+            'longwords' => 'longwords',
+            'charspersentence' => 'charspersentence',
+            'sentencesperparagraph' => 'sentencesperparagraph',
+            'wordspersentence' => 'wordspersentence',
+            'longwordspersentence' => 'longwordspersentence',
+            'totalsyllables' => 'totalsyllables',
+            'avgsyllperword' => 'avgsylperword',
+            'avgwordlenchar' => 'avgwordlenchar',
+            'avgwordpara' => 'avgwordpara',
+            'lexicaldensity' => 'lexicaldensity',
+            'fkgrade' => 'fkgrade',
+            'freadingease' => 'freadingease',
+            'fogindex' => 'fogindex',
+        ];
+    }
+
+    /**
+     * Operator options for metric completion requirements.
+     *
+     * @param string $plugin name
+     * @return array
+     */
+    protected function get_metric_operator_options($plugin) {
+        return [
+            0 => get_string('completionmetricoperatoratleast', $plugin),
+            1 => get_string('completionmetricoperatoratmost', $plugin),
+        ];
     }
 
     /**

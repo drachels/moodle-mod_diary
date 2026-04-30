@@ -66,6 +66,7 @@ $bordercssvars = diary_get_border_css_vars($diary->id);
 // 20230511 Following two lines are for View, Automatic Completion marking.
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
+diary_sync_completion_state($course, $cm, $USER->id, $diary);
 
 // Need to call a prompt function that returns the current promptid, if there is one that is current.
 $promptmode = prompts::get_prompt_mode($diary);

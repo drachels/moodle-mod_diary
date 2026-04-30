@@ -150,6 +150,7 @@ class results {
         }
 
         diary_update_grades($diary, $student->id);
+        diary_sync_completion_state($course, $cm, $student->id, $diary);
 
         $event = \mod_diary\event\entry_created::create([
             'objectid' => $entryid,
@@ -993,6 +994,7 @@ class results {
 
                     // Recalculate grade (now with rating in place).
                     diary_update_grades($diary, $entry->userid);
+                    diary_sync_completion_state($course, $cm, $entry->userid, $diary);
                 }
 
                 // 20260211 Added due to Grok recommendation.
@@ -1030,6 +1032,7 @@ class results {
                             ]);
 
                             diary_update_grades($diary, $entry->userid);
+                            diary_sync_completion_state($course, $cm, $entry->userid, $diary);
                         }
                         self::send_feedback_cleared_notification($context, $course, $diary, $entry);
 
@@ -1564,6 +1567,8 @@ class results {
                 $diary->cmidnumber = $cm->idnumber;
 
                 diary_update_grades($diary, $entry->userid);
+                $synccourse = get_course($cm->course);
+                diary_sync_completion_state($synccourse, $cm, $entry->userid, $diary);
             }
             echo $OUTPUT->notification(get_string("feedbackupdated", "diary", "$count"), "notifysuccess");
         }

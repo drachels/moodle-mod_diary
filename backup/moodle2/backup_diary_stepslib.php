@@ -38,6 +38,7 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
      * @return void
      */
     protected function define_structure() {
+        global $DB;
 
          // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
@@ -92,6 +93,9 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
                 'errorfullmatch',
                 'errorcasesensitive',
                 'errorignorebreaks',
+                'promptmode',
+                'requiredpromptcount',
+                'metricrequirements',
             ]
         );
 
@@ -218,7 +222,19 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
         $tags->add_child($tag);
 
         // Define sources.
-        $diary->set_source_table('diary', ['id' => backup::VAR_ACTIVITYID]);
+        $metricrequirementskey = $DB->sql_concat("'metricrequirements_'", 'd.id');
+        $diary->set_source_sql(
+            'SELECT d.*, cp.value AS metricrequirements
+               FROM {diary} d
+          LEFT JOIN {config_plugins} cp
+                 ON cp.plugin = ?
+                AND cp.name = ' . $metricrequirementskey . '
+              WHERE d.id = ?',
+            [
+                backup_helper::is_sqlparam('mod_diary'),
+                backup::VAR_ACTIVITYID,
+            ]
+        );
         $prompt->set_source_table('diary_prompts', ['diaryid' => backup::VAR_PARENTID]);
         $autograderule->set_source_table('diary_prompt_autograde_rules', ['promptid' => backup::VAR_PARENTID]);
 
@@ -266,11 +282,8 @@ class backup_diary_activity_structure_step extends backup_activity_structure_ste
 
         // Define file annotations.
         $diary->annotate_files('mod_diary', 'intro', null); // This file areas haven't itemid.
-        $entry->annotate_files('mod_diary_prompts', 'entry', 'id');
-        $entry->annotate_files('mod_diary_prompts', 'attachment', 'id');
-
-        $entry->annotate_files('mod_diary_entries', 'entry', 'id');
-        $entry->annotate_files('mod_diary_entries', 'attachment', 'id');
+        $prompt->annotate_files('mod_diary', 'prompt', 'id');
+        $entry->annotate_files('mod_diary', 'entry', 'id');
 
         return $this->prepare_activity_structure($diary);
     }

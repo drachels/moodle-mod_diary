@@ -88,6 +88,7 @@ if ($taginststodel) {
 
 // Delete the diary entry itself.
 $DB->delete_records('diary_entries', ['id' => $entry->id]);
+diary_sync_completion_state($course, $cm, $entry->userid, $diary);
 
 // Handle tags using core Tag API (preferred way).
 require_once($CFG->dirroot . '/tag/lib.php');

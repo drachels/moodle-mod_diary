@@ -12,8 +12,6 @@ Upgrade.txt working notes:
 
 Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 === Deferred until fixed. ===
-20201006 Diary_627 - Included files are not restored correctly.
-20210515 Diary_719 - Media files are NOT there after a restore.
 20210815 Diary_737 - Config settings are not all named the same. Added mod_ to
     the four items that were missing it. As of 20220828 still have three.
 20220228 Diary_824 - The Moodle Mobile app is not supported. Link to Diary_1399.
@@ -27,6 +25,16 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     mailedsubmission.
 
 === 5.1.0 === pending
+20201006 Diary_627 - Included files are not restored correctly.
+    2026043003 Progress - Root cause identified and fixed as part of Diary_1458
+    backup/restore implementation: backup annotations were using component names
+    'mod_diary_entries'/'mod_diary_prompts' (incorrect) instead of 'mod_diary'
+    with file areas 'entry'/'prompt' (correct). File area names now match actual
+    editor component/area usage. Entry and prompt media files should now survive
+    backup/restore cycles correctly.
+20210515 Diary_719 - Media files are NOT there after a restore.
+    2026043003 Progress - Consolidated with Diary_627: same root cause
+    (file-area annotation mismatch). See Diary_627 fix above.
 20230419 Diary_1036 - Diary - Modify Prompts to use Modes to fire up based on restricted
     access or completion.
 20260327 Diary_1454 - Feature Request -Modify the prompt system to allow for other than
@@ -93,8 +101,45 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         now reliably resolve module context even when cmid is not present on the
         diary object (fallback via get_coursemodule_from_instance), so the
         all-rules-used confirmation message appears correctly for teachers.
+    2026043001 Progress - Fixed prompt-mode completion sync so completionstate
+        now stays incomplete until required prompt progress is met and flips to
+        complete when it is. Added sync calls across entry create/update/delete,
+        view, and feedback save paths, including the reportsingle Add to
+        feedback flow (results.php) where a missing course object caused errors.
+    2026043004 Progress - Fixed backup/restore omission: promptmode and
+        requiredpromptcount were missing from backup element attributes in
+        backup_diary_stepslib.php. After restore, promptmode defaulted to 0
+        (Sequential), causing the overlapping-prompts fatal warning to fire
+        incorrectly on non-sequential activities. Both fields added to the
+        backup attribute list; restore carries them via insert_record
+        automatically as direct mdl_diary columns.
+    2026043005 Progress - Verified by rerunning a full course backup from
+        moodledev and replace-contents restore into moodledemo: restored
+        prompt-mode activities retained promptmode/requiredpromptcount and no
+        longer fell back to Sequential or triggered the false overlapping-
+        prompts warning.
 20260331 Diary_1458 - Feature Request - Settings to require meeting certain automatic
     results limits.
+    2026043002 Progress - Added optional completion requirements for advanced
+        writing metrics (independent of existing min/max settings): Unique words,
+        Unique short/medium/long words, Characters per sentence, Sentences per
+        paragraph, Words per sentence, Long words per sentence, Total syllables,
+        Average syllables per word, Average word length (characters), Average
+        words per paragraph, Lexical density, FK Grade, Flesch reading ease,
+        and Fog index. Teachers can enable one or more metrics, choose >= or <=,
+        and set a threshold for each. Completion sync now keeps the activity
+        incomplete until at least one user entry satisfies all selected metric
+        requirements.
+    2026043003 Progress - Completed backup/restore implementation for metric
+        requirements: backup_diary_stepslib.php now includes metricrequirements
+        field in backup element with SQL source fetching from config_plugins;
+        restore_diary_stepslib.php extracts and persists metric requirements to
+        new diary config key after apply_activity_instance. Also fixed file-area
+        mismatch root cause of Diary_627/719 (see below): backup file annotations
+        now use correct component 'mod_diary' with areas 'entry'/'prompt' instead
+        of mismatched 'mod_diary_entries'/'mod_diary_prompts'. Verified
+        implementation: metric requirements config + entry media files both
+        survive round-trip backup/restore cycle.
 
 === 5.0.0 === 2026040400
 20200601 Diary_526r - Make toggle to allow grade and feedback for users with no

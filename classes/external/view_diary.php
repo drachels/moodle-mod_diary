@@ -71,6 +71,7 @@ class view_diary extends external_api {
         // Completion.
         $completion = new \completion_info($course);
         $completion->set_module_viewed($cm);
+        diary_sync_completion_state($course, $cm, $USER->id, $diary);
 
         return null;
     }

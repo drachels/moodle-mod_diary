@@ -23,6 +23,11 @@
  */
 defined('MOODLE_INTERNAL') || die(); // phpcs:ignore
 use mod_diary\local\results;
+use mod_diary\local\prompts;
+use mod_diary\local\diarystats;
+
+/** Config key prefix for per-activity advanced metric completion requirements. */
+const DIARY_METRIC_REQUIREMENTS_KEY_PREFIX = 'metricrequirements_';
 
 /**
  * Given an object containing all the necessary data,
@@ -35,6 +40,8 @@ use mod_diary\local\results;
  */
 function diary_add_instance($diary) {
     global $DB;
+
+    $metricrequirements = diary_extract_metric_requirements_from_form($diary);
 
     $diary->promptmode = isset($diary->promptmode) ? (int)$diary->promptmode : 0;
     if ($diary->promptmode < 0 || $diary->promptmode > 4) {
@@ -86,6 +93,7 @@ function diary_add_instance($diary) {
     set_config('enableborders_' . $diary->id, $enableborders, 'mod_diary');
     set_config('borderstyle_' . $diary->id, $borderstyle, 'mod_diary');
     set_config('bordercolor_' . $diary->id, $bordercolor, 'mod_diary');
+    diary_set_metric_requirements($diary->id, $metricrequirements);
 
     return $diary->id;
 }
@@ -101,6 +109,8 @@ function diary_add_instance($diary) {
  */
 function diary_update_instance($diary) {
     global $DB;
+
+    $metricrequirements = diary_extract_metric_requirements_from_form($diary);
 
     $diary->promptmode = isset($diary->promptmode) ? (int)$diary->promptmode : 0;
     if ($diary->promptmode < 0 || $diary->promptmode > 4) {
@@ -158,6 +168,7 @@ function diary_update_instance($diary) {
     set_config('enableborders_' . $diary->id, $enableborders, 'mod_diary');
     set_config('borderstyle_' . $diary->id, $borderstyle, 'mod_diary');
     set_config('bordercolor_' . $diary->id, $bordercolor, 'mod_diary');
+    diary_set_metric_requirements($diary->id, $metricrequirements);
 
     return true;
 }
@@ -212,8 +223,253 @@ function diary_delete_instance($id) {
     unset_config('enableborders_' . $diary->id, 'mod_diary');
     unset_config('borderstyle_' . $diary->id, 'mod_diary');
     unset_config('bordercolor_' . $diary->id, 'mod_diary');
+    unset_config(DIARY_METRIC_REQUIREMENTS_KEY_PREFIX . $diary->id, 'mod_diary');
 
     return $result;
+}
+
+/**
+ * Returns advanced metric keys supported by completion requirements.
+ *
+ * @return string[]
+ */
+function diary_get_metric_requirement_keys() {
+    return [
+        'uniquewords',
+        'shortwords',
+        'mediumwords',
+        'longwords',
+        'charspersentence',
+        'sentencesperparagraph',
+        'wordspersentence',
+        'longwordspersentence',
+        'totalsyllables',
+        'avgsyllperword',
+        'avgwordlenchar',
+        'avgwordpara',
+        'lexicaldensity',
+        'fkgrade',
+        'freadingease',
+        'fogindex',
+    ];
+}
+
+/**
+ * Get per-activity advanced metric requirements from plugin config.
+ *
+ * @param int $diaryid Diary id.
+ * @return array
+ */
+function diary_get_metric_requirements($diaryid) {
+    $raw = get_config('mod_diary', DIARY_METRIC_REQUIREMENTS_KEY_PREFIX . (int)$diaryid);
+    if (!is_string($raw) || $raw === '') {
+        return [];
+    }
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        return [];
+    }
+
+    $allowed = array_flip(diary_get_metric_requirement_keys());
+    $requirements = [];
+    foreach ($decoded as $metric => $rule) {
+        if (!isset($allowed[$metric]) || !is_array($rule)) {
+            continue;
+        }
+        if (!array_key_exists('value', $rule) || !is_numeric($rule['value'])) {
+            continue;
+        }
+        $operator = (int)($rule['operator'] ?? 0);
+        if ($operator !== 1) {
+            $operator = 0;
+        }
+        $requirements[$metric] = [
+            'operator' => $operator,
+            'value' => (float)$rule['value'],
+        ];
+    }
+
+    return $requirements;
+}
+
+/**
+ * Persist per-activity advanced metric requirements.
+ *
+ * @param int $diaryid Diary id.
+ * @param array $requirements Requirement map.
+ * @return void
+ */
+function diary_set_metric_requirements($diaryid, array $requirements) {
+    if (empty($requirements)) {
+        unset_config(DIARY_METRIC_REQUIREMENTS_KEY_PREFIX . (int)$diaryid, 'mod_diary');
+        return;
+    }
+
+    set_config(
+        DIARY_METRIC_REQUIREMENTS_KEY_PREFIX . (int)$diaryid,
+        json_encode($requirements, JSON_UNESCAPED_SLASHES),
+        'mod_diary'
+    );
+}
+
+/**
+ * Extract advanced metric requirement fields from form data object.
+ *
+ * This unsets form-only fields from $diary so DB insert/update remains clean.
+ *
+ * @param stdClass $diary Form data object.
+ * @return array
+ */
+function diary_extract_metric_requirements_from_form($diary) {
+    $requirements = [];
+    foreach (diary_get_metric_requirement_keys() as $key) {
+        $enabledfield = 'metricreq_enable_' . $key;
+        $operatorfield = 'metricreq_op_' . $key;
+        $valuefield = 'metricreq_val_' . $key;
+
+        $enabled = !empty($diary->{$enabledfield});
+        $value = $diary->{$valuefield} ?? null;
+        $operator = (int)($diary->{$operatorfield} ?? 0);
+
+        unset($diary->{$enabledfield});
+        unset($diary->{$operatorfield});
+        unset($diary->{$valuefield});
+
+        if (!$enabled || $value === null || $value === '' || !is_numeric($value)) {
+            continue;
+        }
+        if ($operator !== 1) {
+            $operator = 0;
+        }
+
+        $requirements[$key] = [
+            'operator' => $operator,
+            'value' => (float)$value,
+        ];
+    }
+
+    return $requirements;
+}
+
+/**
+ * Calculate advanced text metrics for a diary entry.
+ *
+ * @param stdClass $entry Diary entry record.
+ * @return array<string,float>
+ */
+function diary_calculate_entry_metrics($entry) {
+    $precision = 2;
+    $text = diarystats::to_plain_text($entry->text ?? '', $entry->format ?? FORMAT_HTML);
+
+    $characters = (float)diarystats::get_stats_chars($text);
+    $words = (float)diarystats::get_stats_words($text);
+    $sentences = (float)diarystats::get_stats_sentences($text);
+    $paragraphs = (float)diarystats::get_stats_paragraphs($text);
+    $uniquewords = (float)diarystats::get_stats_uniquewords($text);
+    [$shortwords, $mediumwords, $longwords, $totalsyllables] = diarystats::get_stats_longwords($text);
+
+    $charspersentence = $sentences > 0 ? round($characters / $sentences, $precision) : 0.0;
+    $wordspersentence = $sentences > 0 ? round($words / $sentences, $precision) : 0.0;
+    $longwordspersentence = $sentences > 0 ? round(((float)$longwords) / $sentences, $precision) : 0.0;
+    $sentencesperparagraph = $paragraphs > 0 ? round($sentences / $paragraphs, $precision) : 0.0;
+    $avgsyllperword = $uniquewords > 0 ? round(((float)$totalsyllables) / $uniquewords, $precision) : 0.0;
+    $avgwordlenchar = $words > 0 ? round($characters / $words, $precision) : 0.0;
+    $avgwordpara = $paragraphs > 0 ? round($words / $paragraphs, $precision) : 0.0;
+    $lexicaldensity = $words > 0 ? round(($uniquewords / $words) * 100, $precision) : 0.0;
+    $fkgrade = $sentences > 0
+        ? max(round(0.39 * ($words / $sentences) + 11.8 * (((float)$totalsyllables) / max($words, 1.0)) - 15.59, $precision), 0)
+        : 0.0;
+    $freadingease = $sentences > 0
+        ? round(206.835 - 1.015 * ($words / $sentences) - 84.6 * (((float)$totalsyllables) / max($words, 1.0)), $precision)
+        : 0.0;
+    $fogindex = $wordspersentence > 0 ? round(($wordspersentence + $longwordspersentence) * 0.4, $precision) : 0.0;
+
+    return [
+        'uniquewords' => $uniquewords,
+        'shortwords' => (float)$shortwords,
+        'mediumwords' => (float)$mediumwords,
+        'longwords' => (float)$longwords,
+        'charspersentence' => $charspersentence,
+        'sentencesperparagraph' => $sentencesperparagraph,
+        'wordspersentence' => $wordspersentence,
+        'longwordspersentence' => $longwordspersentence,
+        'totalsyllables' => (float)$totalsyllables,
+        'avgsyllperword' => $avgsyllperword,
+        'avgwordlenchar' => $avgwordlenchar,
+        'avgwordpara' => $avgwordpara,
+        'lexicaldensity' => $lexicaldensity,
+        'fkgrade' => (float)$fkgrade,
+        'freadingease' => $freadingease,
+        'fogindex' => $fogindex,
+    ];
+}
+
+/**
+ * Check whether one entry satisfies all configured advanced metric requirements.
+ *
+ * operator: 0 => >=, 1 => <=
+ *
+ * @param stdClass $entry Diary entry record.
+ * @param array $requirements Requirement map.
+ * @return bool
+ */
+function diary_entry_meets_metric_requirements($entry, array $requirements) {
+    if (empty($requirements)) {
+        return true;
+    }
+
+    $metrics = diary_calculate_entry_metrics($entry);
+    foreach ($requirements as $metric => $rule) {
+        if (!array_key_exists($metric, $metrics)) {
+            return false;
+        }
+        $value = (float)$metrics[$metric];
+        $target = (float)$rule['value'];
+        $operator = (int)$rule['operator'];
+
+        if ($operator === 1) {
+            if ($value > $target) {
+                return false;
+            }
+        } else {
+            if ($value < $target) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Compute completion progress for configured advanced metric requirements.
+ *
+ * Applies when at least one requirement is configured and is complete once
+ * at least one entry by this user satisfies all configured requirements.
+ *
+ * @param stdClass $diary Diary activity record.
+ * @param int $userid User id.
+ * @return array{applies:bool, complete:bool}
+ */
+function diary_get_metric_requirements_progress($diary, $userid) {
+    global $DB;
+
+    $requirements = diary_get_metric_requirements((int)$diary->id);
+    if (empty($requirements)) {
+        return ['applies' => false, 'complete' => true];
+    }
+
+    $entries = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $userid],
+        'timemodified DESC, id DESC', 'id,text,format');
+
+    foreach ($entries as $entry) {
+        if (diary_entry_meets_metric_requirements($entry, $requirements)) {
+            return ['applies' => true, 'complete' => true];
+        }
+    }
+
+    return ['applies' => true, 'complete' => false];
 }
 
 /**
@@ -1261,4 +1517,71 @@ function diary_get_completion_state($course, $cm, $userid, $type) {
     }
 
     return $type;
+}
+
+/**
+ * Synchronize stored activity completion with Diary prompt-mode progress.
+ *
+ * Core completion still evaluates view/grade/pass-grade requirements. For
+ * prompt-driven diary modes, this helper clamps the final stored state back to
+ * incomplete until the user has completed the required prompt count.
+ *
+ * @param stdClass $course Course record.
+ * @param cm_info|stdClass $cm Course module.
+ * @param int $userid User id. Defaults to current user.
+ * @param stdClass|null $diary Optional diary record to avoid reloading it.
+ * @return void
+ */
+function diary_sync_completion_state($course, $cm, $userid = 0, $diary = null) {
+    global $DB, $USER;
+
+    if (empty($userid)) {
+        $userid = $USER->id;
+    }
+
+    $completion = new completion_info($course);
+    if ($cm->completion != COMPLETION_TRACKING_AUTOMATIC || !$completion->is_enabled($cm)) {
+        return;
+    }
+
+    $current = $completion->get_data($cm, false, $userid);
+    if (!empty($current->overrideby)) {
+        return;
+    }
+
+    if ($diary === null) {
+        $diary = $DB->get_record('diary', ['id' => $cm->instance], '*', MUST_EXIST);
+    }
+
+    $promptcompletion = prompts::get_prompt_completion_progress($diary, $userid);
+    $metriccompletion = diary_get_metric_requirements_progress($diary, $userid);
+
+    // First let Moodle recalculate the normal automatic rules (view/grade/pass grade).
+    $completion->update_state($cm, COMPLETION_UNKNOWN, $userid);
+
+    $promptrequired = !empty($promptcompletion['applies']);
+    $metricsrequired = !empty($metriccompletion['applies']);
+    if (!$promptrequired && !$metricsrequired) {
+        return;
+    }
+
+    $current = $completion->get_data($cm, false, $userid);
+    if (!empty($current->overrideby)) {
+        return;
+    }
+
+    $promptcomplete = !$promptrequired || !empty($promptcompletion['complete']);
+    $metricscomplete = !$metricsrequired || !empty($metriccompletion['complete']);
+    if ($promptcomplete && $metricscomplete) {
+        return;
+    }
+
+    if ((int)$current->completionstate === COMPLETION_INCOMPLETE) {
+        return;
+    }
+
+    $current->completionstate = COMPLETION_INCOMPLETE;
+    $current->timemodified = time();
+    $current->overrideby = null;
+    $completion->internal_set_data($cm, $current);
 }

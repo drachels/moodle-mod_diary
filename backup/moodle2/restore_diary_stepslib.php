@@ -71,6 +71,11 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
 
         $diary = (object) $diary;
         $oldid = $diary->id;
+        $metricrequirements = '';
+        if (property_exists($diary, 'metricrequirements') && $diary->metricrequirements !== null) {
+            $metricrequirements = (string)$diary->metricrequirements;
+        }
+        unset($diary->metricrequirements);
         $diary->course = $this->get_courseid();
 
         unset($diary->id);
@@ -91,6 +96,12 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
         // Insert the data record.
         $newid = $DB->insert_record('diary', $diary);
         $this->apply_activity_instance($newid);
+
+        if ($metricrequirements !== '') {
+            set_config('metricrequirements_' . $newid, $metricrequirements, 'mod_diary');
+        } else {
+            unset_config('metricrequirements_' . $newid, 'mod_diary');
+        }
     }
 
     /**
@@ -234,8 +245,7 @@ class restore_diary_activity_structure_step extends restore_activity_structure_s
      */
     protected function after_execute() {
         $this->add_related_files('mod_diary', 'intro', null);
-        $this->add_related_files('mod_diary_entries', 'text', null);
-        $this->add_related_files('mod_diary_entries', 'entrycomment', null);
-        $this->add_related_files('mod_diary_prompts', 'text', null);
+        $this->add_related_files('mod_diary', 'prompt', 'diary_prompt');
+        $this->add_related_files('mod_diary', 'entry', 'diary_entry');
     }
 }

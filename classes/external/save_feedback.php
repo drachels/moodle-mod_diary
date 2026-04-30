@@ -156,6 +156,7 @@ class save_feedback extends external_api {
         }
 
         diary_update_grades($diary, $entry->userid);
+        diary_sync_completion_state($course, $cm, $entry->userid, $diary);
 
         $event = \mod_diary\event\feedback_updated::create([
             'objectid' => $diary->id,

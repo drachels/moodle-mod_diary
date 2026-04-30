@@ -142,6 +142,8 @@ class set_text extends external_api {
             $event->trigger();
         }
 
+        diary_sync_completion_state($course, $cm, $USER->id, $diary);
+
         return [
             'status' => 'ok',
             'entryid' => $savedentryid,
