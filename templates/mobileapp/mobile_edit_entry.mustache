@@ -27,6 +27,39 @@
             <h3 style="margin-top: 0;">{{#str}}startoredit, mod_diary{{/str}}</h3>
             {{#info}}<p><i>{{info}}</i></p>{{/info}}
 
+            {{#hasmobilecontext}}
+                {{#promptmode_summary}}<p><strong>{{promptmode_summary}}</strong></p>{{/promptmode_summary}}
+                {{#promptcount_total}}<p>{{{promptcount_total}}}</p>{{/promptcount_total}}
+                {{#promptcount_breakdown}}<p>{{{promptcount_breakdown}}}</p>{{/promptcount_breakdown}}
+
+                {{#haspromptsummary}}
+                    <div style="margin: 10px 0 15px;">
+                        <h3 style="margin: 0 0 6px;">{{prompttitle}}</h3>
+                        {{#promptdates}}<p><i>{{promptdates}}</i></p>{{/promptdates}}
+                        <core-format-text text="{{promptbody}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
+                    </div>
+                {{/haspromptsummary}}
+
+                {{#haslimitnotes}}
+                    <div style="margin-bottom: 15px;">
+                        {{#limitnotes}}<p>{{{html}}}</p>{{/limitnotes}}
+                    </div>
+                {{/haslimitnotes}}
+
+                {{#hasmetricrequirements}}
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 6px;">{{metricrequirementstitle}}</h3>
+                        <ion-list>
+                            {{#metricrequirements}}
+                                <ion-item lines="none">
+                                    <ion-label>{{text}}</ion-label>
+                                </ion-item>
+                            {{/metricrequirements}}
+                        </ion-list>
+                    </div>
+                {{/hasmetricrequirements}}
+            {{/hasmobilecontext}}
+
             {{^canedit}}
                 <core-alert message="{{#str}}editingended, mod_diary{{/str}}" type="info"></core-alert>
             {{/canedit}}
@@ -38,6 +71,19 @@
                     This allows the directive to find the textarea easily.
                 -->
                 <form id="diary-entry-form-{{cmid}}" ngNoForm>
+                    {{#haspromptselector}}
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; color: #666; font-size: 12px; margin-bottom: 5px;">
+                                {{promptselectorlabel}}
+                            </label>
+                            <select name="promptid"
+                                    style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; -webkit-appearance: none;">
+                                {{#promptoptions}}
+                                    <option value="{{value}}" {{selected}}>{{label}}</option>
+                                {{/promptoptions}}
+                            </select>
+                        </div>
+                    {{/haspromptselector}}
                     
                     <!-- Textarea wrapped in a plain div -->
                     <div style="margin-bottom: 15px;">
@@ -50,6 +96,7 @@
 
                     <input type="hidden" name="cmid" value="{{cmid}}">
                     <input type="hidden" name="entryid" value="{{entryid}}">
+                    {{^haspromptselector}}<input type="hidden" name="promptid" value="{{promptid}}">{{/haspromptselector}}
                     <input type="hidden" name="format" value="{{format}}">
                     <input type="hidden" name="itemid" value="0">
                 </form>

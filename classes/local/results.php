@@ -1162,26 +1162,33 @@ class results {
 
         require_once($CFG->dirroot . '/lib/gradelib.php');
 
-        if (! $teacher = $DB->get_record('user', ['id' => $entry->teacher])) {
-            throw new moodle_exception(get_string('generalerror', 'diary'));
-        }
+        $teacher = !empty($entry->teacher)
+            ? $DB->get_record('user', ['id' => $entry->teacher])
+            : false;
 
         echo '<table class="feedbackbox">';
 
         echo '<tr>';
         echo '<td class="left picture">';
 
-        echo $OUTPUT->user_picture(
-            $teacher,
-            [
-                'courseid' => $course->id,
-                'alttext' => true,
-            ]
-        );
+        if ($teacher) {
+            echo $OUTPUT->user_picture(
+                $teacher,
+                [
+                    'courseid' => $course->id,
+                    'alttext' => true,
+                ]
+            );
+        }
         echo '</td>';
         echo '<td class="entryheader">';
-        echo '<span class="author">' . fullname($teacher) . '</span>';
-        echo '&nbsp;&nbsp;<span class="time">' . userdate($entry->timemarked) . '</span>';
+        if ($teacher) {
+            echo '<span class="author">' . fullname($teacher) . '</span>';
+            echo '&nbsp;&nbsp;';
+        }
+        if (!empty($entry->timemarked)) {
+            echo '<span class="time">' . userdate($entry->timemarked) . '</span>';
+        }
         echo '</td>';
         echo '</tr>';
 

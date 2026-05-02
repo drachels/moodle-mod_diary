@@ -326,7 +326,7 @@ if (! $users) {
     $saveallbutton = '<p class="feedbacksavereturn">';
     $saveallbutton .= '<input type="hidden" name="id" value="' . $cm->id . '" />';
     $saveallbutton .= '<input type="hidden" name="sesskey" value="sesskey()" />';
-    $saveallbutton .= '<input type="submit" class="btn btn-primary diary-btn-rounded" value="'
+    $saveallbutton .= '<input type="submit" class="btn btn-primary diary-btn-rounded" data-entryid="0" value="'
                       . get_string('saveallfeedback', 'diary') . '" />';
 
     // phpcs:ignore
@@ -371,7 +371,8 @@ if (! $users) {
         );
         echo '</div>';
         // Since the list can be quite long, add a save button after each entry that will save ALL visible changes.
-        echo $saveallbutton;
+        // Per-entry save button carries the entry ID for reliable scroll-back on Save.
+        echo str_replace('data-entryid="0"', 'data-entryid="' . $ee->id . '"', $saveallbutton);
     }
 
     // End the page area where feedback and grades are added and will need to be saved.
@@ -436,47 +437,16 @@ echo '<script type="text/javascript">
             });
         });
 
-        // Find all input submit buttons with value "Save all my feedback" and track which one is clicked.
+        // On save button click, set last_edited_entry from the button data-entryid (per-entry save
+        // buttons embed the entry ID) or fall back to field-change tracking.
         var submitButtons = document.querySelectorAll("input[type=\"submit\"]");
         submitButtons.forEach(function(button) {
             button.addEventListener("click", function(e) {
-                // If we have a lastEditedEntry from field tracking, use that.
-                if (lastEditedEntry > 0) {
+                var entryId = parseInt(button.getAttribute("data-entryid") || "0", 10);
+                if (entryId > 0) {
+                    document.getElementById("last_edited_entry").value = entryId;
+                } else if (lastEditedEntry > 0) {
                     document.getElementById("last_edited_entry").value = lastEditedEntry;
-                } else {
-                    // Fallback: find the previous entry div before this button.
-                    var currentElement = button;
-                    var entryDiv = null;
-
-                    // Walk backwards through siblings and ancestors to find an entry div.
-                    while (currentElement && !entryDiv) {
-                        // Check previous siblings.
-                        var prevSibling = currentElement.previousElementSibling;
-                        while (prevSibling) {
-                            if (prevSibling.classList && prevSibling.classList.contains("entry")) {
-                                entryDiv = prevSibling;
-                                break;
-                            }
-                            prevSibling = prevSibling.previousElementSibling;
-                        }
-
-                        // If not found in siblings, go up to parent and try again.
-                        if (!entryDiv) {
-                            currentElement = currentElement.parentElement;
-                        }
-                    }
-
-                    // If we found the entry div, extract the entry ID from its anchor.
-                    if (entryDiv) {
-                        var anchors = entryDiv.querySelectorAll("[id^=\"rating-anchor-\"]");
-                        if (anchors.length > 0) {
-                            var anchorId = anchors[0].id; // rating-anchor-{id}
-                            var entryIdFromAnchor = anchorId.replace(/[^0-9]/g, "");
-                            if (entryIdFromAnchor) {
-                                document.getElementById("last_edited_entry").value = entryIdFromAnchor;
-                            }
-                        }
-                    }
                 }
             });
         });

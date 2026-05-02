@@ -31,6 +31,43 @@
         </ion-card-content>
     </ion-card>
 
+    {{#hasmobilecontext}}
+        <ion-card>
+            <ion-card-content>
+                {{#promptmode_summary}}<p><strong>{{promptmode_summary}}</strong></p>{{/promptmode_summary}}
+                {{#promptcount_total}}<p>{{{promptcount_total}}}</p>{{/promptcount_total}}
+                {{#promptcount_breakdown}}<p>{{{promptcount_breakdown}}}</p>{{/promptcount_breakdown}}
+
+                {{#haspromptsummary}}
+                    <div style="margin-top: 12px;">
+                        <h3 style="margin: 0 0 6px;">{{prompttitle}}</h3>
+                        {{#promptdates}}<p><i>{{promptdates}}</i></p>{{/promptdates}}
+                        <core-format-text text="{{promptbody}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
+                    </div>
+                {{/haspromptsummary}}
+
+                {{#haslimitnotes}}
+                    <div style="margin-top: 12px;">
+                        {{#limitnotes}}<p>{{{html}}}</p>{{/limitnotes}}
+                    </div>
+                {{/haslimitnotes}}
+
+                {{#hasmetricrequirements}}
+                    <div style="margin-top: 12px;">
+                        <h3 style="margin: 0 0 6px;">{{metricrequirementstitle}}</h3>
+                        <ion-list>
+                            {{#metricrequirements}}
+                                <ion-item lines="none">
+                                    <ion-label>{{text}}</ion-label>
+                                </ion-item>
+                            {{/metricrequirements}}
+                        </ion-list>
+                    </div>
+                {{/hasmetricrequirements}}
+            </ion-card-content>
+        </ion-card>
+    {{/hasmobilecontext}}
+
     <!-- TEACHER/MANAGER GRADING VIEW -->
     {{#showgrading}}
         {{#canadd}}
@@ -42,13 +79,114 @@
                     title="{{#str}}entry, mod_diary{{/str}}"
                     component="mod_diary"
                     method="mobile_course_view"
-                    [args]="{cmid: {{cmid}}, courseid: {{courseid}}, showgrading: 0}">
+                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 0}">
                     {{#str}}entry, mod_diary{{/str}}
                 </ion-button>
             </div>
         {{/canadd}}
 
+        {{#showgroupselector}}
+            <details class="ion-margin-bottom" style="border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; background: #fff;">
+                <summary style="cursor: pointer; font-size: 14px; color: #333;">
+                    {{#str}}groups{{/str}}: {{selectedgroupname}}
+                </summary>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                    {{#groupoptions}}
+                        <ion-button
+                            size="small"
+                            {{#selected}}color="primary"{{/selected}}
+                            {{^selected}}fill="outline"{{/selected}}
+                            core-site-plugins-new-content
+                            title="{{name}}"
+                            component="mod_diary"
+                            method="mobile_course_view"
+                            [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 1, groupid: '{{id}}', userid: '{{selecteduserid}}', sortmode: '{{selectedsortmode}}'}">
+                            {{name}}
+                        </ion-button>
+                    {{/groupoptions}}
+                </div>
+            </details>
+        {{/showgroupselector}}
+
+        {{#hasuserselector}}
+            <details class="ion-margin-bottom" style="border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; background: #fff;">
+                <summary style="cursor: pointer; font-size: 14px; color: #333;">
+                    View single user: {{selectedusername}}
+                </summary>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                    {{#useroptions}}
+                        <ion-button
+                            size="small"
+                            {{#selected}}color="primary"{{/selected}}
+                            {{^selected}}fill="outline"{{/selected}}
+                            core-site-plugins-new-content
+                            title="{{name}}"
+                            component="mod_diary"
+                            method="mobile_course_view"
+                            [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 1, groupid: '{{selectedgroupid}}', userid: '{{id}}', sortmode: '{{selectedsortmode}}'}">
+                            {{name}}
+                        </ion-button>
+                    {{/useroptions}}
+                </div>
+            </details>
+        {{/hasuserselector}}
+
+        <details class="ion-margin-bottom" style="border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; background: #fff;">
+            <summary style="cursor: pointer; font-size: 14px; color: #333;">
+                Sort: {{selectedsortlabel}}
+            </summary>
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                {{#sortoptions}}
+                    <ion-button
+                        size="small"
+                        {{#selected}}color="primary"{{/selected}}
+                        {{^selected}}fill="outline"{{/selected}}
+                        core-site-plugins-new-content
+                        title="{{label}}"
+                        component="mod_diary"
+                        method="mobile_course_view"
+                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 1, groupid: '{{selectedgroupid}}', userid: '{{selecteduserid}}', sortmode: '{{id}}'}">
+                        {{label}}
+                    </ion-button>
+                {{/sortoptions}}
+            </div>
+        </details>
+
         <h3>{{#str}}entries, mod_diary{{/str}}</h3>
+        {{#gradingsummary}}
+            <p style="margin: 0 0 8px; color: #666; font-size: 13px;">{{gradingsummary}}</p>
+        {{/gradingsummary}}
+
+        {{#hasgradingpager}}
+            <div class="ion-margin-bottom" style="display: flex; gap: 8px;">
+                {{#hasgradingprev}}
+                    <ion-button
+                        fill="outline"
+                        size="small"
+                        core-site-plugins-new-content
+                        title="Previous"
+                        component="mod_diary"
+                        method="mobile_course_view"
+                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 1, groupid: '{{selectedgroupid}}', userid: '{{selecteduserid}}', sortmode: '{{selectedsortmode}}', gradeoffset: '{{gradingprevoffset}}'}">
+                        Previous
+                    </ion-button>
+                {{/hasgradingprev}}
+
+                {{#hasgradingnext}}
+                    <ion-button
+                        fill="outline"
+                        size="small"
+                        core-site-plugins-new-content
+                        title="Next"
+                        component="mod_diary"
+                        method="mobile_course_view"
+                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 1, groupid: '{{selectedgroupid}}', userid: '{{selecteduserid}}', sortmode: '{{selectedsortmode}}', gradeoffset: '{{gradingnextoffset}}'}">
+                        Next
+                    </ion-button>
+                {{/hasgradingnext}}
+            </div>
+        {{/hasgradingpager}}
+
         {{^submissions}}
             <core-alert message="{{#str}}noentriesmanagers, mod_diary{{/str}}" type="info"></core-alert>
         {{/submissions}}
@@ -77,6 +215,38 @@
 
                 <div class="ion-padding">
 
+                    {{#hasresultsblock}}
+                        <div style="margin-bottom: 12px;">
+                            <div id="diary-results-block-{{entryid}}">
+                                <core-format-text text="{{resultsblockhtml}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
+                            </div>
+                        </div>
+                    {{/hasresultsblock}}
+
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <ion-button
+                            class="diary-feedback-action"
+                            data-entryid="{{entryid}}"
+                            data-action="add"
+                            onclick="return window.modDiaryApplyFeedbackAction ? window.modDiaryApplyFeedbackAction('{{entryid}}', 'add') : true;"
+                            size="small"
+                            color="warning"
+                            expand="block">
+                            {{#str}}addtofeedback, mod_diary{{/str}}
+                        </ion-button>
+
+                        <ion-button
+                            class="diary-feedback-action"
+                            data-entryid="{{entryid}}"
+                            data-action="clear"
+                            onclick="return window.modDiaryApplyFeedbackAction ? window.modDiaryApplyFeedbackAction('{{entryid}}', 'clear') : true;"
+                            size="small"
+                            color="warning"
+                            expand="block">
+                            {{#str}}clearfeedback, mod_diary{{/str}}
+                        </ion-button>
+                    </div>
+
                     <!-- 
                          GRADING FORM CONTAINER
                          Using <form ngNoForm> is crucial here. 
@@ -96,64 +266,39 @@
                                 {{#str}}rating, mod_diary{{/str}}
                             </label>
                             <select name="grade"
+                                    data-role="grade-visible"
                                     style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; -webkit-appearance: none;">
                                 <option value="-1" {{rating_minus_one}}>{{#str}}nograde, mod_diary{{/str}}</option>
                                 {{#gradeoptions}}
                                     <option value="{{val}}" {{selected}}>{{label}}</option>
                                 {{/gradeoptions}}
                             </select>
+                            {{#averagegrade}}<p style="margin: 8px 0 0; color: #666;">{{averagegrade}}</p>{{/averagegrade}}
                         </div>
 
                         <!-- Feedback Editor (Standard Textarea) -->
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; color: #666; font-size: 12px; margin-bottom: 5px;">
-                                {{#str}}entrycomment, mod_diary{{/str}}
+                                {{#str}}feedback{{/str}}
                             </label>
 
-                            {{#has_feedback}}
-                                <div style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #111;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 6px;">
-                                        {{#str}}entrycomment, mod_diary{{/str}}
-                                    </div>
-                                    <core-format-text text="{{feedback_formatted}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
-                                </div>
-                            {{/has_feedback}}
-
                             <textarea
-                                name="feedback"
+                                data-role="feedback-visible"
+                                data-entryid="{{entryid}}"
                                 rows="6"
-                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #111;">{{feedback_plain}}</textarea>
+                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #111;">{{feedback_raw}}</textarea>
+                            <textarea name="feedback" data-role="feedback-hidden" style="display:none;">{{feedback_raw}}</textarea>
                         </div>
 
                         <!-- itemid required by WS, keep 0 for now -->
                         <input type="hidden" name="itemid" value="0">
-                        <input type="hidden" name="feedbackseed" value="{{feedback_seed}}">
-                        <textarea name="feedbackseedhtml" style="display:none;">{{feedback_seed_html}}</textarea>
                     </form>
 
+                    <textarea id="diary-feedback-seed-{{entryid}}" style="display:none;">{{feedback_seed}}</textarea>
+                    <textarea id="diary-feedback-seed-html-{{entryid}}" style="display:none;">{{feedback_seed_html}}</textarea>
+                    <input type="hidden" id="diary-autorating-value-{{entryid}}" value="{{autorating_value}}">
+
                     <div class="ion-margin-top">
-                        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                            <ion-button
-                                class="diary-feedback-action"
-                                data-entryid="{{entryid}}"
-                                data-action="add"
-                                size="small"
-                                color="warning"
-                                expand="block">
-                                {{#str}}addtofeedback, mod_diary{{/str}}
-                            </ion-button>
-
-                            <ion-button
-                                class="diary-feedback-action"
-                                data-entryid="{{entryid}}"
-                                data-action="clear"
-                                size="small"
-                                color="warning"
-                                expand="block">
-                                {{#str}}clearfeedback, mod_diary{{/str}}
-                            </ion-button>
-                        </div>
-
                         <!-- 
                             SAVE BUTTON
                             The directive is placed directly on the ion-button.
@@ -162,10 +307,12 @@
                         <ion-button
                             class="diary-save-feedback"
                             data-entryid="{{entryid}}"
+                            onclick="return window.modDiaryPrepareFeedbackSave ? window.modDiaryPrepareFeedbackSave('{{entryid}}') : true;"
                             expand="block"
                             core-site-plugins-call-ws
                             name="mod_diary_save_feedback"
                             form="diary-feedback-{{entryid}}"
+                            refreshOnSuccess="false"
                             successMessage="{{#str}}changessaved, mod_diary{{/str}}">
                                 {{#str}}savefeedback, mod_diary{{/str}}
                         </ion-button>
@@ -179,8 +326,32 @@
 
     <!-- STUDENT VIEW -->
     {{^showgrading}}
-        {{#canmanage}}
-            <div class="ion-margin-bottom" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;">
+        {{#managerlanding}}
+            <div class="ion-margin-bottom">
+                {{#canadd}}
+                <ion-button
+                    fill="outline"
+                    size="small"
+                    core-site-plugins-new-content
+                    title="{{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}"
+                    component="mod_diary"
+                    method="mobile_entry_edit"
+                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}'}">
+                    {{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}
+                </ion-button>
+                {{#hasmanagerlatestentry}}
+                <ion-button
+                    fill="outline"
+                    size="small"
+                    core-site-plugins-new-content
+                    title="{{#str}}editthisentry, mod_diary{{/str}}"
+                    component="mod_diary"
+                    method="mobile_entry_edit"
+                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{managerlatestentryid}}'}">
+                    {{#str}}eeditlabel, mod_diary{{/str}}
+                </ion-button>
+                {{/hasmanagerlatestentry}}
+                {{/canadd}}
                 <ion-button
                     fill="clear"
                     size="small"
@@ -189,38 +360,13 @@
                     title="{{viewallentrieslabel}}"
                     component="mod_diary"
                     method="mobile_course_view"
-                    [args]="{cmid: {{cmid}}, courseid: {{courseid}}, showgrading: 1}">
+                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 1}">
                     <span style="text-decoration: underline;">{{viewallentrieslabel}}</span>
                 </ion-button>
-
-                <a href="{{indexurl}}" style="font-size: 14px;">
-                    {{#str}}viewalldiaries, mod_diary{{/str}}
-                </a>
             </div>
+        {{/managerlanding}}
 
-            {{#showgroupselector}}
-                <details class="ion-margin-bottom" style="border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; background: #fff;">
-                    <summary style="cursor: pointer; font-size: 14px; color: #333;">
-                        {{#str}}groups{{/str}}: {{selectedgroupname}}
-                    </summary>
-                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
-                        {{#groupoptions}}
-                            <ion-button
-                                size="small"
-                                {{#selected}}color="primary"{{/selected}}
-                                {{^selected}}fill="outline"{{/selected}}
-                                core-site-plugins-new-content
-                                title="{{name}}"
-                                component="mod_diary"
-                                method="mobile_course_view"
-                                [args]="{cmid: {{cmid}}, courseid: {{courseid}}, showgrading: 1, groupid: {{id}}}">
-                                {{name}}
-                            </ion-button>
-                        {{/groupoptions}}
-                    </div>
-                </details>
-            {{/showgroupselector}}
-        {{/canmanage}}
+        {{^managerlanding}}
 
         {{#hasentry}}
             <ion-card>
@@ -229,6 +375,7 @@
                 </ion-item-divider>
                 <ion-card-content>
                     <p><strong>{{#str}}lastedited, moodle{{/str}}:</strong> {{lastedited}}</p>
+                    {{#entrypromptlabel}}<p><strong>{{#str}}writingpromptlable2, mod_diary{{/str}}</strong>{{entrypromptlabel}}</p>{{/entrypromptlabel}}
                     <core-format-text text="{{text}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
                 </ion-card-content>
             </ion-card>
@@ -282,7 +429,7 @@
                         title="{{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}"
                         component="mod_diary"
                         method="mobile_entry_edit"
-                        [args]="{cmid: {{cmid}}, courseid: {{courseid}}}">
+                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}'}">
                         {{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}
                     </ion-button>
                 </ion-card-content>
@@ -298,6 +445,7 @@
                             <ion-item lines="full">
                                 <ion-label>
                                     <h3>{{title}}</h3>
+                                    {{#promptlabel}}<p>{{#str}}writingpromptlable2, mod_diary{{/str}}{{promptlabel}}</p>{{/promptlabel}}
                                     <p>{{timemodified}}</p>
                                     {{#preview}}<p>{{preview}}</p>{{/preview}}
                                 </ion-label>
@@ -309,7 +457,7 @@
                                     title="{{#str}}editthisentry, mod_diary{{/str}}"
                                     component="mod_diary"
                                     method="mobile_entry_edit"
-                                    [args]="{cmid: {{cmid}}, courseid: {{courseid}}, entryid: {{entryid}}}">
+                                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{entryid}}'}">
                                     {{#str}}eeditlabel, mod_diary{{/str}}
                                 </ion-button>
                             </ion-item>
@@ -318,5 +466,6 @@
                 </ion-card>
             {{/haseditableentries}}
         {{/canedit}}
+        {{/managerlanding}}
     {{/showgrading}}
 </div>

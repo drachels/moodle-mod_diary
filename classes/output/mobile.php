@@ -22,6 +22,8 @@ require_once($CFG->dirroot . '/mod/diary/lib.php');
 require_once($CFG->libdir . '/gradelib.php');
 require_once($CFG->libdir . '/weblib.php');
 
+use mod_diary\local\diarystats;
+use mod_diary\local\prompts;
 use mod_diary\local\results;
 
 /**
@@ -57,11 +59,16 @@ class mobile {
         $requestedgrading = !empty($args['showgrading']);
         $groupmode = groups_get_activity_groupmode($cm);
         $selectedgroup = isset($args['groupid']) ? (int)$args['groupid'] : groups_get_activity_group($cm, true);
+
+        if (!isset($args['groupid']) && $canmanage && has_capability('moodle/site:accessallgroups', $context)) {
+            $selectedgroup = 0;
+        }
+
         $entrycount = results::diary_count_entries($diary, $selectedgroup);
 
-        // If a user can both manage and add entries (typical teacher/admin),
-        // default to personal entry view and allow switching to grading list.
-        $showgrading = $canmanage && (!$canadd || $requestedgrading);
+        // Always default to the lighter landing view on first mobile open.
+        // Load grading list only when explicitly requested (showgrading=1).
+        $showgrading = $canmanage && $requestedgrading;
 
         [$isopen, $warning, $info] = self::get_open_status($diary, $course, $cm);
 
@@ -82,6 +89,8 @@ class mobile {
             'viewallentrieslabel' => get_string('viewallentries', 'diary', $entrycount),
             'indexurl' => (new \moodle_url('/mod/diary/index.php', ['id' => $course->id]))->out(false),
             'showgroupselector' => false,
+            'selectedgroupid' => (int)$selectedgroup,
+            'selecteduserid' => 0,
             'selectedgroupname' => get_string('allparticipants'),
         ];
 
@@ -120,18 +129,124 @@ class mobile {
             }
         }
 
-        if ($showgrading) {
-            $data['submissions'] = self::build_teacher_submissions($cm, $context, $diary, $OUTPUT, $selectedgroup);
+        $managerlanding = $canmanage && !$showgrading;
+        $data['managerlanding'] = $managerlanding;
+
+        if ($managerlanding && $canadd && $isopen) {
+            $latestentry = $DB->get_record_sql(
+                "SELECT id
+                   FROM {diary_entries}
+                  WHERE diary = :diaryid AND userid = :userid
+               ORDER BY timemodified DESC",
+                ['diaryid' => $diary->id, 'userid' => $USER->id],
+                IGNORE_MULTIPLE
+            );
+            if (!empty($latestentry->id)) {
+                $data['hasmanagerlatestentry'] = true;
+                $data['managerlatestentryid'] = (int)$latestentry->id;
+            }
         }
 
-        self::populate_student_view($data, $cm, $context, $course, $diary, $USER->id, $OUTPUT);
+        if ($showgrading) {
+            $sortmode = (string)($args['sortmode'] ?? 'currententry');
+            $validsortmodes = [
+                'currententry' => 'Current entries',
+                'firstentry' => 'First entries',
+                'latestmodifiedentry' => 'Latest modified entry',
+                'lowestgradeentry' => 'Lowest grade entry',
+                'highestgradeentry' => 'Highest grade entry',
+                'lastnameasc' => 'Name A-Z',
+                'lastnamedesc' => 'Name Z-A',
+            ];
+            if (!array_key_exists($sortmode, $validsortmodes)) {
+                $sortmode = 'currententry';
+            }
+            $data['selectedsortmode'] = $sortmode;
+            $data['selectedsortlabel'] = $validsortmodes[$sortmode];
+            $data['sortoptions'] = [];
+            foreach ($validsortmodes as $optionid => $optionlabel) {
+                $data['sortoptions'][] = [
+                    'id' => $optionid,
+                    'label' => $optionlabel,
+                    'selected' => ($optionid === $sortmode),
+                ];
+            }
 
-        if (!$showgrading && $canadd && $isopen) {
-            $data['editableentries'] = self::build_user_editable_entries($diary, $USER->id);
-            $data['haseditableentries'] = !empty($data['editableentries']);
+            $selecteduserid = max(0, (int)($args['userid'] ?? 0));
+            $data['selecteduserid'] = $selecteduserid;
+            $data['selectedusername'] = get_string('allparticipants');
+
+            $usersort = ($sortmode === 'lastnamedesc')
+                ? 'u.lastname DESC, u.firstname DESC'
+                : 'u.lastname ASC, u.firstname ASC';
+            $gradingusers = diary_get_users_done($diary, $selectedgroup, $usersort);
+            $useroptions = [[
+                'id' => 0,
+                'name' => get_string('allparticipants'),
+                'selected' => ($selecteduserid === 0),
+            ]];
+            if (!empty($gradingusers)) {
+                foreach ($gradingusers as $gradinguser) {
+                    $useroptions[] = [
+                        'id' => (int)$gradinguser->id,
+                        'name' => fullname($gradinguser),
+                        'selected' => ((int)$gradinguser->id === $selecteduserid),
+                    ];
+                    if ((int)$gradinguser->id === $selecteduserid) {
+                        $data['selectedusername'] = fullname($gradinguser);
+                    }
+                }
+            }
+            $data['hasuserselector'] = count($useroptions) > 1;
+            $data['useroptions'] = $useroptions;
+
+            $gradeoffset = max(0, (int)($args['gradeoffset'] ?? 0));
+            $gradelimit = 5;
+            $graderesult = self::build_teacher_submissions(
+                $cm,
+                $context,
+                $course,
+                $diary,
+                $OUTPUT,
+                $selectedgroup,
+                $selecteduserid,
+                $sortmode,
+                $gradeoffset,
+                $gradelimit
+            );
+
+            $data['submissions'] = $graderesult['items'];
+            $totalgradingsubmissions = (int)$graderesult['total'];
+            $activeoffset = (int)$graderesult['offset'];
+
+            if ($totalgradingsubmissions > 0) {
+                $rangefrom = $activeoffset + 1;
+                $rangeto = min($activeoffset + count($graderesult['items']), $totalgradingsubmissions);
+                $data['gradingsummary'] = 'Showing ' . $rangefrom . '-' . $rangeto . ' of ' . $totalgradingsubmissions;
+            }
+
+            if ($totalgradingsubmissions > $gradelimit) {
+                $data['hasgradingpager'] = true;
+                $data['hasgradingprev'] = ($activeoffset > 0);
+                $data['hasgradingnext'] = ($activeoffset + $gradelimit < $totalgradingsubmissions);
+                $data['gradingprevoffset'] = max(0, $activeoffset - $gradelimit);
+                $data['gradingnextoffset'] = $activeoffset + $gradelimit;
+            }
+        }
+
+        if (!$managerlanding) {
+            self::populate_student_view($data, $cm, $context, $course, $diary, $USER->id, $OUTPUT);
+            self::populate_mobile_prompt_context($data, $context, $diary, $USER->id);
+
+            if (!$showgrading && $canadd && $isopen) {
+                $data['editableentries'] = self::build_user_editable_entries($diary, $USER->id);
+                $data['haseditableentries'] = !empty($data['editableentries']);
+            }
         }
 
         $js = <<<'JS'
+    var self = this;
+
 this.scrollToSavedDiaryAnchor = function(retriesLeft) {
     var self = this;
     try {
@@ -173,6 +288,193 @@ this.scrollToSavedDiaryAnchor = function(retriesLeft) {
     }
 };
 
+this.findDiaryActionButton = function(e, selector) {
+    try {
+        if (e && typeof e.composedPath === 'function') {
+            var path = e.composedPath();
+            for (var i = 0; i < path.length; i++) {
+                var node = path[i];
+                if (!node) {
+                    continue;
+                }
+                if (node.matches && node.matches(selector)) {
+                    return node;
+                }
+                if (node.closest) {
+                    var candidate = node.closest(selector);
+                    if (candidate) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+
+        var target = e ? e.target : null;
+        return target && target.closest ? target.closest(selector) : null;
+    } catch (err) {
+        return null;
+    }
+};
+
+this.getDiaryFeedbackForm = function(entryid) {
+    if (!entryid) {
+        return null;
+    }
+    return document.getElementById('diary-feedback-' + entryid);
+};
+
+this.syncDiaryFeedbackField = function(form) {
+    if (!form) {
+        return;
+    }
+
+    var visible = form.querySelector('textarea[data-role="feedback-visible"]');
+    var hidden = form.querySelector('textarea[name="feedback"]');
+    if (!visible) {
+        return;
+    }
+
+    // Single-textarea mode: visible field is the named feedback field.
+    if (visible === hidden) {
+        return;
+    }
+
+    if (!hidden) {
+        return;
+    }
+
+    hidden.value = visible.value || '';
+};
+
+this.applyDiaryFeedbackAction = function(entryid, action) {
+    var form = self.getDiaryFeedbackForm(entryid);
+    if (!form || !action) {
+        return false;
+    }
+
+    var textarea = form.querySelector('textarea[data-role="feedback-visible"]');
+    var seedinput = document.getElementById('diary-feedback-seed-' + entryid);
+    var seedhtmlinput = document.getElementById('diary-feedback-seed-html-' + entryid);
+    var renderedresults = document.getElementById('diary-results-block-' + entryid);
+    var autoratinginput = document.getElementById('diary-autorating-value-' + entryid);
+    if (!textarea) {
+        return false;
+    }
+
+    var seed = seedinput ? (seedinput.value || '').trim() : '';
+    var seedhtml = seedhtmlinput ? (seedhtmlinput.value || '').trim() : '';
+    var autorating = autoratinginput ? (autoratinginput.value || '').trim() : '';
+    var current = textarea.value || '';
+
+    var setGradeValue = function(form, value) {
+        if (!form) {
+            return;
+        }
+        var select = form.querySelector('select[data-role="grade-visible"]');
+        if (!select) {
+            return;
+        }
+
+        select.value = value;
+        for (var i = 0; i < select.options.length; i++) {
+            select.options[i].selected = (String(select.options[i].value) === String(value));
+        }
+        select.dispatchEvent(new Event('input', {bubbles: true}));
+        select.dispatchEvent(new Event('change', {bubbles: true}));
+    };
+
+    if (action === 'clear') {
+        textarea.value = '';
+        setGradeValue(form, '-1');
+    } else if (action === 'add') {
+        var addcontent = seed;
+
+        if (!addcontent) {
+            if (renderedresults) {
+                addcontent = (renderedresults.innerText || renderedresults.textContent || '').trim();
+            }
+        }
+        if (!addcontent && seedhtml) {
+            var temp = document.createElement('div');
+            temp.innerHTML = seedhtml;
+            addcontent = (temp.innerText || temp.textContent || '').trim();
+        }
+        if (!addcontent) {
+            return false;
+        }
+        if (!current.trim()) {
+            textarea.value = addcontent;
+        } else {
+            textarea.value = current.replace(/\s+$/, '') + "\n\n" + addcontent;
+        }
+
+        if (autorating !== '') {
+            setGradeValue(form, autorating);
+        }
+    } else {
+        return false;
+    }
+
+    self.syncDiaryFeedbackField(form);
+    textarea.dispatchEvent(new Event('input', {bubbles: true}));
+    textarea.dispatchEvent(new Event('change', {bubbles: true}));
+    textarea.focus();
+    return false;
+};
+
+this.bindDiaryFeedbackActionButtons = function() {
+    var handler = function(e) {
+        try {
+            var button = e && e.currentTarget ? e.currentTarget : null;
+            if (!button) {
+                return;
+            }
+            var entryid = button.getAttribute('data-entryid');
+            var action = button.getAttribute('data-action');
+            if (!entryid || !action) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            self.applyDiaryFeedbackAction(entryid, action);
+        } catch (err) {
+            // Ignore direct button binding failures.
+        }
+    };
+
+    var buttons = document.querySelectorAll('ion-button.diary-feedback-action[data-entryid][data-action]');
+    for (var i = 0; i < buttons.length; i++) {
+        var button = buttons[i];
+        if (!button || button.getAttribute('data-diary-bound') === '1') {
+            continue;
+        }
+        button.setAttribute('data-diary-bound', '1');
+        button.addEventListener('click', handler, true);
+        button.addEventListener('touchend', handler, true);
+    }
+};
+
+if (!window.modDiaryApplyFeedbackAction) {
+    window.modDiaryApplyFeedbackAction = function(entryid, action) {
+        if (self && typeof self.applyDiaryFeedbackAction === 'function') {
+            return self.applyDiaryFeedbackAction(entryid, action);
+        }
+        return false;
+    };
+}
+
+if (!window.modDiaryPrepareFeedbackSave) {
+    window.modDiaryPrepareFeedbackSave = function(entryid) {
+        if (self && typeof self.getDiaryFeedbackForm === 'function') {
+            var form = self.getDiaryFeedbackForm(entryid);
+            if (typeof self.syncDiaryFeedbackField === 'function') {
+                self.syncDiaryFeedbackField(form);
+            }
+        }
+        return true;
+    };
+}
+
 this.bindDiaryAnchorCapture = function() {
     if (window.__modDiaryAnchorCaptureBound) {
         return;
@@ -181,14 +483,15 @@ this.bindDiaryAnchorCapture = function() {
 
     document.addEventListener('click', function(e) {
         try {
-            var target = e.target;
-            var button = target && target.closest ? target.closest('ion-button.diary-save-feedback[data-entryid]') : null;
+            var button = self.findDiaryActionButton(e, 'ion-button.diary-save-feedback[data-entryid]');
             if (!button) {
                 return;
             }
             var entryid = button.getAttribute('data-entryid');
             if (entryid) {
-                window.localStorage.setItem('mod_diary_last_anchor', 'rating-anchor-' + entryid);
+                var form = self.getDiaryFeedbackForm(entryid);
+                self.syncDiaryFeedbackField(form);
+                window.localStorage.removeItem('mod_diary_last_anchor');
             }
         } catch (err) {
             // Ignore event-capture issues.
@@ -197,6 +500,8 @@ this.bindDiaryAnchorCapture = function() {
 };
 
 this.bindDiaryFeedbackActions = function() {
+    self.bindDiaryFeedbackActionButtons();
+
     if (window.__modDiaryFeedbackActionsBound) {
         return;
     }
@@ -204,10 +509,7 @@ this.bindDiaryFeedbackActions = function() {
 
     document.addEventListener('click', function(e) {
         try {
-            var target = e.target;
-            var button = target && target.closest
-                ? target.closest('ion-button.diary-feedback-action[data-entryid][data-action]')
-                : null;
+            var button = self.findDiaryActionButton(e, 'ion-button.diary-feedback-action[data-entryid][data-action]');
             if (!button) {
                 return;
             }
@@ -217,44 +519,30 @@ this.bindDiaryFeedbackActions = function() {
             if (!entryid || !action) {
                 return;
             }
-
-            var form = document.getElementById('diary-feedback-' + entryid);
-            if (!form) {
-                return;
-            }
-
-            var textarea = form.querySelector('textarea[name="feedback"]');
-            var seedinput = form.querySelector('input[name="feedbackseed"]');
-            var seedhtmlinput = form.querySelector('textarea[name="feedbackseedhtml"]');
-            if (!textarea) {
-                return;
-            }
-
-            var seed = seedinput ? (seedinput.value || '').trim() : '';
-            var seedhtml = seedhtmlinput ? (seedhtmlinput.value || '').trim() : '';
-            var current = textarea.value || '';
-
-            if (action === 'clear') {
-                textarea.value = '';
-            } else if (action === 'add') {
-                var addcontent = seedhtml || seed;
-                if (!addcontent) {
-                    return;
-                }
-                if (!current.trim()) {
-                    textarea.value = addcontent;
-                } else if (current.indexOf(addcontent) === -1) {
-                    textarea.value = current.replace(/\s+$/, '') + "\n\n" + addcontent;
-                }
-            }
-
-            textarea.dispatchEvent(new Event('input', {bubbles: true}));
-            textarea.dispatchEvent(new Event('change', {bubbles: true}));
-            textarea.focus();
+            self.applyDiaryFeedbackAction(entryid, action);
         } catch (err) {
             // Ignore button binding issues.
         }
     }, true);
+
+    document.addEventListener('input', function(e) {
+        try {
+            var target = e && e.target ? e.target : null;
+            if (!target || !target.matches || !target.matches('textarea[data-role="feedback-visible"][data-entryid]')) {
+                return;
+            }
+
+            var entryid = target.getAttribute('data-entryid');
+            if (!entryid) {
+                return;
+            }
+
+            self.syncDiaryFeedbackField(self.getDiaryFeedbackForm(entryid));
+        } catch (err) {
+            // Ignore input sync issues.
+        }
+    }, true);
+
 };
 
 this.ionViewWillEnter = function() {
@@ -368,6 +656,10 @@ JS;
             'entryid' => $entryid,
             'text_plain' => $textplain,
         ];
+        $editpromptid = $entry ? (int)($entry->promptid ?? 0) : prompts::get_current_promptid($diary, $USER->id, 0);
+        $data['promptid'] = $editpromptid;
+        self::populate_mobile_prompt_context($data, $context, $diary, $USER->id, $editpromptid);
+        self::populate_mobile_prompt_selector($data, $diary, $USER->id, $entry, $editpromptid);
 
         $js = <<<'JS'
 this.onDiaryEntrySaved = function(result) {
@@ -403,6 +695,326 @@ JS;
     }
 
     /**
+     * Populate prompt and requirement context used by the mobile student pages.
+     *
+     * @param array $data Data passed to the mobile template.
+     * @param \context_module $context Module context.
+     * @param \stdClass $diary Diary record.
+     * @param int $userid User id.
+     * @param int $promptid Optional resolved/current prompt id.
+     * @return void
+     */
+    protected static function populate_mobile_prompt_context(array &$data, $context, $diary, $userid, $promptid = 0) {
+        global $DB;
+
+        $resolvedpromptid = (int)$promptid;
+        if ($resolvedpromptid <= 0) {
+            $resolvedpromptid = prompts::get_current_promptid($diary, (int)$userid, 0);
+        }
+
+        [$tcount, $past, $current, $future] = prompts::diary_count_prompts($diary);
+        $data['promptmode_summary'] = self::get_mobile_prompt_mode_label($diary);
+        $data['promptcount_total'] = get_string('tcount', 'diary', $tcount);
+        $data['promptcount_breakdown'] = get_string('promptinfo', 'diary', [
+            'past' => $past,
+            'current' => $current,
+            'future' => $future,
+        ]);
+
+        $limitnotes = self::get_mobile_limit_notes($diary, $resolvedpromptid);
+        if (!empty($limitnotes)) {
+            $data['haslimitnotes'] = true;
+            $data['limitnotes'] = array_map(function ($notehtml) {
+                return ['html' => $notehtml];
+            }, $limitnotes);
+        }
+
+        $metricrequirements = self::get_mobile_metric_requirement_items($diary);
+        if (!empty($metricrequirements)) {
+            $data['hasmetricrequirements'] = true;
+            $data['metricrequirementstitle'] = get_string('completionmetricrequirements', 'diary');
+            $data['metricrequirements'] = $metricrequirements;
+        }
+
+        if ($resolvedpromptid > 0) {
+            $prompt = $DB->get_record('diary_prompts', [
+                'id' => $resolvedpromptid,
+                'diaryid' => $diary->id,
+            ]);
+            if ($prompt) {
+                $prompttext = file_rewrite_pluginfile_urls(
+                    (string)$prompt->text,
+                    'pluginfile.php',
+                    $context->id,
+                    'mod_diary',
+                    'prompt',
+                    $prompt->id
+                );
+                $data['haspromptsummary'] = true;
+                $data['prompttitle'] = trim((string)($prompt->title ?? '')) !== ''
+                    ? format_string($prompt->title)
+                    : rtrim(get_string('writingpromptlable2', 'diary')) . ' #' . (int)$prompt->id;
+                $data['promptbody'] = format_text($prompttext, $prompt->format, ['context' => $context]);
+
+                $dates = [];
+                if (!empty($prompt->datestart)) {
+                    $dates[] = userdate((int)$prompt->datestart);
+                }
+                if (!empty($prompt->datestop)) {
+                    $dates[] = userdate((int)$prompt->datestop);
+                }
+                if (!empty($dates)) {
+                    $data['promptdates'] = implode(' - ', $dates);
+                }
+            }
+        }
+
+        $data['hasmobilecontext'] = !empty($data['haspromptsummary'])
+            || !empty($data['haslimitnotes'])
+            || !empty($data['hasmetricrequirements'])
+            || !empty($data['promptmode_summary'])
+            || !empty($data['promptcount_total']);
+    }
+
+    /**
+     * Return a human-readable prompt mode summary for mobile output.
+     *
+     * @param \stdClass $diary Diary record.
+     * @return string
+     */
+    protected static function get_mobile_prompt_mode_label($diary) {
+        global $DB;
+
+        $promptmode = prompts::get_prompt_mode($diary);
+        $total = (int)$DB->count_records('diary_prompts', ['diaryid' => $diary->id]);
+        $required = max(0, min((int)($diary->requiredpromptcount ?? 0), $total));
+
+        if ($promptmode === prompts::PROMPTMODE_CHOICECOMPLETE) {
+            return get_string('coursetopiccurrentpromptmodechoicecomplete', 'diary', [
+                'required' => $required,
+                'total' => $total,
+            ]);
+        }
+
+        if ($promptmode === prompts::PROMPTMODE_RANDOMCOMPLETE) {
+            return get_string('coursetopiccurrentpromptmoderandomcomplete', 'diary', [
+                'required' => $required,
+                'total' => $total,
+            ]);
+        }
+
+        $map = [
+            prompts::PROMPTMODE_SEQUENTIAL => 'promptmodesequential',
+            prompts::PROMPTMODE_CHOICE => 'promptmodechoice',
+            prompts::PROMPTMODE_RANDOM => 'promptmoderandom',
+            prompts::PROMPTMODE_COMPLETEALL => 'promptmodecompleteall',
+        ];
+        $modestring = $map[$promptmode] ?? 'promptmodesequential';
+
+        return get_string('coursetopiccurrentpromptmode', 'diary', get_string($modestring, 'diary'));
+    }
+
+    /**
+     * Build min/max and edit-limit note HTML for mobile pages.
+     *
+     * @param \stdClass $diary Diary record.
+     * @param int $promptid Prompt id, when available.
+     * @return string[]
+     */
+    protected static function get_mobile_limit_notes($diary, $promptid = 0) {
+        global $DB;
+
+        $notes = [];
+        $prompt = null;
+        if (!empty($promptid)) {
+            $prompt = $DB->get_record('diary_prompts', ['id' => (int)$promptid, 'diaryid' => $diary->id]);
+        }
+
+        $limits = [
+            ['field' => 'minchar', 'diaryfield' => 'mincharacterlimit', 'string' => 'mincharacterlimit_desc'],
+            ['field' => 'maxchar', 'diaryfield' => 'maxcharacterlimit', 'string' => 'maxcharacterlimit_desc'],
+            ['field' => 'minword', 'diaryfield' => 'minwordlimit', 'string' => 'minwordlimit_desc'],
+            ['field' => 'maxword', 'diaryfield' => 'maxwordlimit', 'string' => 'maxwordlimit_desc'],
+            ['field' => 'minsentence', 'diaryfield' => 'minsentencelimit', 'string' => 'minsentencelimit_desc'],
+            ['field' => 'maxsentence', 'diaryfield' => 'maxsentencelimit', 'string' => 'maxsentencelimit_desc'],
+            ['field' => 'minparagraph', 'diaryfield' => 'minparagraphlimit', 'string' => 'minparagraphlimit_desc'],
+            ['field' => 'maxparagraph', 'diaryfield' => 'maxparagraphlimit', 'string' => 'maxparagraphlimit_desc'],
+        ];
+
+        foreach ($limits as $limit) {
+            $value = 0;
+            if ($prompt && isset($prompt->{$limit['field']}) && (int)$prompt->{$limit['field']} > 0) {
+                $value = (int)$prompt->{$limit['field']};
+            } else if (isset($diary->{$limit['diaryfield']}) && (int)$diary->{$limit['diaryfield']} > 0) {
+                $value = (int)$diary->{$limit['diaryfield']};
+            }
+
+            if ($value > 0) {
+                $notes[] = get_string($limit['string'], 'diary', $value);
+            }
+        }
+
+        $editlimitnote = diarystats::get_edit_limit_note_html($diary, (int)$promptid);
+        if ($editlimitnote !== '') {
+            $notes[] = $editlimitnote;
+        }
+
+        return $notes;
+    }
+
+    /**
+     * Build metric requirement summary items for mobile pages.
+     *
+     * @param \stdClass $diary Diary record.
+     * @return array<int,array<string,string>>
+     */
+    protected static function get_mobile_metric_requirement_items($diary) {
+        $requirements = \diary_get_metric_requirements((int)$diary->id);
+        if (empty($requirements)) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($requirements as $metric => $rule) {
+            $operator = ((int)$rule['operator'] === 1) ? '<=' : '>=';
+            $items[] = [
+                'text' => get_string($metric, 'diary') . ' ' . $operator . ' ' . (string)$rule['value'],
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Populate prompt selector data for mobile edit flows that allow choosing.
+     *
+     * @param array $data Template data.
+     * @param \stdClass $diary Diary record.
+     * @param int $userid User id.
+     * @param \stdClass|null $entry Existing entry when editing.
+     * @param int $selectedpromptid Current prompt id.
+     * @return void
+     */
+    protected static function populate_mobile_prompt_selector(array &$data, $diary, $userid, $entry, $selectedpromptid) {
+        global $DB;
+
+        if (!empty($entry)) {
+            return;
+        }
+
+        $promptmode = prompts::get_prompt_mode($diary);
+        $supportedmodes = [
+            prompts::PROMPTMODE_CHOICE,
+            prompts::PROMPTMODE_COMPLETEALL,
+            prompts::PROMPTMODE_CHOICECOMPLETE,
+        ];
+        if (!in_array($promptmode, $supportedmodes)) {
+            return;
+        }
+
+        $prompts = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], 'datestart ASC, datestop ASC, id ASC');
+        if (empty($prompts)) {
+            return;
+        }
+
+        $completedrecords = $DB->get_records_sql(
+            "SELECT DISTINCT promptid
+               FROM {diary_entries}
+              WHERE diary = :diaryid AND userid = :userid AND promptid > 0",
+            ['diaryid' => $diary->id, 'userid' => $userid]
+        );
+        $completedids = [];
+        foreach ($completedrecords as $record) {
+            $completedids[] = (int)$record->promptid;
+        }
+
+        if ($promptmode === prompts::PROMPTMODE_CHOICE) {
+            $heading = get_string('promptmodepickerchoice', 'diary');
+        } else if ($promptmode === prompts::PROMPTMODE_COMPLETEALL) {
+            $heading = get_string('promptmodepickercompleteall', 'diary');
+        } else {
+            $required = min((int)($diary->requiredpromptcount ?? 0), count($prompts));
+            $remainingrequired = max(0, $required - count($completedids));
+            if ($remainingrequired <= 0) {
+                return;
+            }
+            $heading = get_string('promptmodepickerchoicecomplete', 'diary', [
+                'remaining' => $remainingrequired,
+                'required' => $required,
+            ]);
+        }
+
+        $options = [];
+        foreach ($prompts as $prompt) {
+            $promptid = (int)$prompt->id;
+            if (self::get_mobile_prompt_date_status($prompt) !== 'open') {
+                continue;
+            }
+
+            if (
+                ($promptmode === prompts::PROMPTMODE_COMPLETEALL || $promptmode === prompts::PROMPTMODE_CHOICECOMPLETE)
+                && in_array($promptid, $completedids)
+            ) {
+                continue;
+            }
+
+            $options[] = [
+                'value' => $promptid,
+                'label' => self::get_mobile_prompt_record_label($prompt),
+                'selected' => ($promptid === (int)$selectedpromptid) ? 'selected' : '',
+            ];
+        }
+
+        if (empty($options)) {
+            return;
+        }
+
+        $data['haspromptselector'] = true;
+        $data['promptselectorlabel'] = $heading;
+        $data['promptoptions'] = $options;
+    }
+
+    /**
+     * Return a compact prompt label for mobile displays.
+     *
+     * @param \stdClass|null $prompt Prompt record.
+     * @return string
+     */
+    protected static function get_mobile_prompt_record_label($prompt) {
+        if (empty($prompt)) {
+            return '';
+        }
+
+        if (!empty($prompt->title)) {
+            return clean_param(trim((string)$prompt->title), PARAM_TEXT);
+        }
+
+        $summary = trim(preg_replace('/\s+/', ' ', strip_tags((string)($prompt->text ?? ''))));
+        if ($summary === '') {
+            return '';
+        }
+
+        return shorten_text($summary, 90, true, '...');
+    }
+
+    /**
+     * Return prompt availability status for mobile selector logic.
+     *
+     * @param \stdClass $prompt Prompt record.
+     * @return string
+     */
+    protected static function get_mobile_prompt_date_status($prompt) {
+        $now = time();
+        if (!empty($prompt->datestart) && $now < (int)$prompt->datestart) {
+            return 'future';
+        }
+        if (!empty($prompt->datestop) && $now > (int)$prompt->datestop) {
+            return 'closed';
+        }
+        return 'open';
+    }
+
+    /**
      * Build a list of the current user's entries that can be opened for editing.
      *
      * @param \stdClass $diary Diary record.
@@ -413,7 +1025,7 @@ JS;
         global $DB;
 
         $entries = $DB->get_records_sql(
-            "SELECT id, title, text, format, timecreated, timemodified
+            "SELECT id, title, text, format, promptid, timecreated, timemodified
                FROM {diary_entries}
               WHERE diary = :diaryid AND userid = :userid
            ORDER BY timemodified DESC",
@@ -422,6 +1034,22 @@ JS;
 
         if (empty($entries)) {
             return [];
+        }
+
+        $promptids = [];
+        foreach ($entries as $entry) {
+            if (!empty($entry->promptid)) {
+                $promptids[] = (int)$entry->promptid;
+            }
+        }
+
+        $promptrecords = [];
+        if (!empty($promptids)) {
+            [$insql, $params] = $DB->get_in_or_equal(
+                array_values(array_unique($promptids)),
+                SQL_PARAMS_NAMED
+            );
+            $promptrecords = $DB->get_records_select('diary_prompts', 'id ' . $insql, $params, '', 'id,title,text');
         }
 
         $result = [];
@@ -442,6 +1070,7 @@ JS;
                 'title' => $title,
                 'preview' => $plain,
                 'timemodified' => userdate((int)$entry->timemodified ?: (int)$entry->timecreated),
+                'promptlabel' => self::get_mobile_prompt_record_label($promptrecords[(int)$entry->promptid] ?? null),
             ];
         }
 
@@ -453,19 +1082,70 @@ JS;
      *
      * @param \cm_info|\stdClass $cm Course module.
      * @param \context_module $context Module context.
-     * @param \stdClass $diary Diary record.
      * @param \renderer_base $output Renderer.
-     * @return array
+     * @param int $offset Paging offset.
+     * @param int $limit Paging limit.
+     * @return array{items: array, total: int, offset: int}
      */
-    protected static function build_teacher_submissions($cm, $context, $diary, $output, $selectedgroup = 0) {
+    protected static function build_teacher_submissions(
+        $cm,
+        $context,
+        $course,
+        $diary,
+        $output,
+        $selectedgroup = 0,
+        $selecteduserid = 0,
+        $sortmode = 'currententry',
+        $offset = 0,
+        $limit = 0
+    ) {
         global $DB;
 
         $submissions = [];
-        $users = diary_get_users_done($diary, $selectedgroup, 'u.lastname ASC, u.firstname ASC');
+        $usersort = ($sortmode === 'lastnamedesc')
+            ? 'u.lastname DESC, u.firstname DESC'
+            : 'u.lastname ASC, u.firstname ASC';
+        $users = diary_get_users_done($diary, $selectedgroup, $usersort);
+        if (!empty($selecteduserid) && !empty($users)) {
+            $selecteduserid = (int)$selecteduserid;
+            $users = array_filter($users, function ($user) use ($selecteduserid) {
+                return ((int)$user->id === $selecteduserid);
+            });
+        }
         $grades = make_grades_menu($diary->scale);
 
+        $entryorder = 'timemodified DESC';
+        switch ($sortmode) {
+            case 'firstentry':
+                $entryorder = 'timecreated ASC';
+                break;
+            case 'lowestgradeentry':
+                // Show ungraded/low-grade entries first, oldest first for ties.
+                $entryorder = 'rating ASC, timemodified ASC';
+                break;
+            case 'highestgradeentry':
+                $entryorder = 'rating DESC, timemodified DESC';
+                break;
+            case 'latestmodifiedentry':
+            case 'currententry':
+            default:
+                $entryorder = 'timemodified DESC';
+                break;
+        }
+
         if (!$users) {
-            return [];
+            return ['items' => [], 'total' => 0, 'offset' => 0];
+        }
+
+        $users = array_values($users);
+        $totalusers = count($users);
+        $offset = max(0, (int)$offset);
+        $limit = max(0, (int)$limit);
+        if ($offset >= $totalusers) {
+            $offset = 0;
+        }
+        if ($limit > 0) {
+            $users = array_slice($users, $offset, $limit);
         }
 
         foreach ($users as $student) {
@@ -473,7 +1153,7 @@ JS;
                 "SELECT *
                    FROM {diary_entries}
                   WHERE diary = :diaryid AND userid = :userid
-               ORDER BY timemodified DESC",
+                    ORDER BY {$entryorder}",
                 ['diaryid' => $diary->id, 'userid' => $student->id],
                 IGNORE_MULTIPLE
             );
@@ -490,12 +1170,46 @@ JS;
                 'entry',
                 $entry->id
             );
+            $entrypreview = trim(html_to_text($entryhtml, 0, false));
+            $entrypreview = str_replace("\xc2\xa0", ' ', $entrypreview);
+            if (\core_text::strlen($entrypreview) > 2500) {
+                $entrypreview = \core_text::substr($entrypreview, 0, 2500) . '...';
+            }
 
             $feedbackplain = trim(html_to_text((string)$entry->entrycomment, 0, false));
             $feedbackplain = str_replace("\xc2\xa0", ' ', $feedbackplain);
-            $feedbackseedhtml = (string)$entry->entrycomment;
-            $feedbackformatted = format_text((string)$entry->entrycomment, FORMAT_HTML, ['context' => $context]);
-            $hasfeedback = trim(strip_tags((string)$entry->entrycomment)) !== '';
+            $tempentry = clone $entry;
+            $statsdata = diarystats::get_diary_stats($tempentry, $diary);
+            $comerrdata = diarystats::get_common_error_stats($tempentry, $diary);
+            [$autoratingdata, $currentratingdata] = diarystats::get_auto_rating_stats($tempentry, $diary);
+
+            $resultsblockhtml = trim((string)$statsdata . (string)$comerrdata . (string)$autoratingdata);
+
+            $seedsource = (string)$resultsblockhtml;
+            if ($seedsource !== '') {
+                // Preserve row/column readability from results tables when inserted into textarea.
+                $seedsource = preg_replace('/<\/?tbody\b[^>]*>/i', '', $seedsource);
+                $seedsource = preg_replace('/<\/?thead\b[^>]*>/i', '', $seedsource);
+                $seedsource = preg_replace('/<\/?table\b[^>]*>/i', '', $seedsource);
+                $seedsource = preg_replace('/<\/t[dh]\s*>/i', ' | ', $seedsource);
+                $seedsource = preg_replace('/<tr\b[^>]*>/i', "\n", $seedsource);
+                $seedsource = preg_replace('/<\/tr\s*>/i', "\n", $seedsource);
+                $seedsource = preg_replace('/<(br|\/p|\/div|\/li|\/h[1-6])\b[^>]*>/i', "\n", $seedsource);
+                $seedsource = html_entity_decode(strip_tags((string)$seedsource), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $seedsource = str_replace("\xc2\xa0", ' ', $seedsource);
+                $seedsource = preg_replace('/[ \t]*\|[ \t]*/', ' | ', (string)$seedsource);
+                $seedsource = preg_replace('/\s+\|\s*$/m', '', (string)$seedsource);
+                $seedsource = preg_replace('/\n{3,}/', "\n\n", (string)$seedsource);
+            }
+
+            $feedbackseed = trim((string)$seedsource);
+            if ($feedbackseed === '' && $resultsblockhtml !== '') {
+                $feedbackseed = trim(html_to_text($resultsblockhtml, 0, false));
+                $feedbackseed = str_replace("\xc2\xa0", ' ', $feedbackseed);
+            }
+            if ($feedbackseed === '') {
+                $feedbackseed = $feedbackplain;
+            }
 
             $gradeoptions = [];
             foreach ($grades as $value => $label) {
@@ -506,24 +1220,40 @@ JS;
                 ];
             }
 
+            $autoratingvalue = '';
+            if ($currentratingdata !== null && $currentratingdata !== '' && is_numeric($currentratingdata)) {
+                $autoratingcandidate = (int)$currentratingdata;
+                if (array_key_exists($autoratingcandidate, $grades)) {
+                    $autoratingvalue = (string)$autoratingcandidate;
+                }
+            }
+
+            $averagegradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, [$student->id]);
+            $averagegrade = '';
+            if (!empty($averagegradinginfo->items[0]->grades[$student->id]->str_long_grade)) {
+                $averagegrade = (string)$averagegradinginfo->items[0]->grades[$student->id]->str_long_grade;
+            }
+
             $submissions[] = [
                 'studentid' => $student->id,
                 'studentname' => fullname($student),
                 'studentpic' => $output->user_picture($student, ['size' => 35]),
                 'timemodified' => userdate($entry->timemodified),
-                'text' => format_text($entryhtml, $entry->format, ['context' => $context]),
+                'text' => format_text(s($entrypreview), FORMAT_HTML, ['context' => $context]),
+                'hasresultsblock' => ($resultsblockhtml !== ''),
+                'resultsblockhtml' => $resultsblockhtml,
                 'entryid' => $entry->id,
                 'gradeoptions' => $gradeoptions,
+                'autorating_value' => $autoratingvalue,
                 'rating_minus_one' => ((string)$entry->rating === '-1' || $entry->rating === null) ? 'selected' : '',
-                'feedback_plain' => $feedbackplain,
-                'feedback_seed' => $feedbackplain,
-                'feedback_seed_html' => $feedbackseedhtml,
-                'feedback_formatted' => $feedbackformatted,
-                'has_feedback' => $hasfeedback,
+                'averagegrade' => $averagegrade,
+                'feedback_raw' => (string)$entry->entrycomment,
+                'feedback_seed' => $feedbackseed,
+                'feedback_seed_html' => $resultsblockhtml,
             ];
         }
 
-        return $submissions;
+        return ['items' => $submissions, 'total' => $totalusers, 'offset' => $offset];
     }
 
     /**
@@ -557,6 +1287,14 @@ JS;
 
         $data['hasentry'] = true;
         $data['lastedited'] = userdate($entry->timemodified ?: $entry->timecreated);
+
+        if (!empty($entry->promptid)) {
+            $prompt = $DB->get_record('diary_prompts', ['id' => (int)$entry->promptid], 'id,title,text');
+            $promptlabel = self::get_mobile_prompt_record_label($prompt);
+            if ($promptlabel !== '') {
+                $data['entrypromptlabel'] = $promptlabel;
+            }
+        }
 
         $entrytext = file_rewrite_pluginfile_urls(
             (string)$entry->text,

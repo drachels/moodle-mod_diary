@@ -140,6 +140,185 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         of mismatched 'mod_diary_entries'/'mod_diary_prompts'. Verified
         implementation: metric requirements config + entry media files both
         survive round-trip backup/restore cycle.
+20260501 Diary_1475 - Need to upgrade Mobile to use new prompt and results as needed.
+    2026050101 Progress - First mobile parity pass: classes/output/mobile.php
+        now exposes prompt-mode summary, prompt counts, current/resolved prompt
+        content, min/max notes, edit-limit notes, and completion metric
+        requirement summaries to the mobile templates so student mobile view and
+        mobile edit pages show the same prompt/results context as desktop. A
+        follow-up pass is still needed for full interactive prompt-selection
+        parity in Choice-style mobile flows.
+    2026050102 Progress - Mobile create/edit now carries promptid through
+        classes/external/set_text.php and renders a prompt selector on mobile
+        edit pages for Choice, Complete all, and Choice x of xx modes using the
+        same open/incomplete prompt constraints as desktop. Student mobile views
+        now also label each saved entry with its prompt title/summary for better
+        entry-context parity.
+    2026050103 Progress - Fixed mobile grading Add to feedback on Android/app
+        report views: classes/output/mobile.php now seeds the mobile Add action
+        from computed stats/common-errors/autorating text (desktop parity)
+        instead of relying only on existing entrycomment content, so the button
+        no longer no-ops when feedback is initially empty.
+    2026050104 Progress - Fixed two mobile grading regressions in report view:
+        (a) Save feedback no longer posts helper seed fields as unexpected WS
+        parameters (seed fields moved outside the form and read by JS only),
+        resolving "Invalid parameter value detected" on save; (b) for managers
+        with access-all-groups, mobile grading now defaults to All participants
+        when no group filter is explicitly selected, preventing entries from
+        being unintentionally hidden by prior/current group context.
+    2026050105 Progress - Mobile grading interaction parity follow-up:
+        Add to feedback now always appends the computed feedback block (matching
+        desktop repeated-add behavior) and Save feedback now uses refreshOnSuccess
+        so the persisted feedback/result state is immediately visible after save.
+    2026050106 Progress - Mobile report-grading layout and behavior parity pass:
+        teacher cards now include the same computed results block (stats/common
+        errors/possible rating) directly under each entry before grading controls;
+        controls are ordered to match desktop flow (Add/Clear, rating selector,
+        average-grade line, feedback area, Save feedback); and Android click
+        handling now resolves buttons via composedPath() (Shadow DOM safe), so
+        Add/Clear actions trigger reliably in app WebView builds.
+    2026050107 Progress - Mobile feedback action/save reliability hardening:
+        grading cards now use a visible feedback textarea plus a hidden WS
+        feedback field that is synchronized on typing, Add, Clear, and Save
+        click (before WS submit), ensuring manual feedback text and Add/Clear
+        updates persist on Save in Android app WebView builds; direct onclick
+        fallbacks were also added for Add/Clear/Save prep to avoid no-op cases
+        when delegated click handling is suppressed.
+    2026050108 Progress - Mobile grading save regression follow-up:
+        removed the extra named textarea field (feedback_visible) from the
+        grading form because it was being posted as an unexpected WS parameter
+        (triggering "Invalid parameter value detected"); kept only the expected
+        feedback field in payload and moved global Add/Clear/Save-prep handler
+        bootstrap earlier in page JS so inline fallback handlers are available
+        before lifecycle bind timing in app WebView contexts.
+    2026050109 Progress - Mobile grading action no-op root-cause fix:
+        mobile page JS methods were calling helper functions through an unbound
+        self reference (resolving to window.self in app runtime), so Add/Clear
+        and pre-save feedback-field sync calls could fail silently inside guarded
+        event handlers. Added an explicit top-level `var self = this;` binding in
+        the mobile view JS block so feedback actions and Save payload sync target
+        the actual page controller instance consistently.
+    2026050110 Progress - Mobile grading persistence hardening follow-up:
+        simplified grading form back to a single named feedback textarea (removed
+        hidden mirror field) so WS submit always reads the directly edited value;
+        this avoids Android/WebView sync race paths where edited text could revert
+        to older payload values at Save time. Clear feedback action now also resets
+        the grade selector to No grade (-1) for expected clear-all behavior.
+    2026050111 Progress - Mobile Clear-rating and Add fallback hardening:
+        switched grading submit to a canonical hidden grade field synchronized from
+        the visible rating selector (including on Save and Clear) so WebView form
+        scraping always posts the intended grade value; this resolves cases where
+        Clear feedback removed text but left rating unchanged after save. Also added
+        Add-to-feedback fallback: if seed payload is empty, insert plain text pulled
+        from the currently rendered results block so Add no longer appears to no-op.
+    2026050112 Progress - Mobile grading regression rollback and seed robustness:
+        restored direct grade submission from the visible select (name="grade")
+        because the hidden-grade mirror path prevented manual rating changes in app
+        retests. Clear now sets the same visible selector to No grade before save.
+        Also hardened Add seed generation server-side: when html_to_text yields an
+        empty result for rich results HTML, Diary now derives a plain-text seed from
+        stripped/decoded results markup so Add has visible content to insert.
+    2026050113 Progress - Mobile action reliability follow-up:
+        Add now reads its plain-text seed from a hidden textarea (instead of hidden
+        input value attr) to preserve multiline/encoded content across app WebView
+        rendering paths. Clear now forces both select.value and option.selected state
+        for No grade (-1) before save, preventing cases where UI text cleared but
+        rating selection was not persisted as cleared.
+    2026050114 Progress - Mobile Add auto-rating parity restore:
+        Add to feedback now also sets the rating selector to the computed auto-
+        rating value for that entry (when a valid scale option exists), matching
+        desktop report behavior where Add applies both feedback text and auto-rating.
+    2026050201 Progress - Mobile grading stability + feedback-format follow-up:
+        teacher grading cards no longer duplicate the full results HTML in a
+        hidden HTML seed field, reducing the rendered grading page payload for
+        large activities such as diary 7880; Add to feedback now prefers the
+        already-rendered HTML results block so saved feedback keeps its table
+        layout; and Save feedback no longer forces a full page refresh, which
+        keeps the teacher in place instead of jumping back to the top of the
+        grading list after each save.
+    2026050202 Progress - Mobile grading load-size follow-up for large activities:
+        teacher grading list now loads in small pages (5 submissions per view)
+        with Previous/Next controls, instead of rendering all submissions at
+        once. This significantly reduces initial template payload size on phone
+        (diary 7880 grading view dropped from ~498KB to ~170KB in local render
+        checks), improving reliability where the app reported template-display
+        errors on open.
+    2026050203 Progress - Mobile teacher entry-preview fallback for very long
+        submissions: grading cards now send a capped plain-text preview of each
+        student entry body (instead of the full formatted entry HTML) to reduce
+        template payload pressure from large individual entries while preserving
+        grading controls, Add/Clear feedback actions, and computed results blocks.
+    2026050204 Progress - Mobile open-path reliability for manager accounts:
+        first load now always opens the lighter landing view (instead of
+        auto-entering grading mode for manage-only roles), and grading list
+        rendering is triggered only when explicitly requested (showgrading=1).
+        This avoids immediate template/render pressure during initial open on
+        large activities while preserving one-tap access to grading from the
+        existing View x diary entries control.
+    2026050205 Progress - Mobile manager landing-template compatibility pass:
+        simplified the non-grading manager controls to a single "View x diary
+        entries" app button and removed the extra raw link + collapsible group
+        selector block from first-load markup. This reduces manager-only
+        template complexity on initial open while keeping direct access to
+        grading mode.
+    2026050206 Progress - Mobile manager first-open isolation mode:
+        when a user has manage capability and has not explicitly requested
+        grading, the handler now serves a minimal landing payload (single
+        "View x diary entries" action) and defers student-entry/prompt-context
+        rendering until grading is requested. This removes additional manager-
+        path template branches from initial app load for large activities.
+    2026050207 Progress - Mobile manager workflow restore (post-isolation):
+        kept the safe first-open manager landing, but re-added manager
+        convenience actions and report-style grading selectors: (a) manager
+        landing now includes Start new/edit entry action for personal notes;
+        (b) grading view now shows Visible groups selector and View single
+        user selector, and pager navigation preserves both selected group and
+        selected user filters while stepping through submissions.
+    2026050208 Progress - Mobile selector UX + re-edit follow-up: grading
+        selectors now render in compact dropdown-style sections (summary row +
+        expandable options) instead of always-visible button walls, and manager
+        landing now includes a quick "Edit" action for the most recent personal
+        entry so teacher/admin note entries can be reopened and continued.
+    2026050209 Progress - Mobile grading toolbar slice (sorting) added:
+        grading view now includes a compact Sort control with options for
+        Current entries, First entries, Name A-Z, and Name Z-A. Selected sort
+        mode is preserved while changing group/user filters and when using
+        paging controls, providing report-style workflow continuity in app.
+    2026050210 Progress - Mobile grading selector order + sort parity follow-up:
+        moved the Sort selector to appear after Visible groups and View single
+        user (matching teacher report workflow order), and expanded mobile sort
+        options to include Latest modified entry, Lowest grade entry, and Highest
+        grade entry in addition to current/first/name sorting.
+    2026050211 Progress - Mobile/desktop Add-Clear regression fix: restored
+        HTML-format seed path for Add to feedback so inserted results retain
+        table/markup formatting, and hardened grading action button handlers
+        with direct per-button click/touch binding (in addition to delegated
+        listener path) so Add/Clear updates apply reliably in desktop browser
+        contexts as well as app WebView.
+    2026050212 Progress - Mobile Add formatting follow-up for phone WebView:
+        Add to feedback now decodes entity-encoded HTML from the hidden seed
+        field before insertion and prioritizes that decoded HTML path over plain
+        fallback content, preventing stats/result table structure from being
+        flattened in phone display/save flows.
+    2026050213 Progress - Mobile Add readability correction: reverted Add
+        insertion to structured plain-text seed (instead of raw HTML insertion)
+        so feedback textarea no longer shows literal table tags on phone;
+        improved seed builder now preserves row/column readability using line
+        breaks and separators derived from stats/result table markup.
+    2026050214 Progress - Mobile Add->Save payload hardening: grading form now
+        uses an unnamed visible feedback textarea plus a hidden named feedback
+        field synchronized on typing/Add/Clear/save-prep, so phone WebView form
+        scraping reliably submits the updated Add-to-feedback text to
+        mod_diary_save_feedback.
+    2026050101 Progress - Desktop report anchor reliability fix: per-entry Save
+        all my feedback buttons in report.php and reportsingle.php now carry a
+        data-entryid attribute with the adjacent entry's ID; the client-side
+        click handler reads this value directly (data-entryid first, then
+        field-change fallback) instead of the previous fragile DOM walk, so
+        scroll-back to the graded entry after Save is now reliable. Add to
+        feedback and Clear feedback continue to use the existing SESSION-based
+        scroll path (rating-anchor-{id}) unchanged.
+
 
 === 5.0.0 === 2026040400
 20200601 Diary_526r - Make toggle to allow grade and feedback for users with no
