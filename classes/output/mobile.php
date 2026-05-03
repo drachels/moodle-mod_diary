@@ -234,14 +234,34 @@ class mobile {
             }
         }
 
+        if (!$showgrading && $canadd && $isopen) {
+            $entryoffset = max(0, (int)($args['entryoffset'] ?? 0));
+            $entrylimit = 5;
+            $entryresult = self::build_user_editable_entries($diary, $USER->id, $entryoffset, $entrylimit);
+
+            $data['editableentries'] = $entryresult['items'];
+            $data['haseditableentries'] = !empty($entryresult['items']);
+            $totaleditableentries = (int)$entryresult['total'];
+            $activeentryoffset = (int)$entryresult['offset'];
+
+            if ($totaleditableentries > 0) {
+                $rangefrom = $activeentryoffset + 1;
+                $rangeto = min($activeentryoffset + count($entryresult['items']), $totaleditableentries);
+                $data['editableentrysummary'] = 'Showing ' . $rangefrom . '-' . $rangeto . ' of ' . $totaleditableentries;
+            }
+
+            if ($totaleditableentries > $entrylimit) {
+                $data['haseditablepager'] = true;
+                $data['haseditableprev'] = ($activeentryoffset > 0);
+                $data['haseditablenext'] = ($activeentryoffset + $entrylimit < $totaleditableentries);
+                $data['editableprevoffset'] = max(0, $activeentryoffset - $entrylimit);
+                $data['editablenextoffset'] = $activeentryoffset + $entrylimit;
+            }
+        }
+
         if (!$managerlanding) {
             self::populate_student_view($data, $cm, $context, $course, $diary, $USER->id, $OUTPUT);
             self::populate_mobile_prompt_context($data, $context, $diary, $USER->id);
-
-            if (!$showgrading && $canadd && $isopen) {
-                $data['editableentries'] = self::build_user_editable_entries($diary, $USER->id);
-                $data['haseditableentries'] = !empty($data['editableentries']);
-            }
         }
 
         $js = <<<'JS'
@@ -323,13 +343,83 @@ this.getDiaryFeedbackForm = function(entryid) {
     return document.getElementById('diary-feedback-' + entryid);
 };
 
+this.getDiaryFeedbackEditor = function(form) {
+    if (!form) {
+        return null;
+    }
+    return form.querySelector('[data-role="feedback-visible"]');
+};
+
+this.getDiaryFeedbackValue = function(editor) {
+    if (!editor) {
+        return '';
+    }
+
+    if (editor.matches && editor.matches('textarea')) {
+        return editor.value || '';
+    }
+
+    return editor.innerHTML || '';
+};
+
+this.setDiaryFeedbackValue = function(editor, value) {
+    if (!editor) {
+        return;
+    }
+
+    if (editor.matches && editor.matches('textarea')) {
+        editor.value = value || '';
+        return;
+    }
+
+    editor.innerHTML = value || '';
+};
+
+this.escapeDiaryFeedbackHtml = function(text) {
+    if (!text) {
+        return '';
+    }
+
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
+this.convertDiaryFeedbackTextToHtml = function(text) {
+    var normalized = (text || '').replace(/\r\n?/g, '\n').trim();
+    if (!normalized) {
+        return '';
+    }
+
+    return self.escapeDiaryFeedbackHtml(normalized)
+        .replace(/\n{2,}/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+};
+
+this.appendDiaryFeedbackHtml = function(current, addition) {
+    var currenthtml = (current || '').trim();
+    var additionhtml = (addition || '').trim();
+
+    if (!additionhtml) {
+        return currenthtml;
+    }
+    if (!currenthtml) {
+        return additionhtml;
+    }
+
+    return currenthtml + '<p><br></p>' + additionhtml;
+};
+
 this.syncDiaryFeedbackField = function(form) {
     if (!form) {
         return;
     }
 
-    var visible = form.querySelector('textarea[data-role="feedback-visible"]');
-    var hidden = form.querySelector('textarea[name="feedback"]');
+    var visible = self.getDiaryFeedbackEditor(form);
+    var hidden = form.querySelector('[name="feedback"]');
     if (!visible) {
         return;
     }
@@ -343,7 +433,7 @@ this.syncDiaryFeedbackField = function(form) {
         return;
     }
 
-    hidden.value = visible.value || '';
+    hidden.value = self.getDiaryFeedbackValue(visible);
 };
 
 this.applyDiaryFeedbackAction = function(entryid, action) {
@@ -352,19 +442,19 @@ this.applyDiaryFeedbackAction = function(entryid, action) {
         return false;
     }
 
-    var textarea = form.querySelector('textarea[data-role="feedback-visible"]');
+    var editor = self.getDiaryFeedbackEditor(form);
     var seedinput = document.getElementById('diary-feedback-seed-' + entryid);
     var seedhtmlinput = document.getElementById('diary-feedback-seed-html-' + entryid);
     var renderedresults = document.getElementById('diary-results-block-' + entryid);
     var autoratinginput = document.getElementById('diary-autorating-value-' + entryid);
-    if (!textarea) {
+    if (!editor) {
         return false;
     }
 
     var seed = seedinput ? (seedinput.value || '').trim() : '';
     var seedhtml = seedhtmlinput ? (seedhtmlinput.value || '').trim() : '';
     var autorating = autoratinginput ? (autoratinginput.value || '').trim() : '';
-    var current = textarea.value || '';
+    var current = self.getDiaryFeedbackValue(editor);
 
     var setGradeValue = function(form, value) {
         if (!form) {
@@ -384,29 +474,31 @@ this.applyDiaryFeedbackAction = function(entryid, action) {
     };
 
     if (action === 'clear') {
-        textarea.value = '';
+        self.setDiaryFeedbackValue(editor, '');
         setGradeValue(form, '-1');
     } else if (action === 'add') {
-        var addcontent = seed;
+        var addcontent = seedhtml;
 
         if (!addcontent) {
             if (renderedresults) {
-                addcontent = (renderedresults.innerText || renderedresults.textContent || '').trim();
+                addcontent = renderedresults.innerHTML || '';
             }
         }
-        if (!addcontent && seedhtml) {
-            var temp = document.createElement('div');
-            temp.innerHTML = seedhtml;
-            addcontent = (temp.innerText || temp.textContent || '').trim();
+        if (!addcontent) {
+            addcontent = self.convertDiaryFeedbackTextToHtml(seed);
+        }
+        if (!addcontent) {
+            if (renderedresults) {
+                addcontent = self.convertDiaryFeedbackTextToHtml(
+                    (renderedresults.innerText || renderedresults.textContent || '').trim()
+                );
+            }
         }
         if (!addcontent) {
             return false;
         }
-        if (!current.trim()) {
-            textarea.value = addcontent;
-        } else {
-            textarea.value = current.replace(/\s+$/, '') + "\n\n" + addcontent;
-        }
+
+        self.setDiaryFeedbackValue(editor, self.appendDiaryFeedbackHtml(current, addcontent));
 
         if (autorating !== '') {
             setGradeValue(form, autorating);
@@ -416,9 +508,9 @@ this.applyDiaryFeedbackAction = function(entryid, action) {
     }
 
     self.syncDiaryFeedbackField(form);
-    textarea.dispatchEvent(new Event('input', {bubbles: true}));
-    textarea.dispatchEvent(new Event('change', {bubbles: true}));
-    textarea.focus();
+    editor.dispatchEvent(new Event('input', {bubbles: true}));
+    editor.dispatchEvent(new Event('change', {bubbles: true}));
+    editor.focus();
     return false;
 };
 
@@ -528,7 +620,7 @@ this.bindDiaryFeedbackActions = function() {
     document.addEventListener('input', function(e) {
         try {
             var target = e && e.target ? e.target : null;
-            if (!target || !target.matches || !target.matches('textarea[data-role="feedback-visible"][data-entryid]')) {
+            if (!target || !target.matches || !target.matches('[data-role="feedback-visible"][data-entryid]')) {
                 return;
             }
 
@@ -1019,21 +1111,37 @@ JS;
      *
      * @param \stdClass $diary Diary record.
      * @param int $userid User id.
-     * @return array
+     * @param int $offset Paging offset.
+     * @param int $limit Paging limit.
+     * @return array{items: array, total: int, offset: int}
      */
-    protected static function build_user_editable_entries($diary, $userid) {
+    protected static function build_user_editable_entries($diary, $userid, $offset = 0, $limit = 0) {
         global $DB;
+
+        $offset = max(0, (int)$offset);
+        $limit = max(0, (int)$limit);
+
+        $total = (int)$DB->count_records('diary_entries', ['diary' => $diary->id, 'userid' => $userid]);
+        if ($total <= 0) {
+            return ['items' => [], 'total' => 0, 'offset' => 0];
+        }
+
+        if ($offset >= $total) {
+            $offset = 0;
+        }
 
         $entries = $DB->get_records_sql(
             "SELECT id, title, text, format, promptid, timecreated, timemodified
                FROM {diary_entries}
               WHERE diary = :diaryid AND userid = :userid
            ORDER BY timemodified DESC",
-            ['diaryid' => $diary->id, 'userid' => $userid]
+            ['diaryid' => $diary->id, 'userid' => $userid],
+            $offset,
+            $limit > 0 ? $limit : 0
         );
 
         if (empty($entries)) {
-            return [];
+            return ['items' => [], 'total' => $total, 'offset' => $offset];
         }
 
         $promptids = [];
@@ -1058,23 +1166,29 @@ JS;
             if ($title === '') {
                 $title = userdate((int)$entry->timemodified ?: (int)$entry->timecreated);
             }
+            $title = clean_param($title, PARAM_TEXT);
 
             $plain = trim(html_to_text((string)$entry->text, 0, false));
             $plain = str_replace("\xc2\xa0", ' ', $plain);
+            $plain = clean_param($plain, PARAM_TEXT);
+            $plain = str_replace(['{', '}', '<', '>'], '', $plain);
             if (\core_text::strlen($plain) > 120) {
                 $plain = \core_text::substr($plain, 0, 120) . '...';
             }
+
+            $promptlabel = self::get_mobile_prompt_record_label($promptrecords[(int)$entry->promptid] ?? null);
+            $promptlabel = clean_param((string)$promptlabel, PARAM_TEXT);
 
             $result[] = [
                 'entryid' => (int)$entry->id,
                 'title' => $title,
                 'preview' => $plain,
                 'timemodified' => userdate((int)$entry->timemodified ?: (int)$entry->timecreated),
-                'promptlabel' => self::get_mobile_prompt_record_label($promptrecords[(int)$entry->promptid] ?? null),
+                'promptlabel' => $promptlabel,
             ];
         }
 
-        return $result;
+        return ['items' => $result, 'total' => $total, 'offset' => $offset];
     }
 
     /**

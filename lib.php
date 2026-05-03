@@ -460,8 +460,12 @@ function diary_get_metric_requirements_progress($diary, $userid) {
         return ['applies' => false, 'complete' => true];
     }
 
-    $entries = $DB->get_records('diary_entries', ['diary' => $diary->id, 'userid' => $userid],
-        'timemodified DESC, id DESC', 'id,text,format');
+    $entries = $DB->get_records(
+        'diary_entries',
+        ['diary' => $diary->id, 'userid' => $userid],
+        'timemodified DESC, id DESC',
+        'id,text,format'
+    );
 
     foreach ($entries as $entry) {
         if (diary_entry_meets_metric_requirements($entry, $requirements)) {

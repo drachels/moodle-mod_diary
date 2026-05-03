@@ -276,18 +276,19 @@
                             {{#averagegrade}}<p style="margin: 8px 0 0; color: #666;">{{averagegrade}}</p>{{/averagegrade}}
                         </div>
 
-                        <!-- Feedback Editor (Standard Textarea) -->
+                        <!-- Feedback Editor -->
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; color: #666; font-size: 12px; margin-bottom: 5px;">
                                 {{#str}}feedback{{/str}}
                             </label>
 
-                            <textarea
+                            <div
                                 data-role="feedback-visible"
                                 data-entryid="{{entryid}}"
-                                rows="6"
-                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #111;">{{feedback_raw}}</textarea>
-                            <textarea name="feedback" data-role="feedback-hidden" style="display:none;">{{feedback_raw}}</textarea>
+                                contenteditable="true"
+                                spellcheck="true"
+                                style="width: 100%; min-height: 140px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #111; white-space: normal; overflow-wrap: anywhere;">{{{feedback_raw}}}</div>
+                            <input type="hidden" name="feedback" data-role="feedback-hidden" value="{{feedback_raw}}">
                         </div>
 
                         <!-- itemid required by WS, keep 0 for now -->
@@ -364,6 +365,72 @@
                     <span style="text-decoration: underline;">{{viewallentrieslabel}}</span>
                 </ion-button>
             </div>
+
+            {{#canedit}}
+                {{#haseditableentries}}
+                    <ion-card>
+                        <ion-item-divider>
+                            <ion-label>{{#str}}entries, mod_diary{{/str}}</ion-label>
+                        </ion-item-divider>
+                        {{#editableentrysummary}}
+                            <p style="margin: 10px 16px 0; color: #666; font-size: 13px;">{{editableentrysummary}}</p>
+                        {{/editableentrysummary}}
+                        <ion-list>
+                            {{#editableentries}}
+                                <ion-item lines="full">
+                                    <ion-label>
+                                        <h3>{{title}}</h3>
+                                        {{#promptlabel}}<p>{{#str}}writingpromptlable2, mod_diary{{/str}}{{promptlabel}}</p>{{/promptlabel}}
+                                        <p>{{timemodified}}</p>
+                                        {{#preview}}<p>{{preview}}</p>{{/preview}}
+                                    </ion-label>
+                                    <ion-button
+                                        slot="end"
+                                        fill="outline"
+                                        size="small"
+                                        core-site-plugins-new-content
+                                        title="{{#str}}editthisentry, mod_diary{{/str}}"
+                                        component="mod_diary"
+                                        method="mobile_entry_edit"
+                                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{entryid}}'}">
+                                        {{#str}}eeditlabel, mod_diary{{/str}}
+                                    </ion-button>
+                                </ion-item>
+                            {{/editableentries}}
+                        </ion-list>
+
+                        {{#haseditablepager}}
+                            <div class="ion-padding-top ion-padding-start ion-padding-end" style="display: flex; gap: 8px;">
+                                {{#haseditableprev}}
+                                    <ion-button
+                                        fill="outline"
+                                        size="small"
+                                        core-site-plugins-new-content
+                                        title="Previous"
+                                        component="mod_diary"
+                                        method="mobile_course_view"
+                                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 0, entryoffset: '{{editableprevoffset}}'}">
+                                        Previous
+                                    </ion-button>
+                                {{/haseditableprev}}
+
+                                {{#haseditablenext}}
+                                    <ion-button
+                                        fill="outline"
+                                        size="small"
+                                        core-site-plugins-new-content
+                                        title="Next"
+                                        component="mod_diary"
+                                        method="mobile_course_view"
+                                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 0, entryoffset: '{{editablenextoffset}}'}">
+                                        Next
+                                    </ion-button>
+                                {{/haseditablenext}}
+                            </div>
+                        {{/haseditablepager}}
+                    </ion-card>
+                {{/haseditableentries}}
+            {{/canedit}}
         {{/managerlanding}}
 
         {{^managerlanding}}
@@ -440,6 +507,9 @@
                     <ion-item-divider>
                         <ion-label>{{#str}}entries, mod_diary{{/str}}</ion-label>
                     </ion-item-divider>
+                    {{#editableentrysummary}}
+                        <p style="margin: 10px 16px 0; color: #666; font-size: 13px;">{{editableentrysummary}}</p>
+                    {{/editableentrysummary}}
                     <ion-list>
                         {{#editableentries}}
                             <ion-item lines="full">
@@ -463,6 +533,36 @@
                             </ion-item>
                         {{/editableentries}}
                     </ion-list>
+
+                    {{#haseditablepager}}
+                        <div class="ion-padding-top ion-padding-start ion-padding-end" style="display: flex; gap: 8px;">
+                            {{#haseditableprev}}
+                                <ion-button
+                                    fill="outline"
+                                    size="small"
+                                    core-site-plugins-new-content
+                                    title="Previous"
+                                    component="mod_diary"
+                                    method="mobile_course_view"
+                                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 0, entryoffset: '{{editableprevoffset}}'}">
+                                    Previous
+                                </ion-button>
+                            {{/haseditableprev}}
+
+                            {{#haseditablenext}}
+                                <ion-button
+                                    fill="outline"
+                                    size="small"
+                                    core-site-plugins-new-content
+                                    title="Next"
+                                    component="mod_diary"
+                                    method="mobile_course_view"
+                                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', showgrading: 0, entryoffset: '{{editablenextoffset}}'}">
+                                    Next
+                                </ion-button>
+                            {{/haseditablenext}}
+                        </div>
+                    {{/haseditablepager}}
                 </ion-card>
             {{/haseditableentries}}
         {{/canedit}}

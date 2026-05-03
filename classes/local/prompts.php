@@ -851,7 +851,13 @@ class prompts {
      * @param int $requestedpromptid Requested prompt id.
      * @return int
      */
-    protected static function resolve_random_promptid($diary, $userid, array $allpromptids, array $remaining, $requestedpromptid = 0) {
+    protected static function resolve_random_promptid(
+        $diary,
+        $userid,
+        array $allpromptids,
+        array $remaining,
+        $requestedpromptid = 0
+    ) {
         $pool = !empty($remaining) ? array_values($remaining) : array_values($allpromptids);
         if (empty($pool)) {
             return 0;

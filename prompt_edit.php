@@ -372,7 +372,7 @@ if ($prompts && $view == 0) {
                 : '';
             $prompttext = '<div class="promptentry" style="background: '
                       . $data->promptbgc
-                      . ';">' 
+                      . ';">'
                       . get_string('writingpromptlable2', 'diary')
                       . $displaycounter
                       . get_string('idlable', 'diary', $data->entryid)

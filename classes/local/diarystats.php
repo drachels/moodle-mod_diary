@@ -1052,8 +1052,10 @@ class diarystats {
                 }
             }
             // Only show this positive confirmation to teachers/managers in report-like contexts.
-            if ($context && (has_capability('mod/diary:manageentries', $context)
-                    || has_capability('mod/diary:rate', $context))) {
+            if (
+                $context && (has_capability('mod/diary:manageentries', $context)
+                    || has_capability('mod/diary:rate', $context))
+            ) {
                 $usercommonerrors .= '<tr class="table-success"><td colspan="4">'
                     . get_string(
                         'detectallphrasespresent',

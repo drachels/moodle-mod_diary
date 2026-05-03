@@ -487,8 +487,12 @@ class mod_diary_mod_form extends moodleform_mod {
         $label = get_string('completionmetricrequirements', $plugin);
         $mform->addElement('header', $name, $label);
         $mform->setExpanded($name, false);
-        $mform->addElement('static', 'completionmetricrequirementshelp', '',
-            get_string('completionmetricrequirements_help', $plugin));
+        $mform->addElement(
+            'static',
+            'completionmetricrequirementshelp',
+            '',
+            get_string('completionmetricrequirements_help', $plugin)
+        );
 
         $operatoroptions = $this->get_metric_operator_options($plugin);
         foreach ($this->get_metric_requirement_definitions() as $key => $stringkey) {

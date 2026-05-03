@@ -732,7 +732,7 @@ function xmldb_diary_upgrade($oldversion = 0) {
             XMLDB_TYPE_CHAR,
             '255',
             null,
-            null,  // NOTNULL = false (nullable).
+            null, // NOTNULL = false (nullable).
             null,
             null,
             'maxeditopens'
