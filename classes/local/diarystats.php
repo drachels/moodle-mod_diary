@@ -378,7 +378,7 @@ class diarystats {
         if (preg_match($regexp, $text, $match, PREG_OFFSET_CAPTURE)) {
             [$match, $offset] = $match[0];
             $length = strlen($match);
-            if (core_text::strlen($search) < core_text::strlen($match[0])) {
+            if (core_text::strlen($search) < core_text::strlen($match)) {
                 $match = $search;
             }
             return [$offset, $length, $match];
