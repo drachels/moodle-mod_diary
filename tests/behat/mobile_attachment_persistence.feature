@@ -22,12 +22,12 @@ Feature: Diary attachment persistence for mobile parity
     And the following config values are set as admin:
       | texteditors | textarea |
 
-  @javascript
+  @javascript @_file_upload
   Scenario: Attachment remains visible after save, reopen, and teacher report view
     Given I am on the "Mobile attachment diary" "diary activity" page logged in as "student1"
     When I press "Start new or edit today's entry"
     And I set the field "Entry" to "Entry with attachment persistence check."
-    And I upload "lib/tests/fixtures/empty.txt" file to "Attachments" filemanager
+    And I upload "lib/tests/fixtures/empty.txt" file to "Attachment" filemanager
     And I press "Save changes"
     Then I should see "empty.txt"
     When I press "Start new or edit today's entry"
