@@ -582,7 +582,12 @@ if ($timenow > $timestart) {
                         . s($prompt->promptbgc) . ';' . s($bordercssvars) . '">';
                     echo '<strong>Prompt ID-' . $prompt->id . ', ' . get_string('prompttext', 'diary')
                         . '</strong>: ' . file_rewrite_pluginfile_urls(
-                            $prompt->text, 'pluginfile.php', $context->id, 'mod_diary', 'prompt', $prompt->id
+                            $prompt->text,
+                            'pluginfile.php',
+                            $context->id,
+                            'mod_diary',
+                            'prompt',
+                            $prompt->id
                         ) . '</div>';
                 }
 

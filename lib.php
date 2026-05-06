@@ -694,7 +694,12 @@ function diary_get_coursemodule_info($coursemodule) {
             if (!empty($currentprompt)) {
                 $prompttext = format_text(
                     file_rewrite_pluginfile_urls(
-                        $currentprompt->text, 'pluginfile.php', $context->id, 'mod_diary', 'prompt', $currentprompt->id
+                        $currentprompt->text,
+                        'pluginfile.php',
+                        $context->id,
+                        'mod_diary',
+                        'prompt',
+                        $currentprompt->id
                     ),
                     $currentprompt->format,
                     [

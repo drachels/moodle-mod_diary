@@ -623,10 +623,13 @@ class diarystats {
         if (!empty($metricrequirements) && function_exists('diary_calculate_entry_metrics')) {
             $metricvalues = \diary_calculate_entry_metrics($entry);
         }
-        $formatmetricnumber = static function(float $number): string {
+        $formatmetricnumber = static function (float $number): string {
             return rtrim(rtrim(number_format($number, 2, '.', ''), '0'), '.');
         };
-        $buildmetriccell = static function(string $metrickey, string $basecontent) use (
+        $buildmetriccell = static function (
+            string $metrickey,
+            string $basecontent
+        ) use (
             $metricrequirements,
             $metricvalues,
             $formatmetricnumber
@@ -641,7 +644,12 @@ class diarystats {
                 $penalty = max((int)($rule['penalty'] ?? 1), 0);
                 $ismeeting = ((int)($rule['operator'] ?? 0) === 1) ? ($actual <= $target) : ($actual >= $target);
                 $cellclass = $ismeeting ? 'table-success' : 'table-danger';
-                $pointlabel = get_string(($penalty === 1) ? 'completionmetricstudentpointsingular' : 'completionmetricstudentpointplural', 'diary');
+                $pointlabel = get_string(
+                    ($penalty === 1)
+                        ? 'completionmetricstudentpointsingular'
+                        : 'completionmetricstudentpointplural',
+                    'diary'
+                );
                 $stringparams = (object)[
                     'target' => $formatmetricnumber($target),
                     'penalty' => $penalty,
@@ -971,10 +979,22 @@ class diarystats {
                     )
                     . '</tr>'
                 . '<tr>'
-                    . $buildmetriccell('charspersentence', get_string('charspersentence', 'diary') . ' ' . $diarystats->charspersentence)
-                    . $buildmetriccell('sentencesperparagraph', get_string('sentencesperparagraph', 'diary') . ' ' . $diarystats->sentencesperparagraph)
-                    . $buildmetriccell('wordspersentence', get_string('wordspersentence', 'diary') . ' ' . $diarystats->wordspersentence)
-                    . $buildmetriccell('longwordspersentence', get_string('longwordspersentence', 'diary') . ' ' . $diarystats->longwordspersentence)
+                    . $buildmetriccell(
+                        'charspersentence',
+                        get_string('charspersentence', 'diary') . ' ' . $diarystats->charspersentence
+                    )
+                    . $buildmetriccell(
+                        'sentencesperparagraph',
+                        get_string('sentencesperparagraph', 'diary') . ' ' . $diarystats->sentencesperparagraph
+                    )
+                    . $buildmetriccell(
+                        'wordspersentence',
+                        get_string('wordspersentence', 'diary') . ' ' . $diarystats->wordspersentence
+                    )
+                    . $buildmetriccell(
+                        'longwordspersentence',
+                        get_string('longwordspersentence', 'diary') . ' ' . $diarystats->longwordspersentence
+                    )
                     . '</tr>'
                 . '<tr>'
                     . $buildmetriccell('totalsyllables', get_string('totalsyllables', 'diary', $diarystats->totalsyllabels) . ' ')

@@ -94,7 +94,13 @@ class mod_diary_entry_form extends moodleform {
 
         // Add attachment file manager.
         $attachmentoptions = $this->_customdata['attachmentoptions'];
-        $mform->addElement('filemanager', 'attachment_filemanager', get_string('attachment', 'mod_diary'), null, $attachmentoptions);
+        $mform->addElement(
+            'filemanager',
+            'attachment_filemanager',
+            get_string('attachment', 'mod_diary'),
+            null,
+            $attachmentoptions
+        );
 
         // 20230302 Added tags.
         if (core_tag_tag::is_enabled('mod_diary', 'diary_entries')) {

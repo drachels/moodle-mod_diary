@@ -763,7 +763,14 @@ class results {
                     s($prompt->promptbgc) .
                     ';' . s($bordercssvars) .
                     ';">' .
-                    file_rewrite_pluginfile_urls($prompt->text, 'pluginfile.php', $context->id, 'mod_diary', 'prompt', $prompt->id) .
+                    file_rewrite_pluginfile_urls(
+                        $prompt->text,
+                        'pluginfile.php',
+                        $context->id,
+                        'mod_diary',
+                        'prompt',
+                        $prompt->id
+                    ) .
                     '</div></td>';
                 echo '<td></td>';
                 echo '</tr>';
@@ -1415,8 +1422,10 @@ class results {
         $relativepath = ($filepath === '') ? $filename : ($filepath . '/' . $filename);
 
         $pluginfiletoken = '@@PLUGINFILE@@/';
-        if (strpos($decodedtext, $pluginfiletoken . $relativepath) !== false
-                || strpos($decodedtext, $pluginfiletoken . $filename) !== false) {
+        if (
+            strpos($decodedtext, $pluginfiletoken . $relativepath) !== false
+                || strpos($decodedtext, $pluginfiletoken . $filename) !== false
+        ) {
             return true;
         }
 
@@ -1502,9 +1511,11 @@ class results {
             $items[] = html_writer::tag('li', html_writer::link($downloadurl, s($file->get_filename())));
 
             $mediatype = self::diary_get_inline_attachment_media_type($file);
-            if ($allowinlinepreviews
+            if (
+                $allowinlinepreviews
                     && $mediatype !== ''
-                    && !self::diary_entry_text_references_file($entry, $file)) {
+                    && !self::diary_entry_text_references_file($entry, $file)
+            ) {
                 $preview = self::diary_render_inline_attachment_preview(
                     $mediatype,
                     (string)$file->get_filename(),
