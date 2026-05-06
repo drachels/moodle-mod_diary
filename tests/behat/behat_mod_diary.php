@@ -53,4 +53,54 @@ class behat_mod_diary extends behat_base {
     public function i_open_diary_notification_preferences() {
         $this->getSession()->visit($this->locate_path('/message/notificationpreferences.php'));
     }
+
+    /**
+     * Configures completion metric requirements for diary activities.
+     *
+     * Required columns: diary, metric, operator, value, penalty.
+     * Operator accepts >=, <=, atleast, atmost.
+     *
+     * @Given /^the following diary metric requirements are configured:$/
+     */
+    public function the_following_diary_metric_requirements_are_configured($table) {
+        global $DB;
+
+        $rows = $table->getHash();
+        $bydiary = [];
+
+        foreach ($rows as $row) {
+            if (!isset($row['diary'], $row['metric'], $row['operator'], $row['value'], $row['penalty'])) {
+                throw new \Exception('Required columns: diary, metric, operator, value, penalty.');
+            }
+
+            $diaryname = trim((string)$row['diary']);
+            $metric = trim((string)$row['metric']);
+            $operatorraw = strtolower(trim((string)$row['operator']));
+            $value = (float)$row['value'];
+            $penalty = (int)$row['penalty'];
+
+            if ($operatorraw === '<=' || $operatorraw === 'atmost') {
+                $operator = 1;
+            } else if ($operatorraw === '>=' || $operatorraw === 'atleast') {
+                $operator = 0;
+            } else {
+                throw new \Exception('Unsupported operator: ' . $operatorraw . ' (expected >=, <=, atleast, atmost).');
+            }
+
+            if (!isset($bydiary[$diaryname])) {
+                $bydiary[$diaryname] = [];
+            }
+
+            $bydiary[$diaryname][$metric] = [
+                'operator' => $operator,
+                'value' => $value,
+                'penalty' => max($penalty, 0),
+            ];
+        }
+
+        foreach ($bydiary as $diaryname => $requirements) {
+            $diary = $DB->get_record('diary', ['name' => $diaryname], 'id', MUST_EXIST);
+            set_config('metricrequirements_' . (int)$diary->id, json_encode($requirements), 'mod_diary');
+        }
+    }
 }

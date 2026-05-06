@@ -489,7 +489,11 @@ $data->textformat = FORMAT_HTML;
 $maxfiles = 99; // Need to add some setting.
 $maxbytes = $course->maxbytes; // Need to add some setting.
 // 20240806 Moved variables from here down to the $form.
+// 20260503 Added maxfiles/maxbytes so file_postupdate_standard_editor saves TinyMCE-embedded
+// media (audio/video recordings) from draft area to mod_diary/prompt permanent file area.
 $editoroptions = [
+    'maxfiles' => $maxfiles,
+    'maxbytes' => $maxbytes,
     'format' => $data->textformat,
     'context' => $context,
 ];

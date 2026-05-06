@@ -337,7 +337,8 @@
                     title="{{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}"
                     component="mod_diary"
                     method="mobile_entry_edit"
-                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}'}">
+                    [preSets]="{getFromCache: 0, saveToCache: 0}"
+                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', cachekey: '{{cachekey}}'}">
                     {{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}
                 </ion-button>
                 {{#hasmanagerlatestentry}}
@@ -348,7 +349,8 @@
                     title="{{#str}}editthisentry, mod_diary{{/str}}"
                     component="mod_diary"
                     method="mobile_entry_edit"
-                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{managerlatestentryid}}'}">
+                    [preSets]="{getFromCache: 0, saveToCache: 0}"
+                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{managerlatestentryid}}', cachekey: '{{cachekey}}'}">
                     {{#str}}eeditlabel, mod_diary{{/str}}
                 </ion-button>
                 {{/hasmanagerlatestentry}}
@@ -381,6 +383,7 @@
                                     <ion-label>
                                         <h3>{{title}}</h3>
                                         {{#promptlabel}}<p>{{#str}}writingpromptlable2, mod_diary{{/str}}{{promptlabel}}</p>{{/promptlabel}}
+                                        {{#hasattachments}}<p>Attachments: {{attachmentcount}}</p>{{/hasattachments}}
                                         <p>{{timemodified}}</p>
                                         {{#preview}}<p>{{preview}}</p>{{/preview}}
                                     </ion-label>
@@ -392,7 +395,8 @@
                                         title="{{#str}}editthisentry, mod_diary{{/str}}"
                                         component="mod_diary"
                                         method="mobile_entry_edit"
-                                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{entryid}}'}">
+                                        [preSets]="{getFromCache: 0, saveToCache: 0}"
+                                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{entryid}}', cachekey: '{{cachekey}}'}">
                                         {{#str}}eeditlabel, mod_diary{{/str}}
                                     </ion-button>
                                 </ion-item>
@@ -443,7 +447,11 @@
                 <ion-card-content>
                     <p><strong>{{#str}}lastedited, moodle{{/str}}:</strong> {{lastedited}}</p>
                     {{#entrypromptlabel}}<p><strong>{{#str}}writingpromptlable2, mod_diary{{/str}}</strong>{{entrypromptlabel}}</p>{{/entrypromptlabel}}
+                    {{#hasattachments}}<p><strong>Attachments:</strong> {{attachmentcount}}</p>{{/hasattachments}}
                     <core-format-text text="{{text}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
+                    {{#hasattachmentspreviews}}
+                        <core-format-text text="{{attachmentshtml}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
+                    {{/hasattachmentspreviews}}
                 </ion-card-content>
             </ion-card>
 
@@ -496,7 +504,8 @@
                         title="{{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}"
                         component="mod_diary"
                         method="mobile_entry_edit"
-                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}'}">
+                        [preSets]="{getFromCache: 0, saveToCache: 0}"
+                        [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', cachekey: '{{cachekey}}'}">
                         {{#showstartnewentry}}{{#str}}startnewentry, mod_diary{{/str}}{{/showstartnewentry}}{{#showstartoredit}}{{#str}}startoredit, mod_diary{{/str}}{{/showstartoredit}}
                     </ion-button>
                 </ion-card-content>
@@ -516,6 +525,7 @@
                                 <ion-label>
                                     <h3>{{title}}</h3>
                                     {{#promptlabel}}<p>{{#str}}writingpromptlable2, mod_diary{{/str}}{{promptlabel}}</p>{{/promptlabel}}
+                                    {{#hasattachments}}<p>Attachments: {{attachmentcount}}</p>{{/hasattachments}}
                                     <p>{{timemodified}}</p>
                                     {{#preview}}<p>{{preview}}</p>{{/preview}}
                                 </ion-label>
@@ -527,7 +537,8 @@
                                     title="{{#str}}editthisentry, mod_diary{{/str}}"
                                     component="mod_diary"
                                     method="mobile_entry_edit"
-                                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{entryid}}'}">
+                                    [preSets]="{getFromCache: 0, saveToCache: 0}"
+                                    [args]="{cmid: '{{cmid}}', courseid: '{{courseid}}', entryid: '{{entryid}}', cachekey: '{{cachekey}}'}">
                                     {{#str}}eeditlabel, mod_diary{{/str}}
                                 </ion-button>
                             </ion-item>

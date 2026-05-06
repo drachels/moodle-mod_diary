@@ -263,6 +263,13 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setDefault($name, $diaryconfig->bordercolor ?? get_string('bordercolor_default', 'diary'));
         $mform->disabledIf($name, 'enableborders', 'eq', 0);
 
+        $name = 'inlineattachmentpreviews';
+        $label = get_string('inlineattachmentpreviews', 'diary');
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, (int)($diaryconfig->inlineattachmentpreviews ?? 0));
+
         $mform->addElement('html', "
             <script>
                 (function() {
@@ -500,8 +507,10 @@ class mod_diary_mod_form extends moodleform_mod {
             $enabledname = 'metricreq_enable_' . $key;
             $operatorname = 'metricreq_op_' . $key;
             $valuename = 'metricreq_val_' . $key;
+            $penaltyname = 'metricreq_pen_' . $key;
 
             $mform->addElement('advcheckbox', $enabledname, $metriclabel, '', [], [0, 1]);
+            $mform->addHelpButton($enabledname, $stringkey, $plugin);
             $mform->setType($enabledname, PARAM_INT);
             $mform->setDefault($enabledname, 0);
 
@@ -513,6 +522,11 @@ class mod_diary_mod_form extends moodleform_mod {
             $mform->addElement('text', $valuename, get_string('completionmetricthreshold', $plugin), $mediumtextoptions);
             $mform->setType($valuename, PARAM_RAW_TRIMMED);
             $mform->disabledIf($valuename, $enabledname, 'eq', 0);
+
+            $mform->addElement('text', $penaltyname, get_string('completionmetricpenalty', $plugin), $mediumtextoptions);
+            $mform->setType($penaltyname, PARAM_INT);
+            $mform->setDefault($penaltyname, 1);
+            $mform->disabledIf($penaltyname, $enabledname, 'eq', 0);
         }
 
         // 20210703 Added the common errors header.
@@ -613,19 +627,26 @@ class mod_diary_mod_form extends moodleform_mod {
             if ($storedcolor !== false && $storedcolor !== null && $storedcolor !== '') {
                 $defaultvalues['bordercolor'] = (string)$storedcolor;
             }
+            $storedinlinepreviews = get_config('mod_diary', 'inlineattachmentpreviews_' . $instanceid);
+            if ($storedinlinepreviews !== false && $storedinlinepreviews !== null && $storedinlinepreviews !== '') {
+                $defaultvalues['inlineattachmentpreviews'] = (int)$storedinlinepreviews;
+            }
 
             $metricrequirements = diary_get_metric_requirements($instanceid);
             foreach ($this->get_metric_requirement_definitions() as $key => $unused) {
                 $enabledname = 'metricreq_enable_' . $key;
                 $operatorname = 'metricreq_op_' . $key;
                 $valuename = 'metricreq_val_' . $key;
+                $penaltyname = 'metricreq_pen_' . $key;
 
                 if (isset($metricrequirements[$key])) {
                     $defaultvalues[$enabledname] = 1;
                     $defaultvalues[$operatorname] = (int)($metricrequirements[$key]['operator'] ?? 0);
                     $defaultvalues[$valuename] = (string)($metricrequirements[$key]['value'] ?? '');
+                    $defaultvalues[$penaltyname] = (int)($metricrequirements[$key]['penalty'] ?? 1);
                 } else {
                     $defaultvalues[$enabledname] = 0;
+                    $defaultvalues[$penaltyname] = 1;
                 }
             }
         }
@@ -677,10 +698,16 @@ class mod_diary_mod_form extends moodleform_mod {
         foreach ($this->get_metric_requirement_definitions() as $key => $unused) {
             $enabledname = 'metricreq_enable_' . $key;
             $valuename = 'metricreq_val_' . $key;
+            $penaltyname = 'metricreq_pen_' . $key;
             if (!empty($data[$enabledname])) {
                 $rawvalue = $data[$valuename] ?? '';
                 if ($rawvalue === '' || !is_numeric($rawvalue)) {
                     $errors[$valuename] = get_string('completionmetricinvalidnumber', 'diary');
+                }
+
+                $rawpenalty = $data[$penaltyname] ?? '';
+                if ($rawpenalty === '' || !is_numeric($rawpenalty) || (int)$rawpenalty < 0) {
+                    $errors[$penaltyname] = get_string('completionmetricinvalidpenalty', 'diary');
                 }
             }
         }

@@ -579,7 +579,7 @@ class diarystats {
             ];
 
         if ($diarystats->words) {
-            $diarystats->lexicaldensity = round(($diarystats->uniquewords / $diarystats->words) * 100, 0) . '%';
+            $diarystats->lexicaldensity = number_format(($diarystats->uniquewords / $diarystats->words) * 100, 2, '.', '') . '%';
             [$diarystats->shortwords,
                  $diarystats->mediumwords,
                  $diarystats->longwords,
@@ -615,6 +615,58 @@ class diarystats {
         $fkgradehelp = $OUTPUT->help_icon('fkgrade', 'diary');
         $freadingeasehelp = $OUTPUT->help_icon('freadingease', 'diary');
         $fogindexhelp = $OUTPUT->help_icon('fogindex', 'diary');
+        $metricrequirements = [];
+        $metricvalues = [];
+        if (function_exists('diary_get_metric_requirements')) {
+            $metricrequirements = \diary_get_metric_requirements((int)$diary->id);
+        }
+        if (!empty($metricrequirements) && function_exists('diary_calculate_entry_metrics')) {
+            $metricvalues = \diary_calculate_entry_metrics($entry);
+        }
+        $formatmetricnumber = static function(float $number): string {
+            return rtrim(rtrim(number_format($number, 2, '.', ''), '0'), '.');
+        };
+        $buildmetriccell = static function(string $metrickey, string $basecontent) use (
+            $metricrequirements,
+            $metricvalues,
+            $formatmetricnumber
+        ): string {
+            $cellclass = '';
+            $notemarkup = '';
+            if (array_key_exists($metrickey, $metricrequirements)) {
+                $rule = $metricrequirements[$metrickey];
+                $operator = ((int)($rule['operator'] ?? 0) === 1) ? '<=' : '>=';
+                $target = (float)($rule['value'] ?? 0.0);
+                $actual = isset($metricvalues[$metrickey]) ? (float)$metricvalues[$metrickey] : 0.0;
+                $penalty = max((int)($rule['penalty'] ?? 1), 0);
+                $ismeeting = ((int)($rule['operator'] ?? 0) === 1) ? ($actual <= $target) : ($actual >= $target);
+                $cellclass = $ismeeting ? 'table-success' : 'table-danger';
+                $pointlabel = get_string(($penalty === 1) ? 'completionmetricstudentpointsingular' : 'completionmetricstudentpointplural', 'diary');
+                $stringparams = (object)[
+                    'target' => $formatmetricnumber($target),
+                    'penalty' => $penalty,
+                    'pointlabel' => $pointlabel,
+                ];
+                if ($ismeeting) {
+                    $stringkey = ($operator === '<=')
+                        ? 'completionmetricstudentmetatmost'
+                        : 'completionmetricstudentmetatleast';
+                } else {
+                    $stringkey = ($operator === '<=')
+                        ? 'completionmetricstudentneedsworkatmost'
+                        : 'completionmetricstudentneedsworkatleast';
+                }
+                $requirementtext = get_string($stringkey, 'diary', $stringparams);
+                if ($ismeeting) {
+                    $notemarkup = '<br>' . s($requirementtext);
+                } else {
+                    $notemarkup = '<br><span class="diary-stat-highlight">' . s($requirementtext) . '</span>';
+                }
+            }
+
+            $classattr = ($cellclass === '') ? '' : ' class="' . $cellclass . '"';
+            return '<td' . $classattr . '>' . $basecontent . $notemarkup . '</td>';
+        };
 
         // 20210812 Show/hide statistics for each entry. 20220903 Total re-write of code.
         if ($diary->enablestats) {
@@ -891,57 +943,92 @@ class diarystats {
                     . '<td>' . get_string('paragraphs', 'diary')
                         . ' ' . $tempminp . '/' . $diarystats->paragraphs . '/' . $tempmaxp
                         . '<br>' . $autoparagraphs . '</td></tr>'
-                . '<tr><td>' . get_string('uniquewords', 'diary') . ' ' . $diarystats->uniquewords . '</td>'
-                    . '<td>' . get_string('shortwords', 'diary')
+                . '<tr>'
+                    . $buildmetriccell('uniquewords', get_string('uniquewords', 'diary') . ' ' . $diarystats->uniquewords)
+                    . $buildmetriccell(
+                        'shortwords',
+                        get_string('shortwords', 'diary')
                         . ' ' . $shortwordshelp . ' '
-                         . $diarystats->shortwords
-                         . ' (' . number_format($diarystats->shortwords / $diarystats->uniquewords * (100), 2, '.', '')
-                         . '%)</td>'
-                    . '<td>' . get_string('mediumwords', 'diary')
+                        . $diarystats->shortwords
+                        . ' (' . number_format($diarystats->shortwords / $diarystats->uniquewords * 100, 2, '.', '')
+                        . '%)'
+                    )
+                    . $buildmetriccell(
+                        'mediumwords',
+                        get_string('mediumwords', 'diary')
                         . ' ' . $mediumwordshelp . ' '
-                         . $diarystats->mediumwords
-                         . ' (' . number_format($diarystats->mediumwords / $diarystats->uniquewords * (100), 2, '.', '')
-                         . '%)</td>'
-                    . '<td>' . get_string('longwords', 'diary')
+                        . $diarystats->mediumwords
+                        . ' (' . number_format($diarystats->mediumwords / $diarystats->uniquewords * 100, 2, '.', '')
+                        . '%)'
+                    )
+                    . $buildmetriccell(
+                        'longwords',
+                        get_string('longwords', 'diary')
                         . ' ' . $longwordshelp . ' '
-                         . $diarystats->longwords
-                         . ' (' . number_format($diarystats->longwords / $diarystats->uniquewords * (100), 2, '.', '')
-                         . '%)</td>'
-
-                . '<tr><td>' . get_string('charspersentence', 'diary') . ' ' . $diarystats->charspersentence . '</td>'
-                    . '<td>' . get_string('sentencesperparagraph', 'diary') . ' ' . $diarystats->sentencesperparagraph . '</td>'
-                    . '<td>' . get_string('wordspersentence', 'diary') . ' ' . $diarystats->wordspersentence . '</td>'
-                    . '<td>' . get_string('longwordspersentence', 'diary') . ' ' . $diarystats->longwordspersentence . '</td></tr>'
-
-                . '<tr><td>' . get_string('totalsyllables', 'diary', ($diarystats->totalsyllabels)) . ' </td>'
-                    . '<td>' . get_string(
-                        'avgsylperword',
-                        'diary',
-                        (number_format($diarystats->totalsyllabels / $diarystats->uniquewords, 2, '.', ''))
-                    ) . '</td>'
-                    . '<td>' . get_string(
+                        . $diarystats->longwords
+                        . ' (' . number_format($diarystats->longwords / $diarystats->uniquewords * 100, 2, '.', '')
+                        . '%)'
+                    )
+                    . '</tr>'
+                . '<tr>'
+                    . $buildmetriccell('charspersentence', get_string('charspersentence', 'diary') . ' ' . $diarystats->charspersentence)
+                    . $buildmetriccell('sentencesperparagraph', get_string('sentencesperparagraph', 'diary') . ' ' . $diarystats->sentencesperparagraph)
+                    . $buildmetriccell('wordspersentence', get_string('wordspersentence', 'diary') . ' ' . $diarystats->wordspersentence)
+                    . $buildmetriccell('longwordspersentence', get_string('longwordspersentence', 'diary') . ' ' . $diarystats->longwordspersentence)
+                    . '</tr>'
+                . '<tr>'
+                    . $buildmetriccell('totalsyllables', get_string('totalsyllables', 'diary', $diarystats->totalsyllabels) . ' ')
+                    . $buildmetriccell(
+                        'avgsyllperword',
+                        get_string(
+                            'avgsylperword',
+                            'diary',
+                            number_format($diarystats->totalsyllabels / $diarystats->uniquewords, 2, '.', '')
+                        )
+                    )
+                    . $buildmetriccell(
                         'avgwordlenchar',
-                        'diary',
-                        (number_format($diarystats->characters / $diarystats->words, 2, '.', ''))
-                    ) . '</td>'
-                    . '<td>' . get_string(
+                        get_string(
+                            'avgwordlenchar',
+                            'diary',
+                            number_format($diarystats->characters / $diarystats->words, 2, '.', '')
+                        )
+                    )
+                    . $buildmetriccell(
                         'avgwordpara',
-                        'diary',
-                        (number_format($diarystats->words / $diarystats->paragraphs, 1, '.', ''))
-                    ) . ' </td></tr>'
-
-                . '<tr><td>' . get_string('lexicaldensity', 'diary')
+                        get_string(
+                            'avgwordpara',
+                            'diary',
+                            number_format($diarystats->words / $diarystats->paragraphs, 1, '.', '')
+                        ) . ' '
+                    )
+                    . '</tr>'
+                . '<tr>'
+                    . $buildmetriccell(
+                        'lexicaldensity',
+                        get_string('lexicaldensity', 'diary')
                         . ' ' . $lexicaldensityhelp . ' '
-                        . $diarystats->lexicaldensity . '</td>'
-                    . '<td>' . get_string('fkgrade', 'diary')
+                        . $diarystats->lexicaldensity
+                    )
+                    . $buildmetriccell(
+                        'fkgrade',
+                        get_string('fkgrade', 'diary')
                         . ' ' . $fkgradehelp . ' '
-                        . $diarystats->fkgrade . ' </td>'
-                    . '<td>' . get_string('freadingease', 'diary')
+                        . $diarystats->fkgrade . ' '
+                    )
+                    . $buildmetriccell(
+                        'freadingease',
+                        get_string('freadingease', 'diary')
                         . ' ' . $freadingeasehelp . ' '
-                        . $diarystats->freadease . ' </td>'
-                    . '<td>' . get_string('fogindex', 'diary')
+                        . $diarystats->freadease . ' '
+                    )
+                    . $buildmetriccell(
+                        'fogindex',
+                        get_string('fogindex', 'diary')
                         . ' ' . $fogindexhelp . ' '
-                        . $diarystats->fogindex . '</td></tr>';
+                        . $diarystats->fogindex
+                    )
+                    . '</tr>';
 
                 // 20211224 Moved return to prevent undefined variable: currentstats warning.
                 return $currentstats;
@@ -1168,13 +1255,23 @@ class diarystats {
 
         // 20210814 Show rating info only if enabled and item to rate is NOT = None.
         // if ($diary->enableautorating && $diary->itemtype <> 0) {
+        $metricrequirements = [];
+        $metricvalues = [];
+        if (function_exists('diary_get_metric_requirements')) {
+            $metricrequirements = \diary_get_metric_requirements((int)$diary->id);
+        }
+        if (!empty($metricrequirements) && function_exists('diary_calculate_entry_metrics')) {
+            $metricvalues = \diary_calculate_entry_metrics($entry);
+        }
+
         if (
             $diary->enableautorating
             && ($settingsused->minchar > 0
             || $settingsused->minword > 0
             || $settingsused->minsentence > 0
             || $settingsused->minparagraph > 0
-            || $phraseeval->rulecount > 0)
+            || $phraseeval->rulecount > 0
+            || !empty($metricrequirements))
         ) {
             // 20220206 Added these two due to string changes.
             $diarystats->commonpercent = $diarystats->commonerrors * $diary->errorpercent;
@@ -1257,32 +1354,82 @@ class diarystats {
                                       * $settingsused->minmaxparagraphpercent);
             }
 
+            $minmaxpenalty = $autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs;
             $potentialratingdisp = $autoratecharacters . '(char) - '
-                                   . $autoratewords . '(word) - '
-                                   . $autoratesentences . '(sent) - '
-                                   . $autorateparagraphs . '(para) - '
-                                   . $phrasepenalty . '(phrase) = '
-                                   . (
-                                       $autoratecharacters
-                                       + $autoratewords
-                                       + $autoratesentences
-                                       + $autorateparagraphs
-                                       + $phrasepenalty
-                                   );
+                . $autoratewords . '(word) - '
+                . $autoratesentences . '(sent) - '
+                . $autorateparagraphs . '(para) = '
+                . $minmaxpenalty;
+
+            $metricgroups = [
+                'unique' => ['uniquewords', 'shortwords', 'mediumwords', 'longwords'],
+                'per' => ['charspersentence', 'sentencesperparagraph', 'wordspersentence', 'longwordspersentence'],
+                'totalavg' => ['totalsyllables', 'avgsyllperword', 'avgwordlenchar', 'avgwordpara'],
+                'egghead' => ['lexicaldensity', 'fkgrade', 'freadingease', 'fogindex'],
+            ];
+            $groupresults = [];
+            foreach ($metricgroups as $groupname => $groupkeys) {
+                $configured = 0;
+                $unmet = 0;
+                $weightedpenalty = 0;
+                $detailparts = [];
+                foreach ($groupkeys as $metrickey) {
+                    if (!array_key_exists($metrickey, $metricrequirements)) {
+                        continue;
+                    }
+                    $configured++;
+                    $rule = $metricrequirements[$metrickey];
+                    $metricpenalty = isset($rule['penalty']) ? max((int)$rule['penalty'], 0) : 1;
+                    $operator = ((int)$rule['operator'] === 1) ? '<=' : '>=';
+                    $target = (float)$rule['value'];
+                    $actual = isset($metricvalues[$metrickey]) ? (float)$metricvalues[$metrickey] : 0.0;
+                    $ismeeting = ((int)$rule['operator'] === 1) ? ($actual <= $target) : ($actual >= $target);
+                    if (!$ismeeting) {
+                        $unmet++;
+                        $weightedpenalty += $metricpenalty;
+                    }
+                    $detailparts[] = $metrickey . ' '
+                        . rtrim(rtrim(number_format($actual, 2, '.', ''), '0'), '.')
+                        . ' ' . $operator . ' '
+                        . rtrim(rtrim(number_format($target, 2, '.', ''), '0'), '.')
+                        . ($ismeeting ? ' [OK]' : ' [MISS]')
+                        . ' [pen ' . $metricpenalty . ']';
+                }
+
+                $groupresults[$groupname] = [
+                    'configured' => $configured,
+                    'unmet' => $unmet,
+                    'penalty' => $weightedpenalty,
+                    'details' => empty($detailparts)
+                        ? 'No metric requirements are configured in this group.'
+                        : implode('; ', $detailparts),
+                ];
+            }
+
+            $groupuniquepenalty = (int)$groupresults['unique']['penalty'];
+            $groupperpenalty = (int)$groupresults['per']['penalty'];
+            $grouptotalavgpenalty = (int)$groupresults['totalavg']['penalty'];
+            $groupeggheadpenalty = (int)$groupresults['egghead']['penalty'];
+
+            $currentratingtotal = max(
+                $diary->scale
+                - $minmaxpenalty
+                - $groupuniquepenalty
+                - $groupperpenalty
+                - $grouptotalavgpenalty
+                - $groupeggheadpenalty
+                - $commonerrorrating,
+                0
+            );
 
             $currentratingdisp = $diary->scale . ' - '
-                                 . $autoratecharacters . '(char) - '
-                                 . $autoratewords . '(word) - '
-                                 . $autoratesentences . '(sent) - '
-                                 . $autorateparagraphs . '(para) - '
-                                 . $phrasepenalty . '(phrase) - '
-                                 . $commonerrorrating . '(err) = '
-                                 . ($diary->scale - $autoratecharacters
-                                                 - $autoratewords
-                                                 - $autoratesentences
-                                                  - $autorateparagraphs
-                                                                                                    - $phrasepenalty
-                                                  - $commonerrorrating);
+                . $minmaxpenalty . '(minmax) - '
+                . $groupuniquepenalty . '(unique) - '
+                . $groupperpenalty . '(per) - '
+                . $grouptotalavgpenalty . '(totalavg) - '
+                . $groupeggheadpenalty . '(egghead) - '
+                . $commonerrorrating . '(err) = '
+                . $currentratingtotal;
 
             // Show prompt phrase-rule details first, including the no-rules case.
             $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
@@ -1304,10 +1451,41 @@ class diarystats {
                     'diary',
                     [
                         'one' => $potentialratingdisp,
-                        'two' => ($autoratecharacters + $autoratewords + $autoratesentences + $autorateparagraphs
-                            + $phrasepenalty - $commonerrorrating),
+                        'two' => $minmaxpenalty,
                     ]
                 )
+                . '</td></tr>';
+
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                . 'Potential Autorating error penalty: '
+                . $groupresults['unique']['unmet'] . ' unmet item(s) out of '
+                . $groupresults['unique']['configured'] . ' configured requirement(s), '
+                . $groupresults['unique']['penalty'] . ' points off.<br>'
+                . $groupresults['unique']['details']
+                . '</td></tr>';
+
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                . 'Potential Autorating error penalty: '
+                . $groupresults['per']['unmet'] . ' unmet item(s) out of '
+                . $groupresults['per']['configured'] . ' configured requirement(s), '
+                . $groupresults['per']['penalty'] . ' points off.<br>'
+                . $groupresults['per']['details']
+                . '</td></tr>';
+
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                . 'Potential Autorating error penalty: '
+                . $groupresults['totalavg']['unmet'] . ' unmet item(s) out of '
+                . $groupresults['totalavg']['configured'] . ' configured requirement(s), '
+                . $groupresults['totalavg']['penalty'] . ' points off.<br>'
+                . $groupresults['totalavg']['details']
+                . '</td></tr>';
+
+            $autoratingdata .= '<tr><td colspan="4" class="table-danger">'
+                . 'Potential Autorating error penalty: '
+                . $groupresults['egghead']['unmet'] . ' unmet item(s) out of '
+                . $groupresults['egghead']['configured'] . ' configured requirement(s), '
+                . $groupresults['egghead']['penalty'] . ' points off.<br>'
+                . $groupresults['egghead']['details']
                 . '</td></tr>';
 
             // Show possible Glossary of common errors penalty. 20211208 Converted hardcoded text to string using {$a}.
@@ -1330,22 +1508,12 @@ class diarystats {
                     'diary',
                     [
                         'one' => $currentratingdisp,
-                        'two' => (max($diary->scale - $autoratecharacters
-                            - $autoratewords
-                            - $autoratesentences
-                            - $autorateparagraphs
-                            - $phrasepenalty
-                            - $commonerrorrating, 0)),
+                        'two' => $currentratingtotal,
                     ]
                 )
                 . '</td></tr>';
 
-            $currentratingdata = (max($diary->scale - $autoratecharacters
-                                    - $autoratewords
-                                    - $autoratesentences
-                                    - $autorateparagraphs
-                                    - $phrasepenalty
-                                    - $commonerrorrating, 0));
+            $currentratingdata = $currentratingtotal;
         }
         // 20211208 Cannot add buttons here because they will also show to everyone on the view page.
         $autoratingdata .= '</table>';

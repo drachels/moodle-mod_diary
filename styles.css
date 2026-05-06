@@ -259,6 +259,88 @@
     color: #111;
 }
 
+.diary-entry-attachment-previews {
+    margin-top: 0.75rem;
+}
+
+.diary-entry-attachment-media-wrap {
+    margin-bottom: 0.75rem;
+}
+
+.diary-entry-attachment-media-name {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+}
+
+.diary-entry-attachment-media-wrap-video,
+.diary-entry-attachment-media-wrap-image {
+    max-width: 24rem;
+}
+
+.diary-entry-attachment-video {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 300px;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.diary-entry-attachment-audio {
+    display: block;
+    width: 100%;
+    max-width: 24rem;
+}
+
+.diary-entry-attachment-image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+#page-mod-diary-view .entry .mediaplugin video,
+#page-mod-diary-view .entry video,
+#page-mod-diary-report .entry .mediaplugin video,
+#page-mod-diary-report .entry video,
+#page-mod-diary-reportsingle .entry .mediaplugin video,
+#page-mod-diary-reportsingle .entry video,
+#page-mod-diary-reportone .entry .mediaplugin video,
+#page-mod-diary-reportone .entry video {
+    width: auto;
+    max-width: 24rem;
+    max-height: 300px;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#page-mod-diary-view .entry .mediaplugin audio,
+#page-mod-diary-view .entry audio,
+#page-mod-diary-report .entry .mediaplugin audio,
+#page-mod-diary-report .entry audio,
+#page-mod-diary-reportsingle .entry .mediaplugin audio,
+#page-mod-diary-reportsingle .entry audio,
+#page-mod-diary-reportone .entry .mediaplugin audio,
+#page-mod-diary-reportone .entry audio {
+    width: 100%;
+    max-width: 24rem;
+}
+
+#page-mod-diary-view .entry .mediaplugin img,
+#page-mod-diary-view .entry img,
+#page-mod-diary-report .entry .mediaplugin img,
+#page-mod-diary-report .entry img,
+#page-mod-diary-reportsingle .entry .mediaplugin img,
+#page-mod-diary-reportsingle .entry img,
+#page-mod-diary-reportone .entry .mediaplugin img,
+#page-mod-diary-reportone .entry img {
+    max-width: 100%;
+    height: auto;
+}
+
 #page-mod-diary-report .mediaplugin {
     width: 100%;
 }
@@ -554,6 +636,13 @@
 #page-mod-diary-reportsingle .generaltable td.table-danger,
 #page-mod-diary-reportone .generaltable td.table-danger {
     background-color: #f8d7da;
+}
+
+#page-mod-diary-view .generaltable td.table-success,
+#page-mod-diary-report .generaltable td.table-success,
+#page-mod-diary-reportsingle .generaltable td.table-success,
+#page-mod-diary-reportone .generaltable td.table-success {
+    background-color: #d1e7dd;
 }
 
 #page-mod-diary-view .generaltable tr.table-warning > td,

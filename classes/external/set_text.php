@@ -40,9 +40,11 @@ class set_text extends external_api {
             'cmid' => new external_value(PARAM_INT, 'Course module id'),
             'entryid' => new external_value(PARAM_INT, 'Diary entry id (0 for create)', VALUE_DEFAULT, 0),
             'promptid' => new external_value(PARAM_INT, 'Selected prompt id for choice-style prompt modes', VALUE_DEFAULT, 0),
+            'title' => new external_value(PARAM_TEXT, 'Diary entry title', VALUE_DEFAULT, ''),
             'text' => new external_value(PARAM_RAW, 'Diary entry text'),
             'format' => new external_value(PARAM_INT, 'Text format', VALUE_DEFAULT, FORMAT_MOODLE),
             'itemid' => new external_value(PARAM_INT, 'Draft item id for files', VALUE_DEFAULT, 0),
+            'attachmentsitemid' => new external_value(PARAM_INT, 'Draft item id for attachment files', VALUE_DEFAULT, 0),
         ]);
     }
 
@@ -56,6 +58,7 @@ class set_text extends external_api {
             'status' => new external_value(PARAM_ALPHA, 'Status string'),
             'entryid' => new external_value(PARAM_INT, 'Saved entry id'),
             'promptid' => new external_value(PARAM_INT, 'Saved prompt id'),
+            'title' => new external_value(PARAM_TEXT, 'Saved title'),
             'text' => new external_value(PARAM_RAW, 'Saved text'),
         ]);
     }
@@ -66,21 +69,34 @@ class set_text extends external_api {
      * @param int $cmid
      * @param int $entryid
      * @param int $promptid
+     * @param string $title
      * @param string $text
      * @param int $format
      * @param int $itemid
+     * @param int $attachmentsitemid
      * @return array
      */
-    public static function execute($cmid, $entryid = 0, $promptid = 0, $text = '', $format = FORMAT_MOODLE, $itemid = 0) {
+    public static function execute(
+        $cmid,
+        $entryid = 0,
+        $promptid = 0,
+        $title = '',
+        $text = '',
+        $format = FORMAT_MOODLE,
+        $itemid = 0,
+        $attachmentsitemid = 0
+    ) {
         global $DB, $USER;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'cmid' => $cmid,
             'entryid' => $entryid,
             'promptid' => $promptid,
+            'title' => $title,
             'text' => $text,
             'format' => $format,
             'itemid' => $itemid,
+            'attachmentsitemid' => $attachmentsitemid,
         ]);
 
         $cm = get_coursemodule_from_id('diary', $params['cmid'], 0, false, MUST_EXIST);
@@ -99,6 +115,8 @@ class set_text extends external_api {
         $timenow = time();
         $savedentryid = (int)$params['entryid'];
         $resolvedpromptid = 0;
+        $draftitemid = (int)$params['itemid'];
+        $attachmentsdraftitemid = (int)$params['attachmentsitemid'];
 
         if ($savedentryid > 0) {
             $entry = $DB->get_record('diary_entries', [
@@ -107,9 +125,34 @@ class set_text extends external_api {
                 'userid' => $USER->id,
             ], '*', MUST_EXIST);
 
+            $texttosave = (string)$params['text'];
+            if ($draftitemid > 0) {
+                $texttosave = file_save_draft_area_files(
+                    $draftitemid,
+                    $context->id,
+                    'mod_diary',
+                    'entry',
+                    (int)$entry->id,
+                    ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => -1],
+                    $texttosave
+                );
+            }
+
+            if ($attachmentsdraftitemid > 0) {
+                file_save_draft_area_files(
+                    $attachmentsdraftitemid,
+                    $context->id,
+                    'mod_diary',
+                    'attachment',
+                    (int)$entry->id,
+                    ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => -1]
+                );
+            }
+
             $record = (object)[
                 'id' => $entry->id,
-                'text' => $params['text'],
+                'title' => trim((string)$params['title']),
+                'text' => $texttosave,
                 'format' => $params['format'],
                 'timemodified' => $timenow,
             ];
@@ -131,12 +174,36 @@ class set_text extends external_api {
                 'promptid' => $resolvedpromptid,
                 'timecreated' => $timenow,
                 'timemodified' => $timenow,
-                'title' => '',
+                'title' => trim((string)$params['title']),
                 'text' => $params['text'],
                 'entrynoticemailed' => 0,
                 'format' => $params['format'],
             ];
             $savedentryid = (int)$DB->insert_record('diary_entries', $newentry);
+
+            if ($draftitemid > 0) {
+                $textwithfiles = file_save_draft_area_files(
+                    $draftitemid,
+                    $context->id,
+                    'mod_diary',
+                    'entry',
+                    $savedentryid,
+                    ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => -1],
+                    (string)$params['text']
+                );
+                $DB->set_field('diary_entries', 'text', $textwithfiles, ['id' => $savedentryid]);
+            }
+
+            if ($attachmentsdraftitemid > 0) {
+                file_save_draft_area_files(
+                    $attachmentsdraftitemid,
+                    $context->id,
+                    'mod_diary',
+                    'attachment',
+                    $savedentryid,
+                    ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => -1]
+                );
+            }
 
             $event = \mod_diary\event\entry_created::create([
                 'objectid' => $savedentryid,
@@ -152,11 +219,16 @@ class set_text extends external_api {
 
         $savedpromptid = (int)$DB->get_field('diary_entries', 'promptid', ['id' => $savedentryid]);
 
+        $savedtitle = (string)$DB->get_field('diary_entries', 'title', ['id' => $savedentryid]);
+
+        $savedtext = (string)$DB->get_field('diary_entries', 'text', ['id' => $savedentryid]);
+
         return [
             'status' => 'ok',
             'entryid' => $savedentryid,
             'promptid' => $savedpromptid,
-            'text' => $params['text'],
+            'title' => $savedtitle,
+            'text' => $savedtext,
         ];
     }
 }

@@ -581,7 +581,9 @@ if ($timenow > $timestart) {
                     echo '<div class="promptentry diary-prompt-themed" style="--diary-prompt-bg: '
                         . s($prompt->promptbgc) . ';' . s($bordercssvars) . '">';
                     echo '<strong>Prompt ID-' . $prompt->id . ', ' . get_string('prompttext', 'diary')
-                        . '</strong>: ' . $prompt->text . '</div>';
+                        . '</strong>: ' . file_rewrite_pluginfile_urls(
+                            $prompt->text, 'pluginfile.php', $context->id, 'mod_diary', 'prompt', $prompt->id
+                        ) . '</div>';
                 }
 
                 // 20231108 If there is a title for the entry add it as a heading.
@@ -610,6 +612,7 @@ if ($timenow > $timestart) {
                     null,
                     'diary-tags'
                 );
+                echo results::diary_render_entry_attachments($entry, $course, $cm);
                 // 20250122 This is the close div for each entry listed on the page.
                 echo '</div>';
 

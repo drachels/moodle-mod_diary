@@ -92,6 +92,10 @@ class mod_diary_entry_form extends moodleform {
         $mform->setType('text_editor', PARAM_RAW);
         $mform->addRule('text_editor', null, 'required', null, 'client');
 
+        // Add attachment file manager.
+        $attachmentoptions = $this->_customdata['attachmentoptions'];
+        $mform->addElement('filemanager', 'attachment_filemanager', get_string('attachment', 'mod_diary'), null, $attachmentoptions);
+
         // 20230302 Added tags.
         if (core_tag_tag::is_enabled('mod_diary', 'diary_entries')) {
             $mform->addElement('header', 'tagshdr', get_string('tags', 'tag'));
@@ -109,8 +113,8 @@ class mod_diary_entry_form extends moodleform {
         $mform->setType('promptid', PARAM_INT);
 
         $buttonarray = [];
-        $buttonarray[] = &$mform->createElement('submit', 'saveandcontinue', get_string('saveandcontinueediting', 'diary'));
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
+        $buttonarray[] = &$mform->createElement('submit', 'saveandcontinue', get_string('saveandcontinueediting', 'diary'));
         $buttonarray[] = &$mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
         $mform->closeHeaderBefore('buttonar');

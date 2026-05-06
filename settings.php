@@ -175,6 +175,18 @@ if ($ADMIN->fulltree) {
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
+    // Default inline attachment previews for new Diary activities.
+    $settings->add(new admin_setting_configselect(
+        'mod_diary/inlineattachmentpreviews',
+        get_string('inlineattachmentpreviews_title', 'diary'),
+        get_string('inlineattachmentpreviews_descr', 'diary'),
+        0,
+        [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
+
     // 20210812 Diary show/hide statistics setting.
     $name = 'mod_diary/enablestats';
     $title = get_string('enablestats_title', 'diary');

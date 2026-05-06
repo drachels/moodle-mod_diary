@@ -186,7 +186,8 @@
                         title="{{#str}}startoredit, mod_diary{{/str}}"
                         component="mod_diary"
                         method="mobile_entry_edit"
-                        [args]="{cmid: {{cmid}}, courseid: {{courseid}}}">
+                        [preSets]="{getFromCache: 0, saveToCache: 0}"
+                        [args]="{cmid: {{cmid}}, courseid: {{courseid}}, cachekey: {{cachekey}}}">
                         {{#str}}startoredit, mod_diary{{/str}}
                     </ion-button>
                 </ion-card-content>

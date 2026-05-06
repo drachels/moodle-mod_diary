@@ -37,6 +37,7 @@ $action = optional_param('action', 'currententry', PARAM_ALPHANUMEXT); // Action
 $firstkey = optional_param('firstkey', '', PARAM_INT); // Which diary_entries id to edit.
 $promptid = optional_param('promptid', '', PARAM_INT); // The current one.
 $saveandcontinue = optional_param('saveandcontinue', '', PARAM_RAW_TRIMMED);
+$submitbutton = optional_param('submitbutton', '', PARAM_RAW_TRIMMED);
 
 if (!$cm = get_coursemodule_from_id('diary', $id)) {
     throw new moodle_exception(get_string('incorrectmodule', 'diary'));
@@ -400,6 +401,15 @@ $data->id = $cm->id;
             'entry',
             $newentry->id
         );
+        // Save attachment files.
+        file_save_draft_area_files(
+            $fromform->attachment_filemanager,
+            $context->id,
+            'mod_diary',
+            'attachment',
+            $newentry->id,
+            $attachmentoptions
+        );
         $newentry->title = $fromform->title;
         $newentry->text = $fromform->text;
         $newentry->format = $fromform->textformat;
@@ -541,7 +551,9 @@ $data->id = $cm->id;
             }
         }
         // End new code.
-        if (!empty($saveandcontinue)) {
+        // Mobile/WebView submissions can default to the first submit button.
+        // Only stay on edit when that button is explicitly chosen.
+        if (!empty($saveandcontinue) && empty($submitbutton)) {
             redirect(new moodle_url('/mod/diary/edit.php', [
                 'id' => $cm->id,
                 'action' => 'editentry',
@@ -564,4 +576,10 @@ $data->id = $cm->id;
     echo $OUTPUT->box($intro);
     // Otherwise fill and print the form.
     $form->display();
+    if ($entry) {
+        $attachmentshtml = results::diary_render_entry_attachments($entry, $course, $cm);
+        if (!empty($attachmentshtml)) {
+            echo $OUTPUT->box($attachmentshtml, 'diary-entry-attachments');
+        }
+    }
     echo $OUTPUT->footer();

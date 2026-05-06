@@ -76,6 +76,7 @@ class mobile {
             'cmid' => $cmid,
             'courseid' => $course->id,
             'diaryid' => $diary->id,
+            'cachekey' => time(),
             'name' => format_string($diary->name),
             'intro' => format_module_intro('diary', $diary, $cm->id),
             'warning' => $warning,
@@ -661,7 +662,7 @@ JS;
                 'html' => $OUTPUT->render_from_template('mod_diary/mobileapp/mobile_view', $data),
             ]],
             'javascript' => $js,
-            'otherdata' => json_encode([]),
+            'otherdata' => [],
         ];
     }
 
@@ -721,19 +722,75 @@ JS;
         }
 
         $textplain = '';
+        $texthtml = '';
+        $entrytitle = '';
         $entryid = 0;
+        $draftitemid = 0;
         if ($entry) {
             $entryid = (int)$entry->id;
-            $entryhtml = file_rewrite_pluginfile_urls(
-                (string)$entry->text,
-                'pluginfile.php',
+            $entrytitle = clean_param((string)$entry->title, PARAM_TEXT);
+            // Copy permanent entry files into a user draft area so the rich
+            // text editor can read and manage them.
+            file_prepare_draft_area(
+                $draftitemid,
                 $context->id,
                 'mod_diary',
                 'entry',
-                $entry->id
+                $entryid,
+                ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0]
             );
-            $textplain = trim(html_to_text($entryhtml, 0, false));
-            $textplain = str_replace("\xc2\xa0", ' ', $textplain);
+            // Rewrite embedded file URLs to point at the draft area so the
+            // rich text editor can display and manage existing media.
+            $texthtml = file_rewrite_pluginfile_urls(
+                (string)$entry->text,
+                'draftfile.php',
+                \context_user::instance($USER->id)->id,
+                'user',
+                'draft',
+                $draftitemid
+            );
+
+            // Also include attachment-area files in the same draft area so
+            // Advanced attachments are visible/editable when re-opening entry edit.
+            $attachmentoptions = [
+                'subdirs' => 0,
+                'maxbytes' => $course->maxbytes,
+                'maxfiles' => 50,
+                'accepted_types' => '*',
+            ];
+            file_prepare_draft_area(
+                $draftitemid,
+                $context->id,
+                'mod_diary',
+                'attachment',
+                $entryid,
+                $attachmentoptions
+            );
+        } else {
+            $draftitemid = file_get_unused_draft_itemid();
+        }
+
+        $attachmentsseed = [];
+        if ($draftitemid > 0) {
+            $usercontext = \context_user::instance($USER->id);
+            $attachmentsseed = \core_external\util::get_area_files(
+                $usercontext->id,
+                'user',
+                'draft',
+                $draftitemid,
+                true
+            );
+            if (!empty($attachmentsseed)) {
+                foreach ($attachmentsseed as &$seedfile) {
+                    $seedfile['itemid'] = $draftitemid;
+                    $seedfile['itemId'] = $draftitemid;
+                }
+                unset($seedfile);
+            }
+        }
+        $attachmentsseedjson = json_encode($attachmentsseed);
+        if ($attachmentsseedjson === false) {
+            $attachmentsseedjson = '[]';
         }
 
         $data = [
@@ -741,34 +798,201 @@ JS;
             'courseid' => $course->id,
             'diaryid' => $diary->id,
             'name' => format_string($diary->name),
-            'format' => FORMAT_MOODLE,
+            'format' => FORMAT_HTML,
             'canedit' => $canadd && $isopen,
             'warning' => $warning,
             'info' => $info,
             'entryid' => $entryid,
-            'text_plain' => $textplain,
+            'title' => $entrytitle,
+            'canattachments' => true,
+            'random' => mt_rand(),
         ];
+        if ($entry) {
+            $data['attachmentshtml'] = results::diary_render_entry_attachments($entry, $course, $cm);
+        }
         $editpromptid = $entry ? (int)($entry->promptid ?? 0) : prompts::get_current_promptid($diary, $USER->id, 0);
         $data['promptid'] = $editpromptid;
         self::populate_mobile_prompt_context($data, $context, $diary, $USER->id, $editpromptid);
         self::populate_mobile_prompt_selector($data, $diary, $USER->id, $entry, $editpromptid);
 
-        $js = <<<'JS'
+        $js = <<<JS
+// Initialise a FormControl for the rich text editor so its content can be
+// passed directly to the WS via [params] rather than form scraping.
+this.textControl = this.FormBuilder.control(this.CONTENT_OTHERDATA.text || '');
+var initialAttachmentsFiles = {$attachmentsseedjson};
+this.attachmentsFiles = Array.isArray(initialAttachmentsFiles) ? initialAttachmentsFiles : [];
+this.advanced = this.attachmentsFiles.length > 0;
+this.isSaving = false;
+
+this.getAttachmentsDraftItemId = function() {
+    var files = this.attachmentsFiles;
+    if (!Array.isArray(files)) {
+        files = [];
+    }
+
+    for (var i = 0; i < files.length; i++) {
+        var file = files[i] || {};
+        var candidate = parseInt(file.itemid || file.itemId || file.draftitemid || file.draftItemId || 0, 10);
+        if (candidate > 0) {
+            return candidate;
+        }
+
+        var fileurl = file.fileurl || file.url || file.source || '';
+        if (typeof fileurl === 'string' && fileurl) {
+            var match = fileurl.match(/\/user\/draft\/(\d+)\//);
+            if (match && match[1]) {
+                candidate = parseInt(match[1], 10);
+                if (candidate > 0) {
+                    return candidate;
+                }
+            }
+        }
+    }
+
+    var fallbackitemid = parseInt((this.CONTENT_OTHERDATA && this.CONTENT_OTHERDATA.itemid) || 0, 10);
+    if (fallbackitemid > 0) {
+        return fallbackitemid;
+    }
+
+    return 0;
+};
+
+this.getFileUploaderService = function() {
+    if (this.CoreFileUploader && typeof this.CoreFileUploader.uploadOrReuploadFiles === 'function') {
+        return this.CoreFileUploader;
+    }
+
+    if (this.CoreFileUploaderProvider && typeof this.CoreFileUploaderProvider.uploadOrReuploadFiles === 'function') {
+        return this.CoreFileUploaderProvider;
+    }
+
+    return null;
+};
+
+this.isLocalAttachmentFile = function(file) {
+    if (!file) {
+        return false;
+    }
+
+    if (this.CoreFileUtils && typeof this.CoreFileUtils.isFileEntry === 'function') {
+        try {
+            return this.CoreFileUtils.isFileEntry(file);
+        } catch (e) {
+            // Fall through to URL heuristics.
+        }
+    }
+
+    return !(file.fileurl || file.url || file.source);
+};
+
+this.uploadAttachmentsAndGetDraftItemId = async function() {
+    var files = this.attachmentsFiles;
+    if (!Array.isArray(files) || files.length === 0) {
+        return 0;
+    }
+
+    var existingdraftid = this.getAttachmentsDraftItemId();
+    var haslocalfiles = false;
+    for (var i = 0; i < files.length; i++) {
+        if (this.isLocalAttachmentFile(files[i])) {
+            haslocalfiles = true;
+            break;
+        }
+    }
+
+    if (!haslocalfiles && existingdraftid > 0) {
+        return existingdraftid;
+    }
+
+    var uploader = this.getFileUploaderService();
+    if (!uploader) {
+        throw new Error('File uploader service unavailable in this app runtime.');
+    }
+
+    var cmid = parseInt((this.CONTENT_OTHERDATA && this.CONTENT_OTHERDATA.cmid) || 0, 10);
+    var uploadeditemid = await uploader.uploadOrReuploadFiles(files, 'mod_diary', cmid);
+    uploadeditemid = parseInt(uploadeditemid || 0, 10);
+
+    if (uploadeditemid > 0) {
+        return uploadeditemid;
+    }
+
+    return 0;
+};
+
+this.getCurrentSiteForWrite = async function() {
+    if (this.CoreSites && typeof this.CoreSites.getCurrentSite === 'function') {
+        return this.CoreSites.getCurrentSite();
+    }
+
+    if (this.CoreSitesProvider && typeof this.CoreSitesProvider.getCurrentSite === 'function') {
+        return this.CoreSitesProvider.getCurrentSite();
+    }
+
+    throw new Error('Site service unavailable in this app runtime.');
+};
+
+this.saveDiaryEntry = async function(continueediting) {
+    if (this.isSaving) {
+        return;
+    }
+
+    this.isSaving = true;
+
+    try {
+        var attachmentsitemid = await this.uploadAttachmentsAndGetDraftItemId();
+        var params = {
+            cmid: this.CONTENT_OTHERDATA.cmid,
+            entryid: this.CONTENT_OTHERDATA.entryid,
+            title: this.CONTENT_OTHERDATA.title,
+            text: this.textControl ? this.textControl.value : '',
+            format: this.CONTENT_OTHERDATA.format,
+            promptid: this.CONTENT_OTHERDATA.promptid,
+            itemid: this.CONTENT_OTHERDATA.itemid,
+            attachmentsitemid: attachmentsitemid,
+        };
+
+        var site = await this.getCurrentSiteForWrite();
+        var result = await site.write('mod_diary_set_text', params, {
+            getFromCache: 0,
+            saveToCache: 0,
+        });
+
+        this.onDiaryEntrySaved(result || {});
+        if (!continueediting) {
+            history.back();
+        }
+
+        if (this.CoreToasts && typeof this.CoreToasts.show === 'function') {
+            try {
+                this.CoreToasts.show({
+                    message: 'core.changessaved',
+                    translateMessage: true,
+                    cssClass: 'core-toast-success',
+                });
+            } catch (toastError) {
+                // Never block save navigation when toast API signatures vary by app version.
+            }
+        }
+    } catch (error) {
+        if (this.CoreAlerts && typeof this.CoreAlerts.showError === 'function') {
+            this.CoreAlerts.showError(error);
+        }
+    } finally {
+        this.isSaving = false;
+    }
+};
+
+this.onAdvancedChanged = function(event) {
+    this.advanced = !!(event && event.detail && event.detail.value === 'advanced');
+};
+
 this.onDiaryEntrySaved = function(result) {
     try {
-        var entryid = parseInt(result && result.entryid ? result.entryid : 0, 10);
-        if (!entryid) {
-            return;
-        }
-
-        var form = document.querySelector('form[id^="diary-entry-form-"]');
-        if (!form) {
-            return;
-        }
-
-        var entryinput = form.querySelector('input[name="entryid"]');
-        if (entryinput) {
-            entryinput.value = String(entryid);
+        // After creating a new entry, store the assigned entryid so
+        // subsequent "Save and continue editing" saves update the same record.
+        if (result && result.entryid) {
+            this.CONTENT_OTHERDATA.entryid = parseInt(result.entryid, 10);
         }
     } catch (e) {
         // Ignore malformed payloads in older app builds.
@@ -782,7 +1006,18 @@ JS;
                 'html' => $OUTPUT->render_from_template('mod_diary/mobileapp/mobile_edit_entry', $data),
             ]],
             'javascript' => $js,
-            'otherdata' => json_encode([]),
+            'otherdata' => [
+                'title' => $entrytitle,
+                'text' => $texthtml,
+                'entryid' => $entryid,
+                'promptid' => $editpromptid,
+                'cmid' => $cm->id,
+                'courseid' => $course->id,
+                'format' => FORMAT_HTML,
+                'itemid' => $draftitemid,
+                'maxattachments' => ((int)($diary->maxfiles ?? 0) !== 0) ? (int)$diary->maxfiles : 9,
+                'maxbytes' => (int)($diary->maxbytes ?? 0),
+            ],
         ];
     }
 
@@ -1107,6 +1342,26 @@ JS;
     }
 
     /**
+     * Determine whether an entry body contains embedded media that should remain formatted.
+     *
+     * Mobile grading normally uses a lightweight plain-text preview to keep payloads small,
+     * but TinyMCE-recorded audio/video needs the formatted HTML path to render as playable media.
+     *
+     * @param string $entryhtml Entry HTML after pluginfile URL rewriting.
+     * @return bool
+     */
+    protected static function entry_requires_formatted_mobile_render(string $entryhtml): bool {
+        if ($entryhtml === '') {
+            return false;
+        }
+
+        return (bool)preg_match(
+            '~<(audio|video|source|track)\b|pluginfile\.php[^"\'\s>]+\.(mp3|mp4|m4a|wav|webm|ogg)(?:[?#][^"\'\s>]*)?~i',
+            $entryhtml
+        );
+    }
+
+    /**
      * Build a list of the current user's entries that can be opened for editing.
      *
      * @param \stdClass $diary Diary record.
@@ -1144,6 +1399,10 @@ JS;
             return ['items' => [], 'total' => $total, 'offset' => $offset];
         }
 
+        $cm = get_coursemodule_from_instance('diary', (int)$diary->id, (int)$diary->course, false, MUST_EXIST);
+        $context = \context_module::instance((int)$cm->id);
+        $fs = get_file_storage();
+
         $promptids = [];
         foreach ($entries as $entry) {
             if (!empty($entry->promptid)) {
@@ -1176,6 +1435,8 @@ JS;
                 $plain = \core_text::substr($plain, 0, 120) . '...';
             }
 
+            $attachmentcount = self::count_entry_attachments($fs, (int)$context->id, (int)$entry->id);
+
             $promptlabel = self::get_mobile_prompt_record_label($promptrecords[(int)$entry->promptid] ?? null);
             $promptlabel = clean_param((string)$promptlabel, PARAM_TEXT);
 
@@ -1185,6 +1446,8 @@ JS;
                 'preview' => $plain,
                 'timemodified' => userdate((int)$entry->timemodified ?: (int)$entry->timecreated),
                 'promptlabel' => $promptlabel,
+                'hasattachments' => ($attachmentcount > 0),
+                'attachmentcount' => (int)$attachmentcount,
             ];
         }
 
@@ -1290,6 +1553,12 @@ JS;
                 $entrypreview = \core_text::substr($entrypreview, 0, 2500) . '...';
             }
 
+            if (self::entry_requires_formatted_mobile_render($entryhtml)) {
+                $entrydisplay = format_text($entryhtml, $entry->format, ['context' => $context]);
+            } else {
+                $entrydisplay = format_text(s($entrypreview), FORMAT_HTML, ['context' => $context]);
+            }
+
             $feedbackplain = trim(html_to_text((string)$entry->entrycomment, 0, false));
             $feedbackplain = str_replace("\xc2\xa0", ' ', $feedbackplain);
             $tempentry = clone $entry;
@@ -1353,7 +1622,7 @@ JS;
                 'studentname' => fullname($student),
                 'studentpic' => $output->user_picture($student, ['size' => 35]),
                 'timemodified' => userdate($entry->timemodified),
-                'text' => format_text(s($entrypreview), FORMAT_HTML, ['context' => $context]),
+                'text' => $entrydisplay,
                 'hasresultsblock' => ($resultsblockhtml !== ''),
                 'resultsblockhtml' => $resultsblockhtml,
                 'entryid' => $entry->id,
@@ -1399,7 +1668,12 @@ JS;
             return;
         }
 
+        $fs = get_file_storage();
+        $attachmentcount = self::count_entry_attachments($fs, (int)$context->id, (int)$entry->id);
+
         $data['hasentry'] = true;
+        $data['hasattachments'] = ($attachmentcount > 0);
+        $data['attachmentcount'] = (int)$attachmentcount;
         $data['lastedited'] = userdate($entry->timemodified ?: $entry->timecreated);
 
         if (!empty($entry->promptid)) {
@@ -1419,6 +1693,9 @@ JS;
             $entry->id
         );
         $data['text'] = format_text($entrytext, $entry->format, ['context' => $context]);
+        $attachmentshtml = results::diary_render_entry_attachments($entry, $course, $cm);
+        $data['hasattachmentspreviews'] = ($attachmentshtml !== '');
+        $data['attachmentshtml'] = $attachmentshtml;
 
         $hasfeedbacktext = trim(strip_tags((string)$entry->entrycomment)) !== '';
         $hasrating = $entry->rating !== null && $entry->rating !== '' && (string)$entry->rating !== '-1';
@@ -1444,6 +1721,29 @@ JS;
                 $data['grade'] = $gradinginfo->items[0]->grades[$userid]->str_long_grade;
             }
         }
+    }
+
+    /**
+     * Count unique attachment files for an entry across entry+attachment areas.
+     *
+     * @param \file_storage $fs File storage service.
+     * @param int $contextid Module context id.
+     * @param int $entryid Diary entry id.
+     * @return int
+     */
+    protected static function count_entry_attachments($fs, int $contextid, int $entryid): int {
+        $unique = [];
+        foreach (['entry', 'attachment'] as $filearea) {
+            $files = $fs->get_area_files($contextid, 'mod_diary', $filearea, $entryid, 'id', false);
+            foreach ($files as $file) {
+                if ($file->is_directory()) {
+                    continue;
+                }
+                $unique[$file->get_contenthash()] = true;
+            }
+        }
+
+        return count($unique);
     }
 
     /**

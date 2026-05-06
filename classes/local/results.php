@@ -763,7 +763,7 @@ class results {
                     s($prompt->promptbgc) .
                     ';' . s($bordercssvars) .
                     ';">' .
-                    $prompt->text .
+                    file_rewrite_pluginfile_urls($prompt->text, 'pluginfile.php', $context->id, 'mod_diary', 'prompt', $prompt->id) .
                     '</div></td>';
                 echo '<td></td>';
                 echo '</tr>';
@@ -831,6 +831,7 @@ class results {
                 null,
                 'diary-tags'
             );
+            echo self::diary_render_entry_attachments($entry, $course, $cm);
             // 20210701 Moved copy 1 of 2 here due to new stats.
             echo '</div></td><td class="diary-col-actions"></td></tr>';
 
@@ -1261,6 +1262,284 @@ class results {
     }
 
     /**
+     * Determine whether an attached file should be rendered inline as media.
+     *
+     * @param \stored_file $file Stored file.
+     * @return string One of: video, audio, image, or empty string.
+     */
+    private static function diary_get_inline_attachment_media_type($file) {
+        $mimetype = strtolower((string)$file->get_mimetype());
+        if (strpos($mimetype, 'video/') === 0) {
+            return 'video';
+        }
+        if (strpos($mimetype, 'audio/') === 0) {
+            return 'audio';
+        }
+        if (strpos($mimetype, 'image/') === 0) {
+            return 'image';
+        }
+
+        $extension = strtolower(pathinfo($file->get_filename(), PATHINFO_EXTENSION));
+        if (in_array($extension, ['mp4', 'webm', 'ogg', 'ogv', 'm4v', 'mov'], true)) {
+            return 'video';
+        }
+        if (in_array($extension, ['mp3', 'm4a', 'aac', 'wav', 'oga', 'opus'], true)) {
+            return 'audio';
+        }
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'], true)) {
+            return 'image';
+        }
+
+        return '';
+    }
+
+    /**
+     * Resolve a browser-safe media MIME type for audio/video previews.
+     *
+     * @param \stored_file $file Stored file.
+     * @param string $mediatype One of video, audio, image.
+     * @return string Empty string means omit the type attribute.
+     */
+    private static function diary_get_inline_preview_mimetype($file, $mediatype) {
+        $rawmimetype = strtolower(trim((string)$file->get_mimetype()));
+        if ($mediatype === 'video' && strpos($rawmimetype, 'video/') === 0) {
+            return $rawmimetype;
+        }
+        if ($mediatype === 'audio' && strpos($rawmimetype, 'audio/') === 0) {
+            return $rawmimetype;
+        }
+
+        $extension = strtolower(pathinfo($file->get_filename(), PATHINFO_EXTENSION));
+        $videomap = [
+            'mp4' => 'video/mp4',
+            'm4v' => 'video/mp4',
+            'webm' => 'video/webm',
+            'ogg' => 'video/ogg',
+            'ogv' => 'video/ogg',
+            'mov' => 'video/quicktime',
+        ];
+        $audiomap = [
+            'mp3' => 'audio/mpeg',
+            'm4a' => 'audio/mp4',
+            'aac' => 'audio/aac',
+            'wav' => 'audio/wav',
+            'oga' => 'audio/ogg',
+            'ogg' => 'audio/ogg',
+            'opus' => 'audio/opus',
+            'webm' => 'audio/webm',
+        ];
+
+        if ($mediatype === 'video') {
+            return $videomap[$extension] ?? '';
+        }
+        if ($mediatype === 'audio') {
+            return $audiomap[$extension] ?? '';
+        }
+
+        return '';
+    }
+
+    /**
+     * Render a single inline attachment preview block.
+     *
+     * @param string $mediatype One of video, audio, image.
+     * @param string $filename Attachment filename.
+     * @param moodle_url $streamurl Non-forced pluginfile URL.
+     * @param moodle_url $downloadurl Forced-download pluginfile URL.
+     * @param string $mimetype Attachment MIME type.
+     * @return string
+     */
+    private static function diary_render_inline_attachment_preview($mediatype, $filename, $streamurl, $downloadurl, $mimetype) {
+        $stream = $streamurl->out(false);
+        $fallback = html_writer::link($downloadurl, get_string('download'));
+        $media = '';
+
+        if ($mediatype === 'video') {
+            $sourceattrs = ['src' => $stream];
+            if ($mimetype !== '') {
+                $sourceattrs['type'] = $mimetype;
+            }
+            $source = html_writer::empty_tag('source', $sourceattrs);
+            $media = html_writer::tag('video', $source . $fallback, [
+                'controls' => 'controls',
+                'preload' => 'metadata',
+                'class' => 'diary-entry-attachment-video',
+            ]);
+        } else if ($mediatype === 'audio') {
+            $sourceattrs = ['src' => $stream];
+            if ($mimetype !== '') {
+                $sourceattrs['type'] = $mimetype;
+            }
+            $source = html_writer::empty_tag('source', $sourceattrs);
+            $media = html_writer::tag('audio', $source . $fallback, [
+                'controls' => 'controls',
+                'preload' => 'metadata',
+                'class' => 'diary-entry-attachment-audio',
+            ]);
+        } else if ($mediatype === 'image') {
+            $media = html_writer::empty_tag('img', [
+                'src' => $stream,
+                'alt' => s($filename),
+                'loading' => 'lazy',
+                'class' => 'diary-entry-attachment-image',
+            ]);
+        }
+
+        if ($media === '') {
+            return '';
+        }
+
+        return html_writer::tag(
+            'div',
+            html_writer::tag('div', s($filename), ['class' => 'diary-entry-attachment-media-name']) . $media,
+            ['class' => 'diary-entry-attachment-media-wrap diary-entry-attachment-media-wrap-' . $mediatype]
+        );
+    }
+
+    /**
+     * Detect whether a file is already referenced in the entry body.
+     *
+     * @param \stdClass $entry Diary entry record.
+     * @param \stored_file $file Stored file.
+     * @return bool
+     */
+    private static function diary_entry_text_references_file($entry, $file) {
+        $entrytext = (string)($entry->text ?? '');
+        if ($entrytext === '') {
+            return false;
+        }
+
+        $decodedtext = rawurldecode(html_entity_decode($entrytext, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $filepath = trim((string)$file->get_filepath(), '/');
+        $filename = (string)$file->get_filename();
+        $relativepath = ($filepath === '') ? $filename : ($filepath . '/' . $filename);
+
+        $pluginfiletoken = '@@PLUGINFILE@@/';
+        if (strpos($decodedtext, $pluginfiletoken . $relativepath) !== false
+                || strpos($decodedtext, $pluginfiletoken . $filename) !== false) {
+            return true;
+        }
+
+        $pluginfilepath = '/mod_diary/entry/' . (int)$entry->id . '/';
+        return strpos($decodedtext, $pluginfilepath . $relativepath) !== false
+            || strpos($decodedtext, $pluginfilepath . $filename) !== false;
+    }
+
+    /**
+     * Return a compact attachment list for a diary entry.
+     *
+     * @param \\stdClass $entry Diary entry record.
+     * @param \\stdClass|false $course Course record.
+     * @param \\stdClass|false $cm Course module record.
+     * @return string
+     */
+    public static function diary_render_entry_attachments($entry, $course = false, $cm = false) {
+        if (! $cm) {
+            $courseid = $course ? (int)$course->id : 0;
+            $cm = get_coursemodule_from_instance('diary', (int)$entry->diary, $courseid);
+        }
+
+        if (!$cm) {
+            return '';
+        }
+
+        $context = context_module::instance($cm->id);
+        $fs = get_file_storage();
+        $fileswithareas = [];
+
+        foreach (['entry', 'attachment'] as $filearea) {
+            $areafiles = $fs->get_area_files($context->id, 'mod_diary', $filearea, (int)$entry->id, 'filename', false);
+            if (empty($areafiles)) {
+                continue;
+            }
+
+            foreach ($areafiles as $file) {
+                if ($file->is_directory()) {
+                    continue;
+                }
+                $uniquekey = $file->get_filepath() . '|' . $file->get_filename() . '|' . $file->get_contenthash();
+                if (!isset($fileswithareas[$uniquekey])) {
+                    $fileswithareas[$uniquekey] = [
+                        'file' => $file,
+                        'filearea' => $filearea,
+                    ];
+                }
+            }
+        }
+
+        if (empty($fileswithareas)) {
+            return '';
+        }
+
+        $items = [];
+        $mediapreviews = [];
+        $allowinlinepreviews = \diary_get_inline_attachment_previews((int)$entry->diary);
+
+        foreach ($fileswithareas as $entryfile) {
+            $file = $entryfile['file'];
+            $filearea = $entryfile['filearea'];
+
+            $downloadurl = moodle_url::make_pluginfile_url(
+                $context->id,
+                'mod_diary',
+                $filearea,
+                (int)$entry->id,
+                $file->get_filepath(),
+                $file->get_filename(),
+                true
+            );
+
+            $streamurl = moodle_url::make_pluginfile_url(
+                $context->id,
+                'mod_diary',
+                $filearea,
+                (int)$entry->id,
+                $file->get_filepath(),
+                $file->get_filename(),
+                false
+            );
+
+            $items[] = html_writer::tag('li', html_writer::link($downloadurl, s($file->get_filename())));
+
+            $mediatype = self::diary_get_inline_attachment_media_type($file);
+            if ($allowinlinepreviews
+                    && $mediatype !== ''
+                    && !self::diary_entry_text_references_file($entry, $file)) {
+                $preview = self::diary_render_inline_attachment_preview(
+                    $mediatype,
+                    (string)$file->get_filename(),
+                    $streamurl,
+                    $downloadurl,
+                    self::diary_get_inline_preview_mimetype($file, $mediatype)
+                );
+                if ($preview !== '') {
+                    $mediapreviews[] = $preview;
+                }
+            }
+        }
+
+        if (empty($items)) {
+            return '';
+        }
+
+        $output = html_writer::start_div('diary-entry-attachments');
+
+        if (!empty($mediapreviews)) {
+            $output .= html_writer::start_div('diary-entry-attachment-previews');
+            $output .= implode('', $mediapreviews);
+            $output .= html_writer::end_div();
+        }
+
+        $output .= html_writer::tag('strong', 'Attachments:');
+        $output .= html_writer::start_tag('ul', ['class' => 'diary-entry-attachments-list']);
+        $output .= implode('', $items);
+        $output .= html_writer::end_tag('ul');
+        $output .= html_writer::end_div();
+
+        return $output;
+    }
+
+    /**
      * Return the editor and attachment options when editing a diary entry.
      *
      * @param array $course Course object.
@@ -1276,7 +1555,11 @@ class results {
         $maxfiles = 99; // Need to add some setting.
 
         // 20210613 Added more custom data to use in edit_form.php to prevent illegal access.
+        // 20260503 Added maxfiles/maxbytes so file_postupdate_standard_editor calls
+        // file_save_draft_area_files for TinyMCE-embedded media (audio/video recordings).
         $editoroptions = [
+            'maxfiles' => EDITOR_UNLIMITED_FILES,
+            'maxbytes' => $course->maxbytes,
             'timeclose' => $diary->timeclose,
             'editall' => $diary->editall,
             'editdates' => $diary->editdates,
@@ -1288,6 +1571,10 @@ class results {
         ];
 
         $attachmentoptions = [
+            'subdirs' => 0,
+            'maxbytes' => $course->maxbytes,
+            'maxfiles' => 50,
+            'accepted_types' => '*',
         ];
 
         return [

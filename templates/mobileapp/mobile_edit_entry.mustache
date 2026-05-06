@@ -10,7 +10,7 @@
         "canedit": true,
         "diaryid": 34,
         "format": 1,
-        "text_plain": "My current entry"
+        "title": ""
     }
 }}
 
@@ -65,70 +65,86 @@
             {{/canedit}}
 
             {{#canedit}}
-                <!-- 
-                    FORM CONTAINER
-                    Using <form ngNoForm> creates a standard HTML form context.
-                    This allows the directive to find the textarea easily.
-                -->
-                <form id="diary-entry-form-{{cmid}}" ngNoForm>
-                    {{#haspromptselector}}
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; color: #666; font-size: 12px; margin-bottom: 5px;">
-                                {{promptselectorlabel}}
-                            </label>
-                            <select name="promptid"
-                                    style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; -webkit-appearance: none;">
-                                {{#promptoptions}}
-                                    <option value="{{value}}" {{selected}}>{{label}}</option>
-                                {{/promptoptions}}
-                            </select>
-                        </div>
-                    {{/haspromptselector}}
-                    
-                    <!-- Textarea wrapped in a plain div -->
+                {{#haspromptselector}}
                     <div style="margin-bottom: 15px;">
-                    <textarea
-                        name="text"
-                        rows="15"
-                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: sans-serif; background: #fff; color: #111;"
-                        placeholder="{{#str}}entry, mod_diary{{/str}}">{{text_plain}}</textarea>
+                        <label style="display: block; color: #666; font-size: 12px; margin-bottom: 5px;">
+                            {{promptselectorlabel}}
+                        </label>
+                        <select
+                            (change)="CONTENT_OTHERDATA.promptid = +$event.target.value"
+                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; -webkit-appearance: none;">
+                            {{#promptoptions}}
+                                <option value="{{value}}" {{selected}}>{{label}}</option>
+                            {{/promptoptions}}
+                        </select>
                     </div>
+                {{/haspromptselector}}
 
-                    <input type="hidden" name="cmid" value="{{cmid}}">
-                    <input type="hidden" name="entryid" value="{{entryid}}">
-                    {{^haspromptselector}}<input type="hidden" name="promptid" value="{{promptid}}">{{/haspromptselector}}
-                    <input type="hidden" name="format" value="{{format}}">
-                    <input type="hidden" name="itemid" value="0">
-                </form>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #666; font-size: 12px; margin-bottom: 5px;">
+                        {{#str}}diarytitle, mod_diary{{/str}}
+                    </label>
+                    <input
+                        type="text"
+                        [(ngModel)]="CONTENT_OTHERDATA.title"
+                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; color: #111;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <core-rich-text-editor
+                        [control]="textControl"
+                        name="mod_diary_entry"
+                        component="mod_diary"
+                        [componentId]="CONTENT_OTHERDATA.cmid"
+                        contextLevel="module"
+                        [contextInstanceId]="CONTENT_OTHERDATA.cmid"
+                        [draftExtraParams]="{itemid: CONTENT_OTHERDATA.itemid}"
+                        placeholder="{{#str}}entry, mod_diary{{/str}}">
+                    </core-rich-text-editor>
+                </div>
+
+                {{#attachmentshtml}}
+                    <div style="margin-bottom: 15px;">
+                        <core-format-text text="{{attachmentshtml}}" component="mod_diary" component-id="{{cmid}}"></core-format-text>
+                    </div>
+                {{/attachmentshtml}}
+
+                {{#canattachments}}
+                    <ion-accordion-group [value]="advanced ? 'advanced' : ''" (ionChange)="onAdvancedChanged($event)">
+                        <ion-accordion value="advanced" toggleIconSlot="start">
+                            <ion-item slot="header">
+                                <ion-label>
+                                    <h3 class="item-heading">{{#str}}advanced{{/str}}</h3>
+                                </ion-label>
+                            </ion-item>
+                            <div slot="content">
+                                <core-attachments
+                                    [files]="attachmentsFiles"
+                                    [maxSize]="CONTENT_OTHERDATA.maxbytes"
+                                    [maxSubmissions]="CONTENT_OTHERDATA.maxattachments"
+                                    [component]="'mod_diary'"
+                                    [componentId]="CONTENT_OTHERDATA.cmid"
+                                    [allowOffline]="true"
+                                    [courseId]="CONTENT_OTHERDATA.courseid">
+                                </core-attachments>
+                            </div>
+                        </ion-accordion>
+                    </ion-accordion-group>
+                {{/canattachments}}
 
                 <div class="ion-margin-top">
-                   
-
-                    <!-- 
-                        SAVE BUTTON
-                        1. core-site-plugins-call-ws on the ion-button.
-                        2. form="diary-entry-form-{{cmid}}" links to the form ID above.
-                        3. goBackOnSuccess="true" automatically navigates back to the View page on success.
-                    -->
                     <ion-button
                         expand="block"
-                        core-site-plugins-call-ws
-                        name="mod_diary_set_text"
-                        form="diary-entry-form-{{cmid}}"
-                        successMessage="{{#str}}changessaved, mod_diary{{/str}}"
-                        (onSuccess)="onDiaryEntrySaved($event)"
-                        goBackOnSuccess="true">
+                        [disabled]="isSaving"
+                        (click)="saveDiaryEntry(false)">
                         {{#str}}savechanges{{/str}}
                     </ion-button>
 
                     <ion-button
                         expand="block"
                         fill="outline"
-                        core-site-plugins-call-ws
-                        name="mod_diary_set_text"
-                        form="diary-entry-form-{{cmid}}"
-                        successMessage="{{#str}}changessaved, mod_diary{{/str}}"
-                        (onSuccess)="onDiaryEntrySaved($event)">
+                        [disabled]="isSaving"
+                        (click)="saveDiaryEntry(true)">
                         {{#str}}saveandcontinueediting, mod_diary{{/str}}
                     </ion-button>
 
