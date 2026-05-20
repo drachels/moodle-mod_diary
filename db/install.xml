@@ -142,8 +142,8 @@
         <KEY NAME="promptid" TYPE="foreign" FIELDS="promptid" REFTABLE="diary_prompts" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="diary_prompt" UNIQUE="false" FIELDS="diaryid,promptid"/>
-        <INDEX NAME="prompt_sort" UNIQUE="false" FIELDS="promptid,sortorder"/>
+        <INDEX NAME="diary_prompt" UNIQUE="false" FIELDS="diaryid, promptid"/>
+        <INDEX NAME="prompt_sort" UNIQUE="false" FIELDS="promptid, sortorder"/>
       </INDEXES>
     </TABLE>
   </TABLES>
