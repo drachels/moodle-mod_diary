@@ -1196,6 +1196,13 @@ class prompts {
             $itemid = required_param('promptid', PARAM_INT);
             $dbquestion = $DB->get_record('diary_prompts', ['id' => $promptid]);
 
+            if (!empty($dbquestion->diaryid)) {
+                $manualpromptid = self::get_manual_promptid((int)$dbquestion->diaryid);
+                if ($manualpromptid === (int)$promptid) {
+                    self::set_manual_promptid((int)$dbquestion->diaryid, 0);
+                }
+            }
+
             $DB->delete_records('diary_prompts', ['id' => $promptid]);
             // Trigger prompt_remove event.
             if ($CFG->version > 2014051200) { // If newer than Moodle 2.7+ use new event logging.
@@ -1220,6 +1227,63 @@ class prompts {
             }
         }
         return;
+    }
+
+    /**
+     * Get the currently configured manual prompt id for a diary.
+     *
+     * Returns 0 when no manual prompt is configured or when the stored id
+     * no longer belongs to this diary.
+     *
+     * @param int $diaryid Diary id.
+     * @return int
+     */
+    public static function get_manual_promptid($diaryid) {
+        global $DB;
+
+        $diaryid = (int)$diaryid;
+        if ($diaryid <= 0) {
+            return 0;
+        }
+
+        $manualpromptid = (int)$DB->get_field('diary', 'manualpromptid', ['id' => $diaryid]);
+        if ($manualpromptid <= 0) {
+            return 0;
+        }
+
+        $exists = $DB->record_exists('diary_prompts', ['id' => $manualpromptid, 'diaryid' => $diaryid]);
+        if (!$exists) {
+            return 0;
+        }
+
+        return $manualpromptid;
+    }
+
+    /**
+     * Set (or clear) the manual prompt id for a diary.
+     *
+     * @param int $diaryid Diary id.
+     * @param int $promptid Prompt id (0 clears manual selection).
+     * @return bool
+     */
+    public static function set_manual_promptid($diaryid, $promptid = 0) {
+        global $DB;
+
+        $diaryid = (int)$diaryid;
+        $promptid = (int)$promptid;
+
+        if ($diaryid <= 0) {
+            return false;
+        }
+
+        if ($promptid > 0) {
+            $exists = $DB->record_exists('diary_prompts', ['id' => $promptid, 'diaryid' => $diaryid]);
+            if (!$exists) {
+                return false;
+            }
+        }
+
+        return $DB->set_field('diary', 'manualpromptid', $promptid, ['id' => $diaryid]);
     }
 
     /**
@@ -1583,6 +1647,13 @@ class prompts {
      * @return int $promptid The current promptid or zero if not available.
      */
     public static function get_current_promptid($diary, $userid = 0, $requestedpromptid = 0) {
+        if (!empty($diary->id)) {
+            $manualpromptid = self::get_manual_promptid((int)$diary->id);
+            if ($manualpromptid > 0) {
+                return $manualpromptid;
+            }
+        }
+
         return self::resolve_promptid_for_mode($diary, (int)$userid, (int)$requestedpromptid);
     }
 }
