@@ -12,24 +12,169 @@ Upgrade.txt working notes:
 
 Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 === Deferred until fixed. ===
+20201014 Diary_631 - When activity is not rated, the tool bar should hide rating
+    sort tools.
+20210815 Diary_735 - Report and reportsingle page is not responsive.
 20210815 Diary_737 - Config settings are not all named the same. Added mod_ to
     the four items that were missing it. As of 20220828 still have three.
+20210817 Diary_747 - Need character, word, sentence, and paragraph counts while
+    editing an entry.
+20211007 Diary_755 - public static function to_plain_text is not working with strike
+    through text.
+20211214 Diary_788 - Need to convert echo's to variables in function diary_print_user_entry
+    in results.php.
+20211231 Diary_801 - Need to change the message that is shown when needing feedback
+    or rating.
+20220101 Diary_802 - Error matching behavior on mod_form.php is not implemented in code.
+20220123 Diary_811 - Have alias language strings but no code to use them.
+20220309 Diary_828 - Need a general feedback that students can see after saving an entry.
+20220629 Diary_878 - I think I need to add Whole Diary Grade as an option to Rating.
+20220728 Diary_898 - Change user names to a link to their profile.
+20220909 Diary_918 - The notice regarding teacher posting feedback should go to the
+    correct entry.
+20220914 Diary_921 - Direct access via URL should be logged and reported.
+20221124 Diary_963 - Date overlap detection does not seem to be working correctly.
+20221126 Diary_965 - Once set a prompt ID should not be allowed to change.
+20221126 Diary_966 - Need to have the capability to pick a prompt to use.
+20230308 Diary_1019 - function diary_reset_userdata($data) { THIS FUNCTION NEEDS REWRITE!
 20230501 Diary_1038 - I think define_restore_log_rules for view all and transfer
     in restore_diary_activity_task.class is missing.
+20231223 Diary_1139 - In the index.php file at line 68, the variable, $timenow, is
+    never used.
+20240110 Diary_1163 - It would be nice if there were an auto feedback capability
+    after submission of some writing.
+20240112 Diary_1169 - Would be nice to have an essay response template capability
+    for with and without Prompts.
+20240116 Diary_1171 - Would be nice to add level requirements for some of the other
+    automatic feedback.
+20240117 Diary_1174 - The prompt_edit.php page needs to have sort capability added to
+    the columns.
+20240117 Diary_1175 - When you are looking at prompt_edit.php, need to ellipse, or
+    double row the prompt text.
+20240123 Diary_1180 - Might think about adding a check for Essay Similarity to
+    provided teacher data.
+20240131 Diary_1184 - In Moodle403 on this server, Diary completion circle is
+    not working.
+20240207 Diary_1199 - Feature request - Sort entries to show the most recent on the top of
+    the column. Issue #36.
 20240221 Diary_1211 - Feature request - Would be nice to be able to use a grading rubric.
+20240304 Diary_1221 - Feature request - Randomly selected writing prompts.
+20240310 Diary_1225 - tags - All functions from /tags/locallib.php were deprecated.
+20240519 Diary_1244 - Script /moodledev/mod/diary/prompt_edit.php mutated the
+    session after it was closed.
+20240927 Diary_1323 - Request for filtering by the first letter of first and last
+    name #46 on github.
+20240929 Diary_1325 - Tool buttons inop on view.php page.
+20241003 Diary_1327 - Need rewrite for function diary_print_recent_activity($course,
+    $viewfullnames, $timestart) {.
+20250125 Diary_1359 - Log entry when deleting entries or entries and tags needs more
+    data included.
 20250211 Diary_1370 - Feature request - Need a new mdl_diary_entries field such as,
     mailedsubmission.
+20260530 Diary_1497 - Feature Request - New Prompt mode to save previous entry and
+    require rewrite as a new entry.
+
+
+=== 5.1.2 === Pending
+20200718 Diary_581r - Need to redo the styles.css file and remove un-used entries.
+    2026071101 Verified in current code/history: ticket is already documented as
+        completed in 3.3.0 release notes (styles.css updates merged there), and
+        current mod/diary/styles.css shows the maintained class-based/themed
+        structure used by view/report/reportsingle/reportone paths. No new code
+        changes required for this ticket in the 5.1.2 pass.
+20200815 Diary_597r - Need to work on fixing Travis violations.
+    2026071103 Verified in current code/history: older release history records
+        Travis fixes/passing status, and the current Diary plugin tree has no
+        plugin-level .travis config. Current maintenance/precheck history shows
+        modern cleanup and PHPCS/gherkinlint work for mod/diary, including a
+        2026050301 note reporting 0 PHPCS errors/warnings. No additional code
+        changes are required for this ticket in the 5.1.2 pass.
+20200817 Diary_599r - Search Diaries not implemented.
+    2026071105 Progress - Reopened during 5.1.2 verification after live user
+        test on moodledev (Site Wide Diary, entry id 2446): searching for
+        "addquestionspage.php" did not surface the known matching Diary entry
+        in results.
+    2026071106 Progress - CLI diagnostics confirmed the entry was indexed
+        (search_simpledb_index docid mod_diary-entry-2446) and indexed content
+        included "addquestionspage.php", but core search API query tests for
+        addquestionspage.php and related variants still returned 0 hits for
+        diary entry 2446.
+    2026071107 Progress - Implemented retrieval fix pass for punctuation-heavy
+        queries used in Diary content (e.g. filenames like addquestionspage.php):
+        search_simpledb engine now falls back to literal LIKE matching when the
+        query includes punctuation, avoiding MySQL fulltext tokenization misses.
+        Diary entry indexing was also improved to set a text-rich title from
+        entry body content.
+    2026071108 Verified live UI/runtime: searching for addquestionspage.php
+        (Everywhere you can access and Diary-only scope) now returns the
+        relevant Diary entries, including entry 2446, instead of pages of
+        unrelated results.
+20210505 Diary_712r - In Moodle 3.11 - String [grade,core] is deprecated.
+    2026071102 Verified in current code/history: 3.3.0 release notes already
+        document this as fixed via branch handling in results.php. Current code
+        still uses branch-safe grade label paths (grade for <311, gradenoun for
+        >=311) in classes/local/results.php and classes/local/prompts.php, so no
+        additional code changes are required in the 5.1.2 pass.
+20221124 Diary_953r - New feature - Would be nice to be able to just manually set the
+    prompt to use.
+    2026071109 Progress - Added activity-level manual prompt override support:
+        prompt_edit.php now includes Set as activity prompt / Clear manual
+        override actions (manager capability + sesskey), prompts resolver now
+        honors diary.manualpromptid before prompt-mode logic, and prompt delete
+        clears the override when deleting the selected manual prompt.
+        Added new diary.manualpromptid schema field with upgrade step.
+    2026071110 Verified runtime via CLI on diary 247 (with prompt records):
+        set manual prompt id to 358, confirmed get_manual_promptid=358 and
+        get_current_promptid resolved 358, then cleared override and confirmed
+        get_manual_promptid returned 0.
+20250126 Diary_1360 - Need to check on local/results.php for errors when grades are missing.
+    2026070904 Progress - Added null-safe gradebook handling in
+        classes/local/results.php so missing grade items/grades no longer
+        trigger property-access warnings on report/reportone/reportsingle
+        feedback and rating rendering paths. Added guards around
+        grade_get_grades() result dereferences and graceful fallback when
+        grademax is unavailable.
+    2026070905 Verified focused live runtime in moodledev using assessed diary
+        281 (entry 3097): Scenario A confirmed normal assessed path with grade
+        item present (hasitem=1, hasgrade=1, grademax=100). Scenario B
+        simulated missing/incomplete gradebook by temporarily removing that
+        diary's grade_items row (hasitem=0, hasgrade=0, grademax=null), which
+        exercises the new fallback path without grade-item dereference failures.
+        Grade item was rebuilt immediately afterward via diary_grade_item_update
+        and diary_update_grades, confirming cleanup (grade_items_after=1,
+        hasitem_after_restore=1).
+20250127 Diary_1361 - Course restore failures at m3x site.
+    2026070903 Verified restore path on moodledev using course 96 as source:
+        backup created with admin/cli/backup.php to
+        _backups/diary_1361_test/backup-moodle2-course-96-DCDev-20260709-1452.mbz,
+        then restored with admin/cli/restore_backup.php into category 1
+        (Miscellaneous/iContent Restore Test location). Restore completed with
+        "Restored course ID: 1113" and new course record is shortname DCDev_1,
+        fullname "Diary Code Development copy 1", category 1.
 20260514 Diary_1479 - Remove deprecated FEATURE_GROUPMEMBERSONLY support.
     YYYYMMDD Planned: remove FEATURE_GROUPMEMBERSONLY handling from plugin_supports()
         while keeping FEATURE_GROUPS and FEATURE_GROUPINGS behavior unchanged.
         Scope: supported Moodle.org versions only (Moodle 4.5 and above).
+20260702 Diary_1513 - Scheduled task appears to skip entries when teacheremail=1,
+    but it sends the notifications when teacheremail=0.
+    2026070901 Progress - Scheduled task updated to honor each teacher's
+        diary_emailpreference for the activity (send only when preference is
+        "email later"). Removed cron SQL filter that limited processing to
+        teacheremail=0 only, so activities defaulting to "email now" still
+        deliver delayed notifications for teachers who selected "email later".
+    2026070902 Verified live on moodledev with diary 237 (cmid 9734): set
+        teacher1 preference to Email now (1) and teacher2 to Email later (2),
+        inserted test entry 2599 for student1, executed
+        \mod_diary\task\cron_task, observed log skip for teacher1 and successful
+        send to teacher2 (message id 22325); notifications table contains
+        mod_diary diary_entry_notification row for student1 -> teacher2 and
+        entry 2599 marked mailed=1.
 
-=== 5.1.1 === pending
-20260520 Diary_1488 - Test failure (plugin_checks_test) on MOODLE_501_STABLE due
+=== 5.1.1 === (Build: 2026052000)
+20260520 Diary_1488r - Test failure (plugin_checks_test) on MOODLE_501_STABLE due
     to index field whitespace #59.
     2026052001 Merged pull request. Fetched origin to local github desktop and
         merged changed install.xml file to my moodledev site.
-
 
 === 5.1.0 === (Build: 2026050600)
 20201006 Diary_627r - Included files are not restored correctly.
