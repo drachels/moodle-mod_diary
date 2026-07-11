@@ -89,6 +89,7 @@ $PAGE->set_heading($course->fullname);
 
 $data = new stdClass();
 $selectedpromptdata = null;
+$manualpromptid = prompts::get_manual_promptid((int)$diary->id);
 
 // 20221002 Added sort for ticket Diary_926.
 $prompts = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart, datestop');
@@ -161,6 +162,34 @@ if (!empty($action)) {
                 $event->add_record_snapshot('course', $course);
                 $event->add_record_snapshot('diary', $diary);
                 $event->trigger();
+            }
+            break;
+        case 'setmanual':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                require_sesskey();
+                $promptid = required_param('promptid', PARAM_INT);
+                if (prompts::set_manual_promptid((int)$diary->id, (int)$promptid)) {
+                    redirect(
+                        new moodle_url('/mod/diary/prompt_edit.php', ['id' => $id]),
+                        get_string('manualpromptsetsuccess', 'diary', $promptid)
+                    );
+                }
+                redirect(
+                    new moodle_url('/mod/diary/prompt_edit.php', ['id' => $id]),
+                    get_string('manualpromptsetfailure', 'diary', $promptid),
+                    null,
+                    \core\output\notification::NOTIFY_ERROR
+                );
+            }
+            break;
+        case 'clearmanual':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                require_sesskey();
+                prompts::set_manual_promptid((int)$diary->id, 0);
+                redirect(
+                    new moodle_url('/mod/diary/prompt_edit.php', ['id' => $id]),
+                    get_string('manualpromptclearsuccess', 'diary')
+                );
             }
             break;
         default:
@@ -285,6 +314,18 @@ $tableheadrow2 .= '</tr>';
 
 $output = '<a id="promptlist"></a><table class="generaltable" cellpadding="5"><thead>'
     . $tableheadrow1 . $tableheadrow2 . '</thead><tbody>';
+
+if ($manualpromptid > 0 && has_capability('mod/diary:manageentries', $context)) {
+    $clearurl = new moodle_url('/mod/diary/prompt_edit.php', [
+        'id' => $id,
+        'action' => 'clearmanual',
+        'sesskey' => sesskey(),
+    ]);
+    $output .= '<div class="alert alert-info" style="margin:8px 0;">'
+        . get_string('manualpromptactive', 'diary', $manualpromptid)
+        . ' <a href="' . $clearurl->out(false) . '">' . get_string('clearmanualprompt', 'diary') . '</a></div>';
+}
+
 $rows = '';
 // Initialize a prompt counter.
 $counter = 0;
@@ -355,6 +396,22 @@ if ($prompts && $view == 0) {
         $url->set_anchor('prompt-' . $data->entryid);
         $jlink2 = '<a href="' . $url->out(false) . '"><img src="pix/edit.png" alt='
                   . get_string('eeditlabel', 'diary') . '></a>';
+
+        $setmanual = '';
+        if (has_capability('mod/diary:manageentries', $context)) {
+            if ((int)$manualpromptid === (int)$data->entryid) {
+                $setmanual = '<span class="badge badge-info">' . get_string('manualpromptselected', 'diary') . '</span>';
+            } else {
+                $manualurl = new moodle_url('prompt_edit.php', [
+                    'id' => $id,
+                    'action' => 'setmanual',
+                    'promptid' => $data->entryid,
+                    'sesskey' => sesskey(),
+                ]);
+                $setmanual = '<a href="' . $manualurl->out(false) . '">' . get_string('setmanualprompt', 'diary') . '</a>';
+            }
+        }
+
         $counter++;
         $displaycounter = $counter;
         if ($editmode && $selectedpromptcounter > 0) {
@@ -407,7 +464,7 @@ if ($prompts && $view == 0) {
                 . $words
                 . $sentences
                 . $paragraphs
-                . '<td>' . $jlink2 . ' | ' . $jlink1 . '</td></tr>';
+                . '<td>' . $jlink2 . ' | ' . $jlink1 . '<br>' . $setmanual . '</td></tr>';
         }
     }
 
