@@ -903,9 +903,16 @@ class results {
             // 20200816 Get the current rating for this user.
             if ($diary->assessed != RATING_AGGREGATE_NONE) {
                 $gradinginfo = grade_get_grades($course->id, 'mod', 'diary', $diary->id, $user->id);
-                $gradeitemgrademax = $gradinginfo->items[0]->grademax;
-                $userfinalgrade = $gradinginfo->items[0]->grades[$user->id];
-                $currentuserrating = $userfinalgrade->str_long_grade;
+                $currentuserrating = '';
+                if (!empty($gradinginfo->items[0])) {
+                    $gradeitem = $gradinginfo->items[0];
+                    if (!empty($gradeitem->grades[$user->id])) {
+                        $userfinalgrade = $gradeitem->grades[$user->id];
+                        if (!empty($userfinalgrade->str_long_grade)) {
+                            $currentuserrating = $userfinalgrade->str_long_grade;
+                        }
+                    }
+                }
             } else {
                 $currentuserrating = '';
             }
@@ -1067,19 +1074,20 @@ class results {
                 ]
             );
 
-            if (! empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
+            if (!empty($gradinginfo->items[0]) && !empty($gradinginfo->items[0]->grades[$user->id]->str_long_grade)) {
+                $gradebookgrade = $gradinginfo->items[0]->grades[$user->id];
                 if (
-                    $gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
-                    || $gradinginfo->items[0]->grades[$user->id]->overridden
+                    $gradingdisabled = !empty($gradebookgrade->locked)
+                    || !empty($gradebookgrade->overridden)
                 ) {
                     $attrs['disabled'] = 'disabled';
                     $hiddengradestr = '<input type="hidden" name="r' . $entry->id . '" value="' . $entry->rating . '"/>';
                     $gradebooklink = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' . $course->id . '">';
-                    $gradebooklink .= $gradinginfo->items[0]->grades[$user->id]->str_long_grade . '</a>';
+                    $gradebooklink .= $gradebookgrade->str_long_grade . '</a>';
                     $gradebookgradestr = '<br/>' . get_string("gradeingradebook", "diary") . ':&nbsp;' . $gradebooklink;
 
                     $feedbackdisabledstr = 'disabled="disabled"';
-                    $feedbacktext = $gradinginfo->items[0]->grades[$user->id]->str_feedback;
+                    $feedbacktext = $gradebookgrade->str_feedback ?? $feedbacktext;
                 }
             }
 
@@ -1216,6 +1224,10 @@ class results {
                 $entry->userid,
             ]
         );
+        $grademax = null;
+        if (!empty($gradinginfo->items[0]) && isset($gradinginfo->items[0]->grademax)) {
+            $grademax = (float)$gradinginfo->items[0]->grademax;
+        }
 
         // 20210609 Added branch check for string compatibility.
         if ($entry->rating !== null && $entry->rating !== '') {
@@ -1224,10 +1236,18 @@ class results {
             } else {
                 echo get_string('grade') . ': ';
             }
-            echo $entry->rating . '/' . number_format($gradinginfo->items[0]->grademax, 2);
+            if ($grademax !== null) {
+                echo $entry->rating . '/' . number_format($grademax, 2);
+            } else {
+                echo $entry->rating;
+            }
         } else {
             echo get_string('gradenoun') . ': ';
-            echo $entry->rating . '/' . number_format($gradinginfo->items[0]->grademax, 2);
+            if ($grademax !== null) {
+                echo $entry->rating . '/' . number_format($grademax, 2);
+            } else {
+                echo get_string('nograde', 'diary');
+            }
         }
         echo '</div>';
 
