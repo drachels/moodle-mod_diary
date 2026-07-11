@@ -766,5 +766,28 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2026042903, 'diary');
     }
+
+    if ($oldversion < 2026071109) {
+        // Define field manualpromptid to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field(
+            'manualpromptid',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'requiredpromptcount'
+        );
+
+        // Conditionally launch add field manualpromptid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026071109, 'diary');
+    }
     return true;
 }
