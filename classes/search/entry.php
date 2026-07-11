@@ -95,9 +95,24 @@ class entry extends \core_search\base_mod {
 
         // Prepare associative array with data from DB.
         $doc = \core_search\document_factory::instance($entry->id, $this->componentname, $this->areaname);
-        // I am using the entry date (timecreated) for the title.
-        $doc->set('title', content_to_text((date(get_config('mod_diary', 'dateformat'), $entry->timecreated)), $entry->format));
-        $doc->set('content', content_to_text('Entry: ' . $entry->text, $entry->format));
+
+        // Use meaningful entry text in the title to improve result ranking.
+        $plainentry = trim(content_to_text((string)$entry->text, $entry->format));
+        $titleseed = trim((string)\core_text::substr($plainentry, 0, 120));
+        if ($titleseed === '') {
+            $title = content_to_text((date(get_config('mod_diary', 'dateformat'), $entry->timecreated)), $entry->format);
+        } else {
+            $title = $titleseed;
+        }
+        $doc->set('title', $title);
+
+        $content = 'Entry: ' . $plainentry;
+        // Add a punctuation-normalized variant to improve token matching for filenames/paths.
+        $normalized = trim((string)preg_replace('/[[:punct:]]+/', ' ', $plainentry));
+        if ($normalized !== '' && $normalized !== $plainentry) {
+            $content .= ' ' . $normalized;
+        }
+        $doc->set('content', $content);
         $doc->set('contextid', $context->id);
         $doc->set('courseid', $entry->course);
         $doc->set('userid', $entry->userid);
