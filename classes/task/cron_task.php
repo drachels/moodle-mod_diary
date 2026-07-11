@@ -117,8 +117,16 @@ class cron_task extends \core\task\scheduled_task {
                         $this->log("   - SKIPPED: This diary instance has submission emails disabled." . $entry->submissionemail);
                         continue; // Proceed with next diary.
                     }
-                    if (!empty($entry->teacheremail)) {
-                        $this->log("   - SKIPPED: This diary instance has teacher emails disabled." . $entry->teacheremail);
+
+                    // Cron is for "email later" delivery only.
+                    $defaultemailpreference = ((int)$entry->teacheremail === 1) ? 1 : 2;
+                    $emailpreference = (int)get_user_preferences(
+                        'diary_emailpreference_' . $entry->diary,
+                        $defaultemailpreference,
+                        $teacher->id
+                    );
+                    if ($emailpreference !== 2) {
+                        $this->log("   - SKIPPED: Teacher preference is email now (pref={$emailpreference}).");
                         continue; // Proceed with next teacher.
                     }
 
@@ -240,7 +248,6 @@ class cron_task extends \core\task\scheduled_task {
                   JOIN {course_modules} cm ON cm.module = m.id AND cm.instance = d.id
                  WHERE de.mailed = 0
                    AND d.submissionemail = 1
-                  AND d.teacheremail = 0
                    AND de.timemodified < :edittimeago";
 
         return $DB->get_records_sql($sql, ['edittimeago' => $edittimeago]);
@@ -265,7 +272,6 @@ class cron_task extends \core\task\scheduled_task {
                   JOIN {diary_entries} de ON d.id = de.diary
                   JOIN {user} u ON de.userid = u.id
                  WHERE d.submissionemail = 1
-                   AND d.teacheremail = 0
                    AND de.entrynoticemailed = 0
                    AND de.timemodified > 0";
         return $DB->get_records_sql($sql, [$cutofftime]);
