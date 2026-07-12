@@ -73,7 +73,10 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     mailedsubmission.
 20260530 Diary_1497 - Feature Request - New Prompt mode to save previous entry and
     require rewrite as a new entry.
-
+20260712 Diary_1515 - Feature Request - Enable copying prompts from one Diary
+    activity to another.
+20260712 Diary_1516 - Feature Request - Would be nice to be able to import
+    Prompts from a CSV file.
 
 === 5.1.2 === Pending
 20200718 Diary_581r - Need to redo the styles.css file and remove un-used entries.
@@ -169,7 +172,6 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         send to teacher2 (message id 22325); notifications table contains
         mod_diary diary_entry_notification row for student1 -> teacher2 and
         entry 2599 marked mailed=1.
-
 === 5.1.1 === (Build: 2026052000)
 20260520 Diary_1488r - Test failure (plugin_checks_test) on MOODLE_501_STABLE due
     to index field whitespace #59.
