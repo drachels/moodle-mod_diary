@@ -273,6 +273,10 @@
     word-break: break-word;
 }
 
+.diary-entry-comments {
+    margin-top: 0.75rem;
+}
+
 .diary-entry-attachment-media-wrap-video,
 .diary-entry-attachment-media-wrap-image {
     max-width: 24rem;

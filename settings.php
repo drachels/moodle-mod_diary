@@ -219,6 +219,22 @@ if ($ADMIN->fulltree) {
         ]
     ));
 
+    // 20260830 Diary enable comments setting.
+    $name = 'mod_diary/enablecomments';
+    $title = get_string('enablecomments_title', 'diary');
+    $description = get_string('enablecomments_descr', 'diary');
+    $default = 0;
+    $settings->add(new admin_setting_configselect(
+        $name,
+        $title,
+        $description,
+        $default,
+        [
+            '0' => get_string('no'),
+            '1' => get_string('yes'),
+        ]
+    ));
+
     // 20210704 Added heading for autorating options section.
     $name = 'autorating';
     $label = get_string('autorating', 'mod_diary');

@@ -789,5 +789,28 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2026071109, 'diary');
     }
+
+    if ($oldversion < 2026083000) {
+        // Define field enablecomments to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field(
+            'enablecomments',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'enabletitles'
+        );
+
+        // Conditionally launch add field enablecomments.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026083000, 'diary');
+    }
     return true;
 }

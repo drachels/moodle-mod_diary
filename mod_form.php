@@ -312,6 +312,14 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, $diaryconfig->enabletitles);
 
+        // 20260830 Added enable/disable setting for entry comments.
+        $name = 'enablecomments';
+        $label = get_string($name, $plugin);
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, $diaryconfig->enablecomments ?? 0);
+
         // 20250301 Added heading for submission options section.
         $name = 'submissionsettingshdr';
         $label = get_string('submissionsettings', 'diary');

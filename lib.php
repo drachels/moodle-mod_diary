@@ -1683,3 +1683,110 @@ function diary_sync_completion_state($course, $cm, $userid = 0, $diary = null) {
     $current->overrideby = null;
     $completion->internal_set_data($cm, $current);
 }
+
+/**
+ * Validate comment parameter before performing operations.
+ *
+ * @param stdClass $commentparam
+ * @return boolean
+ */
+function diary_comment_validate($commentparam) {
+    global $DB;
+
+    // Validate comment area.
+    if ($commentparam->commentarea !== 'diary_entries') {
+        throw new comment_exception('invalidcommentarea');
+    }
+
+    // Validate itemid (diary_entries id).
+    if (!$entry = $DB->get_record('diary_entries', ['id' => $commentparam->itemid])) {
+        throw new comment_exception('invalidcommentitemid');
+    }
+
+    // Validate diary instance.
+    if (!$diary = $DB->get_record('diary', ['id' => $entry->diary])) {
+        throw new comment_exception('invalidid', 'data');
+    }
+
+    // Validate course.
+    if (!$course = $DB->get_record('course', ['id' => $diary->course])) {
+        throw new comment_exception('coursemisconf');
+    }
+
+    // Validate course module.
+    if (!$cm = get_coursemodule_from_instance('diary', $diary->id, $course->id)) {
+        throw new comment_exception('invalidcoursemodule');
+    }
+
+    $context = context_module::instance($cm->id);
+
+    // Validate context id.
+    if ($context->id != $commentparam->context->id) {
+        throw new comment_exception('invalidcontext');
+    }
+
+    // Validation for comment deletion.
+    if (!empty($commentparam->commentid)) {
+        if ($comment = $DB->get_record('comments', ['id' => $commentparam->commentid])) {
+            if ($comment->commentarea !== 'diary_entries') {
+                throw new comment_exception('invalidcommentarea');
+            }
+            if ($comment->contextid != $commentparam->context->id) {
+                throw new comment_exception('invalidcontext');
+            }
+            if ($comment->itemid != $commentparam->itemid) {
+                throw new comment_exception('invalidcommentitemid');
+            }
+        } else {
+            throw new comment_exception('invalidcommentid');
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Running additional permission check on plugin.
+ *
+ * @param stdClass $commentparam {
+ *              context  => context the context object
+ *              courseid => int course id
+ *              cm       => stdClass course module object
+ *              commentarea => string comment area
+ *              itemid      => int itemid
+ * }
+ * @return array
+ */
+function diary_comment_permissions($commentparam) {
+    global $DB, $USER;
+
+    if ($commentparam->commentarea !== 'diary_entries') {
+        return ['post' => false, 'view' => false];
+    }
+
+    if (!$entry = $DB->get_record('diary_entries', ['id' => $commentparam->itemid], 'id, diary, userid')) {
+        return ['post' => false, 'view' => false];
+    }
+
+    if (!$diary = $DB->get_record('diary', ['id' => $entry->diary], 'id, enablecomments')) {
+        return ['post' => false, 'view' => false];
+    }
+
+    if (empty($diary->enablecomments)) {
+        return ['post' => false, 'view' => false];
+    }
+
+    $canmanage = has_capability('mod/diary:manageentries', $commentparam->context);
+    $isowner = ((int)$USER->id === (int)$entry->userid);
+    $canadd = has_capability('mod/diary:addentries', $commentparam->context);
+
+    if ($canmanage) {
+        return ['post' => true, 'view' => true];
+    }
+
+    if ($isowner && $canadd) {
+        return ['post' => true, 'view' => true];
+    }
+
+    return ['post' => false, 'view' => false];
+}

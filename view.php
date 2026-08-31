@@ -618,6 +618,8 @@ if ($timenow > $timestart) {
                     'diary-tags'
                 );
                 echo results::diary_render_entry_attachments($entry, $course, $cm);
+                // 20260830 Added comments right after the user entry.
+                echo results::diary_render_entry_comments($entry, $diary, $course, $cm);
                 // 20250122 This is the close div for each entry listed on the page.
                 echo '</div>';
 

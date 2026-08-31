@@ -77,8 +77,25 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     activity to another.
 20260712 Diary_1516 - Feature Request - Would be nice to be able to import
     Prompts from a CSV file.
+20260721 Diary_1519 - Feature Request - Need new 200x200 color icon for Market Place.
+20260829 Diary_1535 - Feature Request - Need new visibility mode so non-teachers can
+    read diary entries.
+20260829 Diary_1536 - Feature Request - Need a new activity edit mode for multiple
+    individuals and groups.
 
-=== 5.1.2 === Pending
+
+=== 5.2.0 === Pending
+20260830 Diary_1538 - Feature Request - Need Moodle core Comments capability for each
+    user entry.
+    2026083001 Started development on https://10.0.6.58/moodle502/ so that I do not
+        risk damage to my normal moodledev and moodledemo sites.
+    2026083002 Progress - Added enablecomments setting to install.xml, upgrade.php,
+        and mod_form.php; implemented core comment callbacks in lib.php; rendered
+        comments right after user entry in view.php and classes/local/results.php.
+        Upgraded DB and verified with student, teacher, and admin accounts.
+
+
+=== 5.1.2 === (Build: 2026071109)
 20200718 Diary_581r - Need to redo the styles.css file and remove un-used entries.
     2026071101 Verified in current code/history: ticket is already documented as
         completed in 3.3.0 release notes (styles.css updates merged there), and
@@ -130,7 +147,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         set manual prompt id to 358, confirmed get_manual_promptid=358 and
         get_current_promptid resolved 358, then cleared override and confirmed
         get_manual_promptid returned 0.
-20250126 Diary_1360 - Need to check on local/results.php for errors when grades are missing.
+20250126 Diary_1360bt - Need to check on local/results.php for errors when grades are missing.
     2026070904 Progress - Added null-safe gradebook handling in
         classes/local/results.php so missing grade items/grades no longer
         trigger property-access warnings on report/reportone/reportsingle
@@ -146,7 +163,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         Grade item was rebuilt immediately afterward via diary_grade_item_update
         and diary_update_grades, confirming cleanup (grade_items_after=1,
         hasitem_after_restore=1).
-20250127 Diary_1361 - Course restore failures at m3x site.
+20250127 Diary_1361bt - Course restore failures at m3x site.
     2026070903 Verified restore path on moodledev using course 96 as source:
         backup created with admin/cli/backup.php to
         _backups/diary_1361_test/backup-moodle2-course-96-DCDev-20260709-1452.mbz,
@@ -154,11 +171,11 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         (Miscellaneous/iContent Restore Test location). Restore completed with
         "Restored course ID: 1113" and new course record is shortname DCDev_1,
         fullname "Diary Code Development copy 1", category 1.
-20260514 Diary_1479 - Remove deprecated FEATURE_GROUPMEMBERSONLY support.
+20260514 Diary_1479bt - Remove deprecated FEATURE_GROUPMEMBERSONLY support.
     YYYYMMDD Planned: remove FEATURE_GROUPMEMBERSONLY handling from plugin_supports()
         while keeping FEATURE_GROUPS and FEATURE_GROUPINGS behavior unchanged.
         Scope: supported Moodle.org versions only (Moodle 4.5 and above).
-20260702 Diary_1513 - Scheduled task appears to skip entries when teacheremail=1,
+20260702 Diary_1513bt - Scheduled task appears to skip entries when teacheremail=1,
     but it sends the notifications when teacheremail=0.
     2026070901 Progress - Scheduled task updated to honor each teacher's
         diary_emailpreference for the activity (send only when preference is
@@ -172,6 +189,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         send to teacher2 (message id 22325); notifications table contains
         mod_diary diary_entry_notification row for student1 -> teacher2 and
         entry 2599 marked mailed=1.
+
 === 5.1.1 === (Build: 2026052000)
 20260520 Diary_1488r - Test failure (plugin_checks_test) on MOODLE_501_STABLE due
     to index field whitespace #59.

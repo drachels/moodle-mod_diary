@@ -839,6 +839,8 @@ class results {
                 'diary-tags'
             );
             echo self::diary_render_entry_attachments($entry, $course, $cm);
+            // 20260830 Added comments right after the user entry.
+            echo self::diary_render_entry_comments($entry, $diary, $course, $cm);
             // 20210701 Moved copy 1 of 2 here due to new stats.
             echo '</div></td><td class="diary-col-actions"></td></tr>';
 
@@ -1568,6 +1570,49 @@ class results {
         $output .= html_writer::end_div();
 
         return $output;
+    }
+
+    /**
+     * Render comments for a diary entry.
+     *
+     * @param stdClass $entry Diary entry object.
+     * @param stdClass $diary Diary activity object.
+     * @param stdClass|bool $course Course object.
+     * @param stdClass|cm_info|bool $cm Course module object.
+     * @return string HTML comments output.
+     */
+    public static function diary_render_entry_comments($entry, $diary, $course = false, $cm = false) {
+        global $CFG;
+
+        if (empty($diary->enablecomments)) {
+            return '';
+        }
+
+        if (!$cm) {
+            $courseid = $course ? (int)$course->id : 0;
+            $cm = get_coursemodule_from_instance('diary', (int)$entry->diary, $courseid);
+        }
+
+        if (!$cm) {
+            return '';
+        }
+
+        require_once($CFG->dirroot . '/comment/lib.php');
+
+        $context = context_module::instance($cm->id);
+        $cmt = new \stdClass();
+        $cmt->context = $context;
+        if ($course) {
+            $cmt->course = $course;
+        }
+        $cmt->cm = $cm;
+        $cmt->area = 'diary_entries';
+        $cmt->itemid = (int)$entry->id;
+        $cmt->showcount = true;
+        $cmt->component = 'mod_diary';
+
+        $comment = new \comment($cmt);
+        return html_writer::div($comment->output(true), 'diary-entry-comments');
     }
 
     /**
