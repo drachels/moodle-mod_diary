@@ -233,4 +233,29 @@ class prompts_form extends moodleform {
         $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
         $mform->closeHeaderBefore('buttonar');
     }
+
+    /**
+     * Validate prompt date windows before saving.
+     *
+     * @param array $data Submitted form data.
+     * @param array $files Submitted files.
+     * @return array Validation errors keyed by form field.
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        $promptmode = (int)($this->_customdata['promptmode'] ?? prompts::PROMPTMODE_SEQUENTIAL);
+        $errorstring = prompts::validate_prompt_date_window(
+            (int)$data['diaryid'],
+            (int)$data['entryid'],
+            (int)$data['datestart'],
+            (int)$data['datestop'],
+            $promptmode
+        );
+
+        if ($errorstring !== '') {
+            $errors['datestop'] = get_string($errorstring, 'mod_diary');
+        }
+
+        return $errors;
+    }
 }

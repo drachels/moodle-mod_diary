@@ -22,8 +22,8 @@
         <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="editall" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Edit all comments setting."/>
         <FIELD NAME="editdates" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Edit any entry date."/>
-        <FIELD NAME="promptmode" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Prompt assignment mode. 0=sequential, 1=choice, 2=random, 3=complete all, 4=partial complete."/>
-        <FIELD NAME="requiredpromptcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Required prompt completions for partial-complete mode. 0 means unset/ignored."/>
+        <FIELD NAME="promptmode" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Prompt assignment mode. 0=sequential, 1=choice, 2=random, 3=complete all, 4=choice x of xx, 5=random x of xx."/>
+        <FIELD NAME="requiredpromptcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Required prompt completions for the x-of-xx modes (4 and 5). 0 means unset/ignored."/>
         <FIELD NAME="manualpromptid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Optional manual prompt override for this activity. 0 disables manual override."/>
         <FIELD NAME="maxeditopens" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Maximum number of times an existing entry can be opened for editing. 0 means unlimited."/>
         <FIELD NAME="deleteentry" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow users to delete an entry."/>

@@ -382,20 +382,20 @@ Mode 2: Choice (student selects from pool)
 - Student picks one prompt and writes an entry to it.
 - Can optionally limit number of choices per student (for example max 2 of 5 prompts).
 - Teacher can require all prompts be eventually answered or allow flexible completion.
-- Time windows ignored (no datestart/datestop filtering).
+- Each prompt's date window controls when it is available; overlapping windows are allowed.
 
 Mode 3: Random (system assigns)
 - Student creates new entry; system assigns a random prompt from the pool.
 - Student does not see unused prompts.
 - Each entry gets one prompt; cannot reassign or swap.
-- Time windows ignored.
+- Assignment uses only prompts currently within their individual date windows.
 - Useful for anonymized/balanced portfolio assessment.
 
 Mode 4: Complete All (any order)
 - All prompts in pool are visible.
 - Student must eventually write an entry for each prompt.
 - Student chooses order and timing.
-- Time windows ignored.
+- Each prompt becomes selectable only within its individual date window.
 - Good for thematic writing cycles or cumulative reflection assignments.
 
 Mode 5: Partial Complete x of xx (subset required)
@@ -404,7 +404,7 @@ Mode 5: Partial Complete x of xx (subset required)
 - Student chooses which prompts to complete until required count is met.
 - Progress indicator should show completed/required (for example 2/3 complete).
 - Duplicate entries for the same prompt should not count as additional prompt completions.
-- Time windows ignored.
+- Each prompt becomes selectable only within its individual date window; overlap is allowed.
 
 Schema Changes Needed
 ---------------------
@@ -455,7 +455,8 @@ Logic Changes Needed
 
 4. Availability checks:
    - Mode 0: continue using datestart/datestop + maxentries logic.
-   - Mode 1-4: datestart/datestop no longer apply; validate maxentries per diary only.
+- Mode 1-5: use each prompt's datestart/datestop as its availability window;
+   overlapping windows are allowed. Validate maxentries per diary only.
 
 Behavior Design Decisions Needed
 --------------------------------
@@ -532,3 +533,158 @@ This feature significantly increases prompt flexibility and aligns Diary with
 assignment workflows used in more open-ended, portfolio, or choice-based pedagogies.
 The complexity scales with mode; phase-by-phase rollout will allow for careful
 validation and user feedback before full deployment.
+
+
+============================================================
+Group collaboration planning (Diary_1535, Diary_1536, and related)
+Date: 2026-08-31
+============================================================
+
+Purpose
+-------
+Plan a Diary "group assignment" capability where members of a group can read,
+and optionally edit, entries written by other members of the same group, with
+group-aware grading and an optional non-contribution penalty.
+
+Tickets in scope
+----------------
+- Diary_1535 - New visibility mode so non-teachers can read diary entries.
+- Diary_1536 - New activity edit mode for multiple individuals and groups.
+- New (needs ticket) - Method to assign group ownership to an entry.
+- New (needs ticket) - Group grade calculation and distribution to members.
+- New (needs ticket) - Non-contribution penalty factor for inactive members.
+
+Current behavior (baseline as of 5.2.0)
+---------------------------------------
+- Diary is single-author: diary_entries.userid owns the entry; there is no
+  groupid column on diary_entries.
+- Students only ever see their own entries on view.php.
+- Teachers/admins use report.php with the standard groups selector to filter to
+  one group, and picking a single user jumps to reportsingle.php.
+- diary_pluginfile() enforces owner-or-manager access for entry/attachment files.
+- Grading is per-entry via the ratings API (component mod_diary, ratingarea
+  entry), aggregated to one gradebook grade per user.
+- Existing capabilities: mod/diary:addentries, mod/diary:manageentries,
+  mod/diary:rate, mod/diary:addinstance, plus the two email capabilities.
+
+Design decisions to make before coding
+--------------------------------------
+1. Visibility model (Diary_1535). Proposed new per-activity setting,
+   entryvisibility, with values:
+   - 0 Private (current behavior; own entries only).
+   - 1 Group (members of the same group can read each other's entries).
+   - 2 Course (all participants in the activity can read all entries).
+   Group mode should honor the activity groupmode (separate vs visible groups)
+   and groupings, not reimplement its own grouping rules.
+
+2. Edit model (Diary_1536). Proposed new per-activity setting, entryeditmode:
+   - 0 Author only (current behavior).
+   - 1 Group members may edit any entry owned by their group.
+   - 2 Named collaborators (explicit per-entry list; probably a later phase).
+   Editing someone else's entry must be gated by a new capability so a site can
+   allow reading without allowing editing.
+
+3. Entry ownership. Add diary_entries.groupid (int, default 0). 0 keeps the
+   current personal-entry meaning. When an activity is in a group edit/visibility
+   mode, new entries are stamped with the author's active group at save time.
+   Group ownership must be immutable after creation, or changing it must be an
+   explicit teacher action, otherwise grade attribution becomes ambiguous.
+   Also consider a lasteditedby column so group edits can be attributed, since
+   diary_entries.userid must keep meaning "original author".
+
+4. Grading distribution. Diary currently produces one grade per user from
+   ratings. For a group entry the teacher rates the entry once and the resulting
+   grade needs to reach every member of the owning group. Two options:
+   (a) Keep the ratings API and, after a rating is saved on a group entry,
+       propagate an equivalent grade to each group member via
+       diary_update_grades. Simple, but the ratings table only holds one row so
+       per-member overrides are awkward.
+   (b) Move group activities to a direct gradebook write path (grade_update)
+       computed from group entries, bypassing per-user ratings aggregation.
+   Recommendation: start with (a) plus a clearly documented limitation, and only
+   move to (b) if per-member override turns out to be a hard requirement.
+
+5. Non-contribution penalty. Needs a measurable contribution signal per member.
+   Available signals, cheapest first:
+   - Entries authored in the activity (diary_entries.userid).
+   - Edits made to group entries (requires the lasteditedby column above, or an
+     edit-history table if a full audit trail is wanted).
+   - Comments posted on group entries (mod_diary comments, added in 5.2.0).
+   - Activity views from the standard log store (mod_diary course_module_viewed).
+   Proposed setting group: enable penalty, penalty percent per missing signal,
+   and which signals count. Any log-store based check must degrade gracefully
+   when the log store is disabled or has been trimmed, so log data should be a
+   bonus signal, not the only one.
+
+6. Reporting. report.php needs a group-entry view where an entry is listed once
+   for the group rather than repeated per member, showing the member roster,
+   each member's contribution signals, and the single group rating. The existing
+   single-user path (reportsingle.php) should keep working unchanged for
+   personal-mode activities.
+
+Schema sketch
+-------------
+mdl_diary (new fields):
+- entryvisibility  int(2)  NOT NULL DEFAULT 0
+- entryeditmode    int(2)  NOT NULL DEFAULT 0
+- grouppenalty     int(1)  NOT NULL DEFAULT 0
+- grouppenaltypct  int(6)  NOT NULL DEFAULT 0
+
+mdl_diary_entries (new fields):
+- groupid          int(10) NOT NULL DEFAULT 0
+- lasteditedby     int(10) NOT NULL DEFAULT 0
+
+New capabilities:
+- mod/diary:viewgroupentries  (read other members' entries)
+- mod/diary:editgroupentries  (edit other members' entries)
+
+Implementation roadmap (suggested)
+----------------------------------
+Phase 1: Data layer and visibility (Diary_1535)
+- Add entryvisibility to mdl_diary plus groupid to mdl_diary_entries.
+- Add the two new capabilities; default them to student CAP_ALLOW for
+  viewgroupentries only.
+- Teach view.php to fetch group entries when entryvisibility=1, honoring
+  groupmode/grouping.
+- Extend diary_pluginfile() so group members can fetch files on group entries.
+- Update backup/restore, privacy provider, and search indexing for groupid.
+- Verify mode 0 behavior is byte-for-byte unchanged.
+
+Phase 2: Edit model (Diary_1536)
+- Add entryeditmode and lasteditedby.
+- Gate edit.php and deleteentry.php on the new capability plus mode.
+- Show "last edited by" on entries so group edits are attributable.
+- Decide and enforce interaction with maxeditopens (is the cap per entry or per
+  member?).
+
+Phase 3: Group ownership assignment
+- Stamp groupid on create; add a teacher-only reassignment action.
+- Block or warn on reassignment once an entry has been rated.
+
+Phase 4: Group grading
+- Propagate a group entry's rating to all members of the owning group.
+- Add report.php group-entry grouping view.
+
+Phase 5: Contribution tracking and penalty
+- Collect per-member signals (entries, edits, comments, optional log views).
+- Apply the configured penalty to each non-contributing member's grade.
+- Surface the contribution breakdown to teachers in the report so a penalty is
+  never applied invisibly.
+
+Phase 6: Mobile parity
+- Group entry list, read-only vs editable state, and contribution summary in
+  classes/output/mobile.php and templates/mobileapp/.
+
+Risks and open questions
+------------------------
+- Privacy: a student reading another student's diary entry is a significant
+  behavior change. Group mode must be opt-in per activity, off by default, and
+  the activity description should make the visibility state obvious to students.
+- Grade recalculation ordering: propagated group grades must not fight with the
+  existing prompt/metric completion sync or the autorating path.
+- Users in multiple groups: which group owns the entry? Probably require the
+  author to pick when they belong to more than one, and store that choice.
+- Users in no group while the activity is in group mode: fall back to a personal
+  entry (groupid 0) rather than blocking entry creation.
+- Backup/restore must map groupid through the standard group mapping so restores
+  into a different course do not point at stale group ids.

@@ -43,16 +43,20 @@ function diary_add_instance($diary) {
 
     $metricrequirements = diary_extract_metric_requirements_from_form($diary);
 
-    $diary->promptmode = isset($diary->promptmode) ? (int)$diary->promptmode : 0;
-    if ($diary->promptmode < 0 || $diary->promptmode > 4) {
-        $diary->promptmode = 0;
+    $diary->promptmode = isset($diary->promptmode)
+        ? (int)$diary->promptmode
+        : prompts::PROMPTMODE_SEQUENTIAL;
+    if ($diary->promptmode < prompts::PROMPTMODE_SEQUENTIAL
+        || $diary->promptmode > prompts::PROMPTMODE_RANDOMCOMPLETE) {
+        $diary->promptmode = prompts::PROMPTMODE_SEQUENTIAL;
     }
 
     $diary->requiredpromptcount = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
     if ($diary->requiredpromptcount < 0) {
         $diary->requiredpromptcount = 0;
     }
-    if ($diary->promptmode !== 4) {
+    if ($diary->promptmode !== prompts::PROMPTMODE_CHOICECOMPLETE
+        && $diary->promptmode !== prompts::PROMPTMODE_RANDOMCOMPLETE) {
         $diary->requiredpromptcount = 0;
     }
 
@@ -117,16 +121,20 @@ function diary_update_instance($diary) {
 
     $metricrequirements = diary_extract_metric_requirements_from_form($diary);
 
-    $diary->promptmode = isset($diary->promptmode) ? (int)$diary->promptmode : 0;
-    if ($diary->promptmode < 0 || $diary->promptmode > 4) {
-        $diary->promptmode = 0;
+    $diary->promptmode = isset($diary->promptmode)
+        ? (int)$diary->promptmode
+        : prompts::PROMPTMODE_SEQUENTIAL;
+    if ($diary->promptmode < prompts::PROMPTMODE_SEQUENTIAL
+        || $diary->promptmode > prompts::PROMPTMODE_RANDOMCOMPLETE) {
+        $diary->promptmode = prompts::PROMPTMODE_SEQUENTIAL;
     }
 
     $diary->requiredpromptcount = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
     if ($diary->requiredpromptcount < 0) {
         $diary->requiredpromptcount = 0;
     }
-    if ($diary->promptmode !== 4) {
+    if ($diary->promptmode !== prompts::PROMPTMODE_CHOICECOMPLETE
+        && $diary->promptmode !== prompts::PROMPTMODE_RANDOMCOMPLETE) {
         $diary->requiredpromptcount = 0;
     }
 
@@ -602,7 +610,6 @@ function diary_get_inline_attachment_previews($diaryid) {
  * @uses FEATURE_GRADE_OUTCOMES
  * @uses FEATURE_GROUPS
  * @uses FEATURE_GROUPINGS
- * @uses FEATURE_GROUPMEMBERSONLY
  * @uses FEATURE_MOD_INTRO
  * @uses FEATURE_RATE
  * @uses FEATURE_SHOW_DESCRIPTION
@@ -624,8 +631,6 @@ function diary_supports($feature) {
         case FEATURE_GROUPS:
             return true;
         case FEATURE_GROUPINGS:
-            return true;
-        case FEATURE_GROUPMEMBERSONLY:
             return true;
         case FEATURE_MOD_INTRO:
             return true;

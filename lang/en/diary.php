@@ -414,9 +414,19 @@ $string['minwordlimit_desc'] = 'Note: This entry must use a <strong>minimum of {
 $string['minwordlimit_help'] = 'If a number is entered, the user must use more words than the minimum number listed.';
 $string['missing'] = 'Missing';
 $string['modulename'] = 'Diary';
-$string['modulename_help'] = 'The diary activity enables teachers to obtain students feedback
- over a period of time.';
+$string['modulename_help'] = '###### Key features
+- Collect writing entries from students or groups for review, feedback, and grading
+- Support individual writing, group work, essays, reports, projects, and learning journals
+- Set prompts, writing requirements, availability dates, and edit limits
+- Add teacher feedback, ratings, tags, and attachments to individual entries
+
+###### Ways to use it
+- Assign reflective writing, essays, reports, projects, or regular progress reports
+- Collect individual or group writing and provide formative feedback over time
+- Use writing prompts and automatic checks to guide student responses';
 $string['modulenameplural'] = 'Diaries';
+$string['modulename_summary'] = 'Collect writing entries from students or groups, such as essays, reports, or projects, and provide feedback and grades.';
+$string['modulename_tip'] = 'Use prompts, availability dates, and group settings to structure writing activities.';
 $string['needsgrading'] = ' This entry has not been given feedback or rated yet.';
 $string['needsregrade'] = 'This entry has changed since feedback or a rating was given.';
 $string['newdiaryentries'] = 'New diary entries';
@@ -473,9 +483,48 @@ $string['privacy:metadata:diary_entries:userid'] = 'ID of the user.';
 $string['prompt'] = 'Enter your writing prompt';
 $string['promptbgc'] = 'Background color for this prompt';
 $string['promptbgc_help'] = 'This sets the overall background color for this prompt.';
+$string['promptcopybutton'] = 'Copy prompts';
+$string['promptcopyheading'] = 'Copy prompts from another Diary';
+$string['promptcopyincluderules'] = 'Also copy prompt autograde rules';
+$string['promptcopyinvalidsource'] = 'The selected source Diary activity is not available.';
+$string['promptcopynosources'] = 'There are no other Diary activities with prompts in this course.';
+$string['promptcopyselectprompts'] = 'Prompts to copy';
+$string['promptcopyselectprompts_help'] = 'All prompts are selected initially. Use Ctrl (Windows/Linux) or Command (Mac) to select or deselect individual prompts.';
+$string['promptcopyselectpromptserror'] = 'Select at least one prompt to copy.';
+$string['promptcopysource'] = 'Copy from';
+$string['promptcopysource_help'] = 'Choose the Diary activity to copy prompts from. The number in brackets is how many prompts that activity currently has. Copied prompts are added to this activity; existing prompts are left alone.';
+$string['promptcopysuccess'] = 'Copied {$a} prompt(s) into this Diary activity.';
+$string['promptdateinvalid'] = 'Prompt end date must be after its start date.';
+$string['promptdateoverlap'] = 'Sequential prompts cannot have overlapping availability dates.';
 $string['promptdatestatusclosed'] = 'Closed';
 $string['promptdatestatusfuture'] = 'Not yet open';
+$string['promptexportbutton'] = 'Export prompts';
+$string['promptexportcolumns'] = 'The downloaded file has a header row naming every column, and can be fed straight back into the import section on this page, either here or on another site.';
+$string['promptexportdateformat'] = 'Date export format';
+$string['promptexportdateformat_help'] = 'Readable dates use YYYY-MM-DD HH:MM:SS UTC and can be edited then imported again. Unix timestamps preserve the raw seconds value for exact transfers.';
+$string['promptexportdateformatreadable'] = 'Readable date and time (UTC)';
+$string['promptexportdateformattimestamp'] = 'Unix timestamp (seconds)';
+$string['promptexportheading'] = 'Export prompts to a CSV file';
+$string['promptexportinvalidsource'] = 'The selected Diary activity to export from is not available.';
+$string['promptexportnoprompts'] = 'No prompts matched the export selection.';
+$string['promptexportnosources'] = 'There are no Diary activities with prompts in this course.';
+$string['promptexportselectprompts'] = 'Prompts to export';
+$string['promptexportselectprompts_help'] = 'All prompts are selected initially. Use Ctrl (Windows/Linux) or Command (Mac) to select or deselect individual prompts.';
+$string['promptexportselectpromptserror'] = 'Select at least one prompt to export.';
+$string['promptexportsource'] = 'Export from';
+$string['promptexportsource_help'] = 'Choose the Diary activity to export prompts from. The number in brackets is how many prompts that activity currently has. Unlike copying, this activity is included in the list.';
 $string['promptid'] = 'Prompt id';
+$string['promptimportbutton'] = 'Import prompts';
+$string['promptimportcolumns'] = 'The first CSV row must be a header row. Recognized columns are: {$a}. Only the text column is required; dates accept yyyy-mm-dd, yyyy-mm-dd hh:mm, or a unix timestamp.';
+$string['promptimportfile'] = 'CSV file';
+$string['promptimportfile_help'] = 'Upload a CSV file whose first row names the columns. Rows with an empty text column are skipped.';
+$string['promptimportheading'] = 'Import prompts from a CSV file';
+$string['promptimportnodiary'] = 'No destination Diary activity was resolved for this import.';
+$string['promptimportnofile'] = 'No CSV file content could be read.';
+$string['promptimportnorows'] = 'The CSV file needs a header row plus at least one data row.';
+$string['promptimportnotextcolumn'] = 'The CSV header row must include a text column.';
+$string['promptimportrowskipped'] = 'Row {$a} was skipped because its text column was empty.';
+$string['promptimportsuccess'] = 'Imported {$a} prompt(s) into this Diary activity.';
 $string['promptinfo'] = 'There are {$a->past} past prompts, {$a->current} current prompt, and {$a->future} future prompts for this diary activity.<br>';
 $string['promptmaxc'] = 'Char max';
 $string['promptmaxeditopens'] = 'Prompt edit opening override';
@@ -521,6 +570,7 @@ $string['promptsviewtitle'] = 'View writing prompts';
 $string['prompttext'] = 'Prompt text';
 $string['prompttitle'] = 'Prompt title';
 $string['prompttitle_help'] = 'Optional short title shown in the compact prompt picker. If blank, the first part of the prompt text is used instead.';
+$string['prompttransfertitle'] = 'Copy, export, or import prompts';
 $string['promptzerocount'] = '<td>Currently, there are, {$a} prompts for this Diary activity. </td>';
 $string['rate'] = 'Rate';
 $string['rating'] = 'Rating for this entry';

@@ -579,6 +579,7 @@ $form = new prompts_form(
         'current' => $data,
         'cm' => $cm,
         'diary' => $diary->editdates,
+        'promptmode' => prompts::get_prompt_mode($diary),
         'entryid' => $data->entryid,
         'editoroptions' => $editoroptions,
         'promptid' => $data->entryid,
@@ -880,12 +881,18 @@ if (!empty($data->entryid)) {
 // 20230810 Changed based on pull request #29.
 $url1 = new moodle_url($CFG->wwwroot . '/mod/diary/view.php', ['id' => $id]);
 $url2 = new moodle_url($CFG->wwwroot . '/mod/diary/prompt_edit.php', ['id' => $cm->id, 'action' => 'create', 'promptid' => 0]);
+$url3 = new moodle_url($CFG->wwwroot . '/mod/diary/prompt_transfer.php', ['id' => $cm->id]);
 // 20220920 Add a Create button and a return button. 20230810 Changed due to pull request #29.
 echo '<br><a href="' . $url2->out(false) . '#prompteditor"
     class="btn btn-warning"
     style="border-radius: 8px">';
 // 20230810 Changed due to pull request #29.
-echo get_string('createnewprompt', 'diary') . '</a> <a href="' . $url1->out(false)
+echo get_string('createnewprompt', 'diary') . '</a> ';
+// 20260831 Added copy/import prompts action for Diary_1515 and Diary_1516.
+echo '<a href="' . $url3->out(false) . '" class="btn btn-secondary" style="border-radius: 8px">'
+    . get_string('prompttransfertitle', 'diary')
+    . '</a> ';
+echo '<a href="' . $url1->out(false)
     . '" class="btn btn-success" style="border-radius: 8px">'
     . get_string('returnto', 'diary', $diary->name)
     . '</a> ';

@@ -691,6 +691,49 @@ class prompts {
     }
 
     /**
+     * Return the validation error for a proposed prompt date window.
+     *
+     * Date windows may overlap in non-sequential modes, where they control
+     * each prompt's individual availability. Sequential prompts must remain
+     * mutually exclusive.
+     *
+     * @param int $diaryid Diary id.
+     * @param int $promptid Prompt id being updated, or 0 for a new prompt.
+     * @param int $datestart Proposed start timestamp, or 0 for no lower bound.
+     * @param int $datestop Proposed stop timestamp, or 0 for no upper bound.
+     * @param int $promptmode Prompt assignment mode.
+     * @return string Language-string identifier, or an empty string when valid.
+     */
+    public static function validate_prompt_date_window($diaryid, $promptid, $datestart, $datestop, $promptmode) {
+        global $DB;
+
+        $datestart = (int)$datestart;
+        $datestop = (int)$datestop;
+        if ($datestart > 0 && $datestop > 0 && $datestart > $datestop) {
+            return 'promptdateinvalid';
+        }
+
+        if ((int)$promptmode !== self::PROMPTMODE_SEQUENTIAL) {
+            return '';
+        }
+
+        $sql = "SELECT 1
+                  FROM {diary_prompts}
+                 WHERE diaryid = :diaryid
+                   AND id <> :promptid
+                   AND (:datestart = 0 OR datestop = 0 OR datestop >= :datestart)
+                   AND (:datestop = 0 OR datestart = 0 OR datestart <= :datestop)";
+        $params = [
+            'diaryid' => (int)$diaryid,
+            'promptid' => (int)$promptid,
+            'datestart' => $datestart,
+            'datestop' => $datestop,
+        ];
+
+        return $DB->record_exists_sql($sql, $params) ? 'promptdateoverlap' : '';
+    }
+
+    /**
      * Return prompt-mode completion progress for a user.
      *
      * This is used to align UI completion indicators with prompt-mode progress
@@ -912,8 +955,7 @@ class prompts {
             if ($requestedpromptid > 0 && in_array($requestedpromptid, $openpromptids)) {
                 return $requestedpromptid;
             }
-            // Fall back to first open prompt, else first of all prompts.
-            return !empty($openpromptids) ? (int)reset($openpromptids) : (int)reset($allpromptids);
+            return !empty($openpromptids) ? (int)reset($openpromptids) : 0;
         }
 
         if ($mode === self::PROMPTMODE_RANDOM) {
@@ -1655,5 +1697,350 @@ class prompts {
         }
 
         return self::resolve_promptid_for_mode($diary, (int)$userid, (int)$requestedpromptid);
+    }
+
+    /**
+     * Field list copied when duplicating or importing a prompt.
+     *
+     * @return array
+     */
+    public static function get_copyable_prompt_fields() {
+        return [
+            'datestart',
+            'datestop',
+            'title',
+            'text',
+            'format',
+            'promptbgc',
+            'minchar',
+            'maxchar',
+            'minmaxcharpercent',
+            'minword',
+            'maxword',
+            'minmaxwordpercent',
+            'minsentence',
+            'maxsentence',
+            'minmaxsentencepercent',
+            'minparagraph',
+            'maxparagraph',
+            'minmaxparagraphpercent',
+            'maxeditopens',
+        ];
+    }
+
+    /**
+     * Copy prompts from one Diary activity into another.
+     *
+     * Embedded prompt files and prompt autograde rules are carried across too.
+     *
+     * @param int $sourcediaryid Diary instance id to copy from.
+     * @param int $targetdiaryid Diary instance id to copy into.
+     * @param array $promptids Optional list of prompt ids to copy. Empty copies all.
+     * @param bool $includerules Whether prompt autograde rules are copied as well.
+     * @return int Number of prompts copied.
+     */
+    public static function copy_prompts_to_diary($sourcediaryid, $targetdiaryid, array $promptids = [], $includerules = true) {
+        global $DB, $USER;
+
+        $sourcediaryid = (int)$sourcediaryid;
+        $targetdiaryid = (int)$targetdiaryid;
+        if ($sourcediaryid <= 0 || $targetdiaryid <= 0 || $sourcediaryid === $targetdiaryid) {
+            return 0;
+        }
+
+        $params = ['diaryid' => $sourcediaryid];
+        $select = 'diaryid = :diaryid';
+        if (!empty($promptids)) {
+            $promptids = array_filter(array_map('intval', $promptids));
+            if (empty($promptids)) {
+                return 0;
+            }
+            [$insql, $inparams] = $DB->get_in_or_equal($promptids, SQL_PARAMS_NAMED, 'pid');
+            $select .= ' AND id ' . $insql;
+            $params = array_merge($params, $inparams);
+        }
+
+        $sourceprompts = $DB->get_records_select('diary_prompts', $select, $params, 'datestart, datestop, id');
+        if (empty($sourceprompts)) {
+            return 0;
+        }
+
+        $sourcecontext = self::get_diary_module_context($sourcediaryid);
+        $targetcontext = self::get_diary_module_context($targetdiaryid);
+        $fs = get_file_storage();
+        $copied = 0;
+
+        foreach ($sourceprompts as $sourceprompt) {
+            $new = new \stdClass();
+            $new->diaryid = $targetdiaryid;
+            foreach (self::get_copyable_prompt_fields() as $field) {
+                $new->$field = $sourceprompt->$field;
+            }
+            $newpromptid = $DB->insert_record('diary_prompts', $new);
+
+            if ($sourcecontext && $targetcontext) {
+                $promptfiles = $fs->get_area_files(
+                    $sourcecontext->id,
+                    'mod_diary',
+                    'prompt',
+                    (int)$sourceprompt->id,
+                    'itemid, filepath, filename',
+                    false
+                );
+                foreach ($promptfiles as $promptfile) {
+                    $filerecord = [
+                        'contextid' => $targetcontext->id,
+                        'component' => 'mod_diary',
+                        'filearea' => 'prompt',
+                        'itemid' => $newpromptid,
+                    ];
+                    $fs->create_file_from_storedfile($filerecord, $promptfile);
+                }
+
+                // Rewrite embedded pluginfile URLs so they point at the new context/itemid.
+                if (!empty($new->text)) {
+                    $updated = str_replace(
+                        '/' . $sourcecontext->id . '/mod_diary/prompt/' . (int)$sourceprompt->id . '/',
+                        '/' . $targetcontext->id . '/mod_diary/prompt/' . $newpromptid . '/',
+                        $new->text
+                    );
+                    if ($updated !== $new->text) {
+                        $DB->set_field('diary_prompts', 'text', $updated, ['id' => $newpromptid]);
+                    }
+                }
+            }
+
+            if ($includerules) {
+                $rules = $DB->get_records('diary_prompt_autograde_rules', ['promptid' => (int)$sourceprompt->id], 'sortorder');
+                foreach ($rules as $rule) {
+                    unset($rule->id);
+                    $rule->diaryid = $targetdiaryid;
+                    $rule->promptid = $newpromptid;
+                    $rule->usermodified = $USER->id;
+                    $rule->timecreated = time();
+                    $rule->timemodified = time();
+                    $DB->insert_record('diary_prompt_autograde_rules', $rule);
+                }
+            }
+
+            $copied++;
+        }
+
+        return $copied;
+    }
+
+    /**
+     * Resolve the module context for a diary instance.
+     *
+     * @param int $diaryid Diary instance id.
+     * @return \context_module|null
+     */
+    public static function get_diary_module_context($diaryid) {
+        $cm = get_coursemodule_from_instance('diary', (int)$diaryid);
+        if (!$cm) {
+            return null;
+        }
+        return \context_module::instance($cm->id);
+    }
+
+    /**
+     * Column names accepted by the prompt CSV importer.
+     *
+     * The first two are dates and are accepted as yyyy-mm-dd, yyyy-mm-dd hh:mm,
+     * or a raw unix timestamp.
+     *
+     * @return array
+     */
+    public static function get_csv_import_columns() {
+        return self::get_copyable_prompt_fields();
+    }
+
+    /**
+     * Column names written by the prompt CSV exporter.
+     *
+     * @return array
+     */
+    public static function get_csv_export_columns() {
+        return self::get_copyable_prompt_fields();
+    }
+
+    /**
+     * Build the rows for a prompt CSV export.
+     *
+    * Readable dates are written in an unambiguous UTC format so they can be
+    * edited by people and re-imported reliably. Unix timestamps remain
+    * available for exact raw-value transfers.
+     *
+     * @param int $diaryid Diary instance id to export from.
+     * @param array $promptids Optional list of prompt ids to export. Empty exports all.
+     * @param string $dateformat Either readable or timestamp.
+     * @return array List of rows, the first of which is the header row.
+     */
+    public static function get_prompt_export_rows($diaryid, array $promptids = [], $dateformat = 'readable') {
+        global $DB;
+
+        $diaryid = (int)$diaryid;
+        $dateformat = $dateformat === 'timestamp' ? 'timestamp' : 'readable';
+        $columns = self::get_csv_export_columns();
+        $rows = [$columns];
+        if ($diaryid <= 0) {
+            return $rows;
+        }
+
+        $params = ['diaryid' => $diaryid];
+        $select = 'diaryid = :diaryid';
+        if (!empty($promptids)) {
+            $promptids = array_filter(array_map('intval', $promptids));
+            if (empty($promptids)) {
+                return $rows;
+            }
+            [$insql, $inparams] = $DB->get_in_or_equal($promptids, SQL_PARAMS_NAMED, 'pid');
+            $select .= ' AND id ' . $insql;
+            $params = array_merge($params, $inparams);
+        }
+
+        $prompts = $DB->get_records_select('diary_prompts', $select, $params, 'datestart, datestop, id');
+        foreach ($prompts as $prompt) {
+            $row = [];
+            foreach ($columns as $column) {
+                $value = $prompt->$column ?? '';
+                if (($column === 'datestart' || $column === 'datestop') && (int)$value === 0) {
+                    $value = '';
+                } else if (($column === 'datestart' || $column === 'datestop') && $dateformat === 'readable') {
+                    $value = gmdate('Y-m-d H:i:s \U\T\C', (int)$value);
+                }
+                $row[] = (string)$value;
+            }
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Import prompts into a Diary activity from CSV content.
+     *
+     * The first CSV row must be a header row naming the columns. Only "text" is
+     * required; every other column falls back to the field default.
+     *
+     * @param int $diaryid Diary instance id to import into.
+     * @param string $csvcontent Raw CSV file content.
+     * @return array [int imported, array errors]
+     */
+    public static function import_prompts_from_csv($diaryid, $csvcontent) {
+        global $DB;
+
+        $diaryid = (int)$diaryid;
+        $errors = [];
+        if ($diaryid <= 0) {
+            return [0, [get_string('promptimportnodiary', 'diary')]];
+        }
+
+        $csvcontent = \core_text::convert($csvcontent, 'utf-8', 'utf-8');
+        $lines = preg_split('/\R/u', $csvcontent);
+        $rows = [];
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+            $rows[] = str_getcsv($line);
+        }
+
+        if (count($rows) < 2) {
+            return [0, [get_string('promptimportnorows', 'diary')]];
+        }
+
+        $header = array_map(function ($column) {
+            return strtolower(trim((string)$column));
+        }, array_shift($rows));
+
+        $allowed = self::get_csv_import_columns();
+        $map = [];
+        foreach ($header as $index => $column) {
+            if (in_array($column, $allowed, true)) {
+                $map[$column] = $index;
+            }
+        }
+
+        if (!isset($map['text'])) {
+            return [0, [get_string('promptimportnotextcolumn', 'diary')]];
+        }
+
+        $intfields = array_flip([
+            'format',
+            'minchar',
+            'maxchar',
+            'minmaxcharpercent',
+            'minword',
+            'maxword',
+            'minmaxwordpercent',
+            'minsentence',
+            'maxsentence',
+            'minmaxsentencepercent',
+            'minparagraph',
+            'maxparagraph',
+            'minmaxparagraphpercent',
+            'maxeditopens',
+        ]);
+
+        $imported = 0;
+        foreach ($rows as $rownumber => $row) {
+            $text = isset($row[$map['text']]) ? trim((string)$row[$map['text']]) : '';
+            if ($text === '') {
+                $errors[] = get_string('promptimportrowskipped', 'diary', $rownumber + 2);
+                continue;
+            }
+
+            $record = new \stdClass();
+            $record->diaryid = $diaryid;
+            $record->datestart = 0;
+            $record->datestop = 0;
+            $record->title = null;
+            $record->text = $text;
+            $record->format = FORMAT_HTML;
+            $record->promptbgc = '#93FC84';
+            $record->maxeditopens = -1;
+
+            foreach ($map as $column => $index) {
+                if ($column === 'text' || !isset($row[$index])) {
+                    continue;
+                }
+                $value = trim((string)$row[$index]);
+                if ($value === '') {
+                    continue;
+                }
+
+                if ($column === 'datestart' || $column === 'datestop') {
+                    $record->$column = self::parse_csv_date($value);
+                } else if (isset($intfields[$column])) {
+                    $record->$column = (int)$value;
+                } else {
+                    $record->$column = $value;
+                }
+            }
+
+            $DB->insert_record('diary_prompts', $record);
+            $imported++;
+        }
+
+        return [$imported, $errors];
+    }
+
+    /**
+     * Convert a CSV date cell to a unix timestamp.
+     *
+     * @param string $value Raw cell value.
+     * @return int Timestamp, or 0 when unparsable.
+     */
+    protected static function parse_csv_date($value) {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return 0;
+        }
+        if (ctype_digit($value)) {
+            return (int)$value;
+        }
+        $timestamp = strtotime($value);
+        return $timestamp === false ? 0 : (int)$timestamp;
     }
 }

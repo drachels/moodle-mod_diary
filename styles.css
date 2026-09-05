@@ -825,3 +825,65 @@
 .diary-course-topic-currentprompt strong {
     margin-right: 0.25rem;
 }
+
+/* 20260904 Diary_735: stack the 3-column report entry rows on phone-width screens.
+   Kept last in the file so these override the fixed column widths above without
+   needing !important. */
+@media (max-width: 767.98px) {
+    #page-mod-diary-report .diaryuserentry,
+    #page-mod-diary-reportsingle .diaryuserentry,
+    #page-mod-diary-reportone .diaryuserentry,
+    #page-mod-diary-report .diaryuserentry tbody,
+    #page-mod-diary-reportsingle .diaryuserentry tbody,
+    #page-mod-diary-reportone .diaryuserentry tbody,
+    #page-mod-diary-report .diaryuserentry tr,
+    #page-mod-diary-reportsingle .diaryuserentry tr,
+    #page-mod-diary-reportone .diaryuserentry tr {
+        display: block;
+        width: auto;
+    }
+
+    #page-mod-diary-report .diaryuserentry tr > td:nth-child(1),
+    #page-mod-diary-reportsingle .diaryuserentry tr > td:nth-child(1),
+    #page-mod-diary-reportone .diaryuserentry tr > td:nth-child(1),
+    #page-mod-diary-report .diaryuserentry tr > td:nth-child(2),
+    #page-mod-diary-reportsingle .diaryuserentry tr > td:nth-child(2),
+    #page-mod-diary-reportone .diaryuserentry tr > td:nth-child(2),
+    #page-mod-diary-report .diaryuserentry tr > td:nth-child(3),
+    #page-mod-diary-reportsingle .diaryuserentry tr > td:nth-child(3),
+    #page-mod-diary-reportone .diaryuserentry tr > td:nth-child(3) {
+        display: block;
+        width: auto;
+        padding: 6px 0;
+    }
+
+    #page-mod-diary-report .diaryuserentry td.userpix,
+    #page-mod-diary-report .diaryuserentry td.userfullname {
+        width: auto;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* Actions column becomes a horizontal strip once it is no longer a column. */
+    #page-mod-diary-report .diaryuserentry tr > td:nth-child(3),
+    #page-mod-diary-reportsingle .diaryuserentry tr > td:nth-child(3),
+    #page-mod-diary-reportone .diaryuserentry tr > td:nth-child(3) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    /* Stats/autorating tables scroll within the entry instead of widening the page. */
+    #page-mod-diary-report .diary-stats-table,
+    #page-mod-diary-reportsingle .diary-stats-table,
+    #page-mod-diary-reportone .diary-stats-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .diary-col-narrow,
+    .diary-col-actions {
+        width: auto;
+    }
+}
