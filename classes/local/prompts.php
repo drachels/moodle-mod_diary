@@ -721,13 +721,15 @@ class prompts {
                   FROM {diary_prompts}
                  WHERE diaryid = :diaryid
                    AND id <> :promptid
-                   AND (:datestart = 0 OR datestop = 0 OR datestop >= :datestart)
-                   AND (:datestop = 0 OR datestart = 0 OR datestart <= :datestop)";
+                   AND (:datestartfrom = 0 OR datestop = 0 OR datestop >= :datestartto)
+                   AND (:datestopfrom = 0 OR datestart = 0 OR datestart <= :datestopto)";
         $params = [
             'diaryid' => (int)$diaryid,
             'promptid' => (int)$promptid,
-            'datestart' => $datestart,
-            'datestop' => $datestop,
+            'datestartfrom' => $datestart,
+            'datestartto' => $datestart,
+            'datestopfrom' => $datestop,
+            'datestopto' => $datestop,
         ];
 
         return $DB->record_exists_sql($sql, $params) ? 'promptdateoverlap' : '';
