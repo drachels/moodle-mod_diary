@@ -123,6 +123,9 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         prompt modes allow overlapping windows, with each window controlling
         whether that prompt is currently available. Choice no longer falls back
         to a closed prompt when no prompt window is open.
+    2026090601 Fixed - Sequential overlap validation now uses distinct SQL
+        placeholders for repeated date values, fixing the DML parameter-count
+        exception when saving a prompt.
 20221126 Diary_965r - Once set a prompt ID should not be allowed to change.
     2026090409 Verified in current code: the desktop path already enforces this.
         edit.php re-reads the stored promptid with get_field(... MUST_EXIST) when
