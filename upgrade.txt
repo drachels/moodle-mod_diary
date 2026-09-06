@@ -85,6 +85,8 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     a group entry rating.
 20260831 Diary_1547 - Feature Request - Need an optional non-contribution penalty for
     group members with no entries, edits, comments, or activity views.
+20260906 Diary_1549 - Feature Request - Modify Sequestial prompts to proceed upon
+    successful completion of current prompt.
 
 
 
