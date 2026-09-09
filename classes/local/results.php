@@ -1843,10 +1843,13 @@ class results {
         $data = (array) $data;
         // My single data entry contains id, sesskey, and three other items, entry, feedback, and ???
         // Peel out all the data from variable names.
+        // 20260909 Only accept keys matching r<id> or c<id> (e.g. "r15", "c15") so that unrelated
+        // form fields starting with "r" or "c" (such as an editor field literally named "content")
+        // can't be misread as feedback data and cause an undefined array key later.
         foreach ($data as $key => $val) {
-            if (strpos($key, 'r') === 0 || strpos($key, 'c') === 0) {
-                $type = substr($key, 0, 1);
-                $num = substr($key, 1);
+            if (preg_match('/^([rc])(\d+)$/', (string)$key, $matches)) {
+                $type = $matches[1];
+                $num = $matches[2];
                 $feedback[$num][$type] = $val;
             }
         }
@@ -1859,6 +1862,10 @@ class results {
         // 20211203 Changed back to 0.
         $count = 1;
         foreach ($feedback as $num => $vals) {
+            // 20260909 Guard against stray/unexpected keys that don't correspond to a real entry.
+            if (!isset($entrybyentry[$num])) {
+                continue;
+            }
             $entry = $entrybyentry[$num];
             // Only update entries where feedback has actually changed.
             $ratingchanged = false;
@@ -1868,7 +1875,8 @@ class results {
             } else {
                 $studentrating = $entry->rating;
             }
-            $studentcomment = clean_text($vals['c'], FORMAT_HTML);
+            $studentcomment = clean_text($vals['c'] ?? '', FORMAT_HTML);
+
 
             if ($canrate && $studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;
