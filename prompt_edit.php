@@ -192,6 +192,22 @@ if (!empty($action)) {
                 );
             }
             break;
+        case 'duplicate':
+            if (has_capability('mod/diary:manageentries', $context)) {
+                require_sesskey();
+                $promptid = required_param('promptid', PARAM_INT);
+                $prompt = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id]);
+                if (!$prompt) {
+                    throw new moodle_exception(get_string('generalerror', 'diary'));
+                }
+
+                $copied = prompts::copy_prompts_to_diary((int)$diary->id, (int)$diary->id, [$promptid]);
+                redirect(
+                    new moodle_url('/mod/diary/prompt_edit.php', ['id' => $id]),
+                    get_string('duplicatepromptsuccess', 'diary', $copied)
+                );
+            }
+            break;
         default:
     }
 }
@@ -381,26 +397,50 @@ if ($prompts && $view == 0) {
 
         // If user can edit, create a delete link to the current prompt.
         // 20230810 Changed based on pull request #29.
-        $url = new moodle_url('prompt_edit.php', ['id' => $id, 'action' => 'delete', 'promptid' => $prompt->id]);
-        $jlink1 = '&nbsp;<a onclick="return confirm(\''
-                  . get_string('deleteexconfirm', 'diary')
-                  . $data->entryid
-                  . '\')" href="' . $url->out(false) . '"><img src="pix/delete.png" title="'
-                  . get_string('delete', 'diary') . '" alt="'
-                  . get_string('delete', 'diary') . '"/></a>';
+        $url = new moodle_url('prompt_edit.php', [
+            'id' => $id,
+            'action' => 'delete',
+            'promptid' => $prompt->id,
+        ]);
+        $jlink1 = html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/delete', get_string('delete', 'diary')),
+            [
+                'class' => 'toolbutton',
+                'onclick' => "return confirm('" . get_string('deleteexconfirm', 'diary') . $data->entryid . "')",
+            ]
+        );
 
         // If user can edit, create an edit link to the current prompt.
         // Use prompt ID so we can come back to the Prompt Editor we came from.
         // 20230810 Changed based on pull request #29.
         $url = new moodle_url('prompt_edit.php', ['id' => $id, 'action' => 'edit', 'promptid' => $data->entryid]);
         $url->set_anchor('prompt-' . $data->entryid);
-        $jlink2 = '<a href="' . $url->out(false) . '"><img src="pix/edit.png" alt='
-                  . get_string('eeditlabel', 'diary') . '></a>';
+        $jlink2 = html_writer::link(
+            $url,
+            $OUTPUT->pix_icon('t/edit', get_string('eeditlabel', 'diary')),
+            ['class' => 'toolbutton']
+        );
+
+        $duplicate = '';
+        if (has_capability('mod/diary:manageentries', $context)) {
+            $duplicateurl = new moodle_url('prompt_edit.php', [
+                'id' => $id,
+                'action' => 'duplicate',
+                'promptid' => $data->entryid,
+                'sesskey' => sesskey(),
+            ]);
+            $duplicate = html_writer::link(
+                $duplicateurl,
+                $OUTPUT->pix_icon('t/copy', get_string('duplicateprompt', 'diary')),
+                ['class' => 'toolbutton']
+            );
+        }
 
         $setmanual = '';
         if (has_capability('mod/diary:manageentries', $context)) {
             if ((int)$manualpromptid === (int)$data->entryid) {
-                $setmanual = '<span class="badge badge-info">' . get_string('manualpromptselected', 'diary') . '</span>';
+                $setmanual = $OUTPUT->pix_icon('t/check', get_string('manualpromptselected', 'diary'));
             } else {
                 $manualurl = new moodle_url('prompt_edit.php', [
                     'id' => $id,
@@ -408,7 +448,11 @@ if ($prompts && $view == 0) {
                     'promptid' => $data->entryid,
                     'sesskey' => sesskey(),
                 ]);
-                $setmanual = '<a href="' . $manualurl->out(false) . '">' . get_string('setmanualprompt', 'diary') . '</a>';
+                $setmanual = html_writer::link(
+                    $manualurl,
+                    $OUTPUT->pix_icon('t/check', get_string('setmanualprompt', 'diary')),
+                    ['class' => 'toolbutton']
+                );
             }
         }
 
@@ -454,6 +498,7 @@ if ($prompts && $view == 0) {
                           . get_string('minc', 'diary') . $data->minparagraph . '<br>'
                           . get_string('maxc', 'diary') . $data->maxparagraph . '<br>'
                           . get_string('errp', 'diary') . $data->minmaxparagraphpercent . '</td>';
+            $promptactions = implode(' ', array_filter([$jlink2, $jlink1, $duplicate, $setmanual]));
 
             $rows .= '<tr id="' . $rowanchor . '"><td>' . $status . '</td><td colspan="8">' . $prompttext . '</td></tr>';
             $rows .= '<tr><td></td>'
@@ -464,7 +509,7 @@ if ($prompts && $view == 0) {
                 . $words
                 . $sentences
                 . $paragraphs
-                . '<td>' . $jlink2 . ' | ' . $jlink1 . '<br>' . $setmanual . '</td></tr>';
+                . '<td>' . $promptactions . '</td></tr>';
         }
     }
 

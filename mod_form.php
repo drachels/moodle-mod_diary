@@ -23,6 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 use mod_diary\local\diarystats;
+use mod_diary\local\prompts;
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 require_once($CFG->dirroot . '/rating/lib.php');
@@ -200,6 +201,14 @@ class mod_diary_mod_form extends moodleform_mod {
         $mform->addHelpButton($name, $name, $plugin);
         $mform->setType($name, PARAM_INT);
         $mform->setDefault($name, 0);
+
+        $name = 'sequentialgradedpacing';
+        $label = get_string($name, $plugin);
+        $mform->addElement('selectyesno', $name, $label);
+        $mform->addHelpButton($name, $name, $plugin);
+        $mform->setType($name, PARAM_INT);
+        $mform->setDefault($name, 1);
+        $mform->disabledIf($name, 'promptmode', 'neq', prompts::PROMPTMODE_SEQUENTIALGRADED);
 
         $name = 'requiredpromptcount';
         $label = get_string($name, $plugin);
@@ -691,7 +700,7 @@ class mod_diary_mod_form extends moodleform_mod {
         $promptmode = isset($data['promptmode']) ? (int)$data['promptmode'] : 0;
         $requiredpromptcount = isset($data['requiredpromptcount']) ? (int)$data['requiredpromptcount'] : 0;
 
-        if ($promptmode < 0 || $promptmode > 5) {
+        if ($promptmode < 0 || $promptmode > prompts::PROMPTMODE_SEQUENTIALGRADED) {
             $errors['promptmode'] = get_string('promptmodeinvalid', 'diary');
         }
 
@@ -776,6 +785,7 @@ class mod_diary_mod_form extends moodleform_mod {
             3 => get_string('promptmodecompleteall', $plugin),
             4 => get_string('promptmodechoicecomplete', $plugin),
             5 => get_string('promptmoderandomcomplete', $plugin),
+            6 => get_string('promptmodesequentialgraded', $plugin),
         ];
     }
 

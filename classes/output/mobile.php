@@ -1135,6 +1135,7 @@ JS;
             prompts::PROMPTMODE_CHOICE => 'promptmodechoice',
             prompts::PROMPTMODE_RANDOM => 'promptmoderandom',
             prompts::PROMPTMODE_COMPLETEALL => 'promptmodecompleteall',
+            prompts::PROMPTMODE_SEQUENTIALGRADED => 'promptmodesequentialgraded',
         ];
         $modestring = $map[$promptmode] ?? 'promptmodesequential';
 

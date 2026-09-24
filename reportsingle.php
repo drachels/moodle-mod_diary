@@ -264,25 +264,27 @@ if (! $users) {
             ]
         );
 
-        $options['action'] = 'lowestgradeentry';
-        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link(
-            $url,
-            $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
-            [
-                'class' => 'toolbutton',
-            ]
-        );
+        if (!empty($diary->assessed)) {
+            $options['action'] = 'lowestgradeentry';
+            $url = new moodle_url('/mod/diary/reportsingle.php', $options);
+            $output .= html_writer::link(
+                $url,
+                $OUTPUT->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
+                [
+                    'class' => 'toolbutton',
+                ]
+            );
 
-        $options['action'] = 'highestgradeentry';
-        $url = new moodle_url('/mod/diary/reportsingle.php', $options);
-        $output .= html_writer::link(
-            $url,
-            $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
-            [
-                'class' => 'toolbutton',
-            ]
-        );
+            $options['action'] = 'highestgradeentry';
+            $url = new moodle_url('/mod/diary/reportsingle.php', $options);
+            $output .= html_writer::link(
+                $url,
+                $OUTPUT->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
+                [
+                    'class' => 'toolbutton',
+                ]
+            );
+        }
 
         $options['action'] = 'latestmodifiedentry';
         $url = new moodle_url('/mod/diary/reportsingle.php', $options);

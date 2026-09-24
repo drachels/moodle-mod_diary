@@ -46,17 +46,25 @@ function diary_add_instance($diary) {
     $diary->promptmode = isset($diary->promptmode)
         ? (int)$diary->promptmode
         : prompts::PROMPTMODE_SEQUENTIAL;
-    if ($diary->promptmode < prompts::PROMPTMODE_SEQUENTIAL
-        || $diary->promptmode > prompts::PROMPTMODE_RANDOMCOMPLETE) {
+    if (
+        $diary->promptmode < prompts::PROMPTMODE_SEQUENTIAL
+        || $diary->promptmode > prompts::PROMPTMODE_SEQUENTIALGRADED
+    ) {
         $diary->promptmode = prompts::PROMPTMODE_SEQUENTIAL;
     }
+
+    $diary->sequentialgradedpacing = isset($diary->sequentialgradedpacing)
+        ? (int)$diary->sequentialgradedpacing
+        : 1;
 
     $diary->requiredpromptcount = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
     if ($diary->requiredpromptcount < 0) {
         $diary->requiredpromptcount = 0;
     }
-    if ($diary->promptmode !== prompts::PROMPTMODE_CHOICECOMPLETE
-        && $diary->promptmode !== prompts::PROMPTMODE_RANDOMCOMPLETE) {
+    if (
+        $diary->promptmode !== prompts::PROMPTMODE_CHOICECOMPLETE
+        && $diary->promptmode !== prompts::PROMPTMODE_RANDOMCOMPLETE
+    ) {
         $diary->requiredpromptcount = 0;
     }
 
@@ -124,17 +132,25 @@ function diary_update_instance($diary) {
     $diary->promptmode = isset($diary->promptmode)
         ? (int)$diary->promptmode
         : prompts::PROMPTMODE_SEQUENTIAL;
-    if ($diary->promptmode < prompts::PROMPTMODE_SEQUENTIAL
-        || $diary->promptmode > prompts::PROMPTMODE_RANDOMCOMPLETE) {
+    if (
+        $diary->promptmode < prompts::PROMPTMODE_SEQUENTIAL
+        || $diary->promptmode > prompts::PROMPTMODE_SEQUENTIALGRADED
+    ) {
         $diary->promptmode = prompts::PROMPTMODE_SEQUENTIAL;
     }
+
+    $diary->sequentialgradedpacing = isset($diary->sequentialgradedpacing)
+        ? (int)$diary->sequentialgradedpacing
+        : 1;
 
     $diary->requiredpromptcount = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;
     if ($diary->requiredpromptcount < 0) {
         $diary->requiredpromptcount = 0;
     }
-    if ($diary->promptmode !== prompts::PROMPTMODE_CHOICECOMPLETE
-        && $diary->promptmode !== prompts::PROMPTMODE_RANDOMCOMPLETE) {
+    if (
+        $diary->promptmode !== prompts::PROMPTMODE_CHOICECOMPLETE
+        && $diary->promptmode !== prompts::PROMPTMODE_RANDOMCOMPLETE
+    ) {
         $diary->requiredpromptcount = 0;
     }
 
@@ -735,6 +751,7 @@ function diary_get_coursemodule_info($coursemodule) {
                 3 => get_string('promptmodecompleteall', 'diary'),
                 4 => get_string('promptmodechoicecomplete', 'diary'),
                 5 => get_string('promptmoderandomcomplete', 'diary'),
+                6 => get_string('promptmodesequentialgraded', 'diary'),
             ];
             if ($mode === 4) {
                 $required = isset($diary->requiredpromptcount) ? (int)$diary->requiredpromptcount : 0;

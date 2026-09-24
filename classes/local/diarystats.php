@@ -139,8 +139,8 @@ class diarystats {
                         $match = self::glossary_diaryentry_search_text(
                             $entry->concept,
                             $text,
-                            (int)$diary->errorfullmatch,
-                            (int)$diary->errorcasesensitive,
+                            (int)$entry->fullmatch,
+                            (int)$entry->casesensitive,
                             (int)$diary->errorignorebreaks
                         )
                     ) {
@@ -162,8 +162,8 @@ class diarystats {
                             $match = self::glossary_diaryentry_search_text(
                                 $alias->alias,
                                 $text,
-                                (int)$diary->errorfullmatch,
-                                (int)$diary->errorcasesensitive,
+                                (int)$entry->fullmatch,
+                                (int)$entry->casesensitive,
                                 (int)$diary->errorignorebreaks
                             )
                         ) {

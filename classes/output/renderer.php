@@ -111,25 +111,27 @@ class renderer extends plugin_renderer_base {
             ['class' => 'toolbutton']
         );
 
-        // Lowest grade entry.
-        $options['action'] = 'lowestgradeentry';
-        $options['firstkey'] = $firstkey;
-        $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link(
-            $url,
-            $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
-            ['class' => 'toolbutton']
-        );
+        if (!empty($cm['assessed'])) {
+            // Lowest grade entry.
+            $options['action'] = 'lowestgradeentry';
+            $options['firstkey'] = $firstkey;
+            $url = new moodle_url('/mod/diary/view.php', $options);
+            $output .= html_writer::link(
+                $url,
+                $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
+                ['class' => 'toolbutton']
+            );
 
-        // Highest grade entry.
-        $options['action'] = 'highestgradeentry';
-        $options['firstkey'] = $firstkey;
-        $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link(
-            $url,
-            $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
-            ['class' => 'toolbutton']
-        );
+            // Highest grade entry.
+            $options['action'] = 'highestgradeentry';
+            $options['firstkey'] = $firstkey;
+            $url = new moodle_url('/mod/diary/view.php', $options);
+            $output .= html_writer::link(
+                $url,
+                $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
+                ['class' => 'toolbutton']
+            );
+        }
 
         // Latest modified entry.
         $options['action'] = 'latestmodifiedentry';

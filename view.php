@@ -358,6 +358,7 @@ if ($timenow > $timestart) {
                 $options['firstkey'] = $firstkey;
                 $options['action'] = 'editentry';
                 $options['promptid'] = $firstpromptid;
+                $options['assessed'] = $diary->assessed;
                 echo '<span class="diary-toolbar-right">' . get_string('usertoolbar', 'diary');
                 echo $output->toolbar(
                     $firstkey,

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Form used to copy prompts from another Diary activity.
+ * Form used to copy prompts from a Diary activity.
  *
  * @package   mod_diary
  * @copyright 2026 AL Rachels <drachels@drachels.com>
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
 /**
- * Copy prompts from another Diary activity in the same course.
+ * Copy prompts from a Diary activity in the same course.
  *
  * @package   mod_diary
  * @copyright 2026 AL Rachels <drachels@drachels.com>

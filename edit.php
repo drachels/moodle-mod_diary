@@ -145,6 +145,7 @@ if ($action == 'currententry' && $entry) {
     if ((strtotime('today midnight') > $entry->timecreated) || ($action == 'currententry' && $diary->editdates)) {
         $entry = '';
         $data->entryid = null;
+        $data->promptid = $promptid;
         $data->timecreated = time();
         $data->title = '';
         $data->text = '';

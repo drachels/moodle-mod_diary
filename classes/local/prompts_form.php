@@ -77,7 +77,7 @@ class prompts_form extends moodleform {
         $mform->addElement('date_time_selector', 'datestart', get_string('datestart', 'mod_diary', 'promptid'));
         $mform->setType('datestart', PARAM_INT);
         $mform->addElement('date_time_selector', 'datestop', get_string('datestop', 'mod_diary', 'promptid'));
-        $mform->setType('stopdate', PARAM_INT);
+        $mform->setType('datestop', PARAM_INT);
 
         // Optional short title for the prompt picker.
         $mform->addElement('text', 'title', get_string('prompttitle', 'mod_diary'), ['size' => 60, 'maxlength' => 255]);

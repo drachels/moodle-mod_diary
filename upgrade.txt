@@ -12,14 +12,10 @@ Upgrade.txt working notes:
 
 Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 === Deferred until fixed. ===
-20201014 Diary_631 - When activity is not rated, the tool bar should hide rating
-    sort tools.
 20210815 Diary_737 - Config settings are not all named the same. Added mod_ to
     the four items that were missing it. As of 20220828 still have three.
 20210817 Diary_747 - Need character, word, sentence, and paragraph counts while
     editing an entry.
-20211007 Diary_755 - public static function to_plain_text is not working with strike
-    through text.
 20211214 Diary_788 - Need to convert echo's to variables in function diary_print_user_entry
     in results.php.
 20211231 Diary_801 - Need to change the message that is shown when needing feedback
@@ -91,6 +87,14 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 
 
 === 5.2.0 === Pending
+20201014 Diary_631bt - When activity is not rated, the tool bar should hide rating
+    sort tools.
+    2026092001 Progress - The view toolbar now passes the activity assessed setting
+        to both renderer implementations, which omit the lowest-grade and
+        highest-grade sort links when rating is disabled.
+    2026092002 Progress - Report and reportsingle toolbars now apply the same
+        visibility rule. Existing report sort actions and date-based ordering
+        remain unchanged.
 20210815 Diary_735bt - Report and reportsingle page is not responsive.
     2026090405 Scoped - Partially addressed by Diary_1414 (v5.0.0), which made the
         report/reportsingle/reportone entry tables fluid: width 100% with
@@ -119,6 +123,12 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         Appearance colors render there but not in the Moodle App, because the
         templates/mobileapp views never receive entrybgc/--diary-entry-bg. App
         color parity is deliberately deferred, not a regression.
+20211007 Diary_755bt - public static function to_plain_text is not working with strike
+    through text.
+    2026092003 Progress - Common Errors matching now honors each Glossary entry's
+        casesensitive and fullmatch settings for concepts and aliases. The Diary
+        errorignorebreaks setting remains activity-wide because Glossary has no
+        per-entry equivalent.
 20221124 Diary_963bt - Date overlap detection does not seem to be working correctly.
     2026090502 Progress - Prompt save validation now rejects invalid date ranges
         in every mode and overlapping windows only in Sequential mode. Other
@@ -197,12 +207,31 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         posted hidden sourcediaryid is now honored first.
     2026090402 Hardened - Source list now skips activities where the user lacks
         mod/diary:manageentries, so the copy source cannot be forced by URL.
+    2026092201 Progress - Prompt copying now includes the current Diary activity,
+        selected by default, so teachers can duplicate selected prompts in place.
+        The existing copy path creates new prompt, file, and autograde-rule records;
+        source prompts remain unchanged.
+    2026092202 Progress - Added a Duplicate tool to each prompt row in prompt_edit.php.
+        It duplicates that prompt in the current Diary, including prompt files and
+        autograde rules, without opening the copy/export/import page.
+    2026092203 Progress - Prompt-row actions now use standard Moodle icons for
+        Edit, Delete, Duplicate, and Set as activity prompt, with no visual
+        separators between the tools.
+    2026092204 Progress - Fixed a form defect in prompts_form.php: the end-date
+        selector was incorrectly registered as stopdate instead of datestop.
 20260712 Diary_1516bt - Feature Request - Would be nice to be able to import
     Prompts from a CSV file.
     2026090401 Verified in runtime testing; imports as expected.
     2026090503 Progress - Prompt export now defaults to readable UTC date/time
         values (YYYY-MM-DD HH:MM:SS UTC), which the existing importer accepts.
         Teachers can select raw Unix timestamp seconds for exact transfers.
+    2026092401 Fixed - CSV import now reads logical records instead of splitting
+        at every physical line. Quoted multiline prompt text is preserved, so
+        the first exported prompt no longer imports as an empty or partial row.
+    2026092403 Fixed - Export now clears buffered debug output before sending
+        CSV data. Import recovers the canonical header from previously polluted
+        exports, rejects invalid dates instead of saving timestamp zero, and
+        accepts integer values prefixed by a spreadsheet apostrophe.
 20260830 Diary_1538bt - Feature Request - Need Moodle core Comments capability for each
     user entry.
     2026083001 Started development on https://10.0.6.58/moodle502/ so that I do not
@@ -228,7 +257,21 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026090503 Progress - Export form now offers readable UTC date/time output
         by default, with an optional raw Unix timestamp format for exact
         cross-site transfers. Both formats are accepted by the importer.
-
+20260922 Diary_1551bt - Feature Request - Convert Sequential prompt to two
+    modes: Sequential Date/Time and Sequential Finished.
+    2026092201 Progress - Added Sequential Graded mode. Prompts unlock only in
+        sequence after the preceding prompt entry has a grade (including zero).
+        The new Use prompt dates as relative pacing setting preserves each
+        student's start-date intervals from their first-prompt submission.
+    2026092202 Verified rollback runtime: Prompt 1 remained active after an
+        ungraded submission; a zero grade advanced eligibility but relative
+        pacing held Prompt 2 until its configured start-date offset elapsed.
+    2026092402 Fixed - Sequential Graded display now renders only the prompt
+        selected by its grade and relative-pacing resolver. A prompt that is
+        current by its original date window no longer masks the next prompt.
+    2026092404 Fixed - Starting a new entry from an existing current entry now
+        submits the newly resolved prompt ID instead of retaining the previous
+        entry's prompt ID. Verified student1's Prompt 2 form submits ID 530.
 
 
 === 5.1.2 === (Build: 2026071109)

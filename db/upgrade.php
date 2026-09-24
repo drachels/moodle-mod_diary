@@ -812,5 +812,28 @@ function xmldb_diary_upgrade($oldversion = 0) {
         // Diary savepoint reached.
         upgrade_mod_savepoint(true, 2026083000, 'diary');
     }
+
+    if ($oldversion < 2026092201) {
+        // Define field sequentialgradedpacing to be added to diary.
+        $table = new xmldb_table('diary');
+        $field = new xmldb_field(
+            'sequentialgradedpacing',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '1',
+            'promptmode'
+        );
+
+        // Conditionally launch add field sequentialgradedpacing.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Diary savepoint reached.
+        upgrade_mod_savepoint(true, 2026092201, 'diary');
+    }
     return true;
 }

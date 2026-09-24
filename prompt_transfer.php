@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Copy prompts from another Diary activity, or import prompts from a CSV file.
+ * Copy prompts from a Diary activity, or import prompts from a CSV file.
  *
  * @package   mod_diary
  * @copyright 2026 AL Rachels <drachels@drachels.com>
@@ -52,13 +52,10 @@ $PAGE->set_title(format_string($diary->name));
 $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add(get_string('prompttransfertitle', 'diary'));
 
-// Build the list of other Diary activities in this course that actually have prompts.
+// Build the list of Diary activities in this course that actually have prompts.
 $sourceoptions = [];
 $othermodules = get_coursemodules_in_course('diary', $course->id);
 foreach ($othermodules as $othercm) {
-    if ((int)$othercm->instance === (int)$diary->id) {
-        continue;
-    }
     if (!has_capability('mod/diary:manageentries', context_module::instance($othercm->id))) {
         continue;
     }
@@ -78,7 +75,7 @@ if (!isset($sourceoptions[$sourcediaryid])) {
     $sourcediaryid = optional_param('source', 0, PARAM_INT);
 }
 if (!isset($sourceoptions[$sourcediaryid])) {
-    $sourcediaryid = (int)array_key_first($sourceoptions);
+    $sourcediaryid = isset($sourceoptions[$diary->id]) ? (int)$diary->id : (int)array_key_first($sourceoptions);
 }
 
 $buildpromptoptions = function ($diaryid) use ($DB) {
@@ -100,8 +97,8 @@ $buildpromptoptions = function ($diaryid) use ($DB) {
 
 $promptoptions = $buildpromptoptions($sourcediaryid);
 
-// Unlike copying, exporting this activity's own prompts is the common case, so
-// the current Diary stays in the list.
+// Exporting this activity's own prompts is the common case, so the current Diary
+// is selected by default in the list shared with copying.
 $exportoptions = [];
 foreach ($othermodules as $othercm) {
     if (!has_capability('mod/diary:manageentries', context_module::instance($othercm->id))) {
@@ -189,6 +186,9 @@ if ($exportdata = $exportform->get_data()) {
     $csvexport->set_filename(clean_filename('diary_prompts_' . $exportname . '_' . userdate(time(), '%Y%m%d')));
     foreach ($exportrows as $exportrow) {
         $csvexport->add_data($exportrow);
+    }
+    while (ob_get_level()) {
+        ob_end_clean();
     }
     $csvexport->download_file();
     die();

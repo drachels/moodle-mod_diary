@@ -60,6 +60,8 @@ class prompts {
     const PROMPTMODE_PARTIALCOMPLETE = self::PROMPTMODE_CHOICECOMPLETE;
     /** Prompt mode: system assigns random prompts until X are completed. */
     const PROMPTMODE_RANDOMCOMPLETE = 5;
+    /** Prompt mode: prompts unlock in order after the previous prompt is graded. */
+    const PROMPTMODE_SEQUENTIALGRADED = 6;
 
     /**
      * Returns availability status.
@@ -684,7 +686,7 @@ class prompts {
      */
     public static function get_prompt_mode($diary) {
         $mode = isset($diary->promptmode) ? (int)$diary->promptmode : self::PROMPTMODE_SEQUENTIAL;
-        if ($mode < self::PROMPTMODE_SEQUENTIAL || $mode > self::PROMPTMODE_RANDOMCOMPLETE) {
+        if ($mode < self::PROMPTMODE_SEQUENTIAL || $mode > self::PROMPTMODE_SEQUENTIALGRADED) {
             $mode = self::PROMPTMODE_SEQUENTIAL;
         }
         return $mode;
@@ -758,7 +760,9 @@ class prompts {
             ];
         }
 
-        $completed = self::get_completed_prompt_ids((int)$diary->id, (int)$userid);
+        $completed = $mode === self::PROMPTMODE_SEQUENTIALGRADED
+            ? self::get_graded_prompt_ids((int)$diary->id, (int)$userid)
+            : self::get_completed_prompt_ids((int)$diary->id, (int)$userid);
         $required = self::get_required_prompt_completion_target($diary, count($allpromptids));
 
         return [
@@ -788,6 +792,10 @@ class prompts {
         }
 
         if ($mode === self::PROMPTMODE_COMPLETEALL) {
+            return $promptcount;
+        }
+
+        if ($mode === self::PROMPTMODE_SEQUENTIALGRADED) {
             return $promptcount;
         }
 
@@ -877,6 +885,63 @@ class prompts {
     }
 
     /**
+     * Return prompt ids with an entry graded by a teacher for this user.
+     *
+     * A numeric zero is a valid grade, so timemarked plus a non-null rating
+     * distinguishes a graded entry from an ungraded or cleared one.
+     *
+     * @param int $diaryid Diary id.
+     * @param int $userid User id.
+     * @return int[] Prompt ids.
+     */
+    protected static function get_graded_prompt_ids($diaryid, $userid) {
+        global $DB;
+
+        if (empty($userid)) {
+            return [];
+        }
+
+        $sql = "SELECT DISTINCT promptid
+                  FROM {diary_entries}
+                 WHERE diary = :diaryid
+                   AND userid = :userid
+                   AND promptid > 0
+                   AND timemarked > 0
+                   AND rating IS NOT NULL";
+        $records = $DB->get_records_sql($sql, ['diaryid' => (int)$diaryid, 'userid' => (int)$userid]);
+        if (!$records) {
+            return [];
+        }
+
+        return array_map(static fn($record) => (int)$record->promptid, $records);
+    }
+
+    /**
+     * Return the student's first-prompt submission time for relative pacing.
+     *
+     * @param int $diaryid Diary id.
+     * @param int $userid User id.
+     * @param int $firstpromptid First prompt id in sequence.
+     * @return int Submission timestamp, or zero when the first prompt is not started.
+     */
+    protected static function get_sequential_graded_anchor($diaryid, $userid, $firstpromptid) {
+        global $DB;
+
+        return (int)$DB->get_field_sql(
+            "SELECT MIN(timecreated)
+               FROM {diary_entries}
+              WHERE diary = :diaryid
+                AND userid = :userid
+                AND promptid = :promptid",
+            [
+                'diaryid' => (int)$diaryid,
+                'userid' => (int)$userid,
+                'promptid' => (int)$firstpromptid,
+            ]
+        );
+    }
+
+    /**
      * Return the user preference key used for random prompt persistence.
      *
      * @param int $diaryid Diary id.
@@ -938,6 +1003,10 @@ class prompts {
 
         if ($mode === self::PROMPTMODE_SEQUENTIAL) {
             return self::get_current_promptid_sequential($diary);
+        }
+
+        if ($mode === self::PROMPTMODE_SEQUENTIALGRADED) {
+            return self::get_current_promptid_sequential_graded($diary, (int)$userid);
         }
 
         $allpromptids = self::get_all_prompt_ids((int)$diary->id);
@@ -1078,7 +1147,7 @@ class prompts {
      */
     protected static function render_prompt_picker($diary, array $promptsall, $selectedpromptid, $userid) {
         $promptmode = self::get_prompt_mode($diary);
-        if ($promptmode === self::PROMPTMODE_SEQUENTIAL || empty($promptsall)) {
+        if (in_array($promptmode, [self::PROMPTMODE_SEQUENTIAL, self::PROMPTMODE_SEQUENTIALGRADED]) || empty($promptsall)) {
             return '';
         }
 
@@ -1222,6 +1291,48 @@ class prompts {
         }
 
         return $promptid;
+    }
+
+    /**
+     * Return the next prompt in sequence after all earlier prompts are graded.
+     *
+     * @param stdClass $diary Diary settings.
+     * @param int $userid User id.
+     * @return int Prompt id, or zero while waiting for pacing or grading.
+     */
+    protected static function get_current_promptid_sequential_graded($diary, $userid) {
+        global $DB;
+
+        if (empty($userid)) {
+            return 0;
+        }
+
+        $prompts = $DB->get_records('diary_prompts', ['diaryid' => (int)$diary->id], 'datestart ASC, datestop ASC, id ASC');
+        if (empty($prompts)) {
+            return 0;
+        }
+
+        $graded = self::get_graded_prompt_ids((int)$diary->id, (int)$userid);
+        $firstprompt = reset($prompts);
+        foreach ($prompts as $prompt) {
+            if (in_array((int)$prompt->id, $graded)) {
+                continue;
+            }
+
+            if (empty($diary->sequentialgradedpacing) || (int)$prompt->id === (int)$firstprompt->id) {
+                return (int)$prompt->id;
+            }
+
+            $anchor = self::get_sequential_graded_anchor((int)$diary->id, (int)$userid, (int)$firstprompt->id);
+            if ($anchor <= 0) {
+                return 0;
+            }
+
+            $offset = max(0, (int)$prompt->datestart - (int)$firstprompt->datestart);
+            return time() >= $anchor + $offset ? (int)$prompt->id : 0;
+        }
+
+        return 0;
     }
 
     /**
@@ -1395,13 +1506,17 @@ class prompts {
         $promptsall = $DB->get_records('diary_prompts', ['diaryid' => $diary->id], $sort = 'datestart ASC, datestop ASC');
         $promptsone = $DB->get_record('diary_prompts', ['id' => $promptid, 'diaryid' => $diary->id]);
         $promptmode = self::get_prompt_mode($diary);
-        if ($promptmode !== self::PROMPTMODE_SEQUENTIAL && !empty($promptsone) && !empty($promptid)) {
+        $issequentialmode = in_array(
+            $promptmode,
+            [self::PROMPTMODE_SEQUENTIAL, self::PROMPTMODE_SEQUENTIALGRADED]
+        );
+        if (!$issequentialmode && !empty($promptsone) && !empty($promptid)) {
             $action = 'editentry';
         }
         $bordercssvars = \diary_get_border_css_vars((int)$diary->id);
 
         $diary->intro = '';
-        if ($promptmode !== self::PROMPTMODE_SEQUENTIAL && !empty($promptsall)) {
+        if (!$issequentialmode && !empty($promptsall)) {
             $diary->intro .= self::render_prompt_picker($diary, $promptsall, (int)$promptid, (int)$USER->id);
         }
         // If there are any prompts for this diary, create a list of them.
@@ -1418,7 +1533,15 @@ class prompts {
                     $future++;
                 }
 
-                if ((($prompts->datestart < time()) && $prompts->datestop > time()) && ($action <> 'editentry')) {
+                $iscurrentsequentialgradedprompt = $promptmode === self::PROMPTMODE_SEQUENTIALGRADED
+                    && (int)$prompts->id === (int)$promptid;
+                $showprompt = $promptmode === self::PROMPTMODE_SEQUENTIALGRADED
+                    ? $iscurrentsequentialgradedprompt
+                    : ($prompts->datestart < time() && $prompts->datestop > time());
+                if (
+                    $showprompt
+                    && ($action <> 'editentry')
+                ) {
                     $data->entryid = $prompts->id;
                     $data->id = $prompts->id;
                     $data->diaryid = $prompts->diaryid;
@@ -1731,7 +1854,7 @@ class prompts {
     }
 
     /**
-     * Copy prompts from one Diary activity into another.
+     * Copy prompts from one Diary activity into a Diary activity.
      *
      * Embedded prompt files and prompt autograde rules are carried across too.
      *
@@ -1746,7 +1869,7 @@ class prompts {
 
         $sourcediaryid = (int)$sourcediaryid;
         $targetdiaryid = (int)$targetdiaryid;
-        if ($sourcediaryid <= 0 || $targetdiaryid <= 0 || $sourcediaryid === $targetdiaryid) {
+        if ($sourcediaryid <= 0 || $targetdiaryid <= 0) {
             return 0;
         }
 
@@ -1869,9 +1992,9 @@ class prompts {
     /**
      * Build the rows for a prompt CSV export.
      *
-    * Readable dates are written in an unambiguous UTC format so they can be
-    * edited by people and re-imported reliably. Unix timestamps remain
-    * available for exact raw-value transfers.
+     * Readable dates are written in an unambiguous UTC format so they can be
+     * edited by people and re-imported reliably. Unix timestamps remain
+     * available for exact raw-value transfers.
      *
      * @param int $diaryid Diary instance id to export from.
      * @param array $promptids Optional list of prompt ids to export. Empty exports all.
@@ -1939,14 +2062,23 @@ class prompts {
         }
 
         $csvcontent = \core_text::convert($csvcontent, 'utf-8', 'utf-8');
-        $lines = preg_split('/\R/u', $csvcontent);
+        $csvcontent = \core_text::trim_utf8_bom($csvcontent);
+        $exportheader = implode(',', self::get_csv_export_columns());
+        $headerposition = strpos($csvcontent, $exportheader);
+        if ($headerposition !== false) {
+            $csvcontent = substr($csvcontent, $headerposition);
+        }
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $csvcontent);
+        rewind($stream);
         $rows = [];
-        foreach ($lines as $line) {
-            if (trim($line) === '') {
+        while (($row = fgetcsv($stream)) !== false) {
+            if ($row === [null] || (count($row) === 1 && trim((string)$row[0]) === '')) {
                 continue;
             }
-            $rows[] = str_getcsv($line);
+            $rows[] = $row;
         }
+        fclose($stream);
 
         if (count($rows) < 2) {
             return [0, [get_string('promptimportnorows', 'diary')]];
@@ -2013,8 +2145,18 @@ class prompts {
                 }
 
                 if ($column === 'datestart' || $column === 'datestop') {
-                    $record->$column = self::parse_csv_date($value);
+                    $timestamp = self::parse_csv_date($value);
+                    if ($timestamp === null) {
+                        $errors[] = get_string('promptimportinvaliddate', 'diary', [
+                            'column' => $column,
+                            'row' => $rownumber + 2,
+                            'value' => $value,
+                        ]);
+                        continue 2;
+                    }
+                    $record->$column = $timestamp;
                 } else if (isset($intfields[$column])) {
+                    $value = ltrim($value, "'");
                     $record->$column = (int)$value;
                 } else {
                     $record->$column = $value;
@@ -2032,7 +2174,7 @@ class prompts {
      * Convert a CSV date cell to a unix timestamp.
      *
      * @param string $value Raw cell value.
-     * @return int Timestamp, or 0 when unparsable.
+     * @return int|null Timestamp, or null when unparsable.
      */
     protected static function parse_csv_date($value) {
         $value = trim((string)$value);
@@ -2043,6 +2185,6 @@ class prompts {
             return (int)$value;
         }
         $timestamp = strtotime($value);
-        return $timestamp === false ? 0 : (int)$timestamp;
+        return $timestamp === false ? null : (int)$timestamp;
     }
 }

@@ -127,31 +127,33 @@ class mod_diary_renderer extends plugin_renderer_base {
             ]
         );
 
-        // Print lowest grade entry toolbutton.
-        // 20250110 Changed option for firstkey.
-        $options['action'] = 'lowestgradeentry';
-        $options['firstkey'] = $cm['firstkey'];
-        $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link(
-            $url,
-            $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
-            [
-                'class' => 'toolbutton',
-            ]
-        );
+        if (!empty($cm['assessed'])) {
+            // Print lowest grade entry toolbutton.
+            // 20250110 Changed option for firstkey.
+            $options['action'] = 'lowestgradeentry';
+            $options['firstkey'] = $cm['firstkey'];
+            $url = new moodle_url('/mod/diary/view.php', $options);
+            $output .= html_writer::link(
+                $url,
+                $this->pix_icon('t/down', get_string('lowestgradeentry', 'diary')),
+                [
+                    'class' => 'toolbutton',
+                ]
+            );
 
-        // Print highest grade entry toolbutton.
-        // 20250110 Changed option for firstkey.
-        $options['action'] = 'highestgradeentry';
-        $options['firstkey'] = $cm['firstkey'];
-        $url = new moodle_url('/mod/diary/view.php', $options);
-        $output .= html_writer::link(
-            $url,
-            $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
-            [
-                'class' => 'toolbutton',
-            ]
-        );
+            // Print highest grade entry toolbutton.
+            // 20250110 Changed option for firstkey.
+            $options['action'] = 'highestgradeentry';
+            $options['firstkey'] = $cm['firstkey'];
+            $url = new moodle_url('/mod/diary/view.php', $options);
+            $output .= html_writer::link(
+                $url,
+                $this->pix_icon('t/up', get_string('highestgradeentry', 'diary')),
+                [
+                    'class' => 'toolbutton',
+                ]
+            );
+        }
 
         // Print latest modified entry toolbutton.
         // 20250110 Changed option for firstkey.
