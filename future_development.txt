@@ -338,7 +338,8 @@ Future development item:
 - Standardize Diary icon rendered size to match core activity icon dimensions in course overview/Tiles displays.
 
 Suggested implementation notes:
-1. Verify where Diary icon size is set for course overview rendering (for example in `classes/courseformat/overview.php` and icon output paths).
+1. Verify where Diary icon size is set for course overview rendering (for example in 
+    `classes/courseformat/overview.php` and icon output paths).
 2. Align icon output classes/attributes with core activity icons rather than relying on plugin-specific sizing.
 3. Prefer theme-compatible CSS hooks over hardcoded inline dimensions.
 4. Validate in multiple course formats/themes, including Tiles and Boost, on desktop and mobile widths.

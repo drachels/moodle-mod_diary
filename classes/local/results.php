@@ -690,6 +690,7 @@ class results {
      * @param array $entry
      * @param array $teachers
      * @param array $grades
+     * @param bool $allowemptygrading Whether to allow empty grading fields.
      */
     public static function diary_print_user_entry(
         $context,
@@ -1876,8 +1877,6 @@ class results {
                 $studentrating = $entry->rating;
             }
             $studentcomment = clean_text($vals['c'] ?? '', FORMAT_HTML);
-
-
             if ($canrate && $studentrating != $entry->rating && !($studentrating == '' && $entry->rating == "0")) {
                 $ratingchanged = true;
             }

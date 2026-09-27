@@ -5,7 +5,8 @@ Upgrade.txt working notes:
 - Ticket line format: YYYYMMDD iContent_NNNN[suffix] - short summary.
 - Status suffixes used here: bt = being tested, r = resolved, w = not fixed but waiting.
 - For a verification pass: confirm the fix in current code first, then change bt to r.
-- Add a dated follow-up verification line under the ticket: YYYYMMDDNN - iContent_NNNN: Verified in current code; concise evidence summary.
+- Add a dated follow-up verification line under the ticket: YYYYMMDDNN - iContent_NNNN:
+    Verified in current code; concise evidence summary.
 - Keep verification notes factual and brief; mention key files, functions, or behaviors only as needed.
 - Preserve prior history lines; append follow-up notes instead of rewriting older notes unless the status itself changes.
 - Add new unreleased tickets to the Deferred section or the appropriate pending version section.
@@ -83,6 +84,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     group members with no entries, edits, comments, or activity views.
 20260906 Diary_1549 - Feature Request - Modify Sequestial prompts to proceed upon
     successful completion of current prompt.
+
 
 
 
@@ -272,6 +274,14 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026092404 Fixed - Starting a new entry from an existing current entry now
         submits the newly resolved prompt ID instead of retaining the previous
         entry's prompt ID. Verified student1's Prompt 2 form submits ID 530.
+20260925 MooTyper_1552 - Feature Request - Develop Azerbaijan Cyrillic and Latin
+    KB Layouts.
+    2026092501 Progress - Added the two files needed for AzerbaijaniLatin(AZEV5),
+        but needs more testing.
+    2026092601 Progress - Added the two files needed for AzerbaijaniCyrillic(AЗV5),
+        but needs a lot of work. Fixed the AzerbaijaniLatin(AZEV5) so that it
+        can be tested.
+
 
 
 === 5.1.2 === (Build: 2026071109)

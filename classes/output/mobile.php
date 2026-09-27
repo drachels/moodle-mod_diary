@@ -1460,10 +1460,15 @@ JS;
      *
      * @param \cm_info|\stdClass $cm Course module.
      * @param \context_module $context Module context.
-     * @param \renderer_base $output Renderer.
+     * @param \stdClass $course Course object.
+     * @param \stdClass $diary Diary activity object.
+    * @param \renderer_base $output Renderer.
+     * @param int $selectedgroup Selected group id.
+     * @param int $selecteduserid Selected user id.
+     * @param string $sortmode Sorting mode.
      * @param int $offset Paging offset.
      * @param int $limit Paging limit.
-     * @return array{items: array, total: int, offset: int}
+    * @return array{items: array, total: int, offset: int}
      */
     protected static function build_teacher_submissions(
         $cm,

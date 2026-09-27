@@ -1812,6 +1812,8 @@ class prompts {
      *
      * @param array $diary The settings for this diary activity.
      * @return int $promptid The current promptid or zero if not available.
+     * @param int $userid User id for which to get the current prompt.
+     * @param int $requestedpromptid The requested prompt id, if any.
      */
     public static function get_current_promptid($diary, $userid = 0, $requestedpromptid = 0) {
         if (!empty($diary->id)) {

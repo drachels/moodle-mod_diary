@@ -24,6 +24,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use Behat\Gherkin\Node\TableNode;
+
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
 /**
@@ -61,6 +63,7 @@ class behat_mod_diary extends behat_base {
      * Operator accepts >=, <=, atleast, atmost.
      *
      * @Given /^the following diary metric requirements are configured:$/
+    * @param TableNode $table Behat data table.
      */
     public function the_following_diary_metric_requirements_are_configured($table) {
         global $DB;
