@@ -1,4 +1,4 @@
-@mod @mod_diary_legacy
+@mod @mod_diary @mod_diary_legacy
 Feature: Users can add entries to diary activities
   In order to populate diaries
   As a user
