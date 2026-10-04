@@ -88,7 +88,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 
 
 
-=== 5.2.0 === Pending
+=== 5.2.0 === (Build: 2026100400)
 20201014 Diary_631bt - When activity is not rated, the tool bar should hide rating
     sort tools.
     2026092001 Progress - The view toolbar now passes the activity assessed setting
