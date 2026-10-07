@@ -85,7 +85,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 20260906 Diary_1549 - Feature Request - Modify Sequestial prompts to proceed upon
     successful completion of current prompt.
 
-
+=== 5.2.x === pending
 
 
 === 5.2.0 === (Build: 2026100400)
