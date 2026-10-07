@@ -89,7 +89,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
 
 
 === 5.2.0 === (Build: 2026100400)
-20201014 Diary_631bt - When activity is not rated, the tool bar should hide rating
+20201014 Diary_631r - When activity is not rated, the tool bar should hide rating
     sort tools.
     2026092001 Progress - The view toolbar now passes the activity assessed setting
         to both renderer implementations, which omit the lowest-grade and
@@ -97,7 +97,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026092002 Progress - Report and reportsingle toolbars now apply the same
         visibility rule. Existing report sort actions and date-based ordering
         remain unchanged.
-20210815 Diary_735bt - Report and reportsingle page is not responsive.
+20210815 Diary_735r - Report and reportsingle page is not responsive.
     2026090405 Scoped - Partially addressed by Diary_1414 (v5.0.0), which made the
         report/reportsingle/reportone entry tables fluid: width 100% with
         table-layout auto, removal of the forced per-cell width:100% that caused
@@ -125,13 +125,13 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         Appearance colors render there but not in the Moodle App, because the
         templates/mobileapp views never receive entrybgc/--diary-entry-bg. App
         color parity is deliberately deferred, not a regression.
-20211007 Diary_755bt - public static function to_plain_text is not working with strike
+20211007 Diary_755r - public static function to_plain_text is not working with strike
     through text.
     2026092003 Progress - Common Errors matching now honors each Glossary entry's
         casesensitive and fullmatch settings for concepts and aliases. The Diary
         errorignorebreaks setting remains activity-wide because Glossary has no
         per-entry equivalent.
-20221124 Diary_963bt - Date overlap detection does not seem to be working correctly.
+20221124 Diary_963r - Date overlap detection does not seem to be working correctly.
     2026090502 Progress - Prompt save validation now rejects invalid date ranges
         in every mode and overlapping windows only in Sequential mode. Other
         prompt modes allow overlapping windows, with each window controlling
@@ -165,7 +165,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         at _backups/diary_965/entrydelete.php.removed-20260904 before removal.
     2026090411 Verified after removal: entry delete works as expected in runtime
         testing.
-20221126 Diary_966bt - Need to have the capability to pick a prompt to use.
+20221126 Diary_966r - Need to have the capability to pick a prompt to use.
     2026090408 Verified in current code: covered from both readings of the
         ticket. Student-side picking is delivered by the Prompt assignment mode
         setting (Diary_1454): prompts.php render_prompt_picker() renders a
@@ -180,7 +180,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         code required; moved out of the Deferred section.
 20231223 Diary_1139r - In index.php, the variable $timenow is never used.
     2026090504 Verified in current code: index.php has no $timenow reference.
-20240304 Diary_1221bt - Feature request - Randomly selected writing prompts.
+20240304 Diary_1221r - Feature request - Randomly selected writing prompts.
     2026090403 Verified in current code: already delivered under Diary_1454 as
         part of the Prompt assignment mode setting. prompts.php defines
         PROMPTMODE_RANDOM (2) and PROMPTMODE_RANDOMCOMPLETE (5), mod_form.php
@@ -199,7 +199,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026090501 Resolved - Removed the deprecated FEATURE_GROUPMEMBERSONLY
         docblock entry and plugin_supports() switch branch. FEATURE_GROUPS and
         FEATURE_GROUPINGS still return true. Diary supports Moodle 4.5 and above.
-20260712 Diary_1515bt - Feature Request - Enable copying prompts from one Diary
+20260712 Diary_1515r - Feature Request - Enable copying prompts from one Diary
     activity to another.
     2026090401 Fixed - Copying from any activity other than the first one in the
         list always failed with "Select at least one prompt to copy".
@@ -221,7 +221,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         separators between the tools.
     2026092204 Progress - Fixed a form defect in prompts_form.php: the end-date
         selector was incorrectly registered as stopdate instead of datestop.
-20260712 Diary_1516bt - Feature Request - Would be nice to be able to import
+20260712 Diary_1516r - Feature Request - Would be nice to be able to import
     Prompts from a CSV file.
     2026090401 Verified in runtime testing; imports as expected.
     2026090503 Progress - Prompt export now defaults to readable UTC date/time
@@ -234,7 +234,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         CSV data. Import recovers the canonical header from previously polluted
         exports, rejects invalid dates instead of saving timestamp zero, and
         accepts integer values prefixed by a spreadsheet apostrophe.
-20260830 Diary_1538bt - Feature Request - Need Moodle core Comments capability for each
+20260830 Diary_1538r - Feature Request - Need Moodle core Comments capability for each
     user entry.
     2026083001 Started development on https://10.0.6.58/moodle502/ so that I do not
         risk damage to my normal moodledev and moodledemo sites.
@@ -242,10 +242,10 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         and mod_form.php; implemented core comment callbacks in lib.php; rendered
         comments right after user entry in view.php and classes/local/results.php.
         Upgraded DB and verified with student, teacher, and admin accounts.
-20260902 Diary_1542bt - Feature Request - Need to implement modulename_summary, etc.
+20260902 Diary_1542r - Feature Request - Need to implement modulename_summary, etc.
     language string.
     2026090201 Added three new strings that are needed.
-20260903 Diary_1544bt - Feature Request - Need to be able to download CSV file of
+20260903 Diary_1544r - Feature Request - Need to be able to download CSV file of
     Prompts.
     2026090401 Added an export section to prompt_transfer.php with its own Diary
         selector and prompt multi-select, backed by new
@@ -259,7 +259,15 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026090503 Progress - Export form now offers readable UTC date/time output
         by default, with an optional raw Unix timestamp format for exact
         cross-site transfers. Both formats are accepted by the importer.
-20260922 Diary_1551bt - Feature Request - Convert Sequential prompt to two
+20260929 Diary_1550r - Diary - Whoops E_WARNING Undefined array key "ontent" 
+    2026090901 Fixed - The r/c key parser matched any field merely starting
+        with "r" or "c", so an unrelated posted field (e.g. an editor field
+        submitted as an array literally named content) was misparsed as type c,
+        num=ontent, and later dereferencing $entrybyentry['ontent'] threw the
+        warning. Now matched with a strict /^([rc])(\d+)$/ regex, plus an
+        isset($entrybyentry[$num]) guard and $vals['c'] ?? '' fallback as
+        defense in depth.
+20260922 Diary_1551r - Feature Request - Convert Sequential prompt to two
     modes: Sequential Date/Time and Sequential Finished.
     2026092201 Progress - Added Sequential Graded mode. Prompts unlock only in
         sequence after the preceding prompt entry has a grade (including zero).
@@ -274,15 +282,6 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
     2026092404 Fixed - Starting a new entry from an existing current entry now
         submits the newly resolved prompt ID instead of retaining the previous
         entry's prompt ID. Verified student1's Prompt 2 form submits ID 530.
-20260925 MooTyper_1552 - Feature Request - Develop Azerbaijan Cyrillic and Latin
-    KB Layouts.
-    2026092501 Progress - Added the two files needed for AzerbaijaniLatin(AZEV5),
-        but needs more testing.
-    2026092601 Progress - Added the two files needed for AzerbaijaniCyrillic(AЗV5),
-        but needs a lot of work. Fixed the AzerbaijaniLatin(AZEV5) so that it
-        can be tested.
-
-
 
 === 5.1.2 === (Build: 2026071109)
 20200718 Diary_581r - Need to redo the styles.css file and remove un-used entries.
@@ -336,7 +335,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         set manual prompt id to 358, confirmed get_manual_promptid=358 and
         get_current_promptid resolved 358, then cleared override and confirmed
         get_manual_promptid returned 0.
-20250126 Diary_1360bt - Need to check on local/results.php for errors when grades are missing.
+20250126 Diary_1360r - Need to check on local/results.php for errors when grades are missing.
     2026070904 Progress - Added null-safe gradebook handling in
         classes/local/results.php so missing grade items/grades no longer
         trigger property-access warnings on report/reportone/reportsingle
@@ -352,7 +351,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         Grade item was rebuilt immediately afterward via diary_grade_item_update
         and diary_update_grades, confirming cleanup (grade_items_after=1,
         hasitem_after_restore=1).
-20250127 Diary_1361bt - Course restore failures at m3x site.
+20250127 Diary_1361r - Course restore failures at m3x site.
     2026070903 Verified restore path on moodledev using course 96 as source:
         backup created with admin/cli/backup.php to
         _backups/diary_1361_test/backup-moodle2-course-96-DCDev-20260709-1452.mbz,
@@ -360,7 +359,7 @@ Before release, run the checklist in mod/diary/RELEASE_RUN_SHEET.md.
         (Miscellaneous/iContent Restore Test location). Restore completed with
         "Restored course ID: 1113" and new course record is shortname DCDev_1,
         fullname "Diary Code Development copy 1", category 1.
-20260702 Diary_1513bt - Scheduled task appears to skip entries when teacheremail=1,
+20260702 Diary_1513r - Scheduled task appears to skip entries when teacheremail=1,
     but it sends the notifications when teacheremail=0.
     2026070901 Progress - Scheduled task updated to honor each teacher's
         diary_emailpreference for the activity (send only when preference is
